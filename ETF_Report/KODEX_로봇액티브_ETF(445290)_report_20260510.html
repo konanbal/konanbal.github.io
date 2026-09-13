@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KODEX 로봇액티브 투자보고서</title>
+<style>
+  :root {
+    --primary: #071428;
+    --accent: #0d4f8c;
+    --accent2: #0080ff;
+    --accent3: #00e5ff;
+    --neon: #39ff14;
+    --bg: #eef4f9;
+    --card: #ffffff;
+    --text: #071428;
+    --muted: #4a6080;
+    --border: #c8daea;
+    --green: #00796b;
+    --red: #c62828;
+    --amber: #e65100;
+    --orange: #f57c00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #050e1e 0%, #0d3a6e 55%, #0080cc 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '🤖';
+    position: absolute; right: 2rem; bottom: 0;
+    font-size: 130px; opacity: 0.06;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(0,229,255,0.2); color: #80deea; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(0,229,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.75; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-sub { font-size: 13px; margin-top: 2px; color: #80deea; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); }
+  .pill-neon { border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.1); color: #80deea; }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* 액티브 전략 박스 */
+  .active-box { background: linear-gradient(135deg, #e3f2fd, #e1f5fe); border: 1.5px solid #81d4fa; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .active-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .strategy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .strategy-item { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; }
+  .s-label { font-size: 10px; font-weight: 700; color: var(--accent2); letter-spacing: 0.05em; margin-bottom: 4px; }
+  .s-desc { font-size: 12px; color: var(--text); line-height: 1.5; }
+
+  /* 포트폴리오 구조 */
+  .barbell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+  .barbell-side { border-radius: 10px; padding: 1rem 1.25rem; }
+  .barbell-small { background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border: 1.5px solid #a5d6a7; }
+  .barbell-large { background: linear-gradient(135deg, #e3f2fd, #e8eaf6); border: 1.5px solid #90caf9; }
+  .barbell-title { font-size: 13px; font-weight: 700; margin-bottom: 0.6rem; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 600; }
+  .holding-sub { font-size: 11px; color: var(--muted); font-weight: 400; display: block; margin-top: 1px; }
+  .holding-tag { font-size: 10px; padding: 1px 5px; border-radius: 3px; margin-left: 4px; font-weight: 600; }
+  .tag-pure { background: #c8e6c9; color: #1b5e20; }
+  .tag-large { background: #bbdefb; color: #0d47a1; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 800; color: var(--accent2); font-size: 15px; min-width: 52px; text-align: right; }
+  .holding-bar-wrap { width: 90px; height: 7px; background: var(--border); border-radius: 4px; }
+  .holding-bar { height: 7px; border-radius: 4px; }
+  .bar-pure { background: linear-gradient(90deg, #43a047, #66bb6a); }
+  .bar-large { background: linear-gradient(90deg, var(--accent), var(--accent3)); }
+
+  .perf-banner { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+  .perf-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; text-align: center; }
+  .perf-card .label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .perf-card .val { font-size: 20px; font-weight: 800; }
+  .val-mega { color: #7b1fa2; }
+  .val-up { color: var(--green); }
+  .val-hot { color: var(--accent2); }
+  .val-alpha { color: var(--orange); }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f0f7ff; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+  .alpha { color: var(--orange); font-weight: 600; }
+
+  .news-item { padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* 로봇 모멘텀 타임라인 */
+  .momentum-list { display: flex; flex-direction: column; gap: 8px; }
+  .momentum-item { display: flex; gap: 10px; align-items: flex-start; background: #f0f7ff; border-radius: 8px; padding: 10px 12px; border-left: 3px solid var(--accent2); }
+  .momentum-date { font-size: 10px; font-weight: 700; color: var(--accent2); min-width: 60px; margin-top: 2px; }
+  .momentum-text { font-size: 13px; line-height: 1.5; }
+
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 600; }
+  .badge-blue { background: #bbdefb; color: #0d47a1; }
+  .badge-green { background: #c8e6c9; color: #1b5e20; }
+  .badge-amber { background: #ffe082; color: #e65100; }
+  .badge-purple { background: #e1bee7; color: #4a148c; }
+
+  .alpha-box { background: linear-gradient(135deg, #fff8e1, #fffde7); border: 1.5px solid #ffd54f; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .alpha-title { font-size: 14px; font-weight: 700; color: #5d4037; margin-bottom: 0.5rem; }
+
+  .summary-box { background: linear-gradient(135deg, #e3f2fd 0%, #e1f5fe 100%); border: 1px solid #81d4fa; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .perf-banner, .barbell-grid, .strategy-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 445290 · KOSPI · 국내 로봇 액티브 ETF · 알파 추구</div>
+      <div class="etf-name">KODEX 로봇액티브</div>
+      <div class="etf-index">비교지수: iSelect K-로봇테마 지수 (NH투자증권) | 운용사: 삼성자산운용(KODEX)</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 10일</div>
+      <div class="nav-display">~25,000~32,000원 추정</div>
+      <div class="nav-sub">52주 최고 38,970원 대비 조정 중 | 정확가는 Kodex 홈피 확인</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill pill-neon">🤖 국내 로봇 ETF 수익률 1위 (2025)</span>
+    <span class="pill">💰 순자산: 1조원+ 돌파</span>
+    <span class="pill">📅 상장: 2022.11.10</span>
+    <span class="pill">📋 총보수: 0.50%/년</span>
+    <span class="pill">🎯 BM 대비 +11.9%p 초과성과</span>
+    <span class="pill">🏆 투자자·판매자 2026 유망 ETF 1위</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025년 연간 수익률</div>
+      <div class="kpi-value" style="color:#7b1fa2;">+117.6%</div>
+      <div class="kpi-sub">국내 로봇 ETF 9개 중 1위</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순자산총액 (AUM)</div>
+      <div class="kpi-value">1조원+</div>
+      <div class="kpi-sub">2026.02 순자산 1조 돌파</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">BM 대비 초과성과</div>
+      <div class="kpi-value" style="color:var(--orange);">+11.9%p</div>
+      <div class="kpi-sub">액티브 알파(α) 창출 입증</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 저점 대비</div>
+      <div class="kpi-value" style="color:var(--green);">+223%</div>
+      <div class="kpi-sub">12,065 → 38,970원 (52주 고점)</div>
+    </div>
+  </div>
+
+  <!-- ===== 수익률 배너 ===== -->
+  <div class="perf-banner">
+    <div class="perf-card">
+      <div class="label">2025년 수익률</div>
+      <div class="val val-mega">+117.6%</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">6개월 수익률</div>
+      <div class="val val-hot">+113.9%</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">BM 초과성과</div>
+      <div class="val val-alpha">+11.9%p</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">코스피 초과</div>
+      <div class="val val-up">+42.0%p</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">개인 순매수 (1년)</div>
+      <div class="val val-hot">1,122억</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">2026 유망 ETF</div>
+      <div class="val" style="color:var(--accent2);">투자자 1위</div>
+    </div>
+  </div>
+
+  <!-- ===== 액티브 ETF 전략 ===== -->
+  <div class="active-box">
+    <div class="active-title">🎯 KODEX 로봇액티브 = 국내 최초 로봇 액티브 ETF — 패시브보다 유연한 알파 추구</div>
+    <div class="strategy-grid">
+      <div class="strategy-item">
+        <div class="s-label">① 비교지수 초과 목표</div>
+        <div class="s-desc">iSelect K-로봇테마 지수를 비교지수로 하되, 이를 추종하는 것이 아니라 <strong>초과 성과(알파)</strong>를 목표로 운용. 2025년 BM 대비 +11.9%p 달성.</div>
+      </div>
+      <div class="strategy-item">
+        <div class="s-label">② 바벨(Barbell) 전략</div>
+        <div class="s-desc">고변동성 소형 순수 로봇주 + 저변동성 대형 로봇 투자주를 조합. 과열 구간 → 대형주 비중↑, 저점 구간 → 소형주 비중↑</div>
+      </div>
+      <div class="strategy-item">
+        <div class="s-label">③ 빠른 신규 종목 편입</div>
+        <div class="s-desc">신생 로봇 기업이 속속 등장하는 초기 산업 특성상, 패시브 인덱스보다 <strong>훨씬 빠른 신규 종목 편입</strong> 가능. 클로봇, 유니트리 등 신흥 강자 포착.</div>
+      </div>
+      <div class="strategy-item">
+        <div class="s-label">④ 변동성 관리</div>
+        <div class="s-desc">로봇 소형주는 변동성이 극심. 운용역이 과열·조정 구간을 판단해 포트폴리오 내 리스크를 조절. 순수 패시브 대비 하방 리스크 관리 우위.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 포트폴리오 구조 (바벨) ===== -->
+  <div class="barbell-grid">
+    <div class="barbell-side barbell-small">
+      <div class="barbell-title" style="color:#1b5e20;">🟢 순수 로봇 플레이어 (고베타·고수익 축)</div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:0.6rem;">핵심 수익 드라이버. 과열 시 비중 축소, 저점 시 확대</div>
+      <div style="font-size:13px; line-height:2;">
+        <strong>레인보우로보틱스</strong> — 삼성전자 인수, 휴머노이드 핵심<br>
+        <strong>로보티즈</strong> — 액추에이터·자율주행 배송 로봇<br>
+        <strong>두산로보틱스</strong> — 협동로봇 글로벌 확장<br>
+        <strong>클로봇</strong> — 로봇 관제·SW 플랫폼<br>
+        <strong>원익홀딩스</strong> — 로봇손 제조 자회사
+      </div>
+    </div>
+    <div class="barbell-side barbell-large">
+      <div class="barbell-title" style="color:#0d47a1;">🔵 로봇 투자 대형주 (저베타·안정 축)</div>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:0.6rem;">변동성 완충 + 로봇 생태계 영향력 보유</div>
+      <div style="font-size:13px; line-height:2;">
+        <strong>삼성전자</strong> — 레인보우로보틱스 인수, 로봇 OS 개발<br>
+        <strong>NAVER</strong> — 네이버랩스 로봇·자율주행 연구<br>
+        <strong>카카오</strong> — 로봇 산업 전략적 투자<br>
+        <strong>LG전자</strong> — 클로이드 휴머노이드, 서비스로봇<br>
+        <strong>현대차·기아</strong> — 보스턴다이내믹스, 로보틱스 50조 투자
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 전체 구성 종목 ===== -->
+  <div class="card">
+    <div class="card-title">대표 구성 종목 (2026년 초 기준)</div>
+    <div class="badge-row">
+      <span class="badge badge-purple">액티브 운용 — 비중 수시 조정</span>
+      <span class="badge badge-green">소형 순수 로봇주 ↔ 대형 로봇 투자주</span>
+      <span class="badge badge-amber">신규 로봇 기업 빠른 편입 가능</span>
+      <span class="badge badge-blue">과열 시 대형주↑, 저점 시 소형주↑</span>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">NAVER <span class="holding-tag tag-large">대형주</span>
+        <span class="holding-sub">네이버랩스 로봇 플랫폼 · 자율주행 로봇 · 로봇 OS 개발 · 실내 배송 로봇</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">~6.8%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar bar-large" style="width:85%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">카카오 <span class="holding-tag tag-large">대형주</span>
+        <span class="holding-sub">로봇 산업 전략적 투자 · 카카오모빌리티 자율주행 · AI 로봇 서비스</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">~6.1%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar bar-large" style="width:76%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">레인보우로보틱스 <span class="holding-tag tag-pure">순수 로봇</span>
+        <span class="holding-sub">삼성전자 인수 · 협동로봇·휴머노이드 개발 · PSR 260배 (고밸류)</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">~4.5%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar bar-pure" style="width:56%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">두산로보틱스 <span class="holding-tag tag-pure">순수 로봇</span>
+        <span class="holding-sub">협동로봇 글로벌 시장 확장 · 한화로보틱스와 경쟁 · 안정적 성장주</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">~4.4%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar bar-pure" style="width:55%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">원익홀딩스 <span class="holding-tag tag-pure">순수 로봇</span>
+        <span class="holding-sub">로봇손(그리퍼) 제조 자회사 보유 · 반도체 장비 + 로봇 이중 수혜</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">~3.9%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar bar-pure" style="width:49%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">로보티즈 <span class="holding-tag tag-pure">순수 로봇</span>
+        <span class="holding-sub">AI 액추에이터 · 자율주행 배송 로봇 · 2026년 AI Worker 판매 확대</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">~3.8%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar bar-pure" style="width:48%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank" style="background:linear-gradient(135deg,#0288d1,#0097a7);">7+</div>
+      <div class="holding-name">삼성전자·LG전자·현대차·클로봇 등
+        <span class="holding-sub">삼성(로봇OS·레인보우 모회사), LG(클로이드 휴머노이드), 현대차(보스턴다이내믹스), 클로봇(관제SW) 등 다수</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">~70%+</div>
+        <div class="holding-bar-wrap"><div class="holding-bar bar-large" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      ※ 액티브 ETF 특성상 비중이 운용역 판단에 따라 수시 변동. 과열 구간 대형주 비중↑, 저점 구간 소형주 비중↑ 운용. 신규 로봇 기업 빠른 편입 원칙.
+    </div>
+  </div>
+
+  <!-- ===== 수익률 성과 + 경쟁 ETF ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">기간별 수익률 성과 비교</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>기간</th><th>KODEX 로봇액티브</th><th>비교지수(BM)</th><th>알파(α)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2025 연간</td><td class="positive">+117.6%</td><td>N/A</td><td class="alpha">+11.9%p↑</td></tr>
+          <tr><td>6개월 (2025.H2~)</td><td class="positive">+113.9%</td><td>-</td><td class="alpha">로봇 ETF 1위</td></tr>
+          <tr><td>코스피 대비</td><td class="positive">+42.0%p</td><td>코스피</td><td>압도적</td></tr>
+          <tr><td>52주 저점 대비</td><td class="positive">+223%</td><td>-</td><td>-</td></tr>
+          <tr><td>52주 최고(2026)</td><td>38,970원</td><td>-</td><td>-</td></tr>
+          <tr><td>총보수 (연)</td><td>0.50%</td><td>-</td><td>액티브 수준</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">국내 로봇 ETF 경쟁 구도</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>ETF명</th><th>운용사</th><th>특징</th><th>2025 수익률</th></tr>
+        </thead>
+        <tbody>
+          <tr style="background:#fff8e1;">
+            <td><strong>KODEX 로봇액티브</strong></td><td>삼성</td>
+            <td>액티브·K-로봇</td>
+            <td class="positive"><strong>+117.6%</strong></td>
+          </tr>
+          <tr>
+            <td>TIGER 코리아휴머노이드</td><td>미래에셋</td>
+            <td>K-휴머노이드 집중</td>
+            <td class="positive">고수익</td>
+          </tr>
+          <tr>
+            <td>KBSTAR 글로벌로봇</td><td>KB</td>
+            <td>글로벌 로봇 분산</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>RISE 글로벌로봇AI</td><td>KB</td>
+            <td>글로벌 AI+로봇</td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+        ※ KODEX 로봇액티브는 K-로봇(국내) 집중 + 액티브 운용으로 글로벌 로봇 ETF와 차별화. 국내 로봇주 집중 전략이 2025년 K-로봇 테마 급등에 최적화.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 로봇 모멘텀 타임라인 ===== -->
+  <div class="card">
+    <div class="card-title">🚀 K-로봇·글로벌 휴머노이드 주요 모멘텀 (2025~2026)</div>
+    <div class="momentum-list">
+      <div class="momentum-item">
+        <div class="momentum-date">2025.04</div>
+        <div class="momentum-text"><strong>K-휴머노이드 연합 출범</strong> — 산업통상자원부 주도, 참여기업 160개로 확대. 정부 차원 로봇 산업 육성 본격화 신호탄.</div>
+      </div>
+      <div class="momentum-item">
+        <div class="momentum-date">2025.H2</div>
+        <div class="momentum-text"><strong>현대차그룹 50조원 피지컬 AI·로보틱스 투자 선언</strong> — 2030년까지 보스턴다이내믹스·아틀라스 중심 로봇 사업 대규모 투자. K-로봇 ETF 전반 급등 촉발.</div>
+      </div>
+      <div class="momentum-item">
+        <div class="momentum-date">2025.12 상장</div>
+        <div class="momentum-text"><strong>삼성전자 레인보우로보틱스 인수 완료</strong> — 삼성의 로봇 사업 강화 선언. 레인보우로보틱스 주가 급등, ETF 내 기여도 최대급.</div>
+      </div>
+      <div class="momentum-item">
+        <div class="momentum-date">2026.01 CES</div>
+        <div class="momentum-text"><strong>CES 2026 — LG 클로이드 최초 공개, 현대차 '아틀라스 2028 공장 투입' 선언</strong> — AI·로봇이 CES 핵심 화두. 글로벌 투자 심리 극대화.</div>
+      </div>
+      <div class="momentum-item">
+        <div class="momentum-date">2026.02~</div>
+        <div class="momentum-text"><strong>미국 트럼프 정부 로봇 산업 육성 행정명령 검토</strong> — 미국발 로봇 정책 모멘텀 가속. 테슬라 옵티머스 Gen 3 공개 예정 등 글로벌 휴머노이드 상용화 기대감 최고조.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈 (2026)</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.02.03</span>
+      </div>
+      <div class="news-title">FunETF 설문 — 투자자·판매자 모두 2026년 유망 ETF 1위 선정</div>
+      <div class="news-summary">약 9,365명 대상 설문에서 투자자(14.9%, 1위)와 판매자(20.3%, 압도적 1위)가 모두 KODEX 로봇액티브를 2026년 최유망 ETF로 꼽음. 동시에 순자산이 1개월 만에 5,000억원 이상 증가하며 1조원 돌파.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.01.06</span>
+      </div>
+      <div class="news-title">2025년 수익률 +117.6% — 국내 로봇 ETF 1위, BM 대비 +11.9%p 알파 달성</div>
+      <div class="news-summary">2025년 전체 수익률 117.6%로 국내 상장 로봇 ETF 9개 중 최상위 성과. 특히 비교지수 대비 초과 성과 +11.9%p로 액티브 ETF의 운용 역량을 수치로 입증. 코스피 대비 42%p 아웃퍼폼. 순자산 5,273억원 돌파.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.03.05</span>
+      </div>
+      <div class="news-title">단일일 +12.64% 급등 (33,500원) — 로봇주 모멘텀 재점화</div>
+      <div class="news-summary">2026.03.05 하루 만에 +12.64% 급등, 거래대금 985억원 폭증. 미국 정부의 로봇 산업 행정명령 기대감 및 글로벌 휴머노이드 상용화 소식이 맞물리며 K-로봇 전반이 일제히 급등.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04~05</span>
+      </div>
+      <div class="news-title">52주 고점(38,970원) 대비 ~20~30% 조정 — 기대감 선반영 후 숨 고르기</div>
+      <div class="news-summary">로봇 테마 주가 급등 후 차익실현 압력. 고PER 성장주 특성상 금리 불확실성·글로벌 무역 이슈가 겹치면 급락 가능. 로봇 실적 상용화가 기대보다 느릴 경우 밸류에이션 부담 부각.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.04</span>
+      </div>
+      <div class="news-title">산업부 K-휴머노이드 연합 160개사 확대 — 상용화는 2027~2028년 전망</div>
+      <div class="news-summary">정부 주도 K-휴머노이드 연합이 참여 기업 160여 개로 확대됐지만, 실질적 상용화는 2027~2028년으로 전망. 현재 주가는 상용화 기대감을 상당 부분 선반영한 상태. 단기 실적보다 장기 시나리오 투자 필요.</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">🏭</span>
+          <span><strong>글로벌 휴머노이드 상용화 원년 — 2026~2028</strong> — 테슬라 옵티머스, 현대차 아틀라스(2028 공장 투입), LG 클로이드 등이 실제 양산·배치를 시작하는 구간. "기대"에서 "실적"으로 전환되는 티핑포인트. K-로봇 기업들의 부품·소프트웨어 납품 실적 가시화.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🇰🇷</span>
+          <span><strong>K-로봇 생태계 — 정부+대기업+스타트업 3각 협력</strong> — 산업부 K-휴머노이드 연합(160개사), 현대차 50조 투자, 삼성전자 레인보우로보틱스 인수. 한국이 반도체처럼 로봇 공급망에서 독보적 지위를 구축 중.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🎯</span>
+          <span><strong>액티브 알파(+11.9%p) — 증명된 초과 성과</strong> — 로봇처럼 빠르게 진화하는 테마에서 패시브보다 액티브 운용이 유리. 신규 로봇 기업 빠른 편입, 과열 구간 대형주 피난처 전략으로 변동성 관리 + 수익률 극대화.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🔄</span>
+          <span><strong>노동력 대체 구조적 수요</strong> — 고령화·저출생으로 인한 노동력 부족이 로봇 수요를 구조적으로 견인. 단기 테마가 아닌 10년 이상의 메가트렌드. 제조·물류·서비스·의료 전 분야 로봇 침투율 확대.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">💡</span>
+          <span><strong>피지컬 AI 통합 가속</strong> — 엔비디아·CUDA 기반 AI와 로봇 하드웨어 결합. AI가 로봇의 두뇌 역할을 하면서 로봇 성능이 급격히 향상. 삼성자산운용 "앞으로 10년을 바꿀 핵심 산업"으로 평가.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">📊</span>
+          <span><strong>극단적 밸류에이션 — PSR 100배 이상</strong> — 레인보우로보틱스 PSR 260배, 로보티즈 PSR 24배 등. 로봇 기업 대부분이 아직 적자이거나 극초기 실적. 성장 기대가 꺾이면 밸류에이션 급격히 붕괴 가능.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">⏱️</span>
+          <span><strong>상용화 지연 리스크</strong> — 휴머노이드 로봇의 대량 생산·보급은 기술적 난관이 많음. 2026~2028년 예상보다 늦어질 경우 선반영된 주가 기대치와 현실 간 괴리 확대 → 주가 급락 가능.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">📉</span>
+          <span><strong>고변동성 — 단일일 ±10~30% 급등락</strong> — 2026.03.05 하루 +12.64% 급등을 기록한 반면, 하락도 같은 폭으로 가능. 로봇 소형주들의 극단적 변동성이 포트폴리오 전체에 영향. 단기 보유 투자자는 타이밍 리스크 극심.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">🌐</span>
+          <span><strong>글로벌 경쟁 심화 — 중국·미국 로봇 독주 위험</strong> — 테슬라·보스턴다이내믹스(미국), 유니트리·로봇(중국)의 경쟁력이 K-로봇을 압도할 경우, K-로봇 기업들의 포지셔닝 약화. 특히 중국의 초저가 공세 우려.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">💸</span>
+          <span><strong>총보수 0.50% — 성장 정체 구간에서 비용 부담</strong> — 로봇 테마가 횡보·조정 구간에 진입하면 0.50%의 총보수가 상대적으로 부담. 배당 소득 거의 없는 순수 성장형 ETF이므로 보유 기간 소득 없음.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      KODEX 로봇액티브(445290)는 삼성자산운용이 2022년 11월 상장한 <strong>국내 최초·유일의 로봇 액티브 ETF</strong>다. iSelect K-로봇테마 지수를 비교지수로 삼되, 이를 추종하는 것이 아니라 초과 성과(알파)를 목표로 한다. 2025년 +117.6%의 성과는 국내 로봇 ETF 9개 중 1위이며, 비교지수 대비 +11.9%p 초과 달성으로 액티브 운용의 가치를 수치로 입증했다. 2026년 2월에는 순자산 1조원을 돌파했으며, FunETF 설문에서 투자자·판매자 모두 2026 유망 ETF 1위로 선정했다.<br><br>
+      포트폴리오 전략의 핵심은 <strong>"바벨(Barbell)"</strong>이다. 고변동성 소형 순수 로봇주(레인보우로보틱스·로보티즈·두산로보틱스·클로봇 등)와 저변동성 대형 로봇 투자주(삼성전자·NAVER·카카오·LG전자)를 조합해, 과열 구간에서는 대형주 비중을 높이고 저점 구간에서는 소형주를 집중 편입하는 방식이다. 신규 로봇 기업의 빠른 편입이 패시브 ETF 대비 확실한 우위다.<br><br>
+      투자 논거는 명확하다: <strong>K-휴머노이드 연합(160개사) + 현대차 50조 투자 + 삼성전자 레인보우로보틱스 인수 + 정부 정책</strong>이 동시에 작동하는 K-로봇 생태계와, 2026~2028년 글로벌 휴머노이드 상용화 원년이라는 구조적 성장 사이클이다. 다만 리스크도 분명하다. 편입 종목들의 PSR이 수십~수백 배로 극단적 고평가 상태이며, 실적 가시화보다 기대감이 먼저 주가에 선반영돼 있다. 상용화 지연 또는 중국·미국 경쟁 심화 시 주가 급락 가능성이 상존한다. 최소 3~5년의 장기 투자 관점과 단기 변동성 감내 능력이 필수다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 액티브 ETF 특성상 구성 종목과 비중이 수시 변동합니다. 현재가는 추정치이며, 최신 데이터는 삼성자산운용 KODEX 공식 홈페이지(samsungfund.com/etf)에서 확인하세요. ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

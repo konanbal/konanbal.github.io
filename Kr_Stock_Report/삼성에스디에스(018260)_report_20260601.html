@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>삼성에스디에스(018260) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">018260 · KOSPI</div>
+      <div class="company-name">삼성에스디에스</div>
+      <div class="company-desc">삼성그룹 IT 서비스·클라우드·물류 플랫폼 전문기업 — AI 풀스택 전환 중</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 6월 1일</div>
+      <div class="price-display">349,500원</div>
+      <div class="price-change up">▲ +50,500원 (+16.89%, 장중) · 전일 종가 299,000원</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 27조원 (KOSPI 37위)</span>
+    <span class="rating-pill">🏢 섹터: IT서비스 · 클라우드</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (10/10개사)</span>
+    <span class="rating-pill">📈 52주 신고가 갱신 중</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025년 연간 매출</div>
+      <div class="kpi-value">13.9조원</div>
+      <div class="kpi-sub">YoY +0.7%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025년 영업이익</div>
+      <div class="kpi-value">9,571억원</div>
+      <div class="kpi-sub">YoY +5.0% · 영업이익률 6.9%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 컨센서스</div>
+      <div class="kpi-value">210,000~250,000원</div>
+      <div class="kpi-sub">4월 기준 (현재 주가 이미 초과)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">128,900~368,000원</div>
+      <div class="kpi-sub">PER 30.5배 · PBR 2.33배</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 섹션 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (2026년 1분기)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 컨센서스)</div>
+        <div style="font-size:18px;font-weight:700;">3조 3,529억원 <span style="font-size:12px;color:var(--red);">▼ 컨센서스 하회 -3.1%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 3조 4,600억원 · YoY -3.9%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 컨센서스)</div>
+        <div style="font-size:18px;font-weight:700;">783억원 <span style="font-size:12px;color:var(--red);">▼ 어닝 쇼크 (일회성 포함)</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 1,874억원 · 일회성 제외 시 1,903억원(5.7%)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>발표일: 2026.04.23</strong> — 대법원 판결로 인한 퇴직금 산정 기준 변경으로 일회성 퇴직급여 충당금 <strong>1,120억원</strong>을 1분기에 일시 반영. 이를 제외한 정상 영업이익률은 <strong>5.7%</strong>로 양호. 2031년까지 AI 풀스택 전환 및 신사업·M&A에 <strong>10조원 투자</strong> 계획 발표. 2분기는 공공 업종 GPUaaS 증가 및 범정부 지능형 AI 서비스 확산으로 실적 회복 전망.
+    </div>
+  </div>
+
+  <!-- DART 공시 섹션 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">사모 전환사채 발행 — KKR(Startech AI LP), 1조 2,200억원, 만기 2032.04.30, 금리 2.5%</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.15</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 분기보고서 (사업연도 2026.01.01~03.31)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.23</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">타법인 주식 취득 결정 — 두나무(업비트 운영사) 지분 1% 취득, 약 1,532억원</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.28</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#166534;margin-right:8px;">IR</span>
+        <span style="font-size:13px;font-weight:500;">2031년까지 10조원 AI 풀스택 투자 계획 공시 (AI 인프라 5조, AX플랫폼 1조, M&A 4조)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.23</span>
+    </div>
+    <div style="font-size:12px;color:var(--text);line-height:1.7;background:#f0f9ff;border-left:3px solid var(--blue);padding:10px 14px;border-radius:0 6px 6px 0;margin-top:10px;">
+      📌 <strong>투자자 주목</strong>: KKR의 CB 인수는 삼성SDS 상장 이래 첫 외부 전략적 투자자 유치 사례. 전환가 확정 후 KKR은 최대 지분 약 8% 확보 가능. 풋옵션·조기상환권 없이 6년 보호 예정 — KKR의 장기 성장 확신을 시사.
+    </div>
+  </div>
+
+  <!-- 뉴스 섹션 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.29</span>
+      </div>
+      <div class="news-title">삼성전자 AI 자율공장 전환 가속 — KB증권 "삼성SDS 최대 수혜주"</div>
+      <div class="news-summary">삼성전자가 AI 자율공장 전환을 추진하면서 스마트팩토리 솔루션을 보유한 삼성SDS의 매출 확대가 기대된다는 분석. 그룹 내 표준 플랫폼 채택 가능성 부각. 주가는 당일 +20.32% 급등.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.28</span>
+      </div>
+      <div class="news-title">두나무 지분 1% 취득 — 디지털자산 사업 본격화, Web3.0 플랫폼 전략 공식화</div>
+      <div class="news-summary">삼성증권·삼성카드와 함께 두나무 지분 4%(6,128억원) 공동 인수. 삼성SDS 지분은 1%로 약 1,532억원 투자. 디지털자산컨설팅그룹 신설 및 원화 스테이블코인·토큰증권·디지털자산 수탁 사업 진출 공식화.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.28</span>
+      </div>
+      <div class="news-title">정부 2조원 GPU 확충 사업 최종 후보군 — 네이버클라우드·삼성SDS·엘리스 3파전</div>
+      <div class="news-summary">과기정통부 '2026년 AI컴퓨팅자원 활용기반 강화사업' 현장실사 완료 후 막판 협상 중. 삼성SDS 낙점 시 AI 데이터센터 매출 확대 직결 전망.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.04.23</span>
+      </div>
+      <div class="news-title">Google Cloud Next 2026에서 구글 클라우드와 AI·클라우드·보안 전략적 파트너십 체결</div>
+      <div class="news-summary">공공기관·금융권 대상 AI·클라우드 사업 확대를 위한 파트너십. B2B AI MSP 시장 확장 및 글로벌 진출 가속화 기대.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.03.23</span>
+      </div>
+      <div class="news-title">국내 최초 NVIDIA B300 GPU 기반 GPUaaS 서비스 출시</div>
+      <div class="news-summary">B200 대비 연산 성능 9→15 페타플롭스로 향상된 B300 GPU 서비스. 수퍼톤·베슬AI 등 AI 스타트업 채택. ChatGPT Enterprise 리셀링 프로그램과 맞물려 AI MSP 수요 확장.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04.23</span>
+      </div>
+      <div class="news-title">1Q26 영업이익 783억원 — 퇴직급여 일회성 비용 1,120억원 충격</div>
+      <div class="news-summary">대법원 판결에 따른 퇴직금 산정 기준 변경으로 영업이익 YoY -70.8% 급감. 시장 컨센서스(1,874억원) 대폭 하회. 단, 일회성 제외 시 5.7% 수준의 정상 이익률 유지.</div>
+    </div>
+  </div>
+
+  <!-- Bull/Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span>삼성그룹 AX 전환 수혜 — 삼성전자 AI 자율공장 전환 가속으로 스마트팩토리·IT서비스 매출 직접 수혜 구조</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span>10조원 투자 로드맵 — 2031년까지 AI 데이터센터(5조), AX 플랫폼(1조), M&A(4조) 투자 계획으로 사업 가치 재평가 진행 중</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span>KKR 전략적 투자 유치 (1조 2,200억원 CB) — 글로벌 인프라 투자 강자의 장기 보유 베팅, 외부 신뢰도 획득 및 글로벌 네트워크 활용 가능</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span>정부 2조원 GPU 사업 수주 가능성 — 최종 후보군 선정, 낙점 시 GPUaaS 매출 기반 확충</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span>Web3.0·디지털자산 신사업 — 두나무 지분 인수로 원화 스테이블코인·토큰증권(STO) 사업화 구체화, PER 멀티플 재평가 기대</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span>단기 주가 급등 부담 — 52주 신고가(368,000원) 갱신, RSI·스토캐스틱 극단적 과매수 구간, 기술적 조정 가능성 상존</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span>목표주가 상단(250,000원) 이미 초과 — 애널리스트 컨센서스 목표주가를 현재 주가가 크게 웃돌아 추가 상향 조정 여부가 관건</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span>물류사업 부진 지속 — 해상운임 하락 지속 시 7조원대 물류 부문 수익성 압박, 이란 전쟁 등 지정학 리스크에 따른 물류 원가 상승</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span>그룹 캡티브 매출 의존도 — 삼성전자 등 주요 고객사 ITO 계약 내재화 심화 시 IT서비스 부문 매출 감소 우려</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span>투자 성과 불확실성 — 10조원 투자 계획의 실행 가시성, M&A 성과, 데이터센터 수익화 시기 등 중장기 ROE 개선이 실현되기까지 시간 필요</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 4월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">KB증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 230,000원</span><span style="font-size:11px;color:var(--muted);">ROE 12% 목표, 주가 재평가 출발점 기대</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">하나증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 220,000원</span><span style="font-size:11px;color:var(--muted);">상저하고, 가이던스 상향 기대</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">한화투자증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 확인 불가</span><span style="font-size:11px;color:var(--muted);">2026F PER 18.0배, PBR 1.3배</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">기타 증권사 7개사</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 210,000~250,000원 범위</span><span style="font-size:11px;color:var(--muted);">10개 증권사 전원 매수 의견</span></div>
+    </div>
+    <div style="margin-top:10px;padding:10px;background:#fef9c3;border-radius:8px;font-size:12px;color:#92400e;">
+      ⚠️ 4월 말 기준 컨센서스 목표주가(210,000~250,000원)는 현재 주가(349,500원)에 이미 크게 하회. 5월 이후 주가 급등으로 목표주가 상향 조정 가능성 높음. 최신 리포트 확인 권장.
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      삼성에스디에스는 2026년 들어 "현금 많지만 성장성 없는 방어주"에서 "AI 클라우드·Web3.0 플랫폼 기업"으로 시장의 본질 가치 평가가 전면 재조정되고 있는 종목이다. 4월 KKR의 1조 2,200억원 전환사채 인수, 5월 두나무 지분 취득 공시, 삼성전자 AI 자율공장 전환 수혜 기대 등이 연이어 터지며 5월 28~29일 이틀 만에 역사적 상한가를 포함한 35% 이상 급등이 발생했다. 2031년까지 10조원 투자 로드맵(AI 데이터센터 5조, M&A 4조, AI플랫폼 1조)은 6.6조원의 현금성 자산을 수익화하겠다는 선언으로, 지금까지 디스카운트 요인이었던 현금 과잉이 오히려 성장 재료로 전환되는 국면이다. 다만 단기 과매수 부담이 크고 컨센서스 목표주가를 현재 주가가 크게 웃도는 만큼 신규 진입 시 기술적 조정 구간을 기다리는 것이 합리적이다. 중장기 AI 인프라 수혜, 삼성그룹 AX 전환 사업자로서의 독점적 지위, 디지털자산 신사업 개화를 기대하는 투자자에게 중장기 관점의 접근이 유효한 종목이다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. 주식 투자에는 원금 손실 위험이 있으며, 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

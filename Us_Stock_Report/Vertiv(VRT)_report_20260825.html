@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertiv Holdings 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">VRT · NYSE</div>
+      <div class="company-name">Vertiv Holdings Co</div>
+      <div class="company-desc">데이터센터 전력관리·열관리(액체냉각)·랙·통합 인프라와 생애주기 서비스를 공급하는 크리티컬 디지털 인프라 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 8월 25일</div>
+      <div class="price-display">$254.97</div>
+      <div class="price-change down">▼ -2.66% (8/24 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $961억</span>
+    <span class="rating-pill">🏢 섹터: 전기장비 / 데이터센터 인프라</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy (28명 기준)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (2026 Q2)</div>
+      <div class="kpi-value">$32.74억</div>
+      <div class="kpi-sub">YoY +24% (유기적 +18%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">조정 영업이익률</div>
+      <div class="kpi-value">22.6%</div>
+      <div class="kpi-sub">전년 대비 +410bp · 가이던스 상회</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$338.15</div>
+      <div class="kpi-sub">현재가 대비 +32.6%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$118.70~$379.94</div>
+      <div class="kpi-sub">현재가 위치: 약 52%</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 — 2026년 2분기, 2026.07.29 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$32.74억 <span style="font-size:12px;color:var(--red);">▼ 컨센서스 미달 -3.0%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 약 $33.7억 · YoY +24% (유기적 +18%)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">조정 EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.52 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +7.0%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.42 · YoY +60% · GAAP EPS $1.27 (+53%)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <b>손익·현금흐름</b> — 조정 영업이익 $7.38억(+51%), 조정 영업이익률 22.6%로 가이던스 상단($6.9~7.3억) 초과. 영업현금흐름 $11.00억(+241%), 조정 FCF $9.25억(+234%), FCF 전환율 150% 이상. 분기말 유동성 $56억에 순현금 포지션(순레버리지 -0.1배) 달성. 지역별로는 미주 $20.71억(+29%), APAC $7.20억(+29%)이 견인했고 <b>EMEA는 $4.84억으로 유기적 -2% 역성장</b>.<br>
+      <b>가이던스 전면 상향</b> — FY2026 매출 $138~142억(중간값 $140억, 유기적 +30~32%), 조정 영업이익 $32.85~33.65억, 조정 EPS $6.65~6.75(+60%), 조정 FCF $24~26억. Q3는 매출 $36.5~38.5억(유기적 +34~36%), 조정 EPS $1.77~1.83(+43~48%), 조정 영업이익률 약 24.5%로 <b>성장 가속</b>을 제시. 그럼에도 매출 미달과 "일시적 공급망 혼잡·다단계 프로젝트 타이밍 이동"이라는 설명에 주가는 발표 당일 장중 최대 17% 급락했습니다.
+    </div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 실적 발표 및 연간 가이던스 상향 (Exhibit 99.1)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.29</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 분기보고서 (기준일 2026.06.30)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07 (하순)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">배당결정</span>
+        <span style="font-size:13px;font-weight:500;">클래스 A 보통주 분기배당 주당 $0.0625 결의 (기준일 6/15, 지급 6/25)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2025년 4분기·연간 실적 — 4분기 유기적 수주 +252%, TTM 유기적 수주 +81%</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.11</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:0.75rem;background:#f9fafb;padding:10px 12px;border-radius:6px;">
+      📌 <b>투자자 주목 공시</b> — 이번 분기 가장 중요한 건 "쓰여 있는 것"이 아니라 <b>"빠진 것"</b>입니다. 2025년 2분기 보도자료는 백로그 $85억·북투빌 약 1.2배를 헤드라인으로 내세웠고, 2026년 초에는 약 $150억 백로그를 강조했습니다. 그런데 <b>2026년 2분기 보도자료에는 백로그도, 수주 수치도 전혀 등장하지 않습니다.</b> 백로그는 회사가 정의하는 지표이므로 공개 여부 자체가 경영진의 선택입니다. 다음 분기에 이 숫자가 다시 등장하는지가 시장 신뢰 회복의 관건입니다.
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.07.29</span></div>
+      <div class="news-title">가이던스 전면 상향에도 매출 미달로 장중 최대 -17% 급락</div>
+      <div class="news-summary">조정 EPS·영업이익·마진·현금흐름이 모두 가이던스 상단을 넘었고 연간 전망도 전 항목 상향했지만, 매출 $32.74억이 컨센서스 약 $33.7~33.9억을 밑돌면서 시장은 매출 인식 속도에만 반응했습니다. 프리미엄 밸류에이션 종목에서 "수요가 아니라 전환"이 문제로 지목된 전형적인 사례입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.12</span></div>
+      <div class="news-title">복수 로펌, 증권법 위반 가능성 조사 착수 발표</div>
+      <div class="news-summary">Pomerantz, Schall 등 원고 측 로펌이 매출 미달과 급락을 계기로 조사에 나섰다고 밝혔습니다. 급락 후 관행적으로 나오는 절차이며 위법의 증거는 아니지만, 당분간 헤드라인 리스크로 남습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.07</span></div>
+      <div class="news-title">GLJ Research, Hold→Buy 상향하며 목표가 $381 제시</div>
+      <div class="news-summary">급락 이후 나온 첫 명확한 상향 조정입니다. Bernstein은 8월 12일과 21일 매수 의견을 재확인했고, Mizuho도 8월 4일 매수를 유지했습니다. 실적 자체보다 밸류에이션 리셋을 기회로 보는 시각입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.07.30~08.05</span></div>
+      <div class="news-title">주요 증권사, 목표가는 낮추되 투자의견은 유지</div>
+      <div class="news-summary">RBC $418→$337, Citi $414→$358, Evercore ISI $425→$375, Goldman Sachs $352→$301으로 조정됐지만 등급은 그대로였습니다. 성장 논리를 부정한 게 아니라 멀티플과 시점을 낮춘 것이라는 해석이 우세합니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.18</span></div>
+      <div class="news-title">국채금리 상승에 -6.9% 하락 — AI 인프라 섹터 동반 약세</div>
+      <div class="news-summary">Eaton, nVent, Modine 등 동종 업체가 함께 밀렸습니다. 포워드 PER이 40배를 넘는 구조상 금리와 섹터 로테이션에 극도로 민감하며, 개별 실적과 무관하게 주가가 흔들리는 국면이 반복되고 있습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026년 상반기</span></div>
+      <div class="news-title">S&P 500 편입, ThermoKey 인수, 생산 캐파 확장, NVIDIA 800V DC 협력</div>
+      <div class="news-summary">3월 23일 S&P 500 편입으로 대형주 지위를 확보했고, 같은 달 ThermoKey 인수와 미주 4개 생산시설 신·증설을 발표했습니다. 이탈리아 Tognana 열관리 캠퍼스도 확장 중입니다. NVIDIA의 800V DC 전력 아키텍처 협력은 AI 랙 밀도가 140kW에서 300kW·600kW로 올라가는 흐름에서 Vertiv의 위치를 보여줍니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>AI 인프라의 순수 플레이</b> — 전력·액체냉각·랙·통합 인프라를 한 번에 공급. NVIDIA 800V DC 협력으로 고밀도 AI 랙 전환의 직접 수혜 위치.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>이익 레버리지 실증</b> — 매출 +24%에 조정 영업이익 +51%. 조정 영업이익률 22.6%(+410bp)로 가이던스 상회, Q3는 약 24.5% 목표.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>현금창출력과 무차입 구조</b> — 조정 FCF $9.25억(+234%), FCF 전환율 150% 이상, 유동성 $56억, 순현금 전환(순레버리지 -0.1배).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>가이던스 전면 상향</b> — FY26 매출 $140억(유기 +31%), 조정 EPS $6.70(+60%), 조정 FCF $25억. Q3 유기적 성장률 +34~36%로 오히려 가속 전망.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>수요 가시성</b> — 회사가 언급한 약 $150억 백로그는 2027년까지의 매출 커버리지. FY25 4분기 유기적 수주는 전년 대비 +252%였습니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>수요가 아닌 '전환'의 문제</b> — 2026년 리스크는 수주가 아니라 수주를 일정에 맞춰 매출로 바꾸는 능력입니다. Q3 매출이 가이던스 $36.5~38.5억 안에 들어오는지가 첫 시험대입니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>백로그·수주 미공개</b> — 성장의 핵심 지표를 보도자료에서 뺀 것은 해석의 여지가 큽니다. 다음 분기 재등장 여부가 관건입니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>밸류에이션과 금리 민감도</b> — TTM PER 약 58배, 가이던스 조정 EPS 기준으로도 약 38배. 포워드 40배대에서 금리가 오르면 실적과 무관하게 멀티플이 압축됩니다(8/18 -6.9%).</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>법적·헤드라인 리스크</b> — 복수 로펌의 증권법 위반 조사 착수. 급락 후 통상적 절차지만 단기 심리에는 부담입니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>EMEA 역성장과 내부자 매도</b> — EMEA 유기적 매출 -2%로 하반기 회복 전망은 아직 미검증이며, 3개월 기준 약 $2,400만의 내부자 매도에 매수는 0건이었습니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2분기 실적 이후)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">GLJ Research (8.07, Hold→상향)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$381</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Evercore ISI ($425→하향)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 유지</span><span class="target-price">$375</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Citi ($414→하향)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 유지</span><span class="target-price">$358</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">RBC Capital ($418→하향)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 유지</span><span class="target-price">$337</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Goldman Sachs ($352→하향)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">의견 유지</span><span class="target-price">$301</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Bernstein (8.21 재확인)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">N/A</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Mizuho Securities (8.04)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">N/A</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:0.75rem;">종합 컨센서스: <b>Strong Buy</b> · 평균 목표주가 $338.15 (28명 기준) — 집계 기관에 따라 $338~$349로 차이가 있습니다. 2분기 이후 최소 7개 증권사가 목표가를 낮췄지만 <b>투자의견을 내린 곳은 사실상 없었다</b>는 점이 특징입니다.</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Vertiv는 AI 데이터센터에서 칩이 아니라 <b>전기와 열</b>을 담당하는 회사입니다. 랙 밀도가 140kW에서 300kW, 600kW로 올라갈수록 전력관리와 액체냉각의 난이도가 기하급수적으로 커지고, 그 자리를 통째로 채울 수 있는 상장사는 많지 않습니다. 2분기 실적은 이 구조를 그대로 보여줬습니다. 매출 +24%에 조정 영업이익은 +51%, 조정 영업이익률은 22.6%로 410bp 개선됐고, 조정 FCF는 $9.25억으로 세 배 넘게 늘며 순현금 회사로 전환했습니다. 연간 가이던스도 매출·이익·EPS·현금흐름 전 항목이 올라갔고, 3분기는 유기적 성장률 +34~36%로 오히려 가속을 제시했습니다.<br><br>
+      그런데 주가는 발표 당일 17% 빠졌고, 지금도 52주 고점 $379.94 대비 약 33% 낮은 자리입니다. 이유는 하나로 모입니다. <b>수요가 아니라 전환</b>입니다. 매출 $32.74억이 컨센서스를 약 3% 밑돌았고, 회사는 이를 일시적 공급망 혼잡과 다단계 프로젝트 타이밍 문제로 설명했습니다. 여기에 그동안 헤드라인으로 내세우던 백로그·수주 수치가 이번 보도자료에서 통째로 사라졌다는 점이 의구심을 키웠습니다. 프리미엄 멀티플(TTM PER 약 58배, 가이던스 기준 약 38배) 종목에서 "설명이 필요한 분기"는 그 자체로 비용입니다. 다만 월가는 목표가만 낮추고 등급은 거의 손대지 않았습니다. 논리가 아니라 시점을 재조정했다는 뜻입니다.<br><br>
+      앞으로 확인할 체크리스트는 짧고 명확합니다. <b>①3분기 매출이 가이던스 $36.5~38.5억 안에 들어오는가, ②EMEA가 하반기 유기적 성장으로 돌아서는가, ③백로그 수치가 공시에 다시 등장하는가.</b> 세 가지가 확인되면 컨센서스 목표가 $338의 논리는 살아 있고, 하나라도 어긋나면 밸류에이션이 다시 문제로 돌아옵니다. 정리하면 <b>이 종목은 AI 데이터센터 capex 사이클을 실제 이익과 현금흐름이 나오는 기업으로 가져가고 싶고, 금리와 섹터 심리에 따른 20~30% 조정을 견딜 수 있으며, 3분기 실적(10월 예정)까지 기다렸다가 비중을 조절할 준비가 된 투자자에게 적합</b>합니다. 반대로 단기 안정성이나 낮은 변동성을 우선한다면 지금 국면은 부담스럽습니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주가·시가총액·목표주가는 2026년 8월 24~25일 기준 공개 자료를 취합한 것으로 실시간 시세와 다를 수 있으며, 시가총액은 추정치입니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>두산에너빌리티(034020) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* HEADER */
+  .report-header {
+    background: linear-gradient(135deg, #0d1b3e 0%, #1a3a6e 60%, #0f5a8a 100%);
+    color: white; padding: 2.5rem 2rem 2rem; position: relative; overflow: hidden;
+  }
+  .report-header::before {
+    content: '⚛'; font-size: 220px; position: absolute; right: -30px; top: -40px;
+    opacity: 0.04; line-height: 1;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px; }
+  .company-desc { font-size: 14px; opacity: 0.75; max-width: 520px; line-height: 1.5; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.55; margin-bottom: 4px; }
+  .price-display { font-size: 34px; font-weight: 800; }
+  .price-change { font-size: 13px; margin-top: 4px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill {
+    padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(4px);
+  }
+
+  /* LAYOUT */
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title {
+    font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px;
+  }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 21px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .kpi-sub.up { color: var(--green); font-weight: 600; }
+  .kpi-sub.down { color: var(--red); font-weight: 600; }
+
+  /* NEWS */
+  .news-item { padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .news-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; letter-spacing: 0.05em; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #e0e7ff; color: #3730a3; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.55; }
+
+  /* FACTORS */
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.55;
+  }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ANALYST */
+  .analyst-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+  }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 600; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 700; color: var(--text); font-size: 13px; }
+
+  /* EARNINGS */
+  .earn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .earn-box { background: #f8faff; border: 1px solid #e0eaff; border-radius: 8px; padding: 1rem; }
+  .earn-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .earn-value { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+  .earn-badge { font-size: 11px; font-weight: 700; margin-left: 6px; color: var(--green); }
+  .earn-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .earn-comment {
+    font-size: 13px; line-height: 1.7; color: var(--text);
+    background: #fffbf0; border-left: 3px solid var(--amber);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin-top: 0;
+  }
+
+  /* DART */
+  .dart-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+  }
+  .dart-row:last-child { border-bottom: none; }
+  .dart-tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; margin-right: 8px; }
+  .dt-quarter { background: #e0e7ff; color: #3730a3; }
+  .dt-major { background: #fce7f3; color: #9d174d; }
+  .dt-ir { background: #d1fae5; color: #065f46; }
+  .dt-contract { background: #fef3c7; color: #92400e; }
+  .dart-date { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+  /* SUMMARY */
+  .summary-box {
+    background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%);
+    border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem;
+  }
+  .summary-title { font-size: 15px; font-weight: 800; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.85; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #c7d2fe; line-height: 1.6; }
+
+  /* TAGS */
+  .section-tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 3px 9px; border-radius: 12px; margin-right: 6px; margin-bottom: 4px;
+  }
+  .st-blue { background: #dbeafe; color: #1d4ed8; }
+  .st-green { background: #dcfce7; color: #15803d; }
+  .st-amber { background: #fef9c3; color: #92400e; }
+  .st-red { background: #fee2e2; color: #991b1b; }
+  .st-purple { background: #ede9fe; color: #6d28d9; }
+
+  /* MISC */
+  .section-divider { margin: 1.5rem 0 1rem; border: none; border-top: 1px solid var(--border); }
+  .info-banner {
+    background: linear-gradient(90deg, #eff6ff, #f5f3ff);
+    border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 16px;
+    font-size: 13px; color: #1e40af; margin-bottom: 1rem; line-height: 1.6;
+  }
+  .midterm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+  .midterm-box { background: #f8f9fc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+  .midterm-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .midterm-value { font-size: 18px; font-weight: 800; color: var(--accent2); }
+  .midterm-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .earn-grid, .midterm-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+    .company-name { font-size: 22px; }
+    .price-display { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">034020 · KOSPI</div>
+      <div class="company-name">두산에너빌리티</div>
+      <div class="company-desc">국내 유일 원전 주기기 전문 기업. 대형원전·SMR·가스터빈·해상풍력을 아우르는 글로벌 에너지 설비 솔루션 기업으로 AI 전력 수요 확대의 최전선에 위치.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 26일</div>
+      <div class="price-display">~110,800원</div>
+      <div class="price-change down">▼ 최근 고점(139,200) 대비 조정 중 · 52주 저점 31,100</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 섹터: 에너지 설비 (기계)</span>
+    <span class="rating-pill">🏢 거래소: KOSPI</span>
+    <span class="rating-pill">⭐ 컨센서스: 적극 매수 (21명 전원 매수)</span>
+    <span class="rating-pill">🎯 평균 목표가: 138,646원</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- INFO BANNER -->
+  <div class="info-banner">
+    ℹ️ <strong>핵심 투자 테마:</strong> AI 데이터센터 전력 수요 폭증 → 원전·가스터빈 르네상스 → 국내 유일 대형원전 주기기 제조사 + SMR 기자재 독점 수혜. 2026년부터 수익성 본격 반등 사이클 진입 전망.
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 연결 매출</div>
+      <div class="kpi-value">4조 2,611억</div>
+      <div class="kpi-sub up">YoY +13.7%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익</div>
+      <div class="kpi-value">2,335억</div>
+      <div class="kpi-sub up">YoY +63.9% · 컨센서스 +18.5% 상회</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 수주잔고</div>
+      <div class="kpi-value">24조 1,343억</div>
+      <div class="kpi-sub up">YoY +46%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">3.1만~13.9만</div>
+      <div class="kpi-sub">현재가 약 110,800원</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (최신 실적)</div>
+    <div class="earn-grid">
+      <div class="earn-box">
+        <div class="earn-label">연결 매출 (실제 vs 전년동기)</div>
+        <div class="earn-value">4조 2,611억<span class="earn-badge">▲ +13.7%</span></div>
+        <div class="earn-sub">전년동기 3조 7,486억 · 자회사 밥캣·퓨얼셀 포함</div>
+      </div>
+      <div class="earn-box">
+        <div class="earn-label">영업이익 (컨센서스 대비)</div>
+        <div class="earn-value">2,335억<span class="earn-badge">▲ 컨센서스 +18.5% 상회</span></div>
+        <div class="earn-sub">컨센서스 약 1,930~1,970억 · 전년동기 1,425억(+63.9%)</div>
+      </div>
+    </div>
+    <div class="earn-grid" style="margin-top:10px;">
+      <div class="earn-box">
+        <div class="earn-label">당기순이익</div>
+        <div class="earn-value">602억<span class="earn-badge">▲ 흑자전환</span></div>
+        <div class="earn-sub">전년동기 -212억 적자 → 흑자전환</div>
+      </div>
+      <div class="earn-box">
+        <div class="earn-label">신규 수주 (에너빌리티 부문)</div>
+        <div class="earn-value">2조 7,857억<span class="earn-badge">▲ +61.9%</span></div>
+        <div class="earn-sub">전년동기 대비 · 북미 가스터빈·스팀터빈 주도</div>
+      </div>
+    </div>
+    <div class="earn-comment" style="margin-top:10px;">
+      <strong>경영진 코멘트 (2026.04.29 실적 발표):</strong> 에너빌리티 부문 흑자전환, 가스터빈·원전 주기기 고마진 매출 확대가 수익성 개선 견인. 연말까지 체코 원전 EPC·SMR 주기기·해외 가스복합발전·해상풍력 등 포함해 <strong>총 13조 3,000억원 신규 수주 목표</strong> 유지. 북미 데이터센터 전력 수요 대응 가스터빈 수주 기회 지속 확대 예상.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="dart-row">
+      <div>
+        <span class="dart-tag dt-major">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">2026 사업연도 영업실적 전망 공시 — 매출 7.4조·영업익 3,959억·수주 13.3조</span>
+      </div>
+      <span class="dart-date">2026.02.12</span>
+    </div>
+    <div class="dart-row">
+      <div>
+        <span class="dart-tag dt-contract">수주계약</span>
+        <span style="font-size:13px;font-weight:500;">미국향 대형 가스터빈 패키지 공급계약 공시 (미국 빅테크, ~1.2조원 규모)</span>
+      </div>
+      <span class="dart-date">2026.03.07</span>
+    </div>
+    <div class="dart-row">
+      <div>
+        <span class="dart-tag dt-quarter">잠정실적</span>
+        <span style="font-size:13px;font-weight:500;">2025 사업연도 잠정실적 — 매출 17.1조(+5.1%), 영업이익 7,627억(-25%)</span>
+      </div>
+      <span class="dart-date">2026.02.11</span>
+    </div>
+    <div class="dart-row">
+      <div>
+        <span class="dart-tag dt-quarter">잠정실적</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 잠정실적 — 매출 4.3조(+13.7%), 영업이익 2,335억(+63.9%)</span>
+      </div>
+      <span class="dart-date">2026.04.29</span>
+    </div>
+    <div class="dart-row">
+      <div>
+        <span class="dart-tag dt-contract">수주계약</span>
+        <span style="font-size:13px;font-weight:500;">야월 해상풍력 EPC 계약 — 5,750억원 규모</span>
+      </div>
+      <span class="dart-date">2026.02.13</span>
+    </div>
+    <div style="margin-top:10px;padding:10px 12px;background:#f0f4ff;border-radius:8px;font-size:12px;color:#1e40af;line-height:1.6;">
+      📌 <strong>투자자 주목 공시:</strong> 미국향 가스터빈 공급계약은 xAI(일론 머스크) 포함 빅테크향 수주로 추정되며 2026년 말까지 납기 예정. 2026 가이던스 공시상 수주 전망 13.3조는 2025 실제 수주 14.7조 대비 보수적으로 제시된 점에서 상향 가능성에 주목.
+    </div>
+  </div>
+
+  <!-- 뉴스 & 이슈 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-positive">호재</span>
+          <span class="news-date">2026.04.29</span>
+        </div>
+        <div class="news-title">1Q26 영업이익 컨센서스 18.5% 상회 — 어닝 서프라이즈</div>
+        <div class="news-summary">영업이익 2,335억이 시장 예상치(1,930~1,970억)를 크게 웃돌았다. 에너빌리티 부문 흑자전환 및 고마진 가스터빈·원전 주기기 매출 증가가 핵심. 당기순이익도 흑자전환 달성.</div>
+      </div>
+
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-positive">호재</span>
+          <span class="news-date">2026.03.07</span>
+        </div>
+        <div class="news-title">미국 빅테크향 380MW급 가스터빈 7기 공급 계약 (~1.2조)</div>
+        <div class="news-summary">북미 데이터센터용 가스터빈 수요 급증 배경. 누적 미국향 가스터빈 12기 공급이라는 기록 달성. xAI향 물량 납기가 2026년 말 예정되어 하반기 실적 가시성 확보.</div>
+      </div>
+
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-positive">호재</span>
+          <span class="news-date">2026.02.18</span>
+        </div>
+        <div class="news-title">체코 두코바니 원전 2기 26조원 EPC — 한·체코 장관급 협의체 구성</div>
+        <div class="news-summary">팀코리아(한수원+두산에너빌리티) 원전 수출 프로젝트. 기자재 수주 단가 기존 대비 30% 상향 반영. 유럽 원전 시장 진출 교두보로 평가받으며 중장기 수주 모멘텀 강화.</div>
+      </div>
+
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-positive">호재</span>
+          <span class="news-date">2026.05.14</span>
+        </div>
+        <div class="news-title">외국인 2026년 올해 순매수 1위 종목 부상</div>
+        <div class="news-summary">원전·가스터빈 수주 쌓임에 따른 중장기 실적 개선 기대감. 수주잔고 2026년 30조→2027년 42조 원 성장 예측. 한국-베트남 정상회담으로 전력 인프라 협력 기대도 추가.</div>
+      </div>
+
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-neutral">주목</span>
+          <span class="news-date">2026.02.12</span>
+        </div>
+        <div class="news-title">2026 가이던스 공시 — 중기 성장 로드맵 제시</div>
+        <div class="news-summary">2026~2030년 수주 연평균 +16%, 매출 +13%, 영업이익 +20% 성장 목표. 영업이익률 9%대 목표 제시. 2025년이 수익성 저점, 2026년부터 본격 반등 사이클 돌입 선언.</div>
+      </div>
+
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-negative">리스크</span>
+          <span class="news-date">2026.02.11</span>
+        </div>
+        <div class="news-title">2025년 영업이익 25% 감소 — 수익성 저점 확인</div>
+        <div class="news-summary">퓨얼셀 부문 영업손실 확대, 두산밥캣 경기 회복 지연이 전체 수익성 압박. 외형(+5.1%)은 성장했으나 이익률 하락으로 투자자 우려 고조. 이후 1Q26 서프라이즈로 저점 확인 분위기.</div>
+      </div>
+    </div>
+
+    <!-- 투자 포인트 -->
+    <div class="card">
+      <div class="card-title">⚖️ 투자 포인트</div>
+
+      <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">📈 Bull Case — 상승 기대 요인</div>
+      <div class="factor-list" style="margin-bottom:1.25rem;">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>AI 전력 수요 → 가스터빈 슈퍼사이클</strong> — 미국 데이터센터 전력 부족으로 가스터빈 주문 폭증. GE 버노바 등 경쟁사 납기 지연으로 두산의 반사 수혜 지속. 2026년 말 xAI향 납기 완료 시 레퍼런스 확보.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>원전 르네상스 + SMR 독점 포지션</strong> — 2030년까지 NuScale·X-energy·TerraPower 등 SMR 수주 28조원 목표. 국내 유일 SMR 제조 역량, 8,000억원 공장 증설(2028년 준공)로 캐파 확대.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>수주잔고 급증 → 실적 전환 가시화</strong> — 1Q26말 수주잔고 24.1조(+46% YoY). 고마진 기자재 비중 확대로 2026년부터 영업이익률 가파른 상승 예상. 증권가 2026년 영업익 2조원 시대 전망도 등장.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>글로벌 수주 지역 다변화</strong> — 체코(26조 EPC)·폴란드(AP1000)·베트남·튀르키예·사우디 등 유럽·중동·동남아 원전 프로젝트 동시 진행. 특정 국가 의존도 낮아 지정학 리스크 분산 가능.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>글로벌 피어 밸류에이션 리레이팅</strong> — GE 버노바·미쓰비시 중공업 등 동종 기업 EV/EBITDA 38~43배까지 상승. 두산도 에너지 전환 수혜주로 멀티플 재평가 진행 중.</span>
+        </div>
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">📉 Bear Case — 리스크 요인</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>극도로 높은 밸류에이션</strong> — 2026E PER 229배, PBR 10배(하나증권 기준). 수주·실적 성장이 이미 상당 부분 주가에 선반영. 기대치 미달 시 급격한 밸류에이션 수축 위험.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>수주→매출 전환 시차 리스크</strong> — 원전·SMR 수주는 납기까지 3~10년. 단기 실적보다 현금흐름이 중요하나 선행 지출이 먼저 발생. 2026년 매출 가이던스(7.4조)가 과연 조기 달성 가능한지 불확실.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>두산밥캣·퓨얼셀 자회사 부담</strong> — 두산밥캣 경기 회복 지연, 퓨얼셀 영업손실 확대가 연결 기준 수익성 훼손 요인. 분할 매각 등 자회사 구조조정 이슈도 잠재 변수.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>지정학·정책 리스크</strong> — 체코·폴란드 등 해외 수주 과정에서 외교 변수·경쟁국 소송 가능성. 미국 트럼프 행정부 정책 변화, 한국 탈원전 재정책 가능성도 잠재 리스크.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>단기 주가 조정 압력</strong> — 1분기 고점(139,200원) 대비 현재 약 20% 조정. 외국인 매도 지속, 고금리 환경에서 성장주 할인율 상승이 주가 부담 요인. 기술적 지지선 확인 필요.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 중기 가이던스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗓️ 중기 성장 가이던스 (2026~2030년)</div>
+    <div class="midterm-grid">
+      <div class="midterm-box">
+        <div class="midterm-label">수주 연평균 성장</div>
+        <div class="midterm-value">+16%</div>
+        <div class="midterm-sub">2030년 수주잔고 47.7조원 전망</div>
+      </div>
+      <div class="midterm-box">
+        <div class="midterm-label">매출 연평균 성장</div>
+        <div class="midterm-value">+13%</div>
+        <div class="midterm-sub">2026E 가이던스 7.4조(관리연결)</div>
+      </div>
+      <div class="midterm-box">
+        <div class="midterm-label">영업이익 연평균 성장</div>
+        <div class="midterm-value">+20%</div>
+        <div class="midterm-sub">중기 영업이익률 목표 9%대</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 12px;background:#f8f9fc;border-radius:6px;">
+      ※ 관리연결 기준(두산밥캣·두산퓨얼셀 제외). SMR 공장 2028년 증설 완료 시 연간 캐파 대형원전 5기·SMR 20기로 확대. 서비스·유지보수 매출 비중 30% 이상 목표.
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#065f46;">
+      ✅ <strong>21명 전원 매수</strong> · 매도 0명 · 컨센서스 목표가 평균 <strong>138,646원</strong> (현재가 대비 약 +25% 상승 여력)
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">대신증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">130,000원</span>
+        <span style="font-size:11px;color:var(--muted);">2026E 수주 14.3조 전망</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">삼성증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">120,000원</span>
+        <span style="font-size:11px;color:var(--muted);">수주 확대·SMR 기대 반영</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">iM증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">미국 원전 수주 사상 최대 행진</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">하나증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">2026E PER 229배·PBR 10.2배</span>
+        <span style="font-size:11px;color:var(--muted);">밸류에이션 부담 주의</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">미래에셋증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">105,000원</span>
+        <span style="font-size:11px;color:var(--muted);">슈퍼 사이클 도래 진단</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">메리츠·KB·iM 등</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">122,000~165,000원 범위</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      두산에너빌리티는 AI 데이터센터 전력 수요 폭증이라는 메가트렌드의 정점에 서 있는 기업이다. 국내 유일의 대형원전 주기기 제조사이자 국산 가스터빈 상업화에 성공한 에너지 설비 전문 기업으로, 미국·유럽·중동·동남아로 수주 지역을 동시 확대 중이다. 2026년 1분기에는 영업이익이 컨센서스를 18.5% 상회하는 어닝 서프라이즈를 기록하며 수익성 저점(2025년)을 공식 확인했고, 수주잔고는 전년 대비 46% 급증한 24.1조원까지 쌓였다.
+      <br><br>
+      핵심 모멘텀은 세 가지다: ① 미국 빅테크향 가스터빈 수주 본격화(2026년 말 납기), ② 체코·폴란드 등 유럽 원전 EPC 수주 가시화, ③ SMR 공장 증설(2028년) 완료 후 캐파 폭증. 회사는 2026~2030년 수주·매출·영업이익 각각 +16%·+13%·+20% 연평균 성장 목표를 공식 제시했으며, 중기 영업이익률 9%대 달성을 목표로 한다.
+      <br><br>
+      다만 2026E PER 229배라는 극도로 높은 밸류에이션, 수주→실적 전환의 시차 리스크, 두산밥캣·퓨얼셀 자회사 부담은 단기 주가 변동성을 키우는 요인이다. 현재 주가는 고점 대비 20% 조정된 상태로, <strong>원전·AI 전력 인프라 장기 성장을 믿는 투자자라면 분할 매수 관점에서 접근할 만하고, 단기 트레이더에게는 밸류에이션 부담이 여전히 높다</strong>는 점을 유의해야 한다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성된 정보 제공용 자료이며, 특정 종목의 매수·매도를 권유하는 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있으며, 주식 투자에는 원금 손실 위험이 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

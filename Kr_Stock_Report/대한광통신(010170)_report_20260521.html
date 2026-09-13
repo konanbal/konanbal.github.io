@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대한광통신(010170) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-warning { background: #fef3c7; color: #92400e; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .warning-banner { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 10px 14px; margin-bottom: 1rem; font-size: 13px; color: #92400e; font-weight: 500; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">010170 · KOSDAQ</div>
+      <div class="company-name">대한광통신</div>
+      <div class="company-desc">국내 유일 광섬유-광케이블 일관생산 체제 보유 | AI 데이터센터·BEAD 프로그램 핵심 수혜주</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 21일</div>
+      <div class="price-display">~25,000원</div>
+      <div class="price-change down">▼ 5월 고점 31,500원 대비 조정 중</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 3.9조원</span>
+    <span class="rating-pill">🏢 섹터: 광통신·통신장비</span>
+    <span class="rating-pill">⭐ 컨센서스: 매수(Buy)</span>
+    <span class="rating-pill">⚠️ 투자주의종목 지정 이력(5/8)</span>
+  </div>
+</div>
+<div class="container">
+
+  <!-- 투자주의 배너 -->
+  <div class="warning-banner">
+    ⚠️ <strong>투자주의종목 지정 이력</strong> — 2026년 5월 8일, 52주 초과 주가상승률 200% 이상으로 투자주의종목 지정. 투자경고종목으로 추가 지정될 가능성 존재. 단기 변동성에 각별한 주의 요망.
+  </div>
+
+  <!-- KPI 카드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025년 연간 매출 (연결)</div>
+      <div class="kpi-value">1,394억원</div>
+      <div class="kpi-sub">전년(1,527억원) 대비 -8.7%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025년 영업손실 (연결)</div>
+      <div class="kpi-value" style="color:var(--red)">-229억원</div>
+      <div class="kpi-sub">전년(-297억원) 대비 22.8% 축소</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 주가 범위</div>
+      <div class="kpi-value">592~31,500</div>
+      <div class="kpi-sub">1년 최대 약 53배 상승</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026년 매출 전망 (추정)</div>
+      <div class="kpi-value" style="color:var(--green)">~2,200억원</div>
+      <div class="kpi-sub">YoY +약 58% / 흑자 전환 기대</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (2025년 연간 / 2026년 1Q 예정)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">2025년 연간 매출 (연결)</div>
+        <div style="font-size:18px;font-weight:700;">1,394억원 <span style="font-size:12px;color:var(--red);">▼ YoY -8.7%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">별도기준 846억원</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">2025년 연간 당기순손실 (연결)</div>
+        <div style="font-size:18px;font-weight:700;">-245억원 <span style="font-size:12px;color:var(--green);">▲ YoY 56.2% 개선</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년 -560억원 대비 대폭 축소</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>2026년 1분기 실적 발표 예정일: 2026년 5월 18일</strong> — 최초 공식 흑자 전환 여부가 최대 관심사. 분기 매출 약 550억~600억원, 영업이익 흑자 전환 여부가 주가 향방의 분기점. 회사는 2025년 실적 변동 원인으로 광섬유 시장가격 변동과 유형자산 손상 미발생을 제시.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">사업보고서</span>
+        <span style="font-size:13px;font-weight:500;">2025년 사업연도 사업보고서 제출</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.19</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">유상증자</span>
+        <span style="font-size:13px;font-weight:500;">유상증자(주주배정) 증권 발행결과 공시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.19</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">유상증자 청약결과(주주배정) 공시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.06</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef3c7;color:#92400e;margin-right:8px;">손익변동</span>
+        <span style="font-size:13px;font-weight:500;">매출액 또는 손익구조 30% 이상 변동 공시 (정정)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.12</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">타법인투자</span>
+        <span style="font-size:13px;font-weight:500;">TFO Networks를 통한 인캡아메리카 지분 90% 최종 취득 완료</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05월</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--amber);background:#fffbf0;border-radius:6px;padding:8px 12px;border-left:3px solid var(--amber);">
+      📌 <strong>투자자 주목 공시</strong>: 유상증자로 재무 부담이 일부 해소되었으나, 발행 주식 수 증가로 주당 가치 희석 가능성 존재. 인캡아메리카 인수는 미국 현지 생산 거점 확보로 BEAD 보조금 수혜 요건(BABA 정책) 충족 핵심 요인.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.11</span>
+      </div>
+      <div class="news-title">AI 데이터센터 광섬유 수직계열화 부각 — 주가 24% 폭등, 상한가 근접</div>
+      <div class="news-summary">엔비디아 CEO 젠슨 황이 GTC 2026에서 광반도체(Optical Interconnect)를 AI 연산 인프라 핵심 기술로 지목. 구리선 대비 초저손실 특수광섬유 수요 폭증 기대감에 대한광통신이 직접 수혜주로 급부상. 국내 유일 VAD 공법 수직계열화가 핵심 경쟁력으로 재평가됨.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05월</span>
+      </div>
+      <div class="news-title">미국 인캡아메리카 지분 90% 최종 인수 완료 — 북미 현지 생산 거점 확보</div>
+      <div class="news-summary">티에프오네트웍스(TFO Networks)가 미국 텍사스주 그레이프바인 소재 광케이블 제조사 인캡아메리카 지분을 최종 90%로 확대. CFIUS(외국인투자심의위원회) 승인 획득. BEAD 프로그램의 BABA(Buy America) 요건을 충족하며 북미 공공 인프라 수주 자격 확보.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.04</span>
+      </div>
+      <div class="news-title">유진투자증권 "광섬유 가격 상승 HBM 사이클과 유사" — 통신 섹터 비중확대</div>
+      <div class="news-summary">유진투자증권 이찬영 연구원은 AI 데이터센터향 고부가 광섬유 수요 증가로 범용 공급까지 타이트해지는 구조를 과거 HBM이 메모리 시장에 미친 영향과 유사하다고 분석. 대한광통신을 수혜 종목으로 지목하며 통신업종 비중확대 의견 제시.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-warning">주의</span>
+        <span class="news-date">2026.05.08</span>
+      </div>
+      <div class="news-title">투자주의종목 지정 — 52주 초과 주가상승률 200% 이상</div>
+      <div class="news-summary">한국거래소 시장경보제도에 의거, 2026년 5월 8일 1일간 투자주의종목으로 지정. 지정 예고일로부터 10일 내 초장기상승 및 불건전요건 동시 충족 시 투자경고종목으로 추가 지정 가능. 단기 과열 우려에 따른 매물 출회 가능성.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.15</span>
+      </div>
+      <div class="news-title">주가 7.07% 급락 — 고점 31,500원 대비 25% 이상 하락</div>
+      <div class="news-summary">5월 12일 29,100원(4.11% 상승)에서 5월 15일 23,000원으로 급락. 단기 급등에 따른 차익실현 매물과 투자주의종목 지정 영향. 키움증권, 미래에셋증권 등이 매도 상위권 등록. 52주 최저가 592원 대비 누적 수익자의 대규모 차익 실현 압력 지속.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>수직계열화 원가경쟁력</strong> — 국내 유일 광섬유 모재(VAD공법)부터 완제품까지 일관생산. 글로벌 1위 코닝 대비 범용·OPGW 제품에서 원가 우위.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>미국 BEAD 프로그램 직접 수혜</strong> — 미국 정부 60조원 규모 광대역 인프라 보조금이 2026년 하반기 본격 집행 예정. 인캡아메리카 인수로 BABA 요건 충족, 수주 자격 확보.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>코닝의 OPGW 공급 공백 메우기</strong> — 코닝이 고마진 AI 데이터센터용 광섬유에 집중하며 전력망용 특수케이블(OPGW) 공급 공백 발생. 대한광통신이 핵심 대안 공급사로 부상.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>2026년 흑자 전환 기대</strong> — 컨센서스 기준 2026년 매출 약 2,200억원(YoY +58%), 영업이익 100억~200억원으로 고질적 적자 구조 탈출 전망.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>북미 수주 잔고 급증</strong> — 미국향 수주 잔고 전년 대비 110% 폭증 보도. 글로벌 하이퍼스케일러 및 통신사업자 대상 추가 수주 파이프라인 확보 중.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>여전히 적자 기업 — 흑자 전환 미확인</strong> — 2025년 연간 영업손실 -229억원. 5월 18일 1분기 실적에서 흑자 전환 실패 시 주가 급락 리스크 높음.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>단기 급등 밸류에이션 부담</strong> — 52주 최저가 592원 대비 현재가 25,000원대로 약 42배 상승. 실적 기대감이 과도하게 선반영된 구간으로 실망 매물 취약.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>투자경고·위험종목 지정 가능성</strong> — 투자주의종목 지정 이후 10일 내 추가 요건 충족 시 경고종목으로 격상, 거래 제한 및 매물 압력 증가.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>중국 광섬유 업체 증설 리스크</strong> — 중국 업체들의 광섬유 생산 능력 증설이 본격화될 경우 범용 광섬유 가격 하락 및 대한광통신의 가격 경쟁력 약화 가능.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>높은 부채비율</strong> — 2024년 부채비율 413%, 2025년 228%로 여전히 재무 부담 상존. 유상증자에 따른 주주 가치 희석 효과도 고려 필요.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">한국투자증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수 (Buy)</span>
+        <span class="target-price" style="color:var(--muted);font-size:12px;">목표가 미발표 (실적 개선 본격화 전망)</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유진투자증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">통신 비중확대</span>
+        <span class="target-price" style="color:var(--muted);font-size:12px;">광섬유 가격 상승 사이클 수혜</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">SK증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">커버리지 초기</span>
+        <span class="target-price" style="color:var(--red);font-size:12px;">목표가 2,150원 (구 목표 — 현 주가 대비 크게 낮음)</span>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);background:#f8f9fc;padding:8px;border-radius:6px;">
+      ※ 대부분의 증권사가 커버리지 초기 단계이며, 5월 18일 1분기 실적 발표 이후 목표주가 및 의견 대폭 상향 또는 하향 조정 가능성 있음.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      대한광통신은 국내 유일의 광섬유 모재부터 완제품까지 일관생산 체계를 갖춘 광통신 전문 기업으로, AI 데이터센터 확산과 미국 BEAD 프로그램(60조원 규모 광대역 인프라 보조금)이라는 두 가지 강력한 구조적 수요 확대 모멘텀에 직접 노출돼 있다. 글로벌 1위 코닝이 고부가 AI용 광섬유에 집중하며 발생한 OPGW(전력망용 특수케이블) 공급 공백을 메우는 핵심 대안 공급사로 부상하고 있으며, 미국 인캡아메리카 인수를 통해 BABA 정책 요건을 충족하는 현지 생산 거점을 확보했다는 점이 중장기 핵심 투자 포인트다.
+
+      다만 2025년까지 영업적자(-229억원)가 지속됐고, 52주 최저가 대비 약 42배라는 급격한 주가 상승으로 기대감이 상당 부분 선반영된 구간에 있다. 투자주의종목 지정, 높은 부채비율(228%), 유상증자 희석 효과 등 단기 변동성 요인도 상존한다. 2026년 5월 18일 1분기 실적 발표에서의 <strong>흑자 전환 여부 확인</strong>이 주가 방향성의 핵심 분기점이 될 것으로 판단된다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KODEX K방산TOP10 투자보고서</title>
+<style>
+  :root {
+    --primary: #0d1f0a;
+    --accent: #1a4d0e;
+    --accent2: #2d7a1e;
+    --accent3: #4caf50;
+    --bg: #f0f7ee;
+    --card: #ffffff;
+    --text: #0d1f0a;
+    --muted: #5a6b57;
+    --border: #d4e8d0;
+    --green: #1a7a0e;
+    --red: #c62828;
+    --amber: #c77800;
+    --gold: #f59e0b;
+    --steel: #546e7a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0d1f0a 0%, #1b3d10 50%, #2d6e1a 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '🛡️⚔️';
+    position: absolute;
+    right: 2rem;
+    bottom: 0.5rem;
+    font-size: 90px;
+    opacity: 0.07;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.15); color: #c8e6c9; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.25); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.75; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-sub { font-size: 13px; margin-top: 2px; color: #a5d6a7; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent3); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* BIG4 특별 카드 */
+  .big4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .big4-card { background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; text-align: center; }
+  .big4-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--primary); }
+  .big4-sub { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .big4-pct { font-size: 22px; font-weight: 800; color: var(--accent2); }
+  .big4-tag { font-size: 10px; background: #c8e6c9; color: #1b5e20; padding: 2px 6px; border-radius: 3px; margin-top: 4px; display: inline-block; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 600; }
+  .holding-sub { font-size: 11px; color: var(--muted); font-weight: 400; display: block; margin-top: 1px; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 800; color: var(--accent2); font-size: 15px; min-width: 52px; text-align: right; }
+  .holding-bar-wrap { width: 90px; height: 7px; background: var(--border); border-radius: 4px; }
+  .holding-bar { height: 7px; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 4px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f1f8e9; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+
+  .news-item { padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .index-feature { background: linear-gradient(135deg, #e8f5e9, #f9fbe7); border: 1px solid #c5e1a5; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .index-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .index-steps { display: flex; gap: 8px; flex-wrap: wrap; }
+  .index-step { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 12px; flex: 1; min-width: 140px; }
+  .step-num { font-size: 10px; font-weight: 700; color: var(--accent2); margin-bottom: 3px; }
+  .step-desc { color: var(--text); line-height: 1.4; }
+
+  .pipeline-box { background: linear-gradient(135deg, #fff8e1, #fffde7); border: 1px solid #ffe082; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .pipeline-title { font-size: 14px; font-weight: 700; color: #6d4c00; margin-bottom: 0.5rem; }
+
+  .competitor-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .competitor-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .competitor-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .competitor-table tr:nth-child(even) td { background: #f1f8e9; }
+  .competitor-table tr:last-child td { border-bottom: none; }
+  .highlight-row td { background: #dcedc8 !important; font-weight: 600; }
+
+  .summary-box { background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%); border: 1px solid #a5d6a7; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 600; }
+  .badge-green { background: #c8e6c9; color: #1b5e20; }
+  .badge-amber { background: #fff9c4; color: #6d4c00; }
+  .badge-red { background: #ffcdd2; color: #b71c1c; }
+  .badge-blue { background: #e3f2fd; color: #0d47a1; }
+
+  .alert-box { background: linear-gradient(135deg, #fffde7, #fff8e1); border: 1px solid #ffe082; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 13px; line-height: 1.7; }
+  .alert-title { font-weight: 700; color: #6d4c00; margin-bottom: 0.5rem; font-size: 14px; }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .big4-grid { grid-template-columns: 1fr 1fr; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 0080G0 · KRX · 방산 테마형 · NLP 선정</div>
+      <div class="etf-name">KODEX K방산TOP10</div>
+      <div class="etf-index">추종 지수: iSelect K방산TOP10 지수 (NH투자증권 산출) | 운용사: 삼성자산운용(KODEX)</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 10일</div>
+      <div class="nav-display">약 12,500~13,500원 추정</div>
+      <div class="nav-sub">2026 YTD +27.72% 반영 추정치 (정확가는 삼성 Kodex 확인)</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 AUM: ~2,000억원+ (성장 중)</span>
+    <span class="pill">📋 총보수: 0.47%/년</span>
+    <span class="pill">📅 상장일: 2025.07.15 (상장 10개월)</span>
+    <span class="pill">💵 배당: 소액 (성장형)</span>
+    <span class="pill">🤖 AI방산·수출비중 가중치 부여</span>
+    <span class="pill">🎯 방산 매출 비중 高 기업만 선별</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== 주목 알림 ===== -->
+  <div class="alert-box">
+    <div class="alert-title">🆕 신규 상장 10개월 차 ETF — 2026년 K방산 랠리 직접 수혜</div>
+    2025년 7월 15일 삼성자산운용이 출시한 방산 테마 ETF. 상장 첫날 개인 순매수 101억원 기록. "진짜 방산"만 선별하는 NLP 기반 iSelect K방산TOP10 지수를 추종하며, AI방산·고마진 수출주에 가중치를 두어 경쟁 방산 ETF와 차별화. 2026 YTD +27.72%를 기록하며 방산 ETF 중 수익률 6~9위권에 위치. 국내 최대 ETF 운용사 삼성자산운용(KODEX)의 브랜드 신뢰도와 유동성이 강점.
+  </div>
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">현재가 추정 (2026.05)</div>
+      <div class="kpi-value" style="color:var(--accent2);">~13,000원</div>
+      <div class="kpi-sub">2026 YTD +27.72% 반영 추정</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순자산총액 (AUM)</div>
+      <div class="kpi-value">~2,000억원+</div>
+      <div class="kpi-sub">상장 첫날 1,665억 → 성장 중</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수 (연)</div>
+      <div class="kpi-value">0.47%</div>
+      <div class="kpi-sub">K방산 ETF 평균 수준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026 YTD 수익률</div>
+      <div class="kpi-value" style="color:var(--green);">+27.72%</div>
+      <div class="kpi-sub">방산 ETF 상위권 유지</div>
+    </div>
+  </div>
+
+  <!-- ===== 지수 선정 방법론 ===== -->
+  <div class="index-feature">
+    <div class="index-title">🤖 iSelect K방산TOP10 지수 — NLP·AI 방산 선별 방법론</div>
+    <div class="index-steps">
+      <div class="index-step">
+        <div class="step-num">STEP 1</div>
+        <div class="step-desc">시총 1,000억↑ + 거래대금 10억↑ 국내 상장 주식 유니버스 구성</div>
+      </div>
+      <div class="index-step">
+        <div class="step-num">STEP 2</div>
+        <div class="step-desc">방위산업 관련 <strong>NLP 키워드 스코어링</strong> — 6개 분류 (지상/해상/항공/통신/우주/방산대표)</div>
+      </div>
+      <div class="index-step">
+        <div class="step-num">STEP 3</div>
+        <div class="step-desc">방산 유니버스 상위 80개 종목 선정 후 키워드 점수 TOP10 최종 편입</div>
+      </div>
+      <div class="index-step">
+        <div class="step-num">STEP 4</div>
+        <div class="step-desc">수출 비중↑ + <strong>AI방산 기술 보유 기업</strong>에 추가 가중치 부여</div>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      ⭐ 핵심 차별점: 단순 방산 관련주가 아닌 <strong>방산 매출 비중이 실질적으로 높고 AI·수출 역량을 갖춘 "순도 높은 방산기업"만 선별</strong>. 정기변경은 연 2회.
+    </div>
+  </div>
+
+  <!-- ===== 방산 BIG4 핵심 구성 ===== -->
+  <div class="card">
+    <div class="card-title">방산 BIG4 — 포트폴리오 약 78% 집중</div>
+    <div class="big4-grid">
+      <div class="big4-card">
+        <div class="big4-name">현대로템</div>
+        <div class="big4-sub">K2 전차 · 폴란드 수출</div>
+        <div class="big4-pct">20.78%</div>
+        <div class="big4-tag">1위</div>
+      </div>
+      <div class="big4-card">
+        <div class="big4-name">한국항공우주(KAI)</div>
+        <div class="big4-sub">KF-21 · T-50 · 헬기</div>
+        <div class="big4-pct">19.69%</div>
+        <div class="big4-tag">2위</div>
+      </div>
+      <div class="big4-card">
+        <div class="big4-name">한화에어로스페이스</div>
+        <div class="big4-sub">K9 자주포 · 천무 수출</div>
+        <div class="big4-pct">18.92%</div>
+        <div class="big4-tag">3위</div>
+      </div>
+      <div class="big4-card">
+        <div class="big4-name">LIG넥스원</div>
+        <div class="big4-sub">천궁·비궁 미사일 체계</div>
+        <div class="big4-pct">18.82%</div>
+        <div class="big4-tag">4위</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 전체 구성 종목 ===== -->
+  <div class="card">
+    <div class="card-title">전체 구성 종목 TOP 10 (Investing.com 기준)</div>
+    <div class="badge-row">
+      <span class="badge badge-green">총 10~12개 종목</span>
+      <span class="badge badge-red">상위 4종목 78.21% 집중</span>
+      <span class="badge badge-amber">방산 매출 비중 高 기업만 선별</span>
+      <span class="badge badge-blue">AI방산 가중치 적용</span>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">현대로템
+        <span class="holding-sub">K2 흑표 전차 · 폴란드 1,000대 계약 · 장갑차 수출</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">20.78%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">한국항공우주 (KAI)
+        <span class="holding-sub">KF-21 보라매 주관 · T-50 고등훈련기 · KUH 수리온</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">19.69%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:95%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">한화에어로스페이스
+        <span class="holding-sub">K9 자주포·천무 MLRS · 2022년 이후 수주잔고 급증</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">18.92%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:91%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">LIG넥스원
+        <span class="holding-sub">천궁 지대공미사일 · 비궁 로켓 · 유도무기 전문기업</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">18.82%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:91%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">한화시스템
+        <span class="holding-sub">방산전자·레이더 · AI무인체계 · 위성통신(SAT) 사업</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">10.24%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:49%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">풍산
+        <span class="holding-sub">방산 탄약·동 소재 · 수출 탄약 수요 급증 수혜</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">6.48%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:31%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank" style="background:linear-gradient(135deg,#388e3c,#66bb6a);">7+</div>
+      <div class="holding-name">기타 방산 중소형주 (분산)
+        <span class="holding-sub">SNT다이내믹스, STX엔진, 한화, 한화오션 등 NLP 점수 기반 선별</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">~5.1%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:25%"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      ※ 비중은 Investing.com 기준 (2025.11~2026 초 데이터). 지수 정기변경(연 2회) 시 구성 변동. 한화오션은 초기 구성에서 상당 비중이었으나 시기별 NLP 점수 재산정으로 변동 가능.
+    </div>
+  </div>
+
+  <!-- ===== 수익률 + 경쟁 비교 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">수익률 및 시장 성과</div>
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>기간</th>
+            <th>KODEX K방산TOP10</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>2026 YTD</td><td class="positive">+27.72%</td><td>방산 ETF 상위권</td></tr>
+          <tr><td>상장 이후(~10개월)</td><td class="positive">고수익</td><td>코스피200 대비 압도적</td></tr>
+          <tr><td>상장 첫날</td><td class="positive">+개인 101억 순매수</td><td>시장 관심 집중</td></tr>
+          <tr><td>PER (현재)</td><td>약 30배</td><td>성장형 밸류에이션</td></tr>
+          <tr><td>총보수</td><td>0.47%/년</td><td>K방산 ETF 평균</td></tr>
+          <tr><td>배당수익률</td><td>~0.1%</td><td>성장형 (배당 미강조)</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+        ※ 상장 10개월(2025.07~2026.05) 기간이 K방산 최대 호황기와 겹쳐 탁월한 실적 기록.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">방산 ETF 경쟁 구도 비교</div>
+      <table class="competitor-table">
+        <thead>
+          <tr><th>ETF</th><th>운용사</th><th>특징</th><th>YTD '26</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>TIGER K방산&amp;우주</td><td>미래에셋</td>
+            <td>위성·우주 비중 ↑</td>
+            <td class="positive">+30.49%</td>
+          </tr>
+          <tr>
+            <td>SOL K방산</td><td>신한</td>
+            <td>해양방산 포함</td>
+            <td class="positive">+30.43%</td>
+          </tr>
+          <tr class="highlight-row">
+            <td><strong>KODEX K방산TOP10</strong></td><td>삼성</td>
+            <td>NLP 순도·AI방산</td>
+            <td class="positive">+27.72%</td>
+          </tr>
+          <tr>
+            <td>PLUS K방산</td><td>한화</td>
+            <td>조선 방산 포함</td>
+            <td class="positive">+27.79%</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+        ※ K방산 ETF 간 수익률 차이는 주로 포트폴리오 내 한화오션·현대로템·KAI 비중 차이에서 발생.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 수주 파이프라인 ===== -->
+  <div class="pipeline-box">
+    <div class="pipeline-title">💰 K방산 수주 파이프라인 — 약 200조원 (2026년 기준)</div>
+    <div style="font-size:13px; line-height:1.8;">
+      <strong>지상 방산</strong>: 폴란드(K2 전차 1,000대·K9 자주포·천무 MLRS 대규모 계약), 루마니아·체코·노르웨이 진행 중 | 
+      <strong>유도무기</strong>: 중동(UAE·사우디) 천궁 지대공 미사일 체계 수출 | 
+      <strong>항공</strong>: KF-21 보라매 수출 협상(인도·말레이시아·UAE), T-50 추가 수출 | 
+      <strong>탄약</strong>: 우크라이나 전쟁 이후 포탄 수요 급증 → 풍산 탄약 수출 급성장 | 
+      <strong>해양</strong>: HD현대重·한화오션 잠수함·구축함 수주 (편입 시기별 변동)
+    </div>
+  </div>
+
+  <!-- ===== 최근 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈 (2025~2026)</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2025.07.15</span>
+      </div>
+      <div class="news-title">상장 첫날 개인 순매수 101억원 — K방산 최적기에 데뷔</div>
+      <div class="news-summary">삼성자산운용이 '진짜 방산'을 슬로건으로 KODEX K방산TOP10을 상장. NLP 기반 방산 순도 선별과 AI방산 가중치라는 차별화 포인트로 출시 즉시 시장 주목. 방산 섹터 상승 최대 수혜 구간과 상장 시점이 정확히 겹침.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.02</span>
+      </div>
+      <div class="news-title">2026 필수 보유 ETF 18선 선정 — 다올투자증권 커버리지</div>
+      <div class="news-summary">국내 방산 BIG4(KAI·한화에어로·현대로템·한화오션)에 약 76% 집중하며, AI·무인 방산 기술 보유 기업 가중치로 미래 지향적 투자 기회를 제공한다는 평가. 약 200조원 파이프라인 기반 중장기 성장 전망 제시.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2025.09.16</span>
+      </div>
+      <div class="news-title">KODEX K방산TOP10 레버리지 ETF 상장 — 라인업 확장</div>
+      <div class="news-summary">기초 ETF 성공에 힘입어 레버리지 버전(2배) 추가 출시. 삼성자산운용 레버리지 ETF 명가 브랜드와 결합. 방산 테마에 공격적으로 투자하려는 투자자에게 선택지 제공.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.01~05</span>
+      </div>
+      <div class="news-title">K방산 2026 YTD +27.72% — 방산 ETF 전체 상위 수익률</div>
+      <div class="news-summary">트럼프 군비 증강·유럽 재무장 정책, 베네수엘라 지정학 사태, KF-21 수출 모멘텀이 복합 작용하며 K방산 ETF 전반이 2026 YTD 25~30%+ 상승. KODEX K방산TOP10도 수익률 상위권 유지.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04~05</span>
+      </div>
+      <div class="news-title">고점 대비 조정 — 지수 재조정·구성 종목 변동 리스크</div>
+      <div class="news-summary">NLP 기반 정기변경(연 2회)으로 편입 종목이 일부 교체될 수 있어 구성 변동성 존재. 또한 상장 10개월이라는 짧은 역사로 인해 장기 트랙레코드가 없다는 점도 고려 요소.</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">🎯</span>
+          <span><strong>"순도 높은 방산" 선별 원칙</strong> — 방산 매출 비중이 실질적으로 높은 기업만 편입. 방산과 무관한 사업비중이 큰 복합기업을 걸러내, 방산 섹터 상승을 순수하게 포착.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🤖</span>
+          <span><strong>AI방산 가중치 — 미래 전쟁 패러다임 반영</strong> — 무인체계·AI 전술, AI 감시정찰에 강한 기업에 추가 가중. AI 방산 시장은 2034년까지 CAGR 12.9% 성장 전망. 한화시스템 무인수상정, 무인차량 등 편입.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🏢</span>
+          <span><strong>삼성자산운용(KODEX) 브랜드 + 유동성</strong> — 국내 최대 ETF 운용사, 순자산 81조 운용 역량. 거래량·호가 안정성 업계 최상위. 기관 투자자들의 접근성이 높아 자금 유입 여력 풍부.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">💰</span>
+          <span><strong>200조원 수주잔고 → 실적 성장 가시성</strong> — BIG4(KAI·한화에어로·현대로템·LIG넥스원)의 수주잔고가 2~3년 실적을 담보. 수출 매출은 내수 대비 고마진 구조. 2022~2024 영업이익 연평균 44.7% 성장 트랙레코드.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">📈</span>
+          <span><strong>풍산 편입 — 탄약 수요 급증의 숨은 수혜주</strong> — 우크라이나 전쟁 이후 전 세계 탄약 재고 비상. 풍산(동 소재·방산 탄약)은 조용히 급성장 중인 탄약 수출의 직접 수혜자. 타 방산 ETF에는 없는 차별 구성.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">🆕</span>
+          <span><strong>상장 10개월 — 트랙레코드 부재</strong> — 2025년 7월 출시로 아직 1년이 안 된 신규 ETF. 약세장·방산 하락 구간에서의 ETF 성과, 추적오차, 유동성 등 검증된 데이터 미흡.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">🔄</span>
+          <span><strong>NLP 기반 정기변경 — 예측 불가 구성 변동</strong> — 키워드 점수 기반으로 편입 종목이 연 2회 교체됨. 장기 보유 시 보유 종목 구성이 언제든 바뀔 수 있어, 특정 종목에 대한 기대로 투자하는 경우 리스크.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">⚠️</span>
+          <span><strong>상위 4종목 78% 집중 — 고집중 구조</strong> — 현대로템·KAI·한화에어로·LIG넥스원 4개 종목이 포트폴리오의 78% 이상. 이 중 하나라도 수출 계약 차질, 실적 쇼크 시 ETF 전체에 강한 충격.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">📉</span>
+          <span><strong>지정학 완화 리스크</strong> — 러-우 휴전, 중동 정전 등 지정학 리스크 완화 시 방산주 일제 급락 패턴. 상장 이후 경험한 방산 호황이 구조적이 아닌 사이클적일 경우 조정 폭 클 수 있음.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">💸</span>
+          <span><strong>총보수 0.47% + 배당 미흡</strong> — 배당형 ETF와 달리 보유 기간 소득 없음. 총보수가 0.47%로 PLUS 고배당주(0.23%) 대비 2배 수준. 방산 상승이 정체 구간 진입 시 보유 비용 상대적으로 부담.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      KODEX K방산TOP10(0080G0)은 삼성자산운용이 2025년 7월 15일 출시한 국내 방산 테마 ETF다. NH투자증권이 산출하는 iSelect K방산TOP10 지수를 추종하며, NLP(자연어처리) 키워드 스코어링으로 방산 관련도가 높은 상위 10종목을 선별한다. 타 K방산 ETF와 달리 <strong>방산 매출 비중이 실질적으로 높은 기업만 선별하는 "순도 높은 방산" 원칙</strong>을 내세우며, AI방산·수출 비중이 높은 기업에 추가 가중치를 부여하는 것이 핵심 차별점이다.<br><br>
+      현재 포트폴리오는 현대로템(21%), 한국항공우주(20%), 한화에어로스페이스(19%), LIG넥스원(19%), 한화시스템(10%), 풍산(6%) 등 6개 주요 방산주가 95% 이상을 차지한다. 특히 탄약·동 소재 전문기업 풍산의 편입은 우크라이나 전쟁 이후 탄약 수요 급증 수혜를 포착하는 차별화 요소다. BIG4 4개사가 포트폴리오의 78%를 차지하는 고집중 구조는 방산 상승기에 강점이지만, 개별 종목 리스크가 ETF 전체에 직결된다는 점은 유의해야 한다.<br><br>
+      2026년 YTD 기준 +27.72%를 기록하며 K방산 ETF 중 TIGER K방산&우주(+30.5%)·SOL K방산(+30.4%)에 이어 3~4위권 성과를 유지 중이다. 수익률 소폭 열위는 KAI 비중과 우주·위성 노출의 차이에서 비롯된다. 상장 10개월이라는 짧은 역사가 단점이지만, 국내 최대 ETF 운용사 삼성자산운용의 브랜드와 유동성은 강력한 보완 요소다. 약 200조원의 K방산 수주잔고를 기반으로 한 중장기 실적 성장 가시성은 여전히 유효하며, 방산 슈퍼사이클을 신뢰하는 투자자에게 TIGER K방산&우주의 대안 또는 보완 포지션으로 적합하다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 현재가·AUM은 추정치이며, 최신 데이터는 삼성자산운용 공식 홈페이지(samsungfund.com/etf)에서 반드시 확인하시기 바랍니다. ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SK오션플랜트(100090) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0d2b45;
+    --accent: #0ea5e9;
+    --accent2: #0369a1;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f8ff 0%, #e8f4fd 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .three-events { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+  .event-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+  .event-icon { font-size: 22px; margin-bottom: 6px; }
+  .event-label { font-size: 11px; color: var(--muted); font-weight: 600; }
+  .event-value { font-size: 13px; font-weight: 700; color: var(--text); margin-top: 4px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .three-events { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">100090 · KOSPI</div>
+      <div class="company-name">SK오션플랜트</div>
+      <div class="company-desc">해상풍력 하부구조물 아시아 1위 · 특수선 건조 · SK에코플랜트 자회사 (매각 협상 진행 중)</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 6월 10일</div>
+      <div class="price-display">~20,000원대</div>
+      <div class="price-change down">※ 4월 14일 기준 23,050원 / 52주 최저 13,560원</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 1.3조원 (2월 기준 1.17조원)</span>
+    <span class="rating-pill">🏭 섹터: 해상풍력·특수선 (KOSPI)</span>
+    <span class="rating-pill">⭐ 컨센서스: BUY 전원 (4명)</span>
+    <span class="rating-pill">🎯 컨센서스 TP: 25,250원</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 6월 3대 분기점 -->
+  <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;">
+    <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:0.75rem;">⚡ 6월, 3가지 분기점 이벤트 (미래에셋증권 지목)</div>
+    <div class="three-events">
+      <div class="event-card">
+        <div class="event-icon">⚓</div>
+        <div class="event-label">① 안마도 해상풍력 재개</div>
+        <div class="event-value">6월 강재절단 착수 여부</div>
+      </div>
+      <div class="event-card">
+        <div class="event-icon">🏆</div>
+        <div class="event-label">② 고정가격입찰 결과</div>
+        <div class="event-value">해상풍력 경매 선정 발표</div>
+      </div>
+      <div class="event-card">
+        <div class="event-icon">🤝</div>
+        <div class="event-label">③ 매각 협상 마감</div>
+        <div class="event-value">6월 30일 우협 기간 종료</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025년 매출 (연결)</div>
+      <div class="kpi-value">9,654억원</div>
+      <div class="kpi-sub">YoY +45.7% (가이던스 -9.5% 하회)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025년 영업이익</div>
+      <div class="kpi-value">595억원</div>
+      <div class="kpi-sub">YoY +42.4% / OPM 6.2%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026F 영업이익 (컨센)</div>
+      <div class="kpi-value">681~850억원</div>
+      <div class="kpi-sub">YoY +14~43% / 증권사별 상이</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">13,560~31,600원</div>
+      <div class="kpi-sub">1Q26 수주잔고 1조 2,224억원</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (1Q26 잠정 — 어닝 서프라이즈)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출액</div>
+        <div style="font-size:17px;font-weight:700;">1,746억원 <span style="font-size:11px;color:var(--red);">▼ YoY -32.1%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">특수선 매출 -78.1% YoY (진수 완료)</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 컨센)</div>
+        <div style="font-size:17px;font-weight:700;">168억원 <span style="font-size:11px;color:var(--green);">▲ +10.9% 상회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 152억원 / YoY +52.7%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">당기순이익</div>
+        <div style="font-size:17px;font-weight:700;">98억원 <span style="font-size:11px;color:var(--green);">▲ YoY +129.9%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">지배주주 순이익 YoY +123.1%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>핵심 코멘트 (KB증권 2026.05.13):</strong> 매출은 특수선 진수 완료로 YoY 감소했으나, 해상풍력 매출 비중 확대(1Q26 해상풍력 389억원 특수선 대비 급증)에 따른 마진 믹스 개선이 영업이익 컨센서스 상회를 이끌었다. 1Q 신규 수주는 해상풍력 1,062억원 + MRO 84억원 = 총 1,146억원. 수주잔고 1조 2,224억원 유지.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">1Q26 연결 기준 잠정 실적 공시 — 영업이익 168억원(+52.7% YoY)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.12</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">최대주주 지분 매각 우선협상대상자(디오션) 기간 3차 연장 — 협의 기간 +3개월</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.01.30</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">안마해상풍력 하부구조물 공급계약 증액 — 3,834억 → 4,168억원(+334억), 계약 연장</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.01.07</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">임원/지배구조</span>
+        <span style="font-size:13px;font-weight:500;">정기주주총회 — 사내이사 강영규 선임 가결 등 5개 안건 통과</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.31</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 10px;background:#f9fafb;border-radius:6px;">
+      📌 <strong>투자자 주목 공시:</strong> 매각 우선협상대상 기간이 세 차례 연장(10월→11월→1월→4월)되며 누적 6개월 이상 지연. SK에코플랜트는 2027년 3월 31일까지 제3자 매각을 제한하는 조항을 추가해 최소한의 협상 안전장치 마련. 6월 30일 협상 마감 여부가 가장 큰 주가 변수.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.13</span>
+      </div>
+      <div class="news-title">1Q26 영업이익 컨센서스 10.9% 상회 — 해상풍력 마진 호조</div>
+      <div class="news-summary">해상풍력 매출 비중 확대로 1Q26 영업이익 168억원(YoY +52.7%)이 시장 기대치 152억원을 상회. 메리츠증권 BUY·TP 30,000원, KB증권 BUY·TP 25,000원으로 리포트 발간. 매출은 특수선 진수 완료에 따른 구조적 감소였음을 시장이 인지.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.09</span>
+      </div>
+      <div class="news-title">태국 왕립해군 호위함 입찰 제안서 요청 — 8,000억원 규모</div>
+      <div class="news-summary">태국 왕립해군이 약 8,000억원 규모 호위함 1척 도입 사업을 추진 중. HD현대중공업·한화오션과 함께 SK오션플랜트도 제안서 요청을 받음. MSRA 자격 취득에 기반한 글로벌 조선·군함 수주 다각화 전략의 가시화.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.30</span>
+      </div>
+      <div class="news-title">부산 해양경찰 3001함 인도 — 특수선 완공 실적</div>
+      <div class="news-summary">길이 122.3m, 최대속력 24노트급 해양경찰함 3001함 인도식 개최. 특수선 매출 감소는 기건조 함정 인도 완료에 따른 것으로, 향후 태국 등 해외 군함 수주 통해 조선 부문 재성장 기대.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05 ongoing</span>
+      </div>
+      <div class="news-title">안마도 해상풍력 — 최대주주 변경 지연으로 기자재 계약 해지 움직임</div>
+      <div class="news-summary">안마도 해상풍력 프로젝트의 최대주주 변경 작업이 예상보다 지연되면서 일부 기자재 공급업체들이 계약 중단·해지에 나서는 움직임 발생. 당초 6월 예정이었던 강재절단 일정이 다소 늦춰질 가능성 제기. 미래에셋증권은 이를 반영해 2026년 전망치를 하향 조정.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.01.30</span>
+      </div>
+      <div class="news-title">SK에코플랜트 매각 협상 3차 연장 — 지방선거 민심 리스크</div>
+      <div class="news-summary">우선협상대상자 기간이 세 번째로 연장(+3개월)됐다. 지역 사회와 지자체의 거센 반발이 지속되며 매각이 지지부진. SK에코플랜트는 2027년 3월 31일까지 제3자 매각을 금지하는 조항을 추가해 디오션 컨소시엄과의 협상 지속 의지를 표명. 매각 불확실성이 해소되기 전까지 주가 상단을 억누르는 요인으로 작용 중.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026년 수주 파이프라인</span>
+      </div>
+      <div class="news-title">2026년 수주 파이프라인 2조원 이상 — 한국·대만·유럽으로 확장</div>
+      <div class="news-summary">2026년 기대 해상풍력 수주 파이프라인은 한국·대만·유럽 합산 9,500억원 규모. 조선 부문(컨테이너·탱크·FPSO·군함) 포함 시 연간 2조원 이상 수주 목표. 특히 북해 HVDC 해상 변전소(OSS) 수주 가능성이 높은 상태로, 성사 시 유럽 첫 수주로 밸류에이션 리레이팅 기대.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>해상풍력 아시아 1위, 구조적 성장 수혜</strong> — 국내 해상풍력 누적 설치량 2025년 0.4GW→2030년 3GW→2035년 25GW 계획. 자켓 1GW당 8,000억원 시장에서 최대 수주자 지위 확보.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>1Q26 어닝 서프라이즈 — 해상풍력 믹스 개선 확인</strong> — 매출 감소에도 영업이익 컨센서스 10.9% 상회. OPM이 특수선보다 월등히 높은 해상풍력 비중 확대로 수익성 구조 개선 진행 중.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>유럽 HVDC 해상 변전소 수주 임박</strong> — 북해 GW급 OSS 수주 유력. 성사 시 한국·대만을 넘어 유럽 시장으로의 첫 진출로 장기 성장 궤도 확인.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>미국 시장 진입 — MSRA 자격 + 관세 협상 연계</strong> — MSRA 자격 취득으로 미 해군 MRO 사업 가능. 미국-한국 관세협상 과정에서 국내 조선사의 미국 시장 진입 현실화 기대.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>매각 불확실성 해소 시 강력한 주가 촉매</strong> — 매각 노이즈가 현재 주가 디스카운트의 핵심 요인. 6월 협상 결론 시 디스카운트 해소로 본업 밸류에이션 정상화 기대.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>안마도 해상풍력 추가 지연 가능성</strong> — 최대주주 변경 지연으로 기자재 공급 계약 해지 움직임 발생. 6월 강재절단 일정 연기 시 하반기 매출 인식 차질 및 연간 실적 하향 조정 불가피.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>매각 장기화 — 주가 디스카운트 지속</strong> — 3차 연장까지 이어진 매각 협상. 지자체 반발과 지방선거 민심 리스크가 4개월여 앞. 협상이 결렬되거나 추가 지연될 경우 불확실성이 주가 상단을 제한.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>2026년 매출 역성장 (-17% YoY)</strong> — 특수선 매출 급감 + 안마도 지연으로 2026년 매출이 전년 대비 17% 감소 예상. 가이던스 하회 시 주가 부담 가능성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>대만 포모사 4, 웨이란하이 매출 인식 지연 리스크</strong> — 해외 프로젝트의 시운전·공정 일정 변동 시 매출 인식 시점 이연. 상저하고 구조의 특성상 연초 실적 부진이 반복될 수 있음.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>국내 해상풍력 정책 불확실성</strong> — 정치적 환경 변화에 따른 해상풍력 특별법 및 경매 제도 변동 위험. 차기 정부 에너지 정책 방향에 따라 국내 발주 타이밍이 달라질 수 있음.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 최신)</div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">메리츠증권</span> <span style="font-size:11px;color:var(--muted);">1Q26 Review: 해상풍력 마진 호조 (2026.05.13)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 30,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">KB증권</span> <span style="font-size:11px;color:var(--muted);">프로젝트 지연 일시적, 수주 파이프라인 건재 (2026.05.13)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 25,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">미래에셋증권</span> <span style="font-size:11px;color:var(--muted);">6월 3개의 분기점 — 안마도·경매·매각 (2026.05~)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 25,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">유진투자증권</span> <span style="font-size:11px;color:var(--muted);">조선 부문 수주 본격 확대 예상 (2026.02.24)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 27,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">삼성증권</span> <span style="font-size:11px;color:var(--muted);">매각 노이즈 해소 이후 빛날 본업 (2026.03.19)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 24,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">메리츠증권</span> <span style="font-size:11px;color:var(--muted);">노이즈 없는 재생에너지 주식 (2026.05.31)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 22,000원</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 10px;background:#f9fafb;border-radius:6px;">
+      컨센서스 평균 목표주가 약 25,250원 (4~6명 애널리스트 전원 BUY). 최고 TP 30,000원(메리츠), 최저 22,000원(메리츠 하향 후). 현재 주가 대비 상승여력 +9~46%.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      SK오션플랜트는 <strong>해상풍력 하부구조물 아시아 1위</strong>라는 독점적 지위와 특수선(군함·MRO) 역량을 겸비한 복합 성장 기업이다. 1Q26에서 매출이 구조적으로 감소(특수선 진수 완료)했음에도 영업이익이 컨센서스를 상회한 것은 <strong>해상풍력 믹스 개선</strong>이라는 사업 전환이 실제로 이익률에 반영되고 있음을 증명한다. 2026년은 안마도 해상풍력 착공, 대만 포모사·웨이란하이 매출 인식, 유럽 OSS 수주 가능성이라는 3개 성장 축이 열려 있으나, <strong>SK에코플랜트의 매각 협상 장기화</strong>가 주가 디스카운트를 유발하고 있다. 6월 30일은 세 가지 이벤트(안마도 착공 여부, 해상풍력 경매 결과, 매각 협상 마감)가 동시에 도래하는 분기점으로, 매각 노이즈 해소 여부가 주가 방향을 결정할 가능성이 높다. 전원 BUY인 애널리스트 컨센서스와 저평가된 PBR(비교업체 대비 1/3~1/4 수준)을 감안하면 중장기 관점의 매력은 유효하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

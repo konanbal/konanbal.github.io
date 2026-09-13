@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>성호전자(043260) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">043260 · KOSDAQ</div>
+      <div class="company-name">성호전자</div>
+      <div class="company-desc">필름 커패시터·전원공급장치 제조 → AI 데이터센터 광통신(CPO) 장비 사업 전환 중</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 06월 02일</div>
+      <div class="price-display">33,400원</div>
+      <div class="price-change down">▼ -8.62% (2026.06.01 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 2조 3,688억원</span>
+    <span class="rating-pill">🏢 섹터: 전기·전자 (코스닥)</span>
+    <span class="rating-pill">⭐ 애널리스트: Buy (메리츠, 미래에셋)</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025년 연결 매출</div>
+      <div class="kpi-value">2,350억원</div>
+      <div class="kpi-sub">YoY +13.3%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025년 연결 영업이익</div>
+      <div class="kpi-value">84억원</div>
+      <div class="kpi-sub">YoY +33.6%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026E 에이디에스테크 매출</div>
+      <div class="kpi-value">865~903억원</div>
+      <div class="kpi-sub">+51~64% YoY (자회사 단독)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">1,021~59,600</div>
+      <div class="kpi-sub">현재 고점 대비 -43.96%</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (2025년 연간 / 에이디에스테크 반영 전)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">2025 연결 매출</div>
+        <div style="font-size:18px;font-weight:700;">2,350억원 <span style="font-size:12px;color:var(--green);">▲ YoY +13.3%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">필름콘덴서 가동률 78.9% · 현금흐름 양호</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">2025 연결 당기순이익</div>
+        <div style="font-size:18px;font-weight:700;">948억원 <span style="font-size:12px;color:var(--amber);">⚠️ 일회성 포함</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년 대비 +1,074% — 파생상품평가이익 등 일회성 반영</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      ⚠️ 2025년 연결 순이익 948억원은 파생상품평가이익 등 영업외 일회성 수익이 반영된 수치. 2026년부터 에이디에스테크 연결 편입으로 실적 구조 전환. 에이디에스테크 1Q25 기준 매출 635억원·영업이익 255억원(2024년 기준).
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">어매이징홀딩스 흡수합병 결정 (소규모 무증자 합병)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.29</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">핑거 타법인 주식 취득 결정 — 문페이·판토스홀딩스와 1,100억원 투자 계약</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.22</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">어매이징홀딩스 대여금 1,548억원 — 인수금융 상환 목적 (이율 4.6%, 2년)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.14</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">단기차입금 300억원 증가 결정 (타법인 주식 취득 및 운영자금)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.27</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">사업보고서</span>
+        <span style="font-size:13px;font-weight:500;">2025년 사업보고서 (총자산 5,906억원, 자본 2,577억원)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.20</span>
+    </div>
+    <div style="margin-top:0.75rem;font-size:12px;background:#fff7ed;border-left:3px solid var(--amber);padding:8px 12px;border-radius:0 6px 6px 0;color:var(--text);">
+      📌 <strong>투자자 주목 공시</strong>: 어매이징홀딩스 합병기일 2026년 7월 3일 예정. 합병 완료 시 에이디에스테크를 직접 연결 편입하는 구조 완성. 단, 단기차입금·대여금 급증으로 재무 레버리지 확대 주의.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.29</span>
+      </div>
+      <div class="news-title">어매이징홀딩스 흡수합병 결정 — 에이디에스테크 직접 편입 구조 완성</div>
+      <div class="news-summary">100% 자회사 어매이징홀딩스를 소규모 무증자 합병으로 흡수. 신주 미발행으로 기존 주주 지분 희석 없음. 합병 완료 시 에이디에스테크가 직접 자회사로 편입돼 지배구조 단순화.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.22</span>
+      </div>
+      <div class="news-title">핑거 인수 — 문페이·판토스홀딩스와 1,100억원 투자 계약 체결</div>
+      <div class="news-summary">글로벌 가상자산 결제 기업 문페이, LG家 3세 구본호 대표의 판토스홀딩스와 컨소시엄 구성. 핑거의 금융 플랫폼(풀뱅킹·ERP '파로스')에 스테이블코인 결제 인프라를 접목해 B2B 무역결제 상용화 목표.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.02.20</span>
+      </div>
+      <div class="news-title">메리츠증권 "CPO 시대의 주인공" — 에이디에스테크 2026년 영업이익 +78% 전망</div>
+      <div class="news-summary">메리츠증권 양승수 연구원은 에이디에스테크의 2026년 예상 매출 865억원(+51%), 영업이익 428억원(+78%)을 제시. 엔비디아 CES 2026에서 CPO 3Q 상용화 발표로 수혜 기대감 증폭.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.04.13</span>
+      </div>
+      <div class="news-title">미래에셋증권, 2026년 연결 매출 903억·영업이익 433억 전망</div>
+      <div class="news-summary">미래에셋증권 박준서 연구원은 에이디에스테크 기준 매출 +64%, 영업이익 +70% 성장 전망. CPO 시장이 2027년을 기점으로 본격 양산 성장 국면 진입 예상.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.03.27</span>
+      </div>
+      <div class="news-title">단기차입금 300억원 추가 증가 — 총 단기차입금 1,986억원으로 확대</div>
+      <div class="news-summary">대규모 M&A 진행으로 단기차입금이 급속히 증가 중. 에이디에스테크 인수금융 약 1,500억원 포함. 금리 변동 및 리파이낸싱 리스크 상존. 자기자본 대비 차입 비율 점검 필요.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span>에이디에스테크 CPO 정렬장비 — 엔비디아·멜라녹스 공급 파트너십 2015년부터 지속. 국내 유일 CPO 밸류체인으로 희소성 극대화</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span>2026년 3Q CPO 상용화 로드맵 — 엔비디아 CES 2026 발표, 1.6T CPO 수주 본격화로 세대 전환 효과 기대</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span>에이디에스테크 매출 1년 새 6배 증가(95억→635억) 검증된 고성장 구조. 2026년 영업이익률 50%대 목표</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span>핑거+문페이 스테이블코인 결제 생태계 — 원화 코인 인프라 구축으로 핀테크 신사업 포트폴리오 추가</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span>본업(필름콘덴서) 영업현금흐름 200억원 — EV·태양광·ESS 성장과 함께 중장기 기반 사업 안정성 유지</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span>에이디에스테크 매출 90% 이상 멜라녹스(엔비디아 자회사) 단일 고객 의존 — 엔비디아 공급망 전략 변화 시 직격탄</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span>자기자본 182% 규모의 무리한 차입 인수 — 단기차입금 1,986억원·대여금 1,548억원 등 재무 레버리지 급등</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span>52주 고점(5만9천원) 대비 -44% 급락 — 밸류에이션 고점 논란, PBR 9.83배 고평가 구간</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span>핀테크(핑거)·광통신(에이디에스테크)·전자부품 등 사업 분산으로 경영 집중도 희석 우려</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span>CPO 경쟁사 등장 시 기술 장벽 훼손 가능성 — 현재 국내 독점에 가까운 지위가 장기 유지될지 불확실</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">메리츠증권 (양승수)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수 (Buy)</span>
+        <span class="target-price">에이디에스테크 2026E 영업이익 428억원 전망</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">미래에셋증권 (박준서)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수 (Buy)</span>
+        <span class="target-price">2026E 성호전자 연결 영업이익 433억원 (+70%) 전망</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">시장 컨센서스 (블로그·인디 분석)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">중립</span>
+        <span class="target-price">목표가 3만~3.5만원 제시 (단기 고점 논란)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      성호전자는 반세기 넘는 전자부품 제조 이력에서 탈피, 2025년 12월 AI 데이터센터 핵심 장비 업체 에이디에스테크를 약 2,800억원에 인수하며 사업 체질을 전면 전환하고 있습니다.
+      에이디에스테크는 엔비디아 자회사 멜라녹스에 CPO(Co-Packaged Optics) 정렬 장비를 공급하는 국내 유일 밸류체인으로, 2024년 매출이 1년 만에 6배 급성장한 고성장 기업입니다.
+      2026년 에이디에스테크 연결 편입 본격화로 성호전자 연결 영업이익은 메리츠·미래에셋증권 기준 430억원 내외(+70% 내외)로 급증할 것으로 전망됩니다.
+      다만 자기자본 182%에 달하는 인수금융 차입, 멜라녹스 단일 고객 집중도(90% 이상), 최근 52주 고점 대비 -44% 급락, PBR 9.83배 고평가 논란 등 리스크 요인이 상존합니다.
+      추가로 핀테크 기업 핑거 1,100억원 투자(문페이·판토스홀딩스 공동), 어매이징홀딩스 합병(7월 예정) 등 연속적인 M&A로 재무 레버리지가 빠르게 확대 중이어서, 에이디에스테크의 실적 성장과 고객 다변화 성공 여부가 핵심 관전 포인트입니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

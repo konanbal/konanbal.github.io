@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에스에이엠티(031330) 분석 보고서 — 2026.06.02</title>
+<style>
+  :root {
+    --primary: #1a1a2e; --accent: #e94560; --accent2: #0f3460;
+    --bg: #f8f9fc; --card: #ffffff; --text: #1a1a2e; --muted: #6b7280;
+    --border: #e5e7eb; --green: #059669; --red: #dc2626;
+    --amber: #d97706; --blue: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #1a2e1a 0%, #1a4a2a 55%, #2a7a3a 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .kpi-highlight { border: 2px solid var(--green); }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .badge-buy { background: #d1fae5; color: #065f46; }
+  .badge-neutral { background: #f3f4f6; color: #4b5563; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0fff4 0%, #f0f4ff 100%); border: 1px solid #a7f3d0; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: #065f46; margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .mega-stat { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .mega-stat-item { flex: 1; min-width: 140px; background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border: 1px solid #a7f3d0; border-radius: 10px; padding: 1rem 1.25rem; text-align: center; }
+  .mega-stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .mega-stat-value { font-size: 24px; font-weight: 800; color: var(--green); }
+  .mega-stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 13px; }
+  th { background: #f4f6f9; font-weight: 600; text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } .mega-stat { flex-direction: column; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">031330 · KOSDAQ</div>
+      <div class="company-name">에스에이엠티 (SAMT)</div>
+      <div class="company-desc">삼성전자 CIS·메모리 유통 1위 사업자 — 2025년 반도체 대란 최대 수혜주</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 6월 2일</div>
+      <div class="price-display">16,270원</div>
+      <div class="price-change">▲ +10.68% (전일 대비)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 1조 6,269억원</span>
+    <span class="rating-pill">🏭 섹터: IT부품 유통 (KOSDAQ)</span>
+    <span class="rating-pill">💎 테마: 반도체 유통 · AI 수요 수혜</span>
+    <span class="rating-pill">📈 52주 최저→최고: 2,700→16,270원 (+503%)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 어닝 쇼크 하이라이트 -->
+  <div class="card" style="margin-bottom:1rem; border: 2px solid var(--green);">
+    <div class="card-title" style="color: var(--green);">⚡ 2026년 1분기 어닝 서프라이즈 — 전자부품 유통 역사상 전례 없는 실적</div>
+    <div class="mega-stat">
+      <div class="mega-stat-item">
+        <div class="mega-stat-label">1Q 매출액</div>
+        <div class="mega-stat-value">1.8조</div>
+        <div class="mega-stat-sub">YoY +134.9%</div>
+      </div>
+      <div class="mega-stat-item">
+        <div class="mega-stat-label">1Q 영업이익</div>
+        <div class="mega-stat-value">3,273억</div>
+        <div class="mega-stat-sub">YoY +1,575%</div>
+      </div>
+      <div class="mega-stat-item">
+        <div class="mega-stat-label">1Q 영업이익률</div>
+        <div class="mega-stat-value">18.2%</div>
+        <div class="mega-stat-sub">전년 동기 2.5%</div>
+      </div>
+      <div class="mega-stat-item">
+        <div class="mega-stat-label">1Q 순이익</div>
+        <div class="mega-stat-value">2,420억</div>
+        <div class="mega-stat-sub">YoY +1,933%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>마진 폭발의 핵심:</strong> 2025년 하반기부터 AI 서버 수요 폭증으로 DRAM(QoQ +45%)·NAND(QoQ +50%) 가격이 급등하면서 매출원가율이 <strong>96.1% → 81.2%로 14.9%p 하락</strong>. 통상 2~4%에 불과한 전자부품 유통 마진이 18.2%까지 치솟은 사상 초유의 상황. 1분기 단일 영업이익이 2025년 전체 연간 영업이익(1,139억원)의 <strong>2.87배</strong>. (리드경제, 2026.5.15)
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi kpi-highlight">
+      <div class="kpi-label">1Q 2026 매출 (연간 48% 달성)</div>
+      <div class="kpi-value" style="color:var(--green);">1조 7,953억</div>
+      <div class="kpi-sub">2025년 전체 매출의 47.8% 달성</div>
+    </div>
+    <div class="kpi kpi-highlight">
+      <div class="kpi-label">2025 연간 영업이익</div>
+      <div class="kpi-value">1,139억원</div>
+      <div class="kpi-sub">YoY +69% · 1Q26 단독이 2.87배</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 주가 변동</div>
+      <div class="kpi-value">2,700→16,270</div>
+      <div class="kpi-sub">52주 최저 대비 +503%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">고배당기업 / 배당</div>
+      <div class="kpi-value">고배당 지정</div>
+      <div class="kpi-sub">2025년 배당 224억 (+15% YoY)</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 분기보고서 (2026.5.15 공시)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출액 비교</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">1조 7,953억원 <span style="font-size:12px;">▲ YoY +134.9%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년 동기 7,643억원 → 단숨에 2배 이상</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 / 매출총이익</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">3,273억원 <span style="font-size:12px;">▲ YoY +1,575%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">매출총이익 294억 → 3,383억 (11배↑)</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>구분</th><th>1Q 2026</th><th>1Q 2025</th><th>YoY 증감</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>매출액</td><td><strong>1조 7,953억원</strong></td><td>7,643억원</td><td style="color:var(--green);">+134.9%</td></tr>
+        <tr><td>매출원가율</td><td><strong>81.2%</strong></td><td>96.1%</td><td style="color:var(--green);">-14.9%p 하락</td></tr>
+        <tr><td>매출총이익</td><td><strong>3,383억원</strong></td><td>294억원</td><td style="color:var(--green);">+1,050%</td></tr>
+        <tr><td>영업이익</td><td><strong>3,273억원 (18.2%)</strong></td><td>195억원 (2.5%)</td><td style="color:var(--green);">+1,575%</td></tr>
+        <tr><td>당기순이익</td><td><strong>2,420억원</strong></td><td>119억원</td><td style="color:var(--green);">+1,933%</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:12px;font-size:13px;line-height:1.7;background:#fff7ed;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>지역별 매출 구성 (1Q 2026):</strong> 국내 54.0%(9,706억), 중국 18.9%(3,395억), 미국 13.7%(2,463억), 홍콩 10.6%(1,900억). 해외(미국·중국·홍콩) 비중 43.2%. 자체 분기보고서에 "<strong>메모리 공급 부족 2026년까지 지속, 전년 대비 30% 이상 성장 전망</strong>"을 명시.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 분기보고서 — 매출 1조7953억, 영업이익 3273억 (YoY +1575%) 공시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.15</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">임원·주요주주</span>
+        <span style="font-size:13px;font-weight:500;">주요주주 삼지전자, 지분 일부 장내매도 — 1만8076주 처분, 지분율 49.92%→49.82%</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.20</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">기업가치제고</span>
+        <span style="font-size:13px;font-weight:500;">2026년 기업가치 제고 계획 공시 — 고배당기업 지정, 수익성 중심 경영·글로벌 사업 확대</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.25</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#fef9c3;border-left:3px solid var(--amber);padding:8px 12px;border-radius:0 6px 6px 0;line-height:1.6;">
+      ⚠️ <strong>투자자 주목 공시:</strong> 최대주주 삼지전자가 5월 18일 장내매도를 실시. 매도 단가 18,590원은 당시 시가보다 높은 수준. 지분율 변화는 미미(49.92%→49.82%)하나, 대주주 매도 자체가 투자 심리에 부정적 신호로 해석될 수 있음.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.15</span></div>
+      <div class="news-title">"영업이익 한 분기에 작년의 3배" — 1Q 실적 역대급, 상한가 마감 후 공시</div>
+      <div class="news-summary">1Q 2026 영업이익 3,273억원은 2025년 연간 영업이익 1,139억원의 2.87배. 분기보고서 제출 직전 거래일에 상한가를 마감한 뒤 장 후에 공시가 떴다. 통상 2~4%에 불과한 전자부품 유통 마진이 18.2%까지 치솟았다는 점이 핵심. (리드경제, 2026.5.15)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.03.25</span></div>
+      <div class="news-title">2026년 기업가치 제고 계획 공시 — 고배당기업 지정, 배당 +15% 성장</div>
+      <div class="news-summary">반도체·디스플레이·2차전지·Apple IT기기 등 글로벌 최상위 제조사 제품군 다각화 방침 공시. 2025년 이익배당금 224억원(+15% YoY). 고배당기업 지정으로 기관·개인 투자자 관심 확대. (디지털투데이, 2026.3.25)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05~현재</span></div>
+      <div class="news-title">2025년 반도체 대란 지속 수혜 — DRAM QoQ +45%, NAND QoQ +50% 가격 급등</div>
+      <div class="news-summary">AI 서버 수요 폭증으로 2025년 하반기부터 반도체 대란 발생. 삼성전자 공식 CIS·메모리 유통 1위 사업자로서 재고 가치 급등과 판가 상승의 직접 수혜. 분기보고서에 "2026년까지 공급 부족 지속, 전년 대비 30% 이상 성장 전망"을 자체 명시. (나무위키 반도체 대란 항목, 씽크풀, 2026.6)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.05.20</span></div>
+      <div class="news-title">최대주주 삼지전자, 지분 일부 장내매도 — 단가 18,590원</div>
+      <div class="news-summary">삼지전자가 지분 일부(1만8076주)를 장내 처분, 지분율 49.92%→49.82%. 매도 단가 18,590원은 당시 시가보다 높은 수준으로, 대주주가 주가 고점 부근에서 일부 차익실현에 나선 것으로 해석될 수 있음. (디지털투데이, 2026.5.20)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.06.02</span></div>
+      <div class="news-title">젠슨 황 방한·AI 수요 확대 기대에 반도체 유통주 동반 강세</div>
+      <div class="news-summary">오늘 코스피 사상 최고치 경신 및 젠슨 황 GTC 타이베이 효과로 삼성전자 등 반도체주 동반 급등. 에스에이엠티는 삼성전자 공식 공급망으로서 AI 수요 지속 기대감에 10% 이상 상승 마감. 외국인이 5월 말부터 순매수 지속 전환.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 Bull Case — 상승 기대 요인</div>
+      <div class="factor-list">
+        <div class="factor-item factor-bull"><span class="factor-icon">✓</span><span><strong>메모리 공급 부족 2026년 지속</strong> — 사측 분기보고서에 "수익성 중심 보수적 설비투자로 2026년까지 공급 부족"이라고 직접 명시. DRAM/NAND 가격 강세 지속 시 마진 방어 가능</span></div>
+        <div class="factor-item factor-bull"><span class="factor-icon">✓</span><span><strong>삼성전자 공식 CIS·메모리 유통 1위</strong> — 삼성전자 최대 공급망 파트너. AI 서버 수요 폭증으로 삼성전자 메모리 출하량 급증 → 에스에이엠티 취급 물량도 자동 증가</span></div>
+        <div class="factor-item factor-bull"><span class="factor-icon">✓</span><span><strong>글로벌 네트워크 + 제품 다각화</strong> — 미국·중국·홍콩·베트남·싱가포르 현지법인 운영. 반도체 외 OLED 패널, 2차전지, Apple IT기기 등 포트폴리오 확장 방침</span></div>
+        <div class="factor-item factor-bull"><span class="factor-icon">✓</span><span><strong>고배당·저밸류에이션 매력</strong> — 고배당기업 지정, 2025년 배당 224억원(+15%). 1Q 2026 EPS가 폭증했음에도 주가가 여전히 저PER 구간 가능성. PBR도 유통업 특성상 낮은 수준 유지</span></div>
+        <div class="factor-item factor-bull"><span class="factor-icon">✓</span><span><strong>외국인 순매수 전환</strong> — 5월 28~29일 외국인 누적 순매수 20만주 이상. 코스피 반도체 랠리와 동조한 외국인 자금 유입 지속</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 Bear Case — 주의해야 할 리스크</div>
+      <div class="factor-list">
+        <div class="factor-item factor-bear"><span class="factor-icon">!</span><span><strong>메모리 가격 사이클 리스크</strong> — 마진 폭발의 핵심은 메모리 가격 급등. 공급 정상화 또는 수요 둔화 시 원가율이 다시 95%대로 회귀할 수 있음. 과거 반도체 가격 사이클상 고점 이후 급락 전례 다수</span></div>
+        <div class="factor-item factor-bear"><span class="factor-icon">!</span><span><strong>레버리지 급확대</strong> — 단기차입금 4,618억→8,729억(+89%), 부채비율 183%→213%. 금리 환경 악화나 거래처 결제 지연 시 재무 부담 확대 위험</span></div>
+        <div class="factor-item factor-bear"><span class="factor-icon">!</span><span><strong>대주주 삼지전자 매도 신호</strong> — 최대주주가 실적 발표 직전 주가 고점(18,590원) 부근에서 일부 매도. 향후 추가 매도 가능성 있으며, 대주주 신뢰도 영향 요인</span></div>
+        <div class="factor-item factor-bear"><span class="factor-icon">!</span><span><strong>공식 애널리스트 커버리지 부재</strong> — 증권사 공식 리포트 발간 없음. 가격 발견 기능 제한, 기관 투자자 접근성 낮아 변동성 확대 시 수급 불안 위험</span></div>
+        <div class="factor-item factor-bear"><span class="factor-icon">!</span><span><strong>유통업 구조 특성상 지속가능성 불투명</strong> — 18%대 마진은 구조적이 아닌 반도체 대란에 의한 일시적 현상. 대규모 재고 보유 시 가격 하락 국면에 재고평가 손실 위험</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 재무 연도별 추이 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">📊 연도별 실적 추이</div>
+    <table>
+      <thead>
+        <tr><th>기간</th><th>매출액</th><th>영업이익</th><th>영업이익률</th><th>순이익</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2024년</td><td>2조 8,895억원</td><td>674억원</td><td>2.3%</td><td>544억원</td></tr>
+        <tr><td>2025년</td><td>3조 7,566억원 (+30%)</td><td>1,139억원 (+69%)</td><td>3.0%</td><td>758억원 (+39%)</td></tr>
+        <tr style="background:#f0fdf4;"><td><strong>1Q 2026 (단분기)</strong></td><td><strong>1조 7,953억원 (+135%)</strong></td><td><strong>3,273억원 (+1575%)</strong></td><td><strong>18.2%</strong></td><td><strong>2,420억원</strong></td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px;">※ 1Q 2026 단독 영업이익(3,273억)이 2025년 전체 영업이익(1,139억)의 2.87배. 1Q 매출은 2025년 연간 매출의 47.8% 달성.</div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 &amp; 시장 평가</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">공식 증권사 커버리지</span>
+      <div class="analyst-right">
+        <span class="opinion-badge badge-neutral">커버리지 없음</span>
+        <span class="target-price" style="color:var(--muted);font-size:12px;">공식 목표주가 미제시</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">주달AI (AI 분석 서비스)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge badge-buy">매수</span>
+        <span class="target-price">12,000원 이상 목표 (5월 기준)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.04</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">FnGuide 시장 평가</span>
+      <div class="analyst-right">
+        <span class="opinion-badge badge-buy">성장 모멘텀</span>
+        <span class="target-price" style="color:var(--muted);font-size:12px;">AI 인프라 투자 확대 수혜</span>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--blue);background:#f0f9ff;border-left:3px solid var(--blue);padding:8px 12px;border-radius:0 6px 6px 0;line-height:1.6;">
+      💡 <strong>참고:</strong> 공식 애널리스트 커버리지가 전혀 없는 종목입니다. 시가총액 대비 기관 관심도가 낮아 정보 비대칭이 크고, 외국인(최근 순매수 전환)과 개인 수급이 주가를 좌우합니다. 독립적인 투자 판단이 특히 중요한 종목입니다.
+    </div>
+  </div>
+
+  <!-- 사업 개요 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏢 사업 구조 &amp; 포지셔닝</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">주요 거래처</div>
+        <ul style="font-size:13px;line-height:1.8;padding-left:16px;">
+          <li>삼성전자 (CIS·메모리·시스템반도체)</li>
+          <li>삼성전기, 삼성SDI, 삼성디스플레이</li>
+          <li>ASUS (IT 기기 유통)</li>
+          <li>매그나칩 (솔루션)</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">주요 해외 법인</div>
+        <ul style="font-size:13px;line-height:1.8;padding-left:16px;">
+          <li>홍콩 (전체 매출 10.6%)</li>
+          <li>중국 (18.9%, 매입 40%)</li>
+          <li>미국 (13.7%)</li>
+          <li>베트남, 싱가포르</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:13px;line-height:1.7;color:var(--muted);">
+      <strong>사업 특성:</strong> 삼성그룹 계열사(삼지전자 49.82% 지분)로 출발한 IT 마케팅 전문 기업. 삼성전자 CIS(CMOS이미지센서)·메모리 반도체 유통 1위 사업자로, 직접 제조보다 유통·중개에 특화. 메모리 가격 상승기에 재고 평가이익과 판가 인상이 동시에 반영되는 구조.
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      에스에이엠티는 <strong>2025년 반도체 대란의 최대 수혜자</strong>로, 삼성전자 CIS·메모리 유통 1위 사업자라는 포지션이 극적인 실적 폭발로 이어졌습니다. 2026년 1분기 단일 분기 영업이익(3,273억원)이 2025년 전체 연간 영업이익(1,139억원)의 2.87배를 기록하며, 업계 역사상 전례 없는 18.2% 영업이익률을 달성했습니다. 매출원가율이 96.1%→81.2%로 급락한 것이 핵심으로, AI 서버 수요 폭증으로 DRAM·NAND 가격이 급등하면서 재고 가치와 판가가 동시에 뛴 결과입니다.
+      <br><br>
+      자체 분기보고서에 "2026년까지 메모리 공급 부족 지속"을 명시한 점은 긍정적이나, 메모리 가격 사이클은 반드시 고점과 저점을 반복합니다. 단기차입금이 한 분기에 89% 급증해 부채비율 213%에 달하는 레버리지 확대, 최대주주 삼지전자의 일부 매도, 공식 증권사 커버리지 전무 등이 리스크 요인입니다. <strong>반도체 가격 슈퍼사이클이 지속되는 동안은 강력한 이익 모멘텀을 유지하겠지만, 사이클 전환 시점을 선제적으로 파악하는 것이 이 종목 투자의 핵심 변수</strong>입니다. 배당 매력과 저밸류에이션을 겸비한 장기 배당투자자에게도 관심 대상이 될 수 있습니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 공개된 시장 데이터와 뉴스를 바탕으로 작성된 투자 참고 자료이며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

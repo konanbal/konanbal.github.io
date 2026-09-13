@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arm Holdings plc (ARM) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">ARM · NASDAQ</div>
+      <div class="company-name">Arm Holdings plc</div>
+      <div class="company-desc">전 세계 스마트폰과 AI 데이터센터용 CPU 아키텍처를 설계·라이선스하는 영국 케임브리지 기반 반도체 IP 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 8월 26일</div>
+      <div class="price-display">$244.96</div>
+      <div class="price-change down">▼ -3.30% (-$8.37, 전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.08.25 장중(현지시간) · 출처: Yahoo Finance</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $255.0B (메가캡)</span>
+    <span class="rating-pill">🏢 섹터: 반도체(Semiconductor IP)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (매수)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (Q1 FY2027)</div>
+      <div class="kpi-value">$1.29B</div>
+      <div class="kpi-sub">YoY +22%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률 (Non-GAAP)</div>
+      <div class="kpi-value">41.2%</div>
+      <div class="kpi-sub">전분기(49.0%) 대비 -7.8p · YoY +2.1p</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$285.72</div>
+      <div class="kpi-sub">현재가 대비 +16.6%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$100.02~$452.70</div>
+      <div class="kpi-sub">현재가 위치: 약 41%</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: Yahoo Finance / Stockanalysis.com (42명 애널리스트 평균 목표주가), MacroTrends (52주 범위) (기준일 2026.08.25)</div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기: FY2027 1분기, 2026.06.30 마감)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.29B <span style="font-size:12px;color:var(--green);">▲ 컨센서스($1.27B) 소폭 초과</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">자체 가이던스 $1.26B±$50M 상단 초과 · YoY +22%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (Non-GAAP, 실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$0.45 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 (컨센서스 $0.36 대비 초과)</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">자체 가이던스 $0.40±$0.04 상단 초과 · YoY +29%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      2026.07.29 실적 발표. 데이터센터 로열티 매출 YoY 2배 이상 성장, Arm AGI CPU 수요가 $2B로 확대(출시 대비 2배). 다만 스마트폰 메모리 가격 상승 여파로 연간 로열티 성장률 가이던스는 ~20%에서 high-teens로 하향. Q2 FY2027 가이던스: 매출 $1.38B±$50M, Non-GAAP EPS $0.47±$0.04, Non-GAAP 영업비용 약 $780M. 실적 서프라이즈에도 밸류에이션 부담으로 주가는 발표 직후 장중 8% 하락.
+    </div>
+    <div class="source-note">※ 출처: Arm 실적 발표자료(Form 6-K), Investing.com, Bloomberg, 24/7 Wall St.</div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC EDGAR)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">실적발표(6-K)</span>
+        <span style="font-size:13px;font-weight:500;">FY2027 1분기 실적 보고 (매출 $1.29B, Non-GAAP EPS $0.45)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">[2026.07.29] · SEC EDGAR</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">연차보고서(20-F)</span>
+        <span style="font-size:13px;font-weight:500;">FY2026(2026.03.31 마감) 연차보고서 — 발행주식 10억 6,405만주, RISC-V 경쟁·중국 매출 의존 리스크 명시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">[2026.05.26] · SEC EDGAR</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">주총소집(6-K)</span>
+        <span style="font-size:13px;font-weight:500;">2026년 9월 정기주주총회(AGM) 소집 통지 — 임원보수정책·이사진 선임 안건 상정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">[2026.08.10] · SEC EDGAR</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.25</span><span class="news-source">· Investing.com</span></div>
+      <div class="news-title">Raymond James, ARM 목표주가 $565→$641로 상향 (Outperform 유지)</div>
+      <div class="news-summary">서버향 로열티 매출 비중이 FY2028에 전체의 1/3을 넘어설 것으로 전망하며 목표가를 큰 폭 상향. Arm의 자체 CPU 판매(팹리스 진출)가 FY2027 하반기부터 본격화될 것으로 예상해, AI 데이터센터 피벗이 핵심 투자포인트임을 재확인시켰다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.07.29</span><span class="news-source">· Bloomberg</span></div>
+      <div class="news-title">FY2027 1분기 실적, 컨센서스 상회에도 주가는 초기 8% 하락</div>
+      <div class="news-summary">매출·EPS 모두 가이던스 상단을 넘겼지만 PER 100배가 넘는 고밸류에이션 부담으로 차익실현 매물이 출회. 다만 데이터센터 로열티 매출은 2배 이상 늘며 AI 피벗 스토리 자체는 훼손되지 않았다는 평가다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.03~07</span><span class="news-source">· Arm Newsroom / SEC 공시</span></div>
+      <div class="news-title">Meta를 리드 파트너로 한 Arm AGI CPU 생태계 확장, 수요 $2B로 2배 증가</div>
+      <div class="news-summary">Meta가 공동개발 리드 파트너로 참여했고 Cerebras, Cloudflare, OpenAI, SAP, SK텔레콤 등이 고객으로 합류. AWS·구글·마이크로소프트·NVIDIA·삼성 등 50여개 기업이 Arm 컴퓨팅 플랫폼의 실리콘 확장을 지원하는 등 왜 이 파트너십이 밸류에이션 프리미엄을 정당화하는지 보여주는 근거로 꼽힌다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.22</span><span class="news-source">· Simply Wall St (Sahm Capital 인용)</span></div>
+      <div class="news-title">"연초 대비 112% 급등, 밸류에이션 이미 상당 부분 선반영"</div>
+      <div class="news-summary">주가순자산비율(P/B) 등 6개 밸류에이션 지표 중 저평가 신호가 전무하다는 분석. 향후 AI 수요 둔화나 경쟁 심화 시 주가 조정 폭이 클 수 있다는 경고가 뒤따른다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08월 초</span><span class="news-source">· TradingKey</span></div>
+      <div class="news-title">반도체 섹터 급락 여파로 RBC 목표가 $475→$340로 대폭 하향</div>
+      <div class="news-summary">6월 고점 이후 필라델피아 반도체지수(SOX)가 20% 급락하는 가운데 ARM이 가장 큰 타격을 받았다는 분석. AI 데이터센터 자본지출 지속가능성에 대한 우려가 고밸류에이션 종목 전반의 조정을 촉발했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.07.29</span><span class="news-source">· Investing.com / TIKR</span></div>
+      <div class="news-title">CEO Rene Haas, 스마트폰 로열티 성장률 가이던스 하향 언급</div>
+      <div class="news-summary">메모리 가격 상승이 중저가부터 프리미엄 스마트폰까지 영향을 미치며 FY2027 전체 로열티 성장률 전망을 20%에서 high-teens로 낮췄다고 밝혔다. 다만 데이터센터·AI CPU 부문의 초과 성장이 이를 상당 부분 상쇄할 수 있다고 덧붙였다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>Arm AGI CPU 출시 후 6주 만에 고객 수요가 $1B→$2B로 확대, Meta가 공동개발 리드 파트너로 참여하며 데이터센터 로열티 매출이 YoY 2배 이상 성장 중</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>라이선스 중심 비즈니스 모델로 매출총이익률 97%대, Non-GAAP 영업이익률 41%대를 유지하며 TTM 잉여현금흐름 $1.4B를 창출하는 견조한 캐시카우 구조</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>스마트폰 시장의 사실상 표준 아키텍처 지위를 바탕으로 Neoverse 코어 누적 출하량이 15억개를 돌파했고, AWS·구글·MS·NVIDIA 등 50여개 파트너사와의 생태계가 지속 확장</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>트레일링 PER 280배 안팎의 극단적 고밸류에이션으로, 실적 서프라이즈에도 주가가 하락하는 등 시장 기대치가 이미 상당 부분 선반영된 상태</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>메모리 가격 상승에 따른 스마트폰 수요 둔화로 연간 로열티 성장률 가이던스가 20%에서 high-teens로 하향 조정</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>Arm AGI CPU를 통한 자체 실리콘(팹리스) 사업 진출로 R&D·공급망 투자 부담이 커지고, 기존 라이선스 고객사와 이해상충 가능성이 20-F에 리스크 요인으로 명시됨</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>x86 및 오픈소스 RISC-V 아키텍처와의 경쟁 심화, SoftBank·Arm China 등 특정 관계사에 대한 매출 의존도 및 중국 매출 비중에 따른 지정학적 리스크</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Raymond James <span style="color:var(--muted);font-weight:400;">(2026.08.25)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Outperform)</span><span class="target-price">$641</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">JPMorgan <span style="color:var(--muted);font-weight:400;">(2026.07.30)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Overweight)</span><span class="target-price">$255</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wells Fargo <span style="color:var(--muted);font-weight:400;">(2026.07말)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Overweight)</span><span class="target-price">$280</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">HSBC <span style="color:var(--muted);font-weight:400;">(2026.08월경)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립(Hold)</span><span class="target-price">$230</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Morgan Stanley <span style="color:var(--muted);font-weight:400;">(2026.07.30)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립(Equal Weight)</span><span class="target-price">$212</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">Arm Holdings는 스마트폰용 CPU 아키텍처 라이선스라는 기존 캐시카우 위에, AI 데이터센터향 자체 실리콘 제품(Arm AGI CPU)이라는 새로운 성장축을 얹으며 사업모델 전환을 시도하고 있다. Meta를 필두로 한 하이퍼스케일러 고객 확보와 데이터센터 로열티 매출의 배 이상 성장은 단기~중기 실적 모멘텀을 뒷받침하지만, 트레일링 PER이 280배에 달하는 극단적 밸류에이션은 이미 상당한 미래 성장을 선반영하고 있어 작은 가이던스 미스에도 주가 변동성이 커질 수 있다. 스마트폰 로열티 성장 둔화, 자체 실리콘 사업 전환에 따른 마진 압박, RISC-V 경쟁 심화는 주시해야 할 핵심 변수다. 이 종목은 AI 인프라 전환이라는 장기 테마에 확신을 가지고 있으면서도, 100배를 넘는 밸류에이션 변동성을 감내할 수 있는 성장주 투자자에게 적합하다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

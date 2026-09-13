@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rigetti Computing 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">RGTI · NASDAQ</div>
+      <div class="company-name">Rigetti Computing, Inc.</div>
+      <div class="company-desc">초전도 큐빗 기반 풀스택 양자-고전 하이브리드 컴퓨팅 기업. 9큐빗 Novera부터 108큐빗 Cepheus급 온프레미스 시스템과 클라우드 서비스(QCS)를 공급</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 8월 25일</div>
+      <div class="price-display">$16.37</div>
+      <div class="price-change down">▼ -8.6% (8/24 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $55억</span>
+    <span class="rating-pill">🏢 섹터: 양자컴퓨팅 / 반도체</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (매수 9 · 중립 4 · 매도 0)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (2026 Q2)</div>
+      <div class="kpi-value">$510만</div>
+      <div class="kpi-sub">YoY +185% (전년 $180만)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">-551%</div>
+      <div class="kpi-sub">매출총이익률 43% (전년 31%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$29.65</div>
+      <div class="kpi-sub">현재가 대비 +81.1%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$12.53~$58.15</div>
+      <div class="kpi-sub">현재가 위치: 약 8% (하단권)</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 — 2026년 2분기, 2026.08.06 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$510만 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +4.7%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Zacks 컨센서스 약 $487만 · YoY +185%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">-$0.05 <span style="font-size:12px;color:var(--red);">▼ 어닝 쇼크 (컨센서스 -66.7%)</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Non-GAAP 기준 · GAAP EPS -$0.16 (전년 -$0.13)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <b>손익 구조</b> — 영업손실 $2,810만(전년 $1,990만), Non-GAAP 순손실 $1,600만, GAAP 순손실 $5,260만(워런트·언아웃 부채 공정가치 조정 등 비현금 요인 포함). 영업비용은 R&D $2,070만을 중심으로 전년 대비 49% 증가한 $3,030만. 상반기 누적 매출은 $950만(전년 $330만).<br>
+      <b>가이던스</b> — 회사는 분기별 수치 가이던스를 제시하지 않습니다. 대신 <b>인도 C-DAC향 108큐빗 시스템 $840만을 4분기에 인식</b>할 것으로 예상한다고 밝혔으며, 매출이 시스템 인도·정부 프로젝트 시점에 좌우되는 구조라는 점을 명시했습니다. 6월 30일 기준 현금·투자자산 $5.413억, 무차입 상태로 기술 마일스톤 달성까지 충분한 런웨이를 확보했다는 것이 경영진 판단입니다.
+    </div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">운영구조 개편 및 임원 변동 — David Rivas COO 선임, Andrew Bestwick CTO 선임</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.19</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 분기보고서 (기준일 2026.06.30)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08 (상순)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">Form 4</span>
+        <span style="font-size:13px;font-weight:500;">COO 보유주식 9,038주 장내 매도 (가중평균 $16.79)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.20</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">미 상무부와 CHIPS Act 최대 $1억 지원 LOI 체결 (정부 지분 취득 전제)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.21</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:0.75rem;background:#f9fafb;padding:10px 12px;border-radius:6px;">
+      📌 <b>투자자 주목 공시</b> — 5월 21일 8-K가 여전히 이 종목의 최대 변수입니다. CHIPS R&D 사무국의 Broad Agency Announcement에 따른 3년간 최대 $1억 지원이되, <b>상무부가 지원금 총액에 상응하는 지분을 취득</b>하는 조건입니다. 즉 자금 유입과 주식 희석이 동시에 일어나는 구조이며, 아직 확정 계약서가 아닌 구속력 없는 의향서 단계라 최종 조건과 마일스톤이 확정되지 않았습니다. 같은 날 D-Wave, Quantinuum도 동일 규모의 LOI를 발표해 미국 정부의 양자 산업 지분 참여가 업계 전반으로 확대되고 있습니다.
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.21</span></div>
+      <div class="news-title">미 상무부와 최대 $1억 규모 CHIPS Act 지원 의향서 체결 — 주가 한때 65% 급등</div>
+      <div class="news-summary">초전도 양자컴퓨팅 확장의 기술적 난제를 겨냥한 3년간의 R&D 자금입니다. Kulkarni CEO는 이를 "초전도 칩렛 아키텍처에 대한 검증"으로 평가했습니다. 다만 급등분은 이후 모두 반납했고, 정부가 지분을 가져가는 구조라는 점에서 희석 논쟁이 남아 있습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.06</span></div>
+      <div class="news-title">2분기 매출 185% 급증 $510만 — 매출총이익률 31%→43% 개선</div>
+      <div class="news-summary">Novera 온프레미스 QPU 판매가 성장을 이끌었고 계약 믹스 개선으로 마진도 올라왔습니다. 다만 손실이 함께 커지면서 발표 직후 시간외에서 4~6% 하락했습니다. 매출 규모 자체가 아직 작아 시스템 한 대의 인도 시점이 분기 실적을 좌우한다는 점이 구조적 한계입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08 초</span></div>
+      <div class="news-title">HPE·피츠버그 슈퍼컴퓨팅센터와 하이브리드 양자-고전 테스트베드 구축 확대</div>
+      <div class="news-summary">NSF가 $500만을 지원하는 TangleLab 테스트베드에 9큐빗 Novera 시스템을 공급합니다. 착공은 9월 1일, 가동은 내년 목표입니다. HPE라는 블루칩 파트너와 연방 자금이 함께 붙었다는 점에서 "연구실 밖" 레퍼런스로서 의미가 크며, 발표 당일 주가는 약 12% 올랐습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.08.19</span></div>
+      <div class="news-title">조직 개편 — Systems Delivery 조직 신설, COO·CTO 교체</div>
+      <div class="news-summary">David Rivas가 CTO에서 COO로 이동해 제조·인도·정부 프로그램을 총괄하고, Andrew Bestwick이 신임 CTO로 프로세서 아키텍처와 하드웨어 엔지니어링을 통합합니다. 고객 배치와 코어 엔지니어링을 분리해 배치 수요 증가에 대응하겠다는 취지지만, 시장은 발표 직후 6% 하락으로 반응했다가 이틀 뒤 10% 넘게 반등했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.20~22</span></div>
+      <div class="news-title">내부자 매도 지속 — 최근 12개월 $3,900만 매도, 매수는 0건</div>
+      <div class="news-summary">COO는 8월 20일 9,038주를 가중평균 $16.79에 매도했습니다. 단일 건 규모는 작지만, 1년간 매수 기록이 전무한 상태에서 매도만 누적되고 있다는 점이 경영진 신뢰도 측면에서 지적받고 있습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.18~24</span></div>
+      <div class="news-title">국채금리 상승에 양자 섹터 동반 급락 — 8월 24일 -8.6%</div>
+      <div class="news-summary">IonQ, D-Wave와 함께 며칠 사이 두 자릿수 조정을 받았습니다. 현금흐름이 먼 미래에 있는 장기 성장주 특성상 금리에 극도로 민감하며, 개별 기업 뉴스와 무관하게 섹터 전체가 함께 움직이는 국면이 반복되고 있습니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>정부·기관의 직접 검증</b> — CHIPS Act 최대 $1억 LOI, NSF 지원 TangleLab(HPE·PSC), 인도 C-DAC $840만 수주까지 공공 레퍼런스가 쌓이는 중.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>기술 로드맵 진전</b> — 108큐빗 Cepheus-1-108Q 일반 공급 개시(4월 7일), 2큐빗 게이트 충실도 중앙값 99.1%·36큐빗 99.6%. 100큐빗 이상 게이트 기반 플랫폼 3개 중 하나이며 연내 99.5% 목표.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>탄탄한 현금과 무차입</b> — 6월 말 현금·투자자산 $5.413억, 부채 없음. 당장의 자금조달 압박 없이 로드맵을 밀어붙일 수 있는 체력.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>매출·마진 동시 개선</b> — Q2 매출 +185%, 상반기 누적 $950만(전년 $330만), 매출총이익률 31%→43%. 규모는 작아도 방향성은 개선.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>월가의 큰 목표가 갭</b> — 13명 중 매수 9명, 평균 목표가 $29.65로 현재가 대비 +81%. Wedbush Outperform $37, Needham $31 등.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>매출 대비 극단적 밸류에이션</b> — TTM 매출 약 $1,300만에 시총 약 $55억. PSR이 400배를 넘고, GuruFocus 적정가치($7.66) 대비 113.7% 고평가로 산출됩니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>손실 확대 구조</b> — 영업손실 $2,810만(전년 $1,990만), 영업비용 +49%. 2025년 연간 손실은 $2.16억이었고, 매출이 커질수록 손실도 함께 커지는 단계입니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>희석 리스크</b> — CHIPS 자금은 정부 지분 취득이 전제이며 구속력 없는 LOI 단계. 워런트·언아웃 부채도 GAAP 손익을 크게 흔듭니다(Q2 GAAP 순손실 $5,260만).</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>내부자 매도</b> — 최근 12개월 $3,900만 매도, 매수 0건. 8월 20일에도 COO 매도가 있었습니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>상용화 타임라인과 경쟁</b> — 코히어런스·오류율 개선이 여전한 관문이고(Wedbush도 최대 과제로 지목), 매출은 시스템 인도 시점에 좌우돼 분기 변동성이 극심합니다. IBM·Google 등 대형 경쟁자도 존재합니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wedbush ($40→하향)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price">$37</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Needham (2026.05.12)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$31</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Cantor Fitzgerald</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Overweight</span><span class="target-price">$30</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Craig-Hallum</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$30</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Mizuho (2026.05.12, $33→하향)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price">$27</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Benchmark</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$25</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Jefferies (하향)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립 (Hold)</span><span class="target-price">$18</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:0.75rem;">종합 컨센서스: <b>Buy</b> (13명 중 매수 9 · 중립 4 · 매도 0, S&P Global) · 평균 목표주가 $29.65 (최저 $18~$20, 최고 $40) — 목표가 편차가 두 배 이상 벌어져 있다는 점 자체가 이 종목의 불확실성을 보여줍니다.</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Rigetti는 초전도 칩렛 방식으로 양자컴퓨터를 만드는 풀스택 기업으로, 108큐빗 Cepheus-1을 실제로 클라우드와 온프레미스에 공급하고 있는 소수의 게이트 기반 사업자 중 하나입니다. 2분기 매출은 전년 대비 185% 늘어난 $510만, 매출총이익률은 31%에서 43%로 개선됐고, 현금·투자자산 $5.413억을 무차입 상태로 보유해 자금 압박 없이 로드맵을 밀어붙일 수 있습니다. 5월 미 상무부의 최대 $1억 CHIPS Act 의향서, HPE·피츠버그 슈퍼컴퓨팅센터의 NSF 테스트베드, 인도 C-DAC의 $840만 수주는 "정부와 대형 기관이 실제로 돈을 쓴다"는 증거입니다.<br><br>
+      문제는 그 실체와 주가 사이의 거리입니다. 지난 12개월 매출이 약 $1,300만인 회사의 시가총액이 약 $55억으로, PSR이 400배를 넘습니다. 영업손실은 오히려 $1,990만에서 $2,810만으로 커졌고, 영업비용은 49% 증가했습니다. CHIPS 자금은 정부 지분 취득을 전제로 하고 있어 자금 유입과 희석이 동시에 일어나며, 최근 12개월 내부자 매도가 $3,900만인데 매수는 한 건도 없습니다. 주가가 52주 고점 $58.15 대비 약 72% 낮은 자리에 있다는 사실은 저가 매력으로도, 기대 붕괴의 흔적으로도 읽힐 수 있습니다.<br><br>
+      가까운 시일의 관전 포인트는 명확합니다. <b>①연내 2큐빗 충실도 99.5% 달성 여부, ②4분기 C-DAC 108큐빗 시스템 $840만 매출 인식, ③CHIPS 최종 계약의 확정 조건</b>입니다. 세 가지가 모두 맞아떨어지면 목표가 $30대의 논리가 살아나고, 하나라도 지연되면 밸류에이션이 곧바로 문제로 돌아옵니다. 정리하면 <b>이 종목은 양자컴퓨팅이라는 테마의 장기 옵션을 사는 것에 가깝고, 원금의 상당 부분을 잃을 수 있다는 전제 하에 포트폴리오의 소액만 배분할 수 있으며, 금리와 섹터 심리에 따른 두 자릿수 등락을 견딜 수 있는 투자자에게 적합</b>합니다. 실적 기반의 안정적 수익을 찾는 투자자에게는 아직 투자 대상이라기보다 관찰 대상입니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주가·시가총액·목표주가는 2026년 8월 24~25일 기준 공개 자료를 취합한 것으로 실시간 시세와 다를 수 있으며, 시가총액은 추정치입니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

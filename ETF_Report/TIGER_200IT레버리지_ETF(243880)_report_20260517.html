@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIGER 200IT레버리지 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0a2342 0%, #1e6091 55%, #00b4d8 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  /* 레버리지 경고 배너 */
+  .leverage-warning {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: #92400e;
+    line-height: 1.6;
+  }
+  .leverage-warning-icon { font-size: 18px; flex-shrink: 0; }
+
+  /* 수익률 하이라이트 */
+  .return-highlight {
+    background: linear-gradient(135deg, #1e6091, #00b4d8);
+    color: white;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .return-item { text-align: center; }
+  .return-period { font-size: 11px; opacity: 0.75; }
+  .return-value { font-size: 22px; font-weight: 800; }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+    .return-highlight { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 243880 · KRX · 레버리지(X2)</div>
+      <div class="etf-name">TIGER 200IT레버리지</div>
+      <div class="etf-index">추종 지수: 코스피 200 정보기술(IT) | 운용사: 미래에셋자산운용</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 17일</div>
+      <div class="nav-display">457,530원</div>
+      <div class="nav-change up">▲ +5,075 (+1.12%) 5/8 기준</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 시가총액: 약 5,334억원</span>
+    <span class="pill">📋 총보수: 0.69%</span>
+    <span class="pill">📅 설정일: 2016.05.13</span>
+    <span class="pill">🔄 분배금: 연 1회(결산)</span>
+    <span class="pill">⚡ 레버리지: 일일 2배</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== 레버리지 경고 ===== -->
+  <div class="leverage-warning">
+    <span class="leverage-warning-icon">⚠️</span>
+    <span><strong>레버리지 ETF 투자 유의사항</strong> — 이 ETF는 기초지수 일간 변동률의 <strong>양(+) 2배</strong>를 추종합니다. 장기 보유 시 복리 효과로 인한 손실(변동성 손실)이 발생할 수 있으며, 하락장에서는 일반 ETF보다 손실 폭이 크게 확대됩니다. 단기 트레이딩 목적의 상품으로, 투자 원금 전부 손실도 가능합니다.</span>
+  </div>
+
+  <!-- ===== 수익률 하이라이트 ===== -->
+  <div class="return-highlight">
+    <div class="return-item">
+      <div class="return-period">2월 월간</div>
+      <div class="return-value">+51.5%</div>
+    </div>
+    <div class="return-item">
+      <div class="return-period">3개월</div>
+      <div class="return-value">+210.5%</div>
+    </div>
+    <div class="return-item">
+      <div class="return-period">4월 월간 (1위)</div>
+      <div class="return-value">+137.4%</div>
+    </div>
+    <div class="return-item">
+      <div class="return-period">5월 1주 (1위)</div>
+      <div class="return-value">+39.1%</div>
+    </div>
+    <div class="return-item">
+      <div class="return-period">YTD (연초이후)</div>
+      <div class="return-value">+204%↑</div>
+    </div>
+  </div>
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">순자산가치(NAV)</div>
+      <div class="kpi-value" style="color:var(--accent2);">455,869원</div>
+      <div class="kpi-sub">괴리율: +0.36%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">시가총액 (AUM)</div>
+      <div class="kpi-value">5,334억</div>
+      <div class="kpi-sub">연초 대비 +340% 증가</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 최고 / 최저</div>
+      <div class="kpi-value" style="font-size:16px;">508,000 / 20,655</div>
+      <div class="kpi-sub">현재가 52주 고점 근접</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수 (연간)</div>
+      <div class="kpi-value">0.69%</div>
+      <div class="kpi-sub">레버리지 ETF 평균 수준</div>
+    </div>
+  </div>
+
+  <!-- ===== 구성 종목 ===== -->
+  <div class="card">
+    <div class="card-title">구성 종목 (KOSPI200 IT지수 기반 추정 비중)</div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">SK하이닉스 (000660)</div>
+      <div class="holding-right">
+        <div class="holding-weight">42.21%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">삼성전자 (005930)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~22%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:52%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">한미반도체 (042700)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~7%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:17%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">삼성전기 (009150)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~6%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:14%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">SK스퀘어 (402340)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~5%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:12%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">LG전자 (066570)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~4%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:9%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">7</div>
+      <div class="holding-name">NAVER (035420)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~3%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:7%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">8</div>
+      <div class="holding-name">카카오 (035720)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~3%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:7%"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted); background:#f8fafc; padding:8px 10px; border-radius:6px;">
+      ⚠️ 구성종목 비중은 KOSPI200 IT지수 기반 추정치이며, SK하이닉스 42.21%는 2026.05.09 기준 확인된 수치입니다. 실제 편입비중은 미래에셋자산운용 공식 사이트에서 확인하세요.
+    </div>
+  </div>
+
+  <!-- ===== 섹터 배분 + 수익률 성과 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">섹터 배분 (IT지수 내부)</div>
+      <div class="sector-item">
+        <div class="sector-name">반도체·메모리</div>
+        <div class="sector-right">
+          <div class="sector-pct">~70%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#2196f3;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">IT 부품·전자</div>
+        <div class="sector-right">
+          <div class="sector-pct">~15%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:21%;background:#9c27b0;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">인터넷·플랫폼</div>
+        <div class="sector-right">
+          <div class="sector-pct">~10%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:14%;background:#4caf50;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">기타 IT</div>
+        <div class="sector-right">
+          <div class="sector-pct">~5%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:7%;background:#607d8b;"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+        사실상 '반도체 2배 레버리지' ETF. SK하이닉스+삼성전자만 합산 64%↑
+      </div>
+    </div>
+
+    <!-- ===== 수익률 성과 ===== -->
+    <div class="card">
+      <div class="card-title">기간별 수익률</div>
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>기간</th>
+            <th>ETF</th>
+            <th>KOSPI200</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>5월 1주</td><td class="positive">+39.1%</td><td class="positive">+13%대</td><td>1위</td></tr>
+          <tr><td>4월 월간</td><td class="positive">+137.4%</td><td class="positive">~+50%대</td><td>전체 1위</td></tr>
+          <tr><td>3개월</td><td class="positive">+210.5%</td><td>N/A</td><td>-</td></tr>
+          <tr><td>2월 월간</td><td class="positive">+51.5%</td><td>N/A</td><td>1위</td></tr>
+          <tr><td>YTD(연초이후)</td><td class="positive">+204%↑</td><td>~+80%대</td><td>반도체 랠리</td></tr>
+          <tr><td>52주 최저→현재</td><td class="positive">+2,114%</td><td>-</td><td>20,655→457,530</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== 최근 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.08</span>
+      </div>
+      <div class="news-title">5월 1주차 국내 ETF 수익률 1위(+39.12%) — 코스피 7400선 돌파</div>
+      <div class="news-summary">5.04~5.08 주간 코스피가 13%대 급등하며 7400선을 돌파. AI 반도체 랠리와 SK하이닉스(+12% 이상), 삼성전자 동반 급등으로 전체 ETF 중 최고 수익률 기록. 코스피가 사상 최고치를 연일 경신하는 강세장 진행 중.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.30</span>
+      </div>
+      <div class="news-title">4월 국내 ETF 수익률 1위(+137.44%) — 반도체·AI 랠리 본격화</div>
+      <div class="news-summary">3월 급락 이후 4월 반등장에서 TIGER 200IT레버리지가 전체 ETF 1위를 차지. 국내 ETF 순자산총액이 421조원으로 전월 대비 38.9조원 증가. 연초대비 ETF 순자산이 약 340% 급증한 것으로 집계됨.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.04.28</span>
+      </div>
+      <div class="news-title">연초이후 수익률 204% 기록 — 반도체 레버리지 ETF 중 TOP3</div>
+      <div class="news-summary">연초 대비 KODEX 반도체레버리지(215%), TIGER 200IT레버리지(204%), TIGER 반도체TOP10레버리지(202%) 순으로 수익률 상위권 형성. 국내 주식형 ETF 평균 55.6%를 압도적으로 상회.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.13</span>
+      </div>
+      <div class="news-title">삼성전자·SK하이닉스 단일종목 레버리지 ETF 출시 임박 — 쏠림 경쟁 심화</div>
+      <div class="news-summary">5월 22일부터 삼성전자·SK하이닉스 단일종목 레버리지 ETF 출시 예정. 자금이 이들 상품으로 분산될 경우 TIGER 200IT레버리지 수급에 영향 가능. 전문가들은 특정 종목·테마 과도 집중 경계를 권고.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.04.13</span>
+      </div>
+      <div class="news-title">4월 2주차 주간 수익률 1위(+27%) — 미·이란 휴전 합의 효과</div>
+      <div class="news-summary">미·이란 2주 휴전 합의 소식에 코스피가 하루만에 +6.87% 급등. SK하이닉스+12%, 삼성전자+7%의 반도체 대형주 랠리가 이 ETF의 2배 수익률 구조와 맞물려 주간 1위 달성.</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">📈</span><span><strong>코스피 사상 최고치 랠리 지속</strong> — 코스피가 7000→7400선을 돌파하며 신고점을 경신 중. 반도체 대형주 중심 상승장에서 일일 2배 추종 구조가 수익을 극대화.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💡</span><span><strong>AI 반도체 수요 폭증 수혜</strong> — SK하이닉스의 HBM 공급 확대, 삼성전자의 AI 메모리 수주 증가로 구성 종목의 펀더멘털 강화. 포트폴리오의 64%가 반도체 투톱에 집중.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌟</span><span><strong>현물 주식 200% 매수 방식으로 경쟁사 대비 수익률 우위</strong> — 선물 방식이 아닌 현물 차입 방식을 택해 괴리율이 낮고, SK하이닉스 편입 비중이 타사 반도체 레버리지 ETF와 비슷한 수준으로 경쟁력 유지.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🏆</span><span><strong>2026년 수익률 랭킹 상위 독점</strong> — 2월·4월 월간, 4/2주·5/1주 주간 수익률 전체 1위. 증시 강세 국면에서 국내 ETF 시장의 수익률 대장주 지위 확보.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><strong>변동성 손실(Volatility Decay)</strong> — 레버리지 ETF는 지수가 등락을 반복할 때 복리 효과로 손실이 누적됨. 상승→하락→상승 반복 시 원금 회복에 일반 ETF보다 훨씬 큰 상승률 필요.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>SK하이닉스 단일 종목 쏠림 리스크</strong> — 포트폴리오의 42%가 SK하이닉스에 집중. 동사 주가 급락 시 ETF 손실이 2배로 증폭. 삼성전자(~22%)까지 합산하면 64%가 반도체 투톱에 의존.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🔻</span><span><strong>단일종목 레버리지 ETF 출시로 자금 분산</strong> — 5월 22일 삼성전자·SK하이닉스 단일종목 레버리지 ETF 출시로 이 ETF로 들어오던 자금 일부가 이탈할 가능성. 거래 대금 감소 시 괴리율 확대 우려.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🌐</span><span><strong>매크로 리스크</strong> — 미·이란 지정학 불안, 유가·환율 급등, 미국 금리 변동성 등 매크로 이벤트 발생 시 코스피 급락으로 손실이 일반 ETF의 2배 이상 확대될 수 있음.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 유사 ETF 비교 ===== -->
+  <div class="card">
+    <div class="card-title">유사 반도체 레버리지 ETF 비교</div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>ETF명</th>
+          <th>운용사</th>
+          <th>총보수</th>
+          <th>YTD 수익률</th>
+          <th>특징</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>TIGER 200IT레버리지</strong></td><td>미래에셋</td><td>0.69%</td><td class="positive">+204%</td><td>KOSPI200 IT 2배 · 현물방식</td></tr>
+        <tr><td>KODEX 반도체레버리지</td><td>삼성자산</td><td>0.64%</td><td class="positive">+215%</td><td>KOSPI반도체 2배</td></tr>
+        <tr><td>TIGER 반도체TOP10레버리지</td><td>미래에셋</td><td>0.64%</td><td class="positive">+202%</td><td>반도체TOP10 2배</td></tr>
+        <tr><td>TIGER 200IT (비레버리지)</td><td>미래에셋</td><td>0.15%</td><td>N/A</td><td>KOSPI200 IT 1배 · 장기투자 적합</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">YTD 수익률은 2026.04.23 기준. 수치 변동 가능.</div>
+  </div>
+
+  <!-- ===== 배당/분배금 ===== -->
+  <div class="card">
+    <div class="card-title">배당 / 분배금 현황</div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>지급 기준</th>
+          <th>주요 내용</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>분배 주기</td><td>연 1회 (회계기간 종료일)</td><td>결산 분배형</td></tr>
+        <tr><td>과세 방식</td><td>배당소득세 15.4% (매매차익·분배금 모두 과표 기준)</td><td>주식·장내파생 비과세 아님</td></tr>
+        <tr><td>분배금 수준</td><td>운용 성과에 따라 결정 (레버리지 특성상 낮음)</td><td>배당 목적 부적합</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:0.75rem; font-size:12px; color:#92400e; background:#fff7ed; padding:8px 10px; border-radius:6px;">
+      💡 이 ETF는 분배금보다 시세 차익 목적으로 운용됩니다. 배당 수익을 원한다면 TIGER 200IT(비레버리지) 또는 커버드콜 계열 ETF를 검토하세요.
+    </div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      <strong>TIGER 200IT레버리지(243880)</strong>는 미래에셋자산운용이 운용하는 국내 주식형 2배 레버리지 ETF로, KOSPI200 IT 지수의 일간 변동률을 양(+) 2배로 추종한다. 2016년 5월 상장 이후 국내 반도체·IT 산업 성장의 수혜를 2배로 증폭시켜 왔으며, 2026년 들어 SK하이닉스·삼성전자 중심의 반도체 슈퍼 랠리와 코스피 사상 최고치 경신이 맞물리며 YTD +204%, 4월 월간 +137%, 5월 1주차 +39% 등 압도적인 수익률로 국내 전체 ETF 랭킹 1위를 거듭 차지하고 있다.
+      <br><br>
+      이 ETF의 핵심 투자 thesis는 '국내 반도체 대형주 강세 시 2배 수혜'다. 포트폴리오의 약 42%를 SK하이닉스, 22%를 삼성전자가 차지하며, 사실상 반도체 투톱에 64% 이상이 집중된 고농도 반도체 베팅 상품이다. AI·HBM 수요 급증, 코스피 상승 사이클이 지속되는 한 강력한 알파를 창출할 수 있다. 현물 주식 차입 방식으로 선물 방식 대비 추적 오차가 낮고, 5월 초 기준 괴리율이 0.36%로 안정적이다.
+      <br><br>
+      다만 레버리지 ETF 고유의 변동성 손실(복리 손실 효과), SK하이닉스 단일 종목 쏠림, 5월 22일 단일종목 레버리지 ETF 출시에 따른 수급 분산, 지정학·금리 등 매크로 리스크는 핵심 리스크 요인이다. 하락장 전환 시 손실 폭이 일반 ETF의 2배 이상이며, 장기 보유보다는 상승 모멘텀이 명확한 구간에서의 <strong>단기·중기 전술적 활용</strong>에 적합한 상품이다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 특정 상품에 대한 투자 권유가 아닙니다. ETF 투자는 원금 손실 가능성이 있으며, 레버리지 ETF는 일반 ETF보다 위험이 크게 높습니다. 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다. 구성종목 비중 중 일부는 추정치이며, 정확한 정보는 미래에셋자산운용(investments.miraeasset.com) 공식 사이트를 통해 확인하시기 바랍니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>피아이이(452450) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .kpi-sub.up { color: var(--green); }
+  .kpi-sub.down { color: var(--red); }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .biz-section { margin-bottom: 1rem; }
+  .biz-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 0.75rem; }
+  .biz-card { background: #f8f9fc; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; }
+  .biz-card-title { font-size: 12px; font-weight: 700; color: var(--accent2); margin-bottom: 4px; }
+  .biz-card-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .fin-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 0.5rem; }
+  .fin-table th { background: #f1f5f9; color: var(--muted); font-size: 11px; font-weight: 600; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  .fin-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .fin-table tr:last-child td { border-bottom: none; }
+  .fin-table .up { color: var(--green); font-weight: 600; }
+  .fin-table .down { color: var(--red); font-weight: 600; }
+  .section-label { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 0.5rem; margin-top: 1rem; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .biz-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">452450 · KOSDAQ</div>
+      <div class="company-name">피아이이 (PIE Co., Ltd.)</div>
+      <div class="company-desc">AI 비전 검사 & 스마트팩토리 솔루션 전문기업 — 이차전지·반도체·유리기판 검사 S/W 독점 공급</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 11일</div>
+      <div class="price-display">₩7,350</div>
+      <div class="price-change up">▲ +2.51% (2026.05.07 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 2,640억원</span>
+    <span class="rating-pill">🏢 섹터: IT서비스 / 스마트팩토리</span>
+    <span class="rating-pill">📅 상장일: 2025년 2월 4일</span>
+    <span class="rating-pill">👥 임직원: 약 186명</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2024년 연간 매출</div>
+      <div class="kpi-value">1,240억</div>
+      <div class="kpi-sub up">YoY +44.5%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2024년 영업이익</div>
+      <div class="kpi-value">97억</div>
+      <div class="kpi-sub up">YoY +142.1%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">4,700~12,630</div>
+      <div class="kpi-sub">공모가: 5,000원</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025년 3Q 누적 매출</div>
+      <div class="kpi-value">적자전환</div>
+      <div class="kpi-sub down">YoY -40.8%</div>
+    </div>
+  </div>
+
+  <!-- 기업 개요 -->
+  <div class="card biz-section">
+    <div class="card-title">기업 개요 & 사업 구조</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:0.75rem; line-height:1.7;">
+      피아이이(PIE)는 2018년 7월 설립된 <strong>AI 기반 제조 지능화 통합 솔루션 전문기업</strong>으로, 2025년 2월 코스닥에 상장하였습니다.
+      머신비전(Machine Vision), 영상처리, 딥러닝 AI 기술을 기반으로 이차전지·반도체·디스플레이 등 전략산업의 제조 공정 검사 S/W를 개발·판매합니다.
+      국내 이차전지 배터리 셀 3사(LG에너지솔루션, 삼성SDI, SK온) 및 해외 메이저 제조사에 라인별 차별화된 솔루션을 <strong>독점 공급</strong>하고 있습니다.
+    </p>
+    <div class="biz-grid">
+      <div class="biz-card">
+        <div class="biz-card-title">🔬 AI 비전 검사 솔루션</div>
+        <div class="biz-card-desc">이차전지 전 폼팩터(원통형·파우치·각형) 외관·내부 결함 검출. 딥러닝 AI 알고리즘 기반 고정밀 검사</div>
+      </div>
+      <div class="biz-card">
+        <div class="biz-card-title">🏭 스마트팩토리 솔루션</div>
+        <div class="biz-card-desc">데이터 기반 제조 공정관리 고도화. MES·SCADA 연동 산업용 AI 솔루션. 자회사 아하랩스·비즈하이시스템 협업</div>
+      </div>
+      <div class="biz-card">
+        <div class="biz-card-title">🔭 비파괴 검사 솔루션 (신사업)</div>
+        <div class="biz-card-desc">초음파·X-ray·CT 기반 내부 검사. 반도체 패키징·유리기판 대응. 배터리 사고 예방 수요 대응</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 재무 추이 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">연간 실적 추이</div>
+    <table class="fin-table">
+      <thead>
+        <tr>
+          <th>연도</th>
+          <th>매출액</th>
+          <th>YoY</th>
+          <th>영업이익</th>
+          <th>YoY</th>
+          <th>당기순이익</th>
+          <th>영업이익률</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2021</td>
+          <td>235억</td>
+          <td>—</td>
+          <td>75억</td>
+          <td>—</td>
+          <td>72억</td>
+          <td>약 31.9%</td>
+        </tr>
+        <tr>
+          <td>2022</td>
+          <td>554억</td>
+          <td class="up">+135.3%</td>
+          <td>81억</td>
+          <td class="up">+7.8%</td>
+          <td>70억</td>
+          <td>14.6%</td>
+        </tr>
+        <tr>
+          <td>2023</td>
+          <td>858억</td>
+          <td class="up">+54.9%</td>
+          <td>40억</td>
+          <td class="down">-50.8%</td>
+          <td>55억</td>
+          <td>4.7%</td>
+        </tr>
+        <tr>
+          <td>2024 (연간)</td>
+          <td><strong>1,240억</strong></td>
+          <td class="up"><strong>+44.5%</strong></td>
+          <td><strong>97억</strong></td>
+          <td class="up"><strong>+142.1%</strong></td>
+          <td><strong>101억</strong></td>
+          <td><strong>7.8%</strong></td>
+        </tr>
+        <tr style="background:#fff1f2;">
+          <td>2025 (3Q 누적)</td>
+          <td>적자전환</td>
+          <td class="down">-40.8%</td>
+          <td colspan="2" class="down">영업이익 적자전환</td>
+          <td class="down">순이익 적자전환</td>
+          <td class="down">—</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px; color:var(--muted); margin-top:0.5rem;">※ 2025년 3Q 악화 원인: 이차전지 제조사 투자 지연 및 생산 Capa 신증설 둔화로 AI 비전 스마트팩토리 솔루션 수요 급감</p>
+  </div>
+
+  <!-- 주요 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2025.03.10</span></div>
+      <div class="news-title">2025 스마트공장·자동화산업전(AW 2025) 참가 — AI 솔루션 라인업 총공개</div>
+      <div class="news-summary">코엑스에서 열린 국내 최대 스마트팩토리 전시회에 참가해 AI 비전검사·데이터 스마트팩토리·AI Agent·초음파검사 등 솔루션을 선보였다. 자회사 아하랩스·비즈하이시스템·에프원테크와 공동 개발한 통합 솔루션 고도화를 공개하며 기업 역량을 어필했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2025.02.14</span></div>
+      <div class="news-title">유리기판 검사 수요 폭증 — 글로벌 반도체 대기업 문의 쇄도</div>
+      <div class="news-summary">삼성전자의 유리기판 자체개발 발표 이후, 국내외 반도체 대기업들의 피아이이 기술 문의가 폭증했다고 회사 측이 공식 발표했다. 피아이이는 오랜 기간 유리기판 검사 기술을 준비해 왔으며, 비파괴검사(초음파·X-ray·CT) 핵심기술을 확보해 반도체 패키징·유리기판 분야 신사업 본격화를 선언했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2025.03.07</span></div>
+      <div class="news-title">키움증권 리포트: "배터리 外 신규 산업 분야 성과 주목"</div>
+      <div class="news-summary">오현진 키움증권 연구원은 자동차·제약·PCB·반도체 등 신규 고객사 확대 계획에 주목했다. 국내 이차전지 셀메이커 3사의 모든 폼팩터·공정에 솔루션이 적용되는 기술적 독점성을 강점으로 평가했으며, 현재 주요 산업 고객사와 스펙 협의 및 PoC(개념검증) 단계가 진행 중이라고 분석했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.05.07</span></div>
+      <div class="news-title">머니투데이 '여의도 클라쓰' 추천 종목 선정</div>
+      <div class="news-summary">이재상 어드바이저가 피아이이를 '클라쓰 있는 종목'으로 언급. 당일 주가 7,350원(+2.51%)을 기록했다. 2026년 들어 AI·반도체 산업의 글로벌 투자 재개 흐름과 함께 관련 테마주로 재부각되는 모습이다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2025 3Q</span></div>
+      <div class="news-title">2025년 3분기 누적 실적 급락 — 이차전지 투자 지연 직격탄</div>
+      <div class="news-summary">2025년 3분기 누적 기준 매출액이 전년 동기 대비 40.8% 급감하며 영업이익·순이익 모두 적자 전환했다. 주요 고객인 국내외 이차전지 제조사들의 CAPA 투자 지연과 신증설 둔화로 AI 비전 스마트팩토리 솔루션 발주가 급감한 것이 원인으로, 사업 다변화 속도가 얼마나 빠르냐가 최대 관건이다.</div>
+    </div>
+  </div>
+
+  <!-- Bull / Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>국내 배터리 셀 3사 + 해외 메이저에 제조 라인별 솔루션 독점 공급 — 경쟁 진입 장벽이 높은 독보적 포지션</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>유리기판·반도체 패키징 검사 신사업 진출 — 삼성전자 유리기판 자체개발 이후 글로벌 대기업 문의 폭증으로 신수익원 가시화</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>비파괴 검사(초음파·X-ray·CT) 솔루션 상용화 추진 — 배터리 사고 예방 규제 강화로 내부검사 수요 구조적 증가 기대</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>자동차·제약·PCB·반도체 등 신규 산업군으로 고객 다변화 — 이차전지 사이클 의존도 낮추는 중장기 성장전략 실행 중</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>2026년 AI·반도체 투자 재개 국면 — 코스피 7,000시대와 글로벌 AI 인프라 확장에 따른 수혜 테마 재부각</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>이차전지 전방 산업 의존도 과다 — 2025년 배터리 투자 지연 하나로 매출 40% 이상 급감, 매출 집중 리스크 상존</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>고객사 CAPEX 지연 및 글로벌 전기차 수요 둔화 — 배터리 셀 메이커의 증설 계획 재조정 시 직접적 수주 감소 우려</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>신사업(유리기판·비파괴검사)의 매출 기여 시점 불확실 — PoC·스펙 협의 단계로 본격 매출화까지 시간이 필요, 수익화 지연 가능성</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>소규모 기업(임직원 186명) 리스크 — 대형 고객사 협상력·확장성 한계, 인력 이탈 시 핵심 기술력 유지 문제</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>상장 초기 주가 변동성 극심 — 52주 고점 12,630원 대비 현재 7,350원으로 약 42% 하락한 상태, 테마성 급등락 반복</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">키움증권 (오현진 연구원)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수(Buy)</span>
+        <span class="target-price">목표가 미제시 (배터리 외 신규산업 성과 모니터링)</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">증권가 전반</span>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">관망</span>
+        <span class="target-price">2025년 실적 악화로 커버리지 제한적</span>
+      </div>
+    </div>
+    <p style="font-size:11px; color:var(--muted); margin-top:0.75rem;">※ 2025년 상장 초기 기업으로 공식 커버리지 증권사가 소수이며, 목표주가 컨센서스 데이터가 제한적입니다.</p>
+  </div>
+
+  <!-- 경쟁사/포지셔닝 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">핵심 경쟁우위 & 포지셔닝</div>
+    <table class="fin-table">
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>내용</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>독점 공급 구조</strong></td>
+          <td>국내 배터리 셀 3사(LG엔솔·삼성SDI·SK온) + 해외 메이저에 제조 라인별 차별화 솔루션 독점 공급. 라인별 맞춤형 AI 알고리즘이 진입 장벽 형성</td>
+        </tr>
+        <tr>
+          <td><strong>수주 잔고</strong></td>
+          <td>2025년 초 기준 수주총액 약 1,700억원, 수주잔고 약 620억원으로 시가총액 상회하는 수준의 가시적 백로그 보유</td>
+        </tr>
+        <tr>
+          <td><strong>기술력</strong></td>
+          <td>딥러닝 기반 검출 AI S/W + 영상처리 알고리즘 자체 보유. 최근 초음파·X-ray·CT 비파괴검사 핵심기술 추가 확보</td>
+        </tr>
+        <tr>
+          <td><strong>테마 포지셔닝</strong></td>
+          <td>이차전지 AI 검사, 스마트팩토리, 유리기판, AI 반도체 등 복수의 고성장 테마에 동시 편입</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      피아이이는 이차전지 배터리 제조 지능화 분야에서 국내 배터리 셀 3사를 비롯한 글로벌 메이저에 AI 비전 검사 솔루션을 독점 공급하는 핵심 소프트웨어 기업입니다. 2024년에는 매출 1,240억원(+44.5%), 영업이익 97억원(+142%)을 달성하며 고성장을 입증했으나, 2025년에는 이차전지 전방 산업의 투자 지연 여파로 실적이 급격히 악화되어 영업이익 적자 전환이라는 큰 충격을 받았습니다. 단기적으로는 이차전지 제조사들의 CAPEX 회복 속도가 가장 중요한 변수이며, 중장기적으로는 유리기판 검사·초음파 비파괴검사·반도체 패키징 등 신규 산업 확장이 매출 다변화와 실적 회복의 열쇠입니다. 2026년 들어 AI·반도체 테마 훈풍과 함께 주가가 재부각되고 있으나, 본격 실적 회복 확인 전까지 변동성이 클 수 있습니다. 독점적 기술 구조와 높은 수주잔고는 긍정적이나, 이차전지 사이클에 대한 높은 의존도와 신사업 매출 기여 시점의 불확실성을 감안한 신중한 접근이 필요합니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주식 투자에는 원금 손실 위험이 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertiv Holdings (VRT) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">VRT · NYSE</div>
+      <div class="company-name">Vertiv Holdings Co.</div>
+      <div class="company-desc">AI 데이터센터용 전력·냉각·인프라 솔루션 글로벌 리더 — 130개국 사업 운영</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 14일</div>
+      <div class="price-display">$367.13</div>
+      <div class="price-change up">▲ 52주 고점 $377.77 근접</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$142B</span>
+    <span class="rating-pill">🏢 섹터: 산업재 / 데이터센터 인프라</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy</span>
+    <span class="rating-pill">📅 다음 실적: 2026.07.29</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 매출</div>
+      <div class="kpi-value">$2.65B</div>
+      <div class="kpi-sub">YoY +30.1%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">조정 영업이익률</div>
+      <div class="kpi-value">20.8%</div>
+      <div class="kpi-sub">전년 대비 +430bp</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">애널리스트 평균 목표가</div>
+      <div class="kpi-value">$347.50</div>
+      <div class="kpi-sub">TipRanks 17개사 기준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$101~$378</div>
+      <div class="kpi-sub">현재가 고점 96% 위치</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q1 FY2026 (2026.04.22 발표, 최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$2.650B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +0.8%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $2.63B · YoY +30.1% · 유기 성장 +23%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">조정 EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.17 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +17%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.00 · YoY +83% (희석 EPS YoY +136%)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>경영진 가이던스:</strong> FY2026 매출 $13.5~14.0B(유기 성장 +29~31%), 조정 EPS $6.30~6.40(+51% YoY 중간값). Q2 2026 EPS 가이던스 $1.37~1.43, 매출 $3.25~3.45B. 수주 잔고 $15B 돌파(전년 대비 2배 이상), book-to-bill ~2.9x. 운영 현금흐름 $767M(+153% YoY). 관세 영향은 가격·원가 관리로 대응 중.
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC — Form 8-K / 10-Q)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">Q1 FY2026 분기 실적 발표 — 매출 $2.65B, 조정 EPS $1.17, 연간 가이던스 상향</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.22</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Strategic Thermal Labs 인수 완료 — 서버 사이드 액체 냉각 전문기업 편입</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.27</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">BMarko Structures 인수 완료 — 모듈형·컨버지드 인프라 솔루션 생산능력 확대</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.13</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">ThermoKey Spa 인수 합의 발표 (이탈리아) — 열관리 기술 포트폴리오 확장, Q2 2026 클로징 예정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.23</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">IR</span>
+        <span style="font-size:13px;font-weight:500;">2026 투자자 컨퍼런스 개최 예정 — 그린빌(사우스캐롤라이나), 전략 발표 및 시설 투어</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.19~20</span>
+    </div>
+  </div>
+
+  <!-- 뉴스 & 이슈 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.22</span>
+      </div>
+      <div class="news-title">Q1 어닝 서프라이즈 — 조정 EPS $1.17로 컨센서스($1.00) 17% 초과, FY2026 가이던스 상향</div>
+      <div class="news-summary">수주 잔고 $15B 돌파(전년 대비 2배), 미주 매출 +44% YoY, AI 데이터센터 수요가 전방위로 폭발적 성장. 주가는 발표 후 급등, 52주 신고가 갱신.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.07</span>
+      </div>
+      <div class="news-title">Citi, 목표주가 $414(Street 최고)로 상향 — 2026 투자자 데이 발표 후 멀티연도 성장 가시성 부각</div>
+      <div class="news-summary">Citi 애널리스트는 AI 데이터센터 지출 확대에 따른 수익·이익 다년 성장 경로를 강조하며 매수 의견 재확인. JP모건도 목표가 $305→$350 상향.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.27</span>
+      </div>
+      <div class="news-title">Strategic Thermal Labs 인수 — NVIDIA GB200/GB300 NVL72 AI 팩토리 서버 사이드 액체냉각 역량 강화</div>
+      <div class="news-summary">콜드플레이트 설계·고밀도 열 검증 전문기업 편입. NVIDIA Vera Rubin DSX AI 팩토리 레퍼런스 디자인에 전력·냉각 솔루션 공식 채택. 차세대 AI 인프라 공급망 핵심 파트너 위상 공고화.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.03.23</span>
+      </div>
+      <div class="news-title">S&P 500 편입(3월 23일 효력) — 기관 패시브 자금 유입 본격화</div>
+      <div class="news-summary">S&P 다우존스 인덱스가 3월 13일 편입 발표. 인덱스 펀드·ETF 의무 편입 수요 발생으로 유동성·수급 개선. YTD 수익률 +128% 달성의 주요 계기 중 하나.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.14</span>
+      </div>
+      <div class="news-title">밸류에이션 부담 — 추정 공정가치 대비 42% 프리미엄, TTM P/E 92.5x</div>
+      <div class="news-summary">현재 주가는 산업 평균(~37x)의 2.5배 수준 PER. 하이퍼스케일러 캐팩스 둔화 또는 경쟁 심화 시 50% 이상 조정 가능성도 언급됨(일부 분석). 성장 스토리 지속 여부가 핵심 관건.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>$15B 잔고 + 가시성 확보</strong> — 수주 잔고가 향후 12~18개월 매출을 커버. Book-to-bill ~2.9x로 수요 둔화 신호 없음.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>NVIDIA 파트너십 심화</strong> — GB200/GB300 NVL72 및 Vera Rubin DSX 레퍼런스 디자인 공식 채택. AI 팩토리 세대마다 필수 공급자 포지션.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>마진 확장 궤도</strong> — 조정 영업이익률 20.8%(+430bp YoY). 2029년 장기 목표 25% 제시. 볼륨 확대로 고정비 레버리지 효과 지속.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>액체냉각 M&A 드라이브</strong> — STL·BMarko·ThermoKey 연달아 인수. AI 서버 전력밀도 상승에 따른 액체냉각 시장(연 +22% 성장) 선점.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>현금 창출력</strong> — Q1 영업현금흐름 $767M(+153% YoY), 순레버리지 ~0.2x로 재무 건전성 우수. 추가 M&A·자본배분 여력 충분.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>과열 밸류에이션</strong> — TTM P/E 92.5x, 포워드 P/E ~53x로 섹터 평균(37x) 대비 40% 이상 프리미엄. 성장 실망 시 급격한 재평가 위험.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>하이퍼스케일러 집중 리스크</strong> — 매출의 상당 부분이 소수 클라우드 기업에 집중. 고객사 캐팩스 내부화 또는 발주 지연 시 잔고 전환 차질.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>경쟁 심화</strong> — Eaton(Boyd Thermal 인수), Schneider Electric, Delta 등이 액체냉각 시장에 공격적 진입. 가격 경쟁 압력 가능성.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>관세·공급망 리스크</strong> — 글로벌 관세 정책 변화가 원가 구조에 영향. Q1에서 관세 영향을 가격으로 상쇄했으나 추가 에스컬레이션 시 마진 압박.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>고베타(β=2.10)</strong> — 시장 변동성 확대 시 주가 변동폭 S&P500의 2배. AI 캐팩스 사이클 둔화 뉴스에 민감하게 반응.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Citi (Street 최고)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">목표가 $414</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">J.P. Morgan</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">목표가 $350 (↑ $305)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Evercore ISI</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">목표가 확인 중</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 평균 (TipRanks 17개사)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy</span><span class="target-price">평균 $347.50 · 최고 $425</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Zacks 컨센서스 (26개사)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy / Buy</span><span class="target-price">2026E EPS $6.42 (컨센서스)</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+      ※ 26개 커버리지 중 Strong Buy 18개, Buy 2개 (76.9% 매수 이상). 일부 기관은 현재 주가가 목표가를 상회함에 따라 중립 유지 중.
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      버티브 홀딩스(VRT)는 AI 데이터센터 전력·냉각 인프라의 가장 순수한 상장 플레이어로, 하이퍼스케일러의 폭발적 설비투자(캐팩스)를 직접적으로 흡수하는 구조다. Q1 2026 어닝 서프라이즈(EPS +17% 초과), $15B 수주 잔고(전년 대비 2배), FY2026 매출 $13.5~14.0B / 조정 EPS $6.30~6.40 가이던스 상향은 단기 모멘텀을 뒷받침한다. NVIDIA 차세대 GPU 레퍼런스 디자인 공식 파트너 채택, S&P500 편입(3월), Strategic Thermal Labs·BMarko·ThermoKey 연속 인수로 중장기 성장 기반도 탄탄하다. 다만 TTM P/E 92.5x, 포워드 P/E ~53x의 밸류에이션은 하이퍼스케일러 캐팩스 사이클이 흔들릴 경우 상당한 조정 리스크를 내포한다. 5월 19~20일 투자자 컨퍼런스와 7월 29일 Q2 실적 발표가 다음 주요 촉매로, 잔고 전환 속도와 마진 확장 지속 여부를 집중 점검할 필요가 있다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

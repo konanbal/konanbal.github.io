@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>카카오뱅크(323410) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0f3460 0%, #1a4a8a 60%, #e94560 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .section-label { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 0.5rem; margin-top: 0.25rem; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">323410 · KOSPI · 은행업</div>
+      <div class="company-name">카카오뱅크</div>
+      <div class="company-desc">대한민국 대표 인터넷전문은행 — 모바일 뱅킹·플랫폼·글로벌 디지털뱅크 사업 영위</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 13일</div>
+      <div class="price-display">25,250원</div>
+      <div class="price-change up">▲ +850원 (+3.48% 전일 대비)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 11.61조원</span>
+    <span class="rating-pill">🏢 섹터: 인터넷전문은행</span>
+    <span class="rating-pill">⭐ 컨센서스 목표가: 30,350원 (추천점수 3.7)</span>
+    <span class="rating-pill">👥 고객수: 2,727만명</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI 그리드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 순이익 (역대 최대)</div>
+      <div class="kpi-value">1,873억원</div>
+      <div class="kpi-sub">YoY +36.3%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업수익</div>
+      <div class="kpi-value">8,193억원</div>
+      <div class="kpi-sub">YoY +4.4%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">컨센서스 목표주가</div>
+      <div class="kpi-value">30,350원</div>
+      <div class="kpi-sub">현재가 대비 +20.2%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value" style="font-size:16px;">20,950~38,750</div>
+      <div class="kpi-sub">현재가 위치: 하단 21%</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">당기순이익 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">1,873억원 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 +2.2%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 약 1,833억원 · YoY +36.3%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업수익 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">8,193억원 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 부합</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +4.4% · 비이자수익 3,029억원(최초 3천억 돌파)</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;font-size:12px;">
+        <div style="color:var(--muted);margin-bottom:3px;">이자이익 YoY</div>
+        <div style="font-weight:700;color:var(--green);">+15.5%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;font-size:12px;">
+        <div style="color:var(--muted);margin-bottom:3px;">순이자마진(NIM)</div>
+        <div style="font-weight:700;color:var(--green);">2.00% (+6bp QoQ)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:0.75rem;font-size:12px;">
+        <div style="color:var(--muted);margin-bottom:3px;">연체율</div>
+        <div style="font-weight:700;">0.51% (전분기 동일)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>📅 실적 발표일: 2026년 5월 6일</strong><br>
+      인도네시아 디지털뱅크 슈퍼뱅크(Superbank) 인도네시아 증권거래소 상장에 따른 투자 평가차액 <strong>933억원</strong>이 영업외손익에 반영. 이를 제외한 일회성 조정 순이익은 약 1,176억원으로 추정. 경영진은 2026 회계연도 주주환원율을 50%까지 확대할 계획이며, 고객 수 2,727만명 달성·MAU 2,032만명으로 역대 최고치 경신을 강조.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기보고서 (2026.03) — 제출 예정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05월 제출</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#166534;margin-right:8px;">주주환원</span>
+        <span style="font-size:13px;font-weight:500;">2026 회계연도 주주환원율 50% 상향 발표</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.06</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">인도네시아 슈퍼뱅크(Superbank) 상장 — 평가차익 933억원 인식</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.06</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">규제리스크</span>
+        <span style="font-size:13px;font-weight:500;">금감원, 인터넷전문은행 전산사고 관련 소집·엄정 조치 예고</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05월</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:0.75rem;padding:8px 12px;background:#f8f9fc;border-radius:6px;">
+      📌 <strong>투자자 주목</strong>: 주주환원율 50% 목표는 밸류에이션 하방을 지지하는 요인. 단, 전산장애 관련 금감원 조치 결과에 따라 운영 리스크 부각 가능성 모니터링 필요.
+    </div>
+  </div>
+
+  <!-- 뉴스 & 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📰 최근 주요 뉴스</div>
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-positive">호재</span>
+          <span class="news-date">2026.05.06</span>
+        </div>
+        <div class="news-title">1Q26 순이익 1,873억원 — 역대 분기 최대 달성</div>
+        <div class="news-summary">비이자수익 첫 3,000억 돌파 및 글로벌 슈퍼뱅크 상장차익 반영. 컨센서스를 소폭 상회하며 어닝 서프라이즈.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-positive">호재</span>
+          <span class="news-date">2026.05.12</span>
+        </div>
+        <div class="news-title">교보증권 "2026년 신규 서비스 Pipeline 확대" BUY·목표가 32,000원</div>
+        <div class="news-summary">우리아이서비스 통한 고객 증가, 외화서비스·외국인 서비스·체크카드 확장 등 성장 파이프라인 긍정 평가.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-neutral">주목</span>
+          <span class="news-date">2026.05.06</span>
+        </div>
+        <div class="news-title">주주환원율 2026 회계연도 50% 상향 발표</div>
+        <div class="news-summary">2025년도 45%에서 50%로 주주환원율 확대. 배당 및 자사주 매입 병행을 통한 주주가치 제고 기대.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-negative">리스크</span>
+          <span class="news-date">2026.05월</span>
+        </div>
+        <div class="news-title">금감원, 인터넷은행 전산사고 관련 소집 — 엄정 조치 예고</div>
+        <div class="news-summary">카카오뱅크 앱 접속 장애(17일 등)가 잇따르며 금감원이 인터넷전문은행을 소집, 전산 리스크 관리 강화를 요구.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-meta">
+          <span class="news-tag tag-negative">리스크</span>
+          <span class="news-date">2026.05.07</span>
+        </div>
+        <div class="news-title">증권가 "박스권 이익·대출 성장 둔화" 다수 중립 유지</div>
+        <div class="news-summary">한화·메리츠·삼성증권 등 주요 증권사들이 가계대출 규제 및 플랫폼 수익 정체를 이유로 목표주가 2.6~3.1만원 내 Hold 의견 유지.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚖️ 투자 포인트</div>
+      <div class="section-label">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list" style="margin-bottom:1rem;">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>비이자수익 3,000억 돌파 — 수익 다변화 궤도 진입</strong>: 수수료·플랫폼·자금운용 포트폴리오 강화로 이자수익 의존도 완화. 비이자수익 비중 37%는 인터넷은행 고밸류 정당화 근거.</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>고객 2,727만명·MAU 2,032만명 — 플랫폼 락인 지속</strong>: 전 연령대 침투율 상승(40대 80%, 50대 62%). 가입자 기반 광고·제휴 수익 레버리지 기대.</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>글로벌 확장 — 슈퍼뱅크 성공 이후 태국 BankX 추진</strong>: 인도네시아 슈퍼뱅크 상장 성공으로 동남아 디지털뱅크 노하우 실증. 태국·기타 신흥국 진출로 성장 스토리 재점화.</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>주주환원율 50% — 배당 매력 강화</strong>: 2026년 50% 환원 목표로 PBR 하방 지지. 전통 은행 대비 높은 ROE 성장 궤적 유지 시 프리미엄 정당화.</div>
+        </div>
+      </div>
+      <div class="section-label">📉 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>가계대출 규제 — 본업 성장 제약</strong>: 대출 규제 영향으로 분기 대출 성장률이 2024년 하반기 이후 평균 1.6%에 그침. 규제 완화 없으면 이자이익 성장 정체 장기화.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>충전영업이익 9분기 박스권 — 핵심 이익 체력 한계</strong>: 2024년 1분기 이후 충전영업이익이 2,000~2,500억원 구간에서 정체. 슈퍼뱅크 일회성 제거 시 실질 이익 성장세 미미.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>고밸류에이션 부담 — PER 20배 vs 은행평균 8배</strong>: 2026년 예상 PER 20.18배는 은행업종 평균(8.18배)의 약 2.5배. 플랫폼 이익 기여 회복 없이는 밸류에이션 정당화 어려움.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>전산장애 리스크 및 금감원 규제 압력</strong>: 반복적인 앱 접속 장애로 금감원 집중 감독 대상. 향후 제재 수위에 따라 브랜드 신뢰도 및 고객 이탈 리스크 상존.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">교보증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수 (BUY)</span>
+        <span class="target-price">목표가 32,000원</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">삼성증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">중립 (HOLD)</span>
+        <span class="target-price">목표가 31,000원</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">메리츠증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">중립 (HOLD)</span>
+        <span class="target-price">목표가 28,000원</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">대신증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">시장수익률 (HOLD)</span>
+        <span class="target-price">목표가 26,000원</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">한화투자증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">중립 (HOLD)</span>
+        <span class="target-price">목표가 26,000원</span>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem;padding:10px 12px;background:#f3f4f6;border-radius:8px;font-size:12px;color:var(--muted);">
+      📊 컨센서스 기준: 커버 증권사 10곳, 컨센서스 목표주가 <strong style="color:var(--text);">30,350원</strong>, 추천점수 3.7 (4 이상 BUY / 3 HOLD 경계권) — 매수·중립 혼재
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      카카오뱅크는 2026년 1분기 순이익 1,873억원으로 역대 최대 분기 실적을 달성하며 인터넷전문은행으로서의 성장 잠재력을 다시 한번 확인했습니다. 비이자수익이 최초로 3,000억원을 돌파하고, 인도네시아 슈퍼뱅크 상장에 따른 933억원의 평가차익이 더해졌습니다. 고객 기반(2,727만명)과 MAU(2,032만명)는 역대 최고치를 경신하며 플랫폼 경쟁력을 입증했습니다. 그러나 일회성 이익을 제거한 실질 충전영업이익은 9분기째 2,000~2,500억원 박스권에 머물고 있어 본질적 성장에 의문부호가 달립니다. 가계대출 규제 장기화로 대출 성장률이 구조적으로 제한되고 있으며, PER 20배에 달하는 밸류에이션은 플랫폼 이익 기여 개선이 전제되어야 정당화됩니다. 대다수 증권사가 중립 의견을 유지하는 가운데, 주주환원율 50% 목표는 하방을 지지하는 요소로 작용합니다. 2분기부터 외화서비스·외국인 서비스 등 신규 상품 효과와 캐피탈사 인수 여부가 성장성 재평가의 분수령이 될 것으로 보입니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성된 분석 자료이며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 수록된 수치 및 의견은 공개된 뉴스·리서치 자료를 바탕으로 하며 변경될 수 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

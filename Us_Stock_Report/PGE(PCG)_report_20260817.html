@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PG&E Corporation (PCG) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">PCG · NYSE</div>
+      <div class="company-name">PG&E Corporation (PG&E)</div>
+      <div class="company-desc">캘리포니아 북부·중부 1,600만 고객에 전기·가스를 공급하는 규제 유틸리티 지주회사. 산불 리스크 관리, 배전망 지중화, AI데이터센터向 전력수요 확대가 핵심 투자 테마</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 8월 17일</div>
+      <div class="price-display">$17.30</div>
+      <div class="price-change up">▲ (2026.08.11 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $39.3B</span>
+    <span class="rating-pill">🏢 섹터: 유틸리티(전력/가스)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (17명 평균 매수)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 GAAP 순이익 (FY26 2분기)</div>
+      <div class="kpi-value">$733M</div>
+      <div class="kpi-sub">전년동기 $521M 대비 +41%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">약 20%</div>
+      <div class="kpi-sub">영업현금흐름마진 약 32%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스, 17명)</div>
+      <div class="kpi-value">$22.78</div>
+      <div class="kpi-sub">현재가 대비 +31.7%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$14.30~$19.16</div>
+      <div class="kpi-sub">현재가 위치: 약 62%</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (2026 회계연도 2분기, 4~6월)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">GAAP EPS (실제 vs 전년)</div>
+        <div style="font-size:18px;font-weight:700;">$0.33 <span style="font-size:12px;color:var(--green);">▲ 전년동기 $0.24 대비 +37.5%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">GAAP 순이익 $733M(전년 $521M)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">비GAAP 핵심 EPS (실제 vs 전년)</div>
+        <div style="font-size:18px;font-weight:700;">$0.40 <span style="font-size:12px;color:var(--green);">▲ 전년동기 $0.31 대비 +29%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">핵심순이익 $920M(전년 $674M)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      발표일 2026.07.23. 상반기 누적 GAAP EPS $0.72, 핵심EPS $0.83. 2026년 전체 비GAAP 핵심EPS 가이던스($1.64~$1.66, 전년比 +10% 중간값)를 재확인. 신규 연속모니터링센터 가동으로 2025년 1월~2026년 6월 누적 28건의 잠재 발화를 방지, 1,960만 정전분을 회피. 6월 $22억 규모 유틸리티 채권 발행 완료(연초 이후 총 $44억), 2027년까지 지중화 1,900마일 이상 목표. AI데이터센터向 전력수요 증가가 매출 성장에 기여했으나 비용 절감분이 고객 요금으로 상쇄되며 전체 매출은 사실상 보합.
+    </div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-K</span>
+        <span style="font-size:13px;font-weight:500;">2025 회계연도 연차보고서</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">유틸리티 자회사 $22억 규모 채권 발행 완료</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2분기 실적 발표 (GAAP EPS +37.5%, 가이던스 재확인)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.23</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">배당결정</span>
+        <span style="font-size:13px;font-weight:500;">2분기 보통주 배당 $0.05/주 선언 (8개 우선주 시리즈 배당 포함)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.21</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.23</span></div>
+      <div class="news-title">2분기 실적 견조 — AI데이터센터向 전력수요와 비용절감이 견인</div>
+      <div class="news-summary">GAAP·비GAAP 핵심 EPS 모두 두 자릿수 성장을 기록하며 2026년 가이던스 달성 궤도를 재확인, 데이터센터 파이프라인이 12GW 이상으로 확대됐다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08월</span></div>
+      <div class="news-title">회사, 산불 배상책임 개혁 입법 불발 시 자사주 매입으로 전환 가능성 시사</div>
+      <div class="news-summary">경영진은 2030년까지의 전체 자본계획이 "건설적인 입법 성과"를 전제로 한다고 밝히며, 입법이 무산될 경우 그리드 투자 대신 주주환원으로 자본배분을 전환할 수 있다고 경고했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.08월(회기 종료 8/31)</span></div>
+      <div class="news-title">캘리포니아 주의회, 산불 배상책임 광범위 정책개혁 논의 — 회기 종료 임박</div>
+      <div class="news-summary">SB254 후속 조치로 산불기금 지속가능성·배상책임 상한·신속보상체계 등을 논의 중이나, 8월 31일 회기 종료 전 합의안 도출 여부가 불확실한 상태다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07월</span></div>
+      <div class="news-title">신규 연속모니터링센터 가동 — 잠재 발화 28건 사전 차단</div>
+      <div class="news-summary">머신러닝 기반 조기 위험 탐지 시스템으로 2025년 1월부터 2026년 6월까지 28건의 잠재 발화와 1,960만 정전분을 회피, 4년 연속 PG&E 설비발 대형 산불 無 기록을 이어갔다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.07~08월</span></div>
+      <div class="news-title">BMO캐피털($28)·트루이스트($21) 등 목표주가 조정 — 밸류에이션 저평가 vs 정책 리스크 공존</div>
+      <div class="news-summary">일부 하우스는 PER 12.6배의 저평가 매력을 근거로 목표가를 상향한 반면, 트루이스트 등은 입법 불확실성을 반영해 목표가를 소폭 하향했다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>4년 연속 PG&E 설비발 대형 산불 無 — 연속모니터링센터 등 첨단 예방기술로 리스크 관리 역량 입증</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>AI데이터센터 전력수요 파이프라인 12GW 이상으로 확대 — 신규 성장동력이자 요금기반 확대 촉매</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>2026년 조정EPS 가이던스($1.64~1.66, 중간값 +10%) 재확인, 비연료 O&M 2~4% 절감 진행 — 안정적 이익 성장 궤도</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>PER 12.6배로 업종 평균(20.8배)·피어 평균(24.6배) 대비 크게 저평가 — 밸류에이션 매력 부각</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>2030년까지 전체 자본계획이 "산불 배상책임 관련 건설적 입법 성사"를 전제로 설계 — 입법 불발 시 투자계획 전면 재검토 가능성</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>회사 스스로 입법 무산 시 그리드 투자 대신 자사주 매입으로 전환 가능성을 시사 — 정책 불확실성이 핵심 리스크</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>캘리포니아 주의회 회기가 8월 31일 종료 예정 — 시한이 임박했으나 합의안 도출 전</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>요금 적정성(affordability) 논쟁 지속 — 규제당국의 요금인상 승인 여부에 실적이 크게 좌우되는 구조</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">BMO Capital (2026.07.24)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$28 (기존 $27)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Truist Financial (2026.08.04)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$21 (기존 $23)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Morgan Stanley</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$22</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      PG&E(PCG)는 2분기 GAAP·핵심EPS 모두 두 자릿수 성장을 기록하며 4년 연속 설비발 대형 산불이 없는 안전 실적과 함께 안정적인 이익 성장 궤도를 보여주고 있다. AI데이터센터向 전력수요 확대(파이프라인 12GW 이상)는 새로운 성장동력으로 부각되고 있으며, PER 12.6배라는 저평가 밸류에이션은 업종 평균 대비 뚜렷한 할인 요인이다. 다만 회사의 2030년 전체 자본계획이 캘리포니아 산불 배상책임 관련 "건설적 입법 성사"를 전제로 설계돼 있고, 경영진 스스로 입법이 무산될 경우 자본배분을 그리드 투자에서 자사주 매입으로 전환할 수 있다고 밝힌 점은 투자 스토리의 핵심 변수다. 8월 31일 종료되는 캘리포니아 주의회 회기 내 입법 성과가 주가의 단기 방향성을 좌우할 가능성이 크다. 이 종목은 저평가된 규제 유틸리티에 투자하면서 캘리포니아 정책 리스크라는 정치적 불확실성을 감내할 수 있는 투자자에게 적합하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

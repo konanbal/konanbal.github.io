@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marvell Technology 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">MRVL · NASDAQ</div>
+      <div class="company-name">Marvell Technology, Inc.</div>
+      <div class="company-desc">커스텀 AI 실리콘·광 인터커넥트·스위칭을 공급하는 데이터 인프라 팹리스 반도체 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 8월 25일</div>
+      <div class="price-display">$229.29</div>
+      <div class="price-change down">▼ -3.27% (8/24 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $2,061억</span>
+    <span class="rating-pill">🏢 섹터: 반도체 (데이터 인프라)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy (매수 24 · 중립 5 · 매도 0)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (Q1 FY27)</div>
+      <div class="kpi-value">$24.18억</div>
+      <div class="kpi-sub">YoY +28% · 분기 사상 최대</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률 (Non-GAAP)</div>
+      <div class="kpi-value">35.0%</div>
+      <div class="kpi-sub">GAAP 기준 14.0%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$266.36</div>
+      <div class="kpi-sub">현재가 대비 +16.2%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$61.44~$329.88</div>
+      <div class="kpi-sub">현재가 위치: 약 63%</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 — Q1 FY2027, 2026.05.27 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 가이던스 중간값)</div>
+        <div style="font-size:18px;font-weight:700;">$24.18억 <span style="font-size:12px;color:var(--green);">▲ 가이던스 상회 (+$1,800만)</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">가이던스 중간값 $24.00억 · YoY +28%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (Non-GAAP / GAAP)</div>
+        <div style="font-size:18px;font-weight:700;">$0.80 <span style="font-size:12px;color:var(--red);">▼ GAAP $0.04 · 시장 예상 대폭 하회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스(Non-GAAP) 확인 불가 · GAAP 순이익 $3,450만 (YoY -81%)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <b>가이던스</b> — Q2 FY27 매출 $27.00억 ±5%, Non-GAAP EPS $0.93 ±$0.05, GAAP EPS $0.37 ±$0.05. 경영진(Matt Murphy CEO)은 "FY27 내내 매 분기 성장률이 가속될 것"이라며 FY27 데이터센터 매출 약 +50%, 인터커넥트 +70% 이상, FY28 매출 약 $165억(+45%)으로 종전 전망을 $15억 상향. GAAP 이익 급감은 우발대가 공정가치 평가손 $3.318억과 주식보상비용 $2.076억 증가에 따른 일회성 요인. <b>Q2 FY27 실적 발표는 2026년 8월 27일(현지) 예정</b>이며, 시장 컨센서스는 매출 약 $27.1억·EPS 약 $0.87로 회사 가이던스 중간값을 밑돕니다.
+    </div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Google과 커스텀 반도체 상업계약 체결(7.29) 및 최대 5,897만주 워런트 발행</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.19</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">FY2027 1분기 분기보고서 (기준일 2026.05.02)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05 (하순)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">NVIDIA 대상 Series A 전환우선주 200만주 사모 발행 완료</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.31</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-K</span>
+        <span style="font-size:13px;font-weight:500;">FY2026 연간보고서 (기준일 2026.01.31) — XConn·Celestial AI 인수 등 기재</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.11</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:0.75rem;background:#f9fafb;padding:10px 12px;border-radius:6px;">
+      📌 <b>투자자 주목 공시</b> — 8월 19일 8-K가 이번 분기 최대 이벤트입니다. 워런트 5,897만주 중 136만주만 1년간 분기 균등 베스팅되고, 나머지는 Google의 커스텀 제품 구매 누적액 $5억마다 1트랜치(총 240트랜치)씩 FY2027 3분기~FY2033에 걸쳐 베스팅됩니다. 즉 <b>지분 희석은 매출이 실제로 발생한 만큼만 진행되는 구조</b>로, 전량 행사 조건을 채우려면 Google이 약 $1,200억을 구매해야 합니다.
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.19</span></div>
+      <div class="news-title">Google에 최대 $122억 규모 주식 워런트 부여 — 커스텀 AI 칩 계약 확대</div>
+      <div class="news-summary">행사가 $206.58에 5,897만주를 2033년 8월까지 매수할 수 있는 권리로, 전량 행사 시 Google은 Marvell의 5대 주주가 됩니다. 계약 범위는 TPU 생태계에 붙는 AI 추론 가속기·스토리지 컨트롤러·NIC·메모리 인터페이스 컨트롤러 전반이며, 로이터는 목표 달성 시 FY2033까지 약 $1,200억 매출로 이어질 수 있다고 보도했습니다. 그동안 Google 커스텀 칩을 사실상 독점하던 Broadcom 주가는 5% 넘게 하락했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.04</span></div>
+      <div class="news-title">하이퍼스케일·에이전틱 AI용 신규 AI 메모리 인프라 플랫폼 공개 — 주가 약 14% 급등</div>
+      <div class="news-summary">AI 워크로드의 메모리 대역폭 병목을 겨냥한 신제품 발표로 $180선에서 $218선까지 단숨에 레벨업했습니다. 커스텀 실리콘에 이어 메모리 인터페이스까지 제품군을 넓혀 하이퍼스케일러 지갑 점유율을 키우는 전략이 시장에서 인정받은 사례입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.24~25</span></div>
+      <div class="news-title">실적 발표를 앞두고 목표주가 상향 러시 — Wells Fargo $310, Rosenblatt $300</div>
+      <div class="news-summary">Wells Fargo(Aaron Rakers)는 목표가를 $240에서 $310으로 대폭 올리며 Overweight를 유지했고, Citi $275, Oppenheimer $300, Roth Capital $350 등 상향이 이어졌습니다. 한 분기 서프라이즈가 아니라 FY28~FY29 이익체력 자체를 재평가한다는 의미로 해석됩니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.08.19</span></div>
+      <div class="news-title">미 FCC, 중국산 신규 광 트랜시버 수입 금지 검토 보도</div>
+      <div class="news-summary">규제가 현실화되면 미국 데이터센터 수요가 비중국 공급사로 이동해 Marvell에 우호적입니다. 다만 머천트 실리콘 전체로 보면 장기 영향은 중립적이라는 평가가 지배적이어서, 단기 심리 재료 성격이 강합니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.21</span></div>
+      <div class="news-title">밸류에이션 부담과 실적 이벤트 리스크 — 옵션시장은 ±12% 변동 반영</div>
+      <div class="news-summary">TTM PER이 약 79~81배로 기대치가 이미 주가에 상당 부분 반영됐습니다. 연초 대비 약 3배 상승했지만 연중 고점 대비로는 약 30% 낮은 수준이라 변동성이 극심하며, 8월 27일 실적에서 마진이나 AI 칩 매출이 기대에 못 미치면 "Google 계약이 단기 이익으로 이어지지 않는다"는 재평가가 나올 수 있습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.08.25</span></div>
+      <div class="news-title">실적 발표 이틀 전 프리마켓 4% 반등, $237선 회복</div>
+      <div class="news-summary">200일 이평($145.78) 대비 약 63%, 50일 이평($232.82) 대비 약 2% 위에서 거래되며 RSI는 52.5로 중립입니다. 50일선이 단기 지지선 역할을 할 가능성이 있습니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>Google 워런트 구조</b> — 고객을 주주로 묶어 이해관계를 일치시킨 계약. Broadcom이 독점하던 TPU 생태계에 진입해 FY2033까지 최대 $1,200억 매출 경로 확보.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>NVIDIA 전략적 투자·제휴</b> — 3월 31일 Series A 전환우선주 사모 발행으로 자본 결합, 광학·NVLink Fusion·AI-RAN 협력으로 신규 기회 창출.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>가속되는 성장 가이던스</b> — 데이터센터가 매출의 76%. FY27 데이터센터 +약 50%, 인터커넥트 +70% 이상, FY28 매출 약 $165억(+45%), 커스텀 칩은 FY29 $100억+ 목표.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>M&A로 기술 스택 완성</b> — Celestial AI(포토닉 패브릭), XConn(PCIe·CXL 스위칭), Polariton(광학) 인수로 CPO·스케일업 네트워킹 역량 확보.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>현금창출력과 주주환원</b> — Q1 영업현금흐름 사상 최대 $6.39억, FCF $4.83억(+127%), 현금 $38.4억. FY26 자사주 $20.4억 + Q1 $2억 매입, 분기배당 $0.06.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>극단적인 밸류에이션 분산</b> — TTM PER 약 80배, 포워드 PER 약 58배. 목표가가 $224(Morgan Stanley)부터 $350(Roth)까지 벌어져 있고, 일각에서는 $100 목표의 매도 의견까지 나옵니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>고객 집중도</b> — 데이터센터가 매출의 76%이고 소수 하이퍼스케일러가 이를 좌우합니다. 고객이 커스텀 실리콘을 내재화하거나 벤더를 교체하면 실적 충격이 큽니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>GAAP 수익성과 희석</b> — Q1 GAAP 순이익 $3,450만(YoY -81%), 순이익률 1.4%. 우발대가 평가손·주식보상비용에 더해 NVIDIA 우선주와 Google 워런트로 주식 수 증가 압력이 지속됩니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>실적 이벤트 리스크</b> — 옵션시장이 ±12% 이상 변동을 반영 중이며, 시장 EPS 컨센서스($0.87)가 회사 가이던스 중간값($0.93)보다 낮은데도 주가는 이미 크게 올라 "beat만으로는 부족한" 국면입니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>경쟁·기술 전환 리스크</b> — ASIC 시장에서 Broadcom과 정면 경쟁하고, CPO/LPO 확산 시 기존 DSP 수요가 잠식될 수 있습니다. 하이퍼스케일러 capex 둔화는 곧바로 실적 하향으로 연결됩니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (최근 액션 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Roth Capital</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$350</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wells Fargo (8.24, $240→상향)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Overweight</span><span class="target-price">$310</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Rosenblatt (8.25)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$300</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Oppenheimer (8.21, $250→상향)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price">$300</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">UBS ($340→하향)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">하향 조정</span><span class="target-price">$300</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Citi (8.20, $225→상향)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$275</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">BMO Capital (8.20, 커버리지 개시)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price">$250</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Morgan Stanley (8.24, $195→상향)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">Equal-Weight</span><span class="target-price">$224</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Goldman Sachs</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$195</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Erste Group (하향)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">Hold</span><span class="target-price">N/A</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:0.75rem;">종합 컨센서스: <b>Strong Buy</b> (매수 24 · 중립 5 · 매도 0, TipRanks) · 평균 목표주가 $266.36 (Yahoo Finance 1년 추정치) — 집계 기관에 따라 $264~$286로 차이가 있습니다.</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Marvell은 지난 1년 사이 "네트워킹·커넥티비티 칩 회사"에서 "AI 인프라 핵심 공급사"로 시장의 분류 자체가 바뀐 종목입니다. FY2026 매출이 42% 늘어 $82억을 기록했고 회사는 FY2027 약 $110억, FY2028 약 $165억을 제시하고 있으며, 데이터센터가 이미 매출의 76%를 차지합니다. 여기에 3월 NVIDIA의 전환우선주 투자와 8월 Google의 최대 $122억 워런트 계약이 더해지면서, 최대 고객사 두 곳이 동시에 주주가 되는 이례적인 구조가 만들어졌습니다. 특히 Google 워런트는 커스텀 제품 매출 $5억마다 한 트랜치씩 베스팅되는 성과연동형이라, 희석이 실제 매출 성장과 짝을 이룬다는 점에서 단순 지분 매각과는 결이 다릅니다.<br><br>
+      반대편에는 명확한 부담이 있습니다. TTM PER 약 80배는 "가속 성장"을 이미 가격에 넣어둔 수준이고, GAAP 순이익률은 1.4%까지 눌려 있으며, 데이터센터 76% 집중은 하이퍼스케일러 한 곳의 의사결정만으로도 스토리가 흔들릴 수 있음을 뜻합니다. 연중 고점 대비 약 30% 조정과 한 달 사이 $163→$245 급등을 오갈 만큼 변동성도 큽니다. 무엇보다 <b>8월 27일 Q2 FY2027 실적 발표</b>가 바로 앞에 있고, 옵션시장은 ±12% 이상의 변동을 반영 중입니다. 컨센서스 EPS($0.87)가 회사 가이던스 중간값($0.93)보다 낮게 잡혀 있다는 점은 눈여겨볼 만하지만, 주가가 이미 크게 오른 상태라 "가이던스가 추가로 상향되는지"가 실제 관건입니다.<br><br>
+      정리하면 <b>이 종목은 AI 데이터센터 capex 사이클에 순수하게 베팅하고 싶고, 20~30%대 급등락을 감내할 수 있으며, 8월 27일 실적과 FY2028 가이던스를 직접 확인한 뒤 비중을 조절할 준비가 된 투자자에게 적합</b>합니다. 안정적인 이익 기반이나 낮은 변동성을 우선하는 투자자에게는 현재 밸류에이션과 이벤트 타이밍 모두 부담스러운 구간입니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주가·목표주가·컨센서스 수치는 2026년 8월 24~25일 기준 공개 자료를 취합한 것으로 실시간 시세와 다를 수 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

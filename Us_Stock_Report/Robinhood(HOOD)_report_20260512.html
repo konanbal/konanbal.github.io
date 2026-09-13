@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robinhood(HOOD) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a0533;
+    --accent: #00c805;
+    --accent2: #6a0dad;
+    --accent3: #9b30f5;
+    --bg: #f5f0fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #1a0533 0%, #3d0f6e 55%, #6a1db5 100%);
+    color: white; padding: 2.5rem 2rem 2rem;
+    position: relative; overflow: hidden;
+  }
+  .report-header::before {
+    content: '🪶';
+    position: absolute; right: 2rem; top: 0.5rem;
+    font-size: 120px; opacity: 0.07;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #00c805; color: #0a1a00; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 13px; opacity: 0.8; max-width: 500px; line-height: 1.5; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #fca5a5; }
+  .price-change.up { color: #86efac; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent3); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Revenue breakdown bars */
+  .rev-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .rev-item:last-child { border-bottom: none; }
+  .rev-label { width: 150px; flex-shrink: 0; }
+  .rev-amount { font-weight: 700; width: 65px; text-align: right; flex-shrink: 0; }
+  .rev-yoy { font-size: 11px; width: 55px; text-align: right; flex-shrink: 0; }
+  .bar-outer { flex: 1; background: var(--border); border-radius: 3px; height: 7px; }
+  .bar-inner { height: 7px; border-radius: 3px; }
+
+  /* Analyst */
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 700; }
+  .target-up { color: var(--green); }
+  .target-down { color: var(--red); }
+
+  /* News */
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+  /* Bull / Bear */
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Catalyst box */
+  .catalyst-box {
+    background: linear-gradient(135deg, #1a0533 0%, #3d0f6e 100%);
+    border-radius: 12px; padding: 1.5rem; color: white; margin-bottom: 1rem;
+    position: relative; overflow: hidden;
+  }
+  .catalyst-box::after { content: '⚡'; position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); font-size: 52px; opacity: 0.1; }
+  .catalyst-title { font-size: 12px; font-weight: 700; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .catalyst-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .catalyst-item { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.5; border: 1px solid rgba(255,255,255,0.15); }
+  .catalyst-item strong { color: #a78bfa; }
+
+  .summary-box { background: linear-gradient(135deg, #fdf4ff 0%, #f0f9ff 100%); border: 1px solid #e9d5ff; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+    .catalyst-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">HOOD · NASDAQ · 핀테크/브로커리지</div>
+      <div class="company-name">Robinhood Markets, Inc.</div>
+      <div class="company-desc">주식·ETF·옵션·암호화폐·예측시장 모두 다루는 미국 1위 리테일 브로커. 2013년 창립, 2억 7천만 고객 기반. 2026년 대형 정책 이벤트(PDT 규제 철폐·Trump Accounts) 최대 수혜주.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 12일</div>
+      <div class="price-display">$78.72</div>
+      <div class="price-change down">▼ YTD -32% | 52주 고점 $153.86 대비 -49%</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$71B</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (23명)</span>
+    <span class="rating-pill">🎯 평균 목표주가: $105 (+33%↑)</span>
+    <span class="rating-pill">📅 다음 실적 발표: 2026.07.28(est.)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 매출</div>
+      <div class="kpi-value" style="color:var(--green)">$1.07B</div>
+      <div class="kpi-sub">YoY +15% (컨센서스 미달 -6%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 순이익</div>
+      <div class="kpi-value">$346M</div>
+      <div class="kpi-sub">YoY +3% / EPS $0.38</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">플랫폼 총자산(AUM)</div>
+      <div class="kpi-value" style="color:var(--green)">$307B</div>
+      <div class="kpi-sub">YoY +39% (순유입 강세)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Gold 구독자</div>
+      <div class="kpi-value" style="color:var(--green)">4.34M</div>
+      <div class="kpi-sub">YoY +36% — 역대 최고</div>
+    </div>
+  </div>
+
+  <!-- 카탈리스트 박스 -->
+  <div class="catalyst-box">
+    <div class="catalyst-title">⚡ 2026년 핵심 카탈리스트</div>
+    <div class="catalyst-grid">
+      <div class="catalyst-item"><strong>SEC PDT 규제 철폐 (4/14)</strong><br>$25,000 데이트레이더 최소 잔고 규제 폐지. 6/4 발효. 전체 고객 25% 직접 수혜. 거래량·마진 수익 급증 기대.</div>
+      <div class="catalyst-item"><strong>Trump Accounts (4월)</strong><br>미 재무부 지정 단독 브로커·수탁자. 5,500만 미국 어린이 계좌 담당. 60M명 잠재 고객. BNY와 공동 운영.</div>
+      <div class="catalyst-item"><strong>싱가포르 MAS 인가 (4/23)</strong><br>싱가포르 금융당국 브로커리지 원칙 승인. 국제 확장 본격화. 캐나다 크립토 출시 예정(2026 중순).</div>
+      <div class="catalyst-item"><strong>예측시장 폭발적 성장</strong><br>Q1 이벤트 컨트랙트 거래량 +320% YoY. 2030년 예측시장 규모 $1조 전망. Robinhood 업계 1위 포지션.</div>
+    </div>
+  </div>
+
+  <!-- 매출 구성 & 수익성 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Q1 2026 매출 구성</div>
+      <div class="rev-item">
+        <div class="rev-label">거래 기반 수익</div>
+        <div class="bar-outer"><div class="bar-inner" style="width:60%;background:#6a0dad;"></div></div>
+        <div class="rev-amount">$623M</div>
+        <div class="rev-yoy" style="color:var(--green)">+7%</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-label">　ㄴ 예측시장</div>
+        <div class="bar-outer"><div class="bar-inner" style="width:15%;background:#9b30f5;"></div></div>
+        <div class="rev-amount">$147M</div>
+        <div class="rev-yoy" style="color:var(--green)">+320%</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-label">　ㄴ 주식</div>
+        <div class="bar-outer"><div class="bar-inner" style="width:17%;background:#7c3aed;"></div></div>
+        <div class="rev-amount">~$180M</div>
+        <div class="rev-yoy" style="color:var(--green)">+46%</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-label">　ㄴ 암호화폐</div>
+        <div class="bar-outer"><div class="bar-inner" style="width:13%;background:#dc2626;"></div></div>
+        <div class="rev-amount">$134M</div>
+        <div class="rev-yoy" style="color:var(--red)">-47%</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-label">순이자 수익</div>
+        <div class="bar-outer"><div class="bar-inner" style="width:35%;background:#2563eb;"></div></div>
+        <div class="rev-amount">$359M</div>
+        <div class="rev-yoy" style="color:var(--green)">+24%</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-label">기타 수익</div>
+        <div class="bar-outer"><div class="bar-inner" style="width:8%;background:#059669;"></div></div>
+        <div class="rev-amount">$85M</div>
+        <div class="rev-yoy" style="color:var(--green)">+57%</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">플랫폼 KPI 추이</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="background:#1a0533;color:white;">
+            <th style="padding:7px 10px;font-size:11px;text-align:left;">지표</th>
+            <th style="padding:7px 10px;font-size:11px;text-align:center;">Q1 2026</th>
+            <th style="padding:7px 10px;font-size:11px;text-align:center;">YoY</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 10px;">유료 고객 수</td>
+            <td style="padding:8px 10px;text-align:center;font-weight:600;">27.4M</td>
+            <td style="padding:8px 10px;text-align:center;color:var(--green);font-weight:600;">+6%</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 10px;">총 투자 계좌 수</td>
+            <td style="padding:8px 10px;text-align:center;font-weight:600;">29.1M</td>
+            <td style="padding:8px 10px;text-align:center;color:var(--green);font-weight:600;">+8%</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 10px;">순 유입액 (Q1)</td>
+            <td style="padding:8px 10px;text-align:center;font-weight:600;">$18B</td>
+            <td style="padding:8px 10px;text-align:center;color:var(--green);font-weight:600;">+22%(연환산)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 10px;">ARPU</td>
+            <td style="padding:8px 10px;text-align:center;font-weight:600;">$157</td>
+            <td style="padding:8px 10px;text-align:center;color:var(--green);font-weight:600;">+8%</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 10px;">Adj. EBITDA</td>
+            <td style="padding:8px 10px;text-align:center;font-weight:600;">$534M</td>
+            <td style="padding:8px 10px;text-align:center;color:var(--green);font-weight:600;">+14%</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;">마진 잔액</td>
+            <td style="padding:8px 10px;text-align:center;font-weight:600;">$17B</td>
+            <td style="padding:8px 10px;text-align:center;color:var(--green);font-weight:600;">~+2배</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">FY2025: 매출 $4.5B(역대), EPS $2.05(역대), 순유입 $68B(역대)</div>
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.14</span></div>
+      <div class="news-title">SEC, 25년 된 PDT 규제 철폐 — 데이트레이더 $25,000 최소 잔고 요건 삭제</div>
+      <div class="news-summary">FINRA Rule 4210 개정으로 데이트레이딩 최소 잔고 요건 폐지. 6월 4일 발효 예정. 발표 당일 HOOD +7.8%, 4월 한 달 간 +31% 급등. Robinhood 고객 25%가 직접 수혜. Mizuho·Cantor Fitzgerald 즉각 목표주가 상향.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.28</span></div>
+      <div class="news-title">Q1 2026 실적 발표 — 매출 +15%, Trump Accounts 단독 브로커 지정</div>
+      <div class="news-summary">매출 $1.07B(+15% YoY), 순이익 $346M(+3%). 미 재무부로부터 Trump Accounts 단독 브로커·수탁자 지정 — 5,500만 어린이 계좌 관리, 60M명 잠재 고객. 4월 주식·옵션 거래량 연중 최고 예고. Robinhood Gold +36%, 플랫폼 자산 $307B</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.23</span></div>
+      <div class="news-title">싱가포르 MAS 브로커리지 원칙 승인 — 아시아 본격 진출 시동</div>
+      <div class="news-summary">싱가포르 통화청(MAS) 종합 브로커리지 서비스 인가 원칙 승인. 2025년 WonderFi(캐나다) 인수에 이어 두 번째 주요 국제 진출. 국제 고객 100만 접근 중. 캐나다 크립토 서비스 2026 중순 출시 예정.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.04.28 어닝 후</span></div>
+      <div class="news-title">Q1 어닝 미스 — 암호화폐 수익 -47% 급락으로 컨센서스 6% 하회</div>
+      <div class="news-summary">크립토 수익 $134M(-47% QoQ, -47% YoY). 매출 컨센서스 $1.14B 대비 $70M 미달. 어닝 발표 후 -9% 급락. KBW 목표 $65 하향, Barclays $82 하향. 단, 코어 사업(주식·옵션·예측시장·이자수익) 강세 지속.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.05.05</span></div>
+      <div class="news-title">CNBC 블라드 테네프 CEO 인터뷰 — 예측시장 전망 강조, Cortex AI 롤아웃</div>
+      <div class="news-summary">CEO 테네프, 예측시장 성장 잠재력과 정보 기능 강조. AI 기반 Cortex Assistant 전체 앱 배포 중(누적 사용자 100만). "위대한 부의 이전(Great Wealth Transfer) 초입에 위치" 강조. Q2 equities·options 거래량 연중 최고 트래킹 중.</div>
+    </div>
+  </div>
+
+  <!-- Bull / Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">📋</span><span><strong>PDT 규제 철폐 — 구조적 볼륨 급증:</strong> 6/4 발효 후 Robinhood 전체 고객 25%의 거래 제한 해소. 거래량·마진 수익 직결 수혜. 크립토 없이도 실적 성장 가능한 새 구조 확보.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🇺🇸</span><span><strong>Trump Accounts — 60M 잠재 고객의 첫 브로커:</strong> 단독 수탁자로 5,500만 어린이 계좌 운영. 장기적으로 '첫 투자 플랫폼' 포지션 독점. 비용 대비 수익 초과 구조(cost-plus).</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌏</span><span><strong>국제 확장 가속:</strong> 싱가포르 MAS 인가·캐나다 크립토 출시·Bitstamp 기관 고객 성장. 국제 고객 100만 접근. 미국 의존도 분산으로 장기 성장 다변화.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">📊</span><span><strong>예측시장·마진·구독 복합 성장:</strong> 예측시장 +320% YoY, 마진 잔액 ~2배($17B), Gold 구독자 +36%(4.34M). 크립토 의존에서 다각화 성공 중. 2030년 예측시장 $1조 규모 기대.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💵</span><span><strong>주주환원 강화:</strong> Q1에만 $250M 자사주 매입. 누적 $1.2B(25M주) 바이백. $1.5B 바이백 프로그램 지속. 현 주가 대비 평균 매입가 $46 → 내재 가치 자신감 표출.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">₿</span><span><strong>크립토 수익 극단적 변동성:</strong> Q4 2024 $358M → Q1 2026 $134M (-63%). 암호화폐 시장이 반등하지 않으면 단기 실적 회복 제한. 전체 수익의 12%인데 주가 영향은 그 이상.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">💸</span><span><strong>비용 가이던스 상향 — 마진 압박:</strong> 2026 OPEX 가이던스 $100M 추가 상향($2.70~2.83B). Trump Accounts 인프라 투자. YTD 주가 -32%인데 비용은 증가. 단기 수익성 개선 지연 우려.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">⚖️</span><span><strong>PFOF(주문흐름 매도) 규제 리스크:</strong> 미국 및 EU 시장에서 지속적으로 규제 압박. 거래 수익의 핵심 구조 변경 시 수익모델 훼손. 특히 해외 확장 시 해당국 규제와 충돌 가능.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>고평가·밸류에이션 리레이팅 리스크:</strong> YTD -32% 하락에도 P/E 여전히 프리미엄. 금리 인하 지연, 시장 침체 시 고베타 핀테크 주 추가 하락 가능. 52주 고점 대비 현재가 -49%.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Citizens</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price target-up">$155</span><span style="font-size:11px;color:var(--muted)">+97%↑</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Bernstein</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price target-up">$130</span><span style="font-size:11px;color:var(--muted)">+65%↑</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Mizuho</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price target-up">$115</span><span style="font-size:11px;color:var(--muted)">+46%↑</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Cantor Fitzgerald</span>
+      <div class="analyst-right"><span class="opinion-badge buy">비중확대</span><span class="target-price target-up">$110</span><span style="font-size:11px;color:var(--muted)">+40%↑</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Compass Point</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price target-up">$107</span><span style="font-size:11px;color:var(--muted)">+36%↑</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Barclays</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$82</span><span style="font-size:11px;color:var(--muted)">+4%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Needham</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$85</span><span style="font-size:11px;color:var(--muted)">+8%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Keefe Bruyette</span>
+      <div class="analyst-right"><span class="opinion-badge sell">하향</span><span class="target-price target-down">$65</span><span style="font-size:11px;color:var(--red)">-17%↓</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);padding-top:10px;">
+      컨센서스: Buy (23명) | 평균 목표가 $105 (현재가 대비 +33%) | 최고 $155 / 최저 $48
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      <strong>Robinhood(HOOD)</strong>는 2026년 최대 변곡점을 맞고 있다. Q1 결과는 겉으로 엇갈렸다. 매출 $1.07B(+15%)는 컨센서스(~$1.14B)를 6% 하회했고 어닝 직후 -9% 급락했다. 핵심 원인은 크립토 수익 -47% 붕괴였다. 하지만 같은 분기에 예측시장 +320%, 주식 +46%, 순이자수익 +24%, Gold 구독자 +36%를 기록하며 사업 다각화는 빠르게 진행됐다.<br><br>
+      더 중요한 건 분기 외부 이벤트다. SEC의 PDT 규제 철폐(6/4 발효)는 Robinhood 전체 고객의 25%가 직접 수혜를 받는 구조적 볼륨 카탈리스트다. 트럼프 행정부로부터 Trump Accounts 단독 브로커·수탁자 지정은 60M명 잠재 고객을 기반으로 한 장기 플랫폼 파워를 강화한다. 싱가포르 MAS 인가와 캐나다 크립토 출시로 국제 성장 스토리도 가시화됐다.<br><br>
+      리스크는 명확하다. 크립토 수익의 극단적 변동성, 비용 가이던스 상향, PFOF 규제 잠재 리스크, YTD -32%의 가격 충격이 복합적으로 작용 중이다. 애널리스트 평균 목표주가 $105는 현재가 대비 +33% 업사이드를 시사하지만, 단기 크립토 모멘텀 부재가 주가 회복의 속도를 제한할 수 있다.<br><br>
+      <strong>결론:</strong> PDT 규제 발효(6/4) 이후 거래량 데이터와 Q2 실적 발표(7/28 est.)가 투자 타이밍의 핵심 체크포인트다. 크립토 사이클 회복과 PDT 해제 효과를 믿는 중장기 성장주 투자자에게 현 가격은 매력적인 재진입 구간으로 볼 수 있다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 데이터 출처: Robinhood IR, 각종 언론사·애널리스트 보고서 (2026.05 기준).
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

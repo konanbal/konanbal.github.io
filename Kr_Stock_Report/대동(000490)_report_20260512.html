@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대동(000490) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0f2b1a;
+    --accent: #1a8040;
+    --accent2: #0e5c2f;
+    --bg: #f4f8f5;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0f2b1a 0%, #1a5c32 55%, #267a44 100%);
+    color: white; padding: 2.5rem 2rem 2rem;
+    position: relative; overflow: hidden;
+  }
+  .report-header::before {
+    content: '🌾';
+    position: absolute; right: 2.5rem; top: 0.5rem;
+    font-size: 110px; opacity: 0.06;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #1a8040; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.3); }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 13px; opacity: 0.8; max-width: 480px; line-height: 1.5; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #fca5a5; }
+  .price-change.up { color: #86efac; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* 매출 구조 */
+  .rev-bar-wrap { background: #f0f4f1; border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; }
+  .rev-bar-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+  .rev-bar { height: 8px; border-radius: 4px; }
+  .rev-bar-bg { background: #e2e8f0; border-radius: 4px; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; }
+
+  /* 밸류업 박스 */
+  .valuup-box {
+    background: linear-gradient(135deg, #0f2b1a 0%, #1a5c32 100%);
+    border-radius: 12px; padding: 1.5rem; color: white; margin-bottom: 1rem;
+    position: relative; overflow: hidden;
+  }
+  .valuup-box::after { content: '🌱'; position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); font-size: 48px; opacity: 0.12; }
+  .valuup-title { font-size: 12px; font-weight: 700; color: #86efac; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .valuup-content { font-size: 14px; line-height: 1.7; opacity: 0.9; }
+  .valuup-highlight { color: #4ade80; font-weight: 700; }
+
+  /* 재무 테이블 */
+  .fin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .fin-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .fin-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .fin-table tr:last-child td { border-bottom: none; }
+  .fin-table tr:nth-child(even) td { background: #f8fafc; }
+  .pos { color: var(--green); font-weight: 600; }
+  .neg { color: var(--red); font-weight: 600; }
+
+  .summary-box { background: linear-gradient(135deg, #f0fff4 0%, #f0f9ff 100%); border: 1px solid #a7f3d0; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">000490 · KOSPI · 농기계/AI로보틱스</div>
+      <div class="company-name">대동 (Daedong)</div>
+      <div class="company-desc">1947년 설립된 국내 1위 농기계 기업. 트랙터·콤바인을 KIOTI 브랜드로 북미·유럽 수출. 2026년 AI·로보틱스 기업 전환 원년 선포.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 12일</div>
+      <div class="price-display">9,880원</div>
+      <div class="price-change down">▼ -2.85% (2026.04.23 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 4,100억원</span>
+    <span class="rating-pill">🏭 업종: 특수목적용 기계(농기계)</span>
+    <span class="rating-pill">📅 설립: 1947년 · 상장: 1975년</span>
+    <span class="rating-pill">🌐 주요 브랜드: KIOTI (해외)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025년 연간 매출</div>
+      <div class="kpi-value" style="color:var(--green)">1조 4,750억</div>
+      <div class="kpi-sub">YoY +4.2% — 창사 이래 역대 최대</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025년 영업이익</div>
+      <div class="kpi-value" style="color:var(--green)">311억원</div>
+      <div class="kpi-sub">YoY +68.3% / 영업이익률 ~2.1%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">8,790~13,640</div>
+      <div class="kpi-sub">현재가 52주 고점 대비 -28%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">당기순손실</div>
+      <div class="kpi-value" style="color:var(--amber)">-251억원</div>
+      <div class="kpi-sub">적자 지속 but 손실폭 축소</div>
+    </div>
+  </div>
+
+  <!-- 밸류업 핵심 전략 박스 -->
+  <div class="valuup-box">
+    <div class="valuup-title">📢 2026.05.07 밸류업 공시 — 2030 중장기 청사진</div>
+    <div class="valuup-content">
+      대동·대동기어·대동금속 3사 동시 공시. <span class="valuup-highlight">2030년 그룹 매출 목표 3조 5,900억원</span> (현재 대비 2.4배). 농기계 일회성 판매 → AI 농업 운영 솔루션 <span class="valuup-highlight">구독형 반복 매출</span> 구조 전환. 2030년까지 배당성향 20% 단계 확대. 북미 딜러 1,000개·유럽 700개 이상 확보 목표.
+    </div>
+  </div>
+
+  <!-- 지역별 매출 구조 & 재무 추이 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">지역별 매출 구조 (2025 3Q 누적)</div>
+      <div class="rev-bar-wrap">
+        <div class="rev-bar-label"><span>🇺🇸 북미 (KIOTI)</span><span style="font-weight:600;">6,723억 <span style="color:var(--green)">+18%</span></span></div>
+        <div class="rev-bar-bg"><div class="rev-bar" style="width:85%;background:#1a8040;"></div></div>
+      </div>
+      <div class="rev-bar-wrap">
+        <div class="rev-bar-label"><span>🇩🇪 유럽</span><span style="font-weight:600;">1,660억 <span style="color:var(--green)">+121%</span></span></div>
+        <div class="rev-bar-bg"><div class="rev-bar" style="width:21%;background:#2563eb;"></div></div>
+      </div>
+      <div class="rev-bar-wrap">
+        <div class="rev-bar-label"><span>🇰🇷 국내</span><span style="font-weight:600;">~3,172억 <span style="color:var(--amber)">축소세</span></span></div>
+        <div class="rev-bar-bg"><div class="rev-bar" style="width:40%;background:#d97706;"></div></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px;">
+        * 북미 매출 비중 약 58% — 환율·관세 영향 민감 구조
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">연간 실적 추이</div>
+      <table class="fin-table">
+        <thead>
+          <tr><th>연도</th><th>매출</th><th>영업이익</th><th>영업이익률</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2022</td><td>1조4,637억</td><td>N/A</td><td>—</td></tr>
+          <tr><td>2023</td><td>조정기</td><td class="neg">↓</td><td>—</td></tr>
+          <tr><td>2024</td><td>조정기</td><td class="neg">185억</td><td>~1.3%</td></tr>
+          <tr><td><strong>2025</strong></td><td class="pos"><strong>1조4,750억</strong></td><td class="pos"><strong>311억</strong></td><td class="pos"><strong>2.1%</strong></td></tr>
+          <tr><td>2026E</td><td>성장 지속 목표</td><td>개선 기대</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 최근 뉴스 & 이슈 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.07</span></div>
+      <div class="news-title">대동그룹 3사 밸류업 공시 — 2030년 매출 3조5,900억 목표 제시</div>
+      <div class="news-summary">대동·대동기어·대동금속 동시 기업가치 제고 계획 공시. AI 농업 운영 플랫폼·로봇·첨단소재 사업 중심으로 포트폴리오 재편. 2030년 배당성향 20% 단계 확대. 주주환원 의지 명확화.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.28~29</span></div>
+      <div class="news-title">2026 대동 테크데이 — AI 무인 트랙터 자율작업 실제 시연</div>
+      <div class="news-summary">창녕 캠퍼스에서 앱 1개로 트랙터 2대 동시 무인 작업 시연 성공. 4년간 510만 장 피지컬 AI 데이터 공개. 전 세계 유일의 소규모 농경지 특화 비전 AI 트랙터임을 강조. 2026년 상용화 재확인.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.02.12</span></div>
+      <div class="news-title">2025년 역대 최대 매출 1조4,750억 달성 — 영업이익 68.3% 급증</div>
+      <div class="news-summary">북미·유럽 매출 합산 949억 증가 견인. 2022년 최고치 경신하며 2년 조정기 종료. 영업이익 311억으로 수익성 구조 개선 확인. 단, 당기순손실 251억으로 이자비용 등 금융비용 부담 지속.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026년 상시</span></div>
+      <div class="news-title">미국 관세 정책 불확실성 — 북미 의존도 58% 구조적 취약점</div>
+      <div class="news-summary">트럼프 관세 정책 변동에 따라 KIOTI 브랜드 북미 수출 수익성 직접 영향. 2025년 관세 환경 속에서도 성장했으나, 관세 심화 시 마진 압박 불가피. 환율 변동도 원화 환산 실적에 영향.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.02</span></div>
+      <div class="news-title">우크라이나 재건 농기계 사업 — 300억 규모 트랙터 공급 진행 중</div>
+      <div class="news-summary">국내 농기계 업체 중 유일하게 우크라이나 농업부와 공식 재건 협력 MOU 체결. 2023년부터 진행해 2025년부터 300억 규모 트랙터 판매. 유럽 기반 재건 수요 장기 수혜 잠재력.</div>
+    </div>
+  </div>
+
+  <!-- Bull / Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">🤖</span><span><strong>AI·로보틱스 전환 본격화:</strong> 2026년 AI 트랙터 상용화(세계 유일 소규모 농경지 특화), 운반로봇·제초로봇 출시. 일회성 판매 → 구독형 반복 매출 구조 전환 시 밸류에이션 리레이팅 기대.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌍</span><span><strong>유럽 고성장 지속:</strong> 2025년 3Q누적 유럽 매출 +121%. 2026년 두 자릿수 성장·시장점유율 3% 목표. 우크라이나 재건 수혜 + 5대 핵심국 맞춤 전략. 북미 집중 리스크 분산 효과.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">📊</span><span><strong>실적 반등 구조 확인:</strong> 2022년 이후 조정기 마치고 역대 최대 매출 경신. 영업이익 +68% 급등으로 수익성 개선 궤도 확인. 2030년 매출 3.6조 목표 달성 시 현 시총 대비 큰 폭 저평가.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌾</span><span><strong>구조적 수요 증가:</strong> 농촌 인구 고령화·감소로 자율주행 농기계 수요 필연적 증가. 식량안보 이슈로 정밀농업 정책 지원 강화. 글로벌 농기계 시장 스마트화 트렌드에 선제 대응.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><strong>당기순손실 지속:</strong> 영업이익 개선에도 당기순손실 251억 지속. 이자비용 등 금융비용 부담이 크고, 신규 사업 투자 확대로 단기 순이익 전환 시점 불확실.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🇺🇸</span><span><strong>북미 관세·환율 리스크:</strong> 매출의 58%가 북미 의존. 미국 농기계 수입 관세 인상, 달러 약세 시 수익성 직격. 2026년 관세 환경 여전히 불안정.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">⏳</span><span><strong>AI 사업 수익화 지연 리스크:</strong> AI 트랙터·로봇 등 신사업의 실질 매출·이익 기여까지 상당 시간 소요. 2030년 목표 달성 여부 불확실. 기술 개발비 선투자 부담 지속.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>낮은 영업이익률(~2%):</strong> 역대 최대 매출에도 영업이익률 2%대 박리다매 구조. 원가 상승, 글로벌 농기계 수요 부진 시 적자 전환 가능성. 글로벌 경쟁사(존디어, 구보다) 대비 마진 열세.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">SK증권 (박찬솔)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">목표가 확인 필요</span>
+        <span style="font-size:11px;color:var(--muted)">2025.01.24</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유안타증권 (손현정)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">중립</span>
+        <span class="target-price">목표가 확인 필요</span>
+        <span style="font-size:11px;color:var(--muted)">2024.04.25</span>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);padding-top:10px;">
+      ⚠️ 최근 커버리지 증권사 수가 적은 편 (소형주 특성). 최신 보고서 개별 확인 권장.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      <strong>대동(000490)</strong>은 1947년 창립 이후 국내 농기계 1위를 유지해온 기업이다. 핵심 전환점은 2026년이다. 2025년 역대 최대 매출(1조 4,750억, +4.2%)과 영업이익 68% 급증으로 2년간의 조정기를 마치고 성장 궤도에 재진입했으며, 2026년 5월에는 AI 트랙터 무인 자율작업 시연에 성공하고 밸류업 공시를 통해 2030년 매출 3조 5,900억 청사진을 공개했다.<br><br>
+      투자 thesis의 핵심은 '농기계 회사 → AI 농업 플랫폼 회사'로의 전환 프리미엄이다. 비전 AI 기반 소규모 농경지 특화 무인 트랙터(전 세계 유일), 자율주행 운반·제초 로봇, OTA·구독형 반복 매출 모델 등 중장기 성장 스토리는 탄탄하다. 북미 KIOTI 브랜드 성장(+18%), 유럽 급팽창(+121%)으로 지역 다변화도 진행 중이다.<br><br>
+      단, 단기 리스크도 명확하다. 영업이익률이 여전히 2%대로 박리다매 구조이며, 당기순손실이 지속되고 있다. 매출의 58%를 차지하는 북미 시장은 미국 관세 정책과 원/달러 환율에 구조적으로 취약하다. 신사업(AI 트랙터·로봇)의 실질 이익 기여까지는 시간이 필요해 단기 주가 모멘텀은 제한적이다.<br><br>
+      <strong>결론:</strong> 대동은 농업 AI·로보틱스 전환 스토리를 믿는 3~5년 중장기 투자자에게 적합한 종목이다. AI 트랙터 상용화 매출 실적, 미국 관세 동향, 유럽 시장점유율 3% 달성 여부가 주요 모니터링 포인트다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 데이터 기준: 각종 언론사·공시 자료 (2026.05 기준).
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

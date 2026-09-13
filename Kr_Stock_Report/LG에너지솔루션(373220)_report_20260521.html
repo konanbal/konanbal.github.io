@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LG에너지솔루션(373220) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0f172a;
+    --accent: #dc2626;
+    --accent2: #7c1e1e;
+    --lg-red: #c0392b;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --ess: #0d9488;
+    --ev: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #7c1e1e 0%, #1e1e3a 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--lg-red); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 540px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--lg-red); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 19px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-warning { background: #fef3c7; color: #92400e; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #fff5f5 0%, #fdf4ff 100%); border: 1px solid #fca5a5; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .pivot-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
+  .pivot-label { font-size: 11px; font-weight: 600; color: var(--ess); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .alert-box { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 10px 14px; margin-bottom: 1rem; font-size: 13px; color: #9a3412; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">373220 · KOSPI</div>
+      <div class="company-name">LG에너지솔루션</div>
+      <div class="company-desc">국내 최대 배터리 기업 | EV → ESS·46시리즈로 사업 피벗 중 | 북미 IRA AMPC 최대 수혜사 | 2026년 실적 저점 통과·2분기 반등 기대</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 21일</div>
+      <div class="price-display">약 476,500원</div>
+      <div class="price-change down">▼ 52주 고점 527,000원 대비 조정 중 / 52주 저점 266,000원</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 111.5조원</span>
+    <span class="rating-pill">🏢 섹터: 2차전지·배터리</span>
+    <span class="rating-pill">⭐ 컨센서스: 매수(Buy)</span>
+    <span class="rating-pill">🎯 2026년 연간 실적 발표 예정: 7월 23일</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 1Q26 어닝 경고 -->
+  <div class="alert-box">
+    ⚠️ <strong>1Q26 어닝쇼크</strong>: 2026년 1분기 영업손실 2,078억원(AMPC 1,898억원 포함). AMPC 제외 시 영업손실 3,975억원. 2분기 연속 적자. 북미 ESS 공장 5곳 초기 램프업 비용 + EV 파우치 물량 감소 복합 작용. 회사는 1분기를 실적 저점으로 판단하고 2분기부터 반등 예고.
+  </div>
+
+  <!-- KPI 카드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025년 연간 매출 (연결)</div>
+      <div class="kpi-value">25조 3,190억원</div>
+      <div class="kpi-sub">전년(25.6조) 대비 소폭 감소</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익</div>
+      <div class="kpi-value" style="color:var(--red)">-2,078억원</div>
+      <div class="kpi-sub">AMPC 제외 시 -3,975억원</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">IRA AMPC (1Q26)</div>
+      <div class="kpi-value" style="color:var(--blue)">1,898억원</div>
+      <div class="kpi-sub">북미 배터리 생산 세액공제</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026년 북미 배터리 CAPA</div>
+      <div class="kpi-value">288GWh</div>
+      <div class="kpi-sub">배터리 3사 중 북미 최대</div>
+    </div>
+  </div>
+
+  <!-- 사업 피벗 카드 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🔄 핵심 사업 피벗 — EV → ESS + 46시리즈</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;">
+      <div class="pivot-box">
+        <div class="pivot-label">🟢 ESS (에너지저장장치)</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6;">2026년 ESS 매출 전년 대비 3배+ 목표. 1분기 전사 매출 비중 20% 중반대까지 확대. AI 데이터센터 UPS/BBU 포함. 중국산 ESS 미국 관세 +17.5% 수혜. LFP JF2 DC LINK 5.0 등 신제품 출시.</div>
+      </div>
+      <div class="pivot-box" style="background:#f5f3ff;border-color:#c4b5fd;">
+        <div class="pivot-label" style="color:var(--ev);">🟣 46시리즈 (원통형)</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6;">수주 잔고 440GWh 이상. 테슬라·완성차 복수 고객 공급 계약. 2026년 미시건·애리조나 공장 양산 개시. 기존 2170 대비 에너지 밀도 5배. 로봇·드론 배터리도 병행.</div>
+      </div>
+      <div class="pivot-box" style="background:#fef9c3;border-color:#fde047;">
+        <div class="pivot-label" style="color:#92400e;">🟡 EV (전기차) — 구조조정 중</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6;">포드(9.6조)·FBPS(3.9조) 합계 13.5조 계약 해지(2025.12). 가동률 낮은 EV 설비 → ESS 전환 중. GM JV 공장 재가동 하반기 기대. EV 수요 회복 시 매출 레버리지 작동.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (2026.04.30 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#fff5f5;border-radius:8px;padding:1rem;border:1px solid #fca5a5;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">1Q26 매출 (실제 vs 컨센서스)</div>
+        <div style="font-size:18px;font-weight:700;">6조 5,550억원 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 +11.8% 상회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY -2.5% / QoQ +1.2% / ESS 비중 20% 중반 확대</div>
+      </div>
+      <div style="background:#fff5f5;border-radius:8px;padding:1rem;border:1px solid #fca5a5;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">1Q26 영업이익 (AMPC 포함)</div>
+        <div style="font-size:18px;font-weight:700;color:var(--red);">-2,078억원 <span style="font-size:12px;color:var(--red);">▼ 어닝쇼크</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">AMPC 1,898억원 포함 / 제외 시 -3,975억원</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>CFO 이창실 부사장 코멘트:</strong> "북미 ESS 생산기지 5곳 초기 안정화(Ramp-up) 비용 부담과 전략 고객 EV 파우치 물량 감소로 손익 악화. 단, ESS 매출 비중 20% 중반대 확대 등 구조적 성장은 진행 중. 1분기를 실적 저점으로 판단하며 2분기부터 ESS 중심 반등 기대. 미국-이란 전쟁으로 에너지 자립 수요 증가 → ESS 사업 기회 확대."
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fee2e2;color:#991b1b;margin-right:8px;">계약해지</span>
+        <span style="font-size:13px;font-weight:500;">포드(Ford)와 전기차 배터리 공급계약 해지 — 9조 6,030억원</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2025.12.17</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fee2e2;color:#991b1b;margin-right:8px;">계약해지</span>
+        <span style="font-size:13px;font-weight:500;">FBPS(Freudenberg)와 전기차 배터리 모듈 공급계약 해지 — 3조 9,217억원</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2025.12.26</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">자금조달</span>
+        <span style="font-size:13px;font-weight:500;">유동성 확보 4.2조원 — ESS 투자 재원 마련</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2025~2026년</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 연결 실적 공시 (매출 6.6조, 영업손실 2,078억)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.30</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">전시회</span>
+        <span style="font-size:13px;font-weight:500;">인터배터리 2026 — LMR 배터리·AI 진단기술·BBU 솔루션 최초 공개</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.11~13</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--amber);background:#fffbf0;border-radius:6px;padding:8px 12px;border-left:3px solid var(--amber);">
+      📌 <strong>투자자 주목</strong>: 포드·FBPS 합계 13.5조원 계약 해지는 향후 실제 매출 미발생분이 제거되는 수주잔고 감소 충격이나, 증권가는 "해당 계약의 실제 매출 기여도는 미미했다"고 평가. EV 설비를 ESS로 전환해 가동률 방어 중. AMPC 회계 처리 방식 변경(1분기부터 매출+영업이익 동시 반영) 유의 필요.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.30</span></div>
+      <div class="news-title">1분기 ESS 매출 비중 20% 중반 확대 — "1Q 저점, 2Q 반등 예고"</div>
+      <div class="news-summary">ESS 사업이 전사 매출의 20% 중반대로 확대되며 의미 있는 성장을 기록. 회사는 2026년 ESS 매출을 전년 대비 3배 이상 성장시키는 목표를 재확인. 미국-이란 전쟁 등 지정학적 리스크로 에너지 자립 수요가 증가하며 ESS가 '필수 인프라'로 부상하고 있다고 진단. 중국산 ESS 관세 +17.5% 수혜도 현실화 중.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.03.11~13</span></div>
+      <div class="news-title">인터배터리 2026 — LMR 배터리·BBU·AI 진단기술 국내 최초 공개</div>
+      <div class="news-summary">LMR(리튬망간리치) 배터리, AI 데이터센터용 BBU(Battery Backup Unit), LFP 기반 JF2 DC LINK 5.0 ESS 솔루션 최초 공개. 차세대 기술력 과시. 인터배터리 2026 주제는 'Original Innovator, Creating the Future of Energy'. 46시리즈 라인업 확장과 로봇·드론용 배터리도 전시.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026년 지속</span></div>
+      <div class="news-title">46시리즈 수주 잔고 440GWh 이상 — 테슬라·복수 완성차 고객 확보</div>
+      <div class="news-summary">46시리즈(4680·4695·46120) 수주 잔고 440GWh 이상. 미시건·애리조나 공장 2026년 양산 개시. 기존 21700 대비 에너지 밀도 5배, 생산 효율 대폭 개선. 2027년부터 본격적인 매출 기여 기대. KB증권은 "ESS·46시리즈 쌍끌이로 확실한 턴어라운드 진입" 판단해 목표가 60만원 제시.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2025.12</span></div>
+      <div class="news-title">포드·FBPS 합계 13.5조원 계약 해지 — EV 캐즘 장기화 충격</div>
+      <div class="news-summary">2025년 12월 포드(9.6조원)·FBPS(3.9조원) 연달아 계약 해지. EV 후발주자 경쟁력 열세 및 배터리팩 업체 철수 연쇄 반응. 실제 매출 기여도는 미미했다는 분석이나 수주 안정성 우려 확산. 글로벌 EV 판매 성장률 급감(+35% → +5%) 여파.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-warning">주목</span><span class="news-date">2026년 상반기</span></div>
+      <div class="news-title">IRA AMPC 정책 불확실성 — 트럼프 2기 세제 변화 리스크</div>
+      <div class="news-summary">트럼프 2기 행정부의 IRA 세액공제 정책 변화 가능성이 주요 리스크로 부각. 1분기 AMPC 1,898억원이 영업손익에 직결. 만약 AMPC가 축소·폐지될 경우 현재의 손실이 더욱 확대될 가능성. 단, 북미에 기투자된 공장의 경쟁력은 단기간에 희석되지 않는다는 반론도 있음.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>ESS 매출 3배 성장 목표 — AI 데이터센터·전력망 수요 폭발</strong> — 2026년 ESS 전년 대비 3배+ 성장, 연간 ESS 출하 EV 추월 전망. 중국산 ESS 관세 +17.5% 직접 수혜. UPS/BBU AI 데이터센터 수요 급증.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>북미 최대 배터리 CAPA(288GWh) + IRA AMPC 최대 수혜</strong> — 배터리 3사 중 북미 생산능력 최대. kWh당 AMPC 세액공제가 구조적 원가 우위. 2027년 301GWh까지 확대.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>46시리즈 수주 잔고 440GWh — 2027년 매출 레벨업</strong> — 테슬라·복수 완성차 고객. 기존 원통형 대비 에너지 밀도 5배 향상. 미시건·애리조나 2026년 양산 개시.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>2분기부터 점진적 실적 회복 — 1분기 저점 가능성 높음</strong> — GM JV 공장 재가동, 북미 ESS 안정화, 유럽 공장 가동률 회복. 2026년 하반기 영업이익 흑자 전환 기대.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>LMR·전고체 차세대 배터리 파이프라인</strong> — 비용 15% 개선 차세대 ESS용 LFP 제품(2028년 공급 예정). 리튬망간리치(LMR) 배터리 최초 공개. 전고체 배터리 개발 지속.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>EV 캐즘 장기화 — 북미 공장 가동률 저하 지속</strong> — 글로벌 EV 성장률 급감(+35%→+5%), 포드·FBPS 13.5조 계약 해지. 북미 EV 파우치 라인 수요 공백이 ESS 전환으로 완전히 메워질지 불확실.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>AMPC(IRA 세액공제) 정책 리스크</strong> — 트럼프 2기 IRA 축소·폐지 시 연간 수천억원 영업이익 증발. AMPC 없이는 적자 폭이 훨씬 커지는 구조적 의존성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>북미 ESS 공장 5곳 동시 램프업 비용 부담 지속</strong> — 초기 안정화 비용이 적어도 2026년 상반기까지 지속 예상. ESS 생산 정상화 속도가 실적 회복 타임라인의 핵심 변수.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>중국 배터리 업체(CATL·BYD) 저가 공세 심화</strong> — LFP 배터리 원가 경쟁력에서 중국 업체 대비 열위. 비관세 장벽 완화 시 경쟁 심화 재현 가능성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>막대한 설비투자 부담 — 비유동자산 44.9조원(2024년)</strong> — 3년 만에 2.3배 증가한 설비 투자가 2026~2027년 ESS·46시리즈 매출로 회수되지 않으면 재무 부담 지속. 감가상각 비용 증가로 손익 압박.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">한화투자증권 (이용욱)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 600,000원 <span style="font-size:11px;color:var(--green)">(상향, ESS·46시리즈 턴어라운드)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유진투자증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 550,000원 <span style="font-size:11px;color:var(--green)">(상향)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">KB증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 530,000원 <span style="font-size:11px;color:var(--green)">(상향, ESS 기대 이상)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">IBK투자증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 — <span style="font-size:11px;color:var(--muted);">2026년 매출 29.7조 전망 (매 분기 성장)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 (평균)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 약 500,000~540,000원 <span style="font-size:11px;color:var(--green)">(현재가 대비 +5~13%)</span></span></div>
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      LG에너지솔루션은 EV 캐즘이라는 업황 역풍 속에서 ESS(에너지저장장치)와 46시리즈 원통형 배터리로 사업 피벗을 단행하고 있는 전환기적 국면의 배터리 대장주다. 2026년 1분기 영업손실 2,078억원(AMPC 제외 시 -3,975억원)이라는 어닝쇼크를 기록했으나, 회사는 이를 실적 저점으로 판단하며 2분기부터 ESS 중심 반등을 예고했다. ESS 사업이 전사 매출의 20% 중반대까지 확대됐고, 2026년 ESS 매출 3배+ 성장 목표가 달성된다면 ESS 출하가 EV 출하를 추월하는 역사적 전환점이 된다.
+
+      북미 배터리 3사 중 최대 생산능력(288GWh)과 IRA AMPC 세액공제라는 구조적 강점, 46시리즈 수주 잔고 440GWh+, 중국산 ESS 관세 수혜(+17.5%)는 중장기 회복의 핵심 근거다. 그러나 AMPC 정책 불확실성, 북미 EV 파우치 물량 감소, 램프업 비용 지속, 막대한 설비 투자(비유동자산 44.9조)의 조기 회수 여부는 여전히 유효한 리스크다. <strong>ESS 사업의 구조적 성장과 46시리즈 매출화를 중장기 시야(2026~2028년)로 베팅하는 투자자에게 적합한 종목</strong>이며, 단기 실적 변동성이 높아 분할 접근이 바람직하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

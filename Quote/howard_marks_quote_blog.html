@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>잘 사기만 해도 절반은 이미 이긴 것 — 하워드 막스</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f9f9f7; min-height: 100vh; display: flex; justify-content: center; padding: 3rem 1.5rem; }
+    .blog-wrap {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #1a1a1a;
+      max-width: 680px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 3rem 3.5rem 4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    }
+    .category-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: #1a56a0;
+      background: #e8f0fb;
+      border-radius: 8px;
+      padding: 3px 10px;
+      margin-bottom: 1.2rem;
+      text-transform: uppercase;
+    }
+    .blog-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 0.65rem;
+      color: #1a1a1a;
+    }
+    .blog-subtitle {
+      font-size: 15px;
+      color: #666666;
+      line-height: 1.65;
+      margin-bottom: 1rem;
+    }
+    .meta {
+      font-size: 12px;
+      color: #999999;
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .meta-dot { width: 3px; height: 3px; border-radius: 50%; background: #cccccc; }
+    .hero-quote {
+      border-left: 3px solid #4a8fd4;
+      background: #f6f6f4;
+      border-radius: 0 8px 8px 0;
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 2rem;
+    }
+    .hero-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.9;
+      color: #1a1a1a;
+      margin-bottom: 0.75rem;
+    }
+    .hero-attr {
+      font-size: 13px;
+      color: #1a56a0;
+      font-weight: 500;
+    }
+    hr { border: none; border-top: 1px solid #e0e0e0; margin: 2rem 0; }
+    .section-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 0.9rem;
+      color: #1a1a1a;
+    }
+    .body-text {
+      font-size: 15px;
+      line-height: 1.9;
+      color: #1a1a1a;
+      margin-bottom: 1.4rem;
+    }
+    .body-text b { font-weight: 500; }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin: 1.5rem 0 2rem;
+    }
+    .info-card {
+      background: #f6f6f4;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+    }
+    .card-label { font-size: 11px; color: #999999; margin-bottom: 4px; }
+    .card-value { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+    .principle-list { list-style: none; padding: 0; }
+    .principle-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .principle-item:last-child { border-bottom: none; }
+    .num-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #e8f0fb;
+      color: #1a56a0;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .principle-text { font-size: 14px; line-height: 1.8; color: #1a1a1a; }
+    .principle-text b { font-weight: 500; }
+    .closing-quote {
+      border-top: 1px solid #e0e0e0;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      text-align: center;
+    }
+    .closing-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 15px;
+      color: #666666;
+      line-height: 1.85;
+    }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1.5rem; }
+    .tag {
+      font-size: 12px;
+      color: #666666;
+      border: 1px solid #cccccc;
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+
+  <span class="category-tag">투자 철학</span>
+  <h1 class="blog-title">잘 사기만 해도 절반은 이미 이긴 것</h1>
+  <p class="blog-subtitle">하워드 막스가 말하는 '매수의 기술' — 팔 걱정을 덜어주는 단 하나의 원칙</p>
+  <div class="meta">
+    <span>2026년 5월 25일</span>
+    <span class="meta-dot"></span>
+    <span>읽기 약 3분</span>
+    <span class="meta-dot"></span>
+    <span>투자 원칙</span>
+  </div>
+
+  <div class="hero-quote">
+    <p>
+      "잘 사기만 한다면 절반은 판 것이나 다름없다. 즉 보유 자산을 얼마에, 언제, 누구에게, 어떤 방법으로 팔지에 대해 고심하느라 많은 시간을 보내지 않아도 된다는 의미다. 자산을 저가에 매수했다면 위의 문제들은 저절로 해결될 것이다."
+    </p>
+    <span class="hero-attr">— 하워드 막스 (Howard Marks)</span>
+  </div>
+
+  <hr>
+
+  <p class="section-title">매수 가격이 모든 것을 결정한다</p>
+  <p class="body-text">
+    많은 투자자가 "언제 팔아야 할까?"를 가장 어려운 질문으로 꼽습니다. 목표주가를 얼마로 잡아야 할지, 주가가 오르면 더 보유해야 할지 팔아야 할지, 떨어지면 손절해야 할지 기다려야 할지 — 이 고민들은 밤잠을 설치게 합니다.
+  </p>
+  <p class="body-text">
+    하워드 막스는 이 질문 자체를 다른 각도에서 바라봅니다. <b>출구 전략의 복잡성은 대부분 잘못된 진입 가격에서 비롯된다는 것</b>입니다. 충분히 낮은 가격에 매수했다면, 가격이 어느 정도 회복되기만 해도 이익이 나고, 팔 타이밍에 대한 불안도 현저히 줄어듭니다.
+  </p>
+
+  <p class="section-title">오크트리를 만든 투자 철학</p>
+
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="card-label">생애</div>
+      <div class="card-value">1946년생 · 78세</div>
+    </div>
+    <div class="info-card">
+      <div class="card-label">소속</div>
+      <div class="card-value">오크트리 캐피털 공동 창업자</div>
+    </div>
+    <div class="info-card">
+      <div class="card-label">운용 규모</div>
+      <div class="card-value">약 1,800억 달러 (AUM)</div>
+    </div>
+    <div class="info-card">
+      <div class="card-label">별칭</div>
+      <div class="card-value">'메모의 달인' — 워런 버핏이 애독</div>
+    </div>
+  </div>
+
+  <p class="body-text">
+    하워드 막스는 1995년 오크트리 캐피털을 공동 창업해 부실채권·신용 투자 분야의 세계적 권위자가 된 인물입니다. 그가 주기적으로 발행하는 투자 메모는 워런 버핏이 "도착하는 즉시 읽는 두 가지 중 하나"라고 밝힐 만큼 업계 필독서로 꼽힙니다. 막스의 철학 핵심은 일관됩니다 — <b>리스크 통제와 저가 매수야말로 수익보다 먼저 고민해야 할 것</b>이라는 믿음입니다.
+  </p>
+
+  <hr>
+
+  <p class="section-title">명언에서 도출하는 3가지 매수 원칙</p>
+  <ul class="principle-list">
+    <li class="principle-item">
+      <div class="num-badge">1</div>
+      <div class="principle-text"><b>가격이 곧 리스크 관리다</b><br>좋은 자산을 비싸게 사는 것은 나쁜 자산을 싸게 사는 것만큼 위험할 수 있습니다. 매수 가격 자체가 가장 강력한 손실 방어 수단입니다.</div>
+    </li>
+    <li class="principle-item">
+      <div class="num-badge">2</div>
+      <div class="principle-text"><b>출구 전략은 진입 전략의 결과물이다</b><br>"언제 팔까"를 고민하기 전에 "지금 가격이 충분히 낮은가"를 먼저 따져야 합니다. 진입을 잘했다면 출구는 덜 급박해집니다.</div>
+    </li>
+    <li class="principle-item">
+      <div class="num-badge">3</div>
+      <div class="principle-text"><b>인내심은 할인된 형태로 보상받는다</b><br>저가 매수 기회는 시장이 공포에 질렸을 때 옵니다. 평정심을 유지하고 기다릴 수 있어야 이 원칙을 실천에 옮길 수 있습니다.</div>
+    </li>
+  </ul>
+
+  <hr>
+
+  <p class="section-title">지금 이 시대의 투자자에게</p>
+  <p class="body-text">
+    AI 테마가 시장을 달구고, 단기 급등주가 연일 화제를 모으는 지금, 많은 투자자들이 '무엇을 살지'보다 '언제 팔지'를 더 자주 검색합니다. 이 현상 자체가 막스의 명언이 가리키는 문제를 드러냅니다 — <b>진입 가격에 대한 충분한 고민 없이 매수했기 때문</b>입니다.
+  </p>
+  <p class="body-text">
+    물론 어떤 가격이 '충분히 낮은지'를 판단하는 것 자체가 투자의 본질적 어려움입니다. 막스도 이것이 쉽다고 말하지 않습니다. 다만 그는 이 어려운 질문에 충분한 시간을 쏟는 것이 곧 나중의 불안을 줄이는 일임을 상기시킵니다.
+  </p>
+
+  <div class="closing-quote">
+    <p>좋은 투자는 매수하는 순간 이미 시작된다.<br>팔 때를 걱정하는 에너지는 살 때를 고르는 데 써야 한다.</p>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag">#하워드막스</span>
+    <span class="tag">#투자철학</span>
+    <span class="tag">#가치투자</span>
+    <span class="tag">#매수전략</span>
+    <span class="tag">#오크트리캐피털</span>
+    <span class="tag">#주식투자</span>
+    <span class="tag">#리스크관리</span>
+  </div>
+
+</article>
+</body>
+</html>

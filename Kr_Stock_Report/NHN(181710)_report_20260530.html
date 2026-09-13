@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NHN(181710) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">181710 · KOSPI</div>
+      <div class="company-name">NHN</div>
+      <div class="company-desc">게임·결제·클라우드를 3대 축으로 하는 한국 종합 IT 기업. 한게임, NHN KCP, NHN클라우드 운영.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 30일</div>
+      <div class="price-display">41,000원</div>
+      <div class="price-change down">▼ 52주 범위: 18,540 ~ 44,150원</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 5,300억원</span>
+    <span class="rating-pill">🏢 섹터: IT서비스 (KOSPI)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 매수 (8명)</span>
+    <span class="rating-pill">💰 PBR: 0.89배 (저평가 구간)</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 매출</div>
+      <div class="kpi-value">6,714억</div>
+      <div class="kpi-sub">YoY +11.9%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익</div>
+      <div class="kpi-value">263억</div>
+      <div class="kpi-sub" style="color:var(--red);">YoY -5.0% (GPU 선투자)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 컨센서스</div>
+      <div class="kpi-value">40,700원</div>
+      <div class="kpi-sub">최고 48,000원 (메리츠)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025 연간 영업이익</div>
+      <div class="kpi-value">1,324억</div>
+      <div class="kpi-sub" style="color:var(--green);">역대 최대 · 전년比 흑자전환</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 섹션 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">6,714억 <span style="font-size:12px;color:var(--red);">▼ 컨센서스 소폭 미달 -2.1%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 약 6,850억 · YoY +11.9%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">263억 <span style="font-size:12px;color:var(--red);">▼ 어닝 쇼크 -76.6%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">EPS(TTM) 1,023원 · YoY -5.0%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">순이익</div>
+        <div style="font-size:18px;font-weight:700;">311억 <span style="font-size:12px;color:var(--green);">▲ 흑자전환</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년 동기 적자 → 흑자전환</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>실적 발표일: 2026년 5월 12일</strong> | 정우진 대표: "AI GPU 사업 본격화를 위한 선제적 인프라 투자 비용이 일시적 부담으로 작용했으나, 2분기부터 기술사업에서 의미 있는 실적 개선이 가능할 것." — 양평 리전 B200 GPU가 3월 말 가동 시작, 4월부터 매출 인식. 5년간 3,000억원 GPU 매출 목표 유지.
+    </div>
+  </div>
+
+  <!-- DART 공시 섹션 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#166534;margin-right:8px;">자사주취득</span>
+        <span style="font-size:13px;font-weight:500;">자기주식 취득결정 — 167억원 규모, 취득 즉시 100% 전량 소각 예정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.12</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 경영실적 발표 — 매출 6,714억원, 영업이익 263억원</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.12</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">NHN벅스 지분 45.26% 매각 — 엔디티엔지니어링 등에 347억원에 양도</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.01.15</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">주주환원</span>
+        <span style="font-size:13px;font-weight:500;">3개년 주주환원 정책 공시 — EBITDA 15% 재원, 배당성장 + 자사주 소각</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2025.08.12</span>
+    </div>
+    <div style="font-size:12px;color:var(--blue);background:#eff6ff;padding:8px 12px;border-radius:6px;margin-top:0.75rem;">
+      📌 <strong>투자자 주목 공시:</strong> 2026년 상법 개정으로 자사주 의무 소각이 도입된 가운데, NHN은 167억원 규모 자사주를 취득 즉시 100% 소각 방침을 선언. 기존 정책(50% 즉시 소각)을 초과하는 강력한 주주환원 시그널.
+    </div>
+  </div>
+
+  <!-- 뉴스 & 이슈 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.12</span>
+      </div>
+      <div class="news-title">GPU 클라우드 사업 본격화 — 양평 리전 B200 가동, 2Q부터 매출 반영</div>
+      <div class="news-summary">NHN클라우드 양평 리전에 구축한 B200 GPU가 3월 말 정상 가동을 시작, 관련 매출은 4월부터 인식. 5년간 3,000억원의 정부 GPU 공급 사업 수주와 크래프톤 3년 1,000억원 계약도 확보. 2Q26부터 기술부문 실적 개선이 본격화될 전망이다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.02.12</span>
+      </div>
+      <div class="news-title">2025년 연간 매출·영업이익 역대 최대 달성 — 매출 2조5,163억원</div>
+      <div class="news-summary">2025년 연결기준 매출 2조5,163억원(YoY +2.5%), 영업이익 1,324억원으로 전년 대비 흑자전환하며 연간 기준 역대 최대치를 동시에 달성. 4분기 영업이익은 551억원으로 분기 기준도 사상 최대 기록. 게임·결제·기술 3개 핵심사업 모두 성장세.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.02</span>
+      </div>
+      <div class="news-title">웹보드 규제 완화 시행 — 결제 한도 상향, 1Q 웹보드 매출 +11% YoY</div>
+      <div class="news-summary">2026년 2월 웹보드 게임 결제 한도 규제가 완화되며 주요 타이틀의 1인당 평균 결제액이 상승, 1분기 전체 웹보드 매출이 전년 동기 대비 11% 증가. 한게임 로얄홀덤은 오프라인 토너먼트 효과로 분기 매출이 전 분기 대비 51% 급증했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.01.15</span>
+      </div>
+      <div class="news-title">NHN벅스 347억원에 매각 완료 — 경영 효율화 일환</div>
+      <div class="news-summary">NHN이 음원 서비스 자회사 NHN벅스 지분 45.26%를 347억원에 엔디티엔지니어링 등에 매각. 만성 적자 자회사를 정리함으로써 연결 수익성 개선 효과가 기대된다. 매각 차익 일부가 순이익에 반영될 예정.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.05.12</span>
+      </div>
+      <div class="news-title">일본 게임 시장 전략적 집중 선언 — 일본 유명 IP 신작 준비 중</div>
+      <div class="news-summary">정우진 대표가 컨퍼런스콜에서 "한국보다 일본 시장을 타깃으로 게임 전략을 재편"한다고 공식화. 일본 인지도 높은 IP 계약을 추진 중이며 코드명 단계의 프로젝트도 진행 중. 구체적인 출시 일정은 미공개 상태.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.12</span>
+      </div>
+      <div class="news-title">1Q26 영업이익 어닝쇼크 — GPU 선투자 비용으로 컨센서스 대폭 하회</div>
+      <div class="news-summary">1분기 영업이익이 263억원으로 컨센서스 대비 약 76% 하회하는 어닝쇼크 기록. GPU 인프라 구축 과정의 선제적 비용 인식이 주원인. 시장은 '일시적 부담'으로 해석했으나, 2분기 GPU 매출 반영 가시성이 관건이다.</div>
+    </div>
+  </div>
+
+  <!-- Bull / Bear 분석 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>GPU 클라우드 매출 본격화</strong> — 양평 B200 리전 4월 가동, 정부 사업 5년 3,000억 + 크래프톤 3년 1,000억 계약 확보. 2Q부터 기술부문 실적 V자 반등 기대.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>웹보드 규제 완화 수혜 지속</strong> — 2월 결제 한도 상향 효과가 2분기부터 본격 반영. 한게임포커클래식·로얄홀덤 성장세 유지 중.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>결제 부문 고성장 구조화</strong> — NHN KCP 1Q 해외 거래액 +68.3% 급증, 월 거래규모 5조원 돌파. 간편결제 시장 우상향 구조에서 수혜.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>강력한 주주환원 정책</strong> — EBITDA 15% 재원, 3개년 배당성장 + 자사주 100% 즉시 소각(2026). PBR 0.89 저평가 구간에서 밸류업 모멘텀.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>적자 자회사 정리 완료</strong> — NHN벅스 매각으로 연결 수익성 개선. 경영 효율화 기조 유지로 추가 체질 개선 가능성.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>GPU 투자 비용 부담 지속 가능성</strong> — 1Q 선투자 비용이 어닝쇼크를 유발. 클라우드 확장을 위한 추가 인프라 투자가 이어질 경우 영업이익 압박 반복 우려.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>게임 신작 출시 불확실성</strong> — 일본 IP 기반 신작의 구체적 출시 일정·제목 미공개. 게임 부문 성장 모멘텀이 신작 흥행에 의존하는 구조적 리스크.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>웹보드 규제 완화 효과 체감 시차</strong> — 과거 규제 완화 시 실적 반영까지 1~2개월 소요. 규제 효과가 기대보다 약할 경우 게임 부문 성장률 둔화 가능.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>기타 부문 매출 감소세</strong> — 1Q26 기타 부문 YoY -18.9%, QoQ -10.0%. 일부 법인 서비스 종료에 따른 외형 축소가 전사 성장률을 희석.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>클라우드 경쟁 심화</strong> — AWS·KT·NCP 등과의 공공 클라우드 경쟁 격화. GPU 공급망 이슈나 정부 예산 변화로 공공 클라우드 매출 지연 가능성.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">메리츠증권 (이효진)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">목표가 47,000원 (+14.6%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.02.13</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">NH투자증권 (안재민)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">목표가 40,000원 (-2.4%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.01.02</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">한화투자증권 (김나우·김소혜)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">목표가 36,000원 (-12.2%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.01.26</span>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem;padding:10px 12px;background:#f8f9fc;border-radius:8px;font-size:12px;color:var(--muted);">
+      ※ 총 8명 애널리스트 전원 매수 의견 · 컨센서스 목표가 평균 40,700원 (현재가 대비 약 -0.7%) · 목표가 최고 48,000원, 최저 24,800원
+    </div>
+  </div>
+
+  <!-- 2026년 실적 추정 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📊 2025~2027E 주요 재무 추정 (메리츠증권)</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="background:#f3f4f6;">
+            <th style="padding:8px 12px;text-align:left;font-weight:600;color:var(--muted);font-size:11px;">항목</th>
+            <th style="padding:8px 12px;text-align:right;font-weight:600;color:var(--muted);font-size:11px;">2025 실적</th>
+            <th style="padding:8px 12px;text-align:right;font-weight:600;color:var(--blue);font-size:11px;">2026E</th>
+            <th style="padding:8px 12px;text-align:right;font-weight:600;color:var(--muted);font-size:11px;">2027E</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 12px;">매출액</td>
+            <td style="padding:8px 12px;text-align:right;">2조5,163억원</td>
+            <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--blue);">2조6,938억원</td>
+            <td style="padding:8px 12px;text-align:right;">2조9,598억원</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 12px;">영업이익</td>
+            <td style="padding:8px 12px;text-align:right;">1,324억원</td>
+            <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--blue);">1,638억원</td>
+            <td style="padding:8px 12px;text-align:right;">2,471억원</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 12px;">당기순이익</td>
+            <td style="padding:8px 12px;text-align:right;">578억원</td>
+            <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--blue);">1,223억원</td>
+            <td style="padding:8px 12px;text-align:right;">2,038억원</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;">EPS (추정)</td>
+            <td style="padding:8px 12px;text-align:right;">—</td>
+            <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--blue);">2,869원</td>
+            <td style="padding:8px 12px;text-align:right;">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;">* 2026E 메리츠증권 추정치 기준. 컨센서스 대비 메리츠 영업이익 추정치 +20.7% 상단.</div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      NHN은 2025년 연간 기준 매출·영업이익 역대 최대를 달성하며 본격적인 턴어라운드 사이클에 진입했다. 2026년 1분기는 GPU 인프라 구축을 위한 선제적 비용 인식으로 영업이익이 일시 감소했으나, 양평 리전 B200 GPU가 4월부터 매출 인식을 시작하면서 2분기부터 기술부문의 실질적 실적 반등이 예상된다. 게임 부문에서는 웹보드 규제 완화(2026년 2월)가 결제 이용자 증가로 이어지며 상승 모멘텀이 유지되고 있고, NHN KCP 해외 결제 거래액의 고성장도 안정적 성장 기반을 제공한다. 단기 리스크로는 GPU 투자 비용 부담과 게임 신작 출시 불확실성이 있으나, 3개년 주주환원 정책(EBITDA 15% + 자사주 100% 즉시 소각)은 밸류업 모멘텀을 강화하는 재료다. PBR 0.89배의 저평가 구간에서 거래 중이며, 메리츠증권 목표주가 47,000원 기준 약 15% 상승 여력이 있다. <strong>이 종목은 GPU 클라우드 성장에 베팅하면서 게임·결제의 안정적 캐시플로우를 함께 누리고 싶은 중장기 성장형 투자자에게 적합하다.</strong>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

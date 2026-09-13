@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조비에비에이션(JOBY) 분석 보고서 — 2026.06.02</title>
+<style>
+  :root {
+    --primary: #0a0a1a; --accent: #6366f1; --accent2: #3730a3;
+    --bg: #f8f9fc; --card: #ffffff; --text: #1a1a2e; --muted: #6b7280;
+    --border: #e5e7eb; --green: #059669; --red: #dc2626;
+    --amber: #d97706; --blue: #2563eb; --sky: #0284c7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0a0a2e 0%, #1a1060 55%, #312e81 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #6366f1; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: #6366f1; border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; flex-wrap: wrap; gap: 6px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .badge-buy { background: #d1fae5; color: #065f46; }
+  .badge-hold { background: #fef9c3; color: #854d0e; }
+  .badge-sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .milestone-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .milestone-row:last-child { border-bottom: none; }
+  .milestone-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; white-space: nowrap; }
+  .done { background: #d1fae5; color: #065f46; }
+  .active { background: #dbeafe; color: #1e40af; }
+  .upcoming { background: #fef9c3; color: #854d0e; }
+  .partner-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 0.75rem; }
+  .partner-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; font-size: 12px; }
+  .partner-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: var(--accent2); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f4f6f9; font-weight: 600; text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .partner-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">JOBY · NYSE</div>
+      <div class="company-name">조비에비에이션 (Joby Aviation)</div>
+      <div class="company-desc">전기 수직이착륙(eVTOL) 에어택시 선두주자 — FAA 인증 최종 단계 진입, 2026년 상업 운항 목표</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 6월 2일</div>
+      <div class="price-display">$11.89</div>
+      <div class="price-change">▲ 52주 최저($8.68) 대비 +37% 반등</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: $11.7B</span>
+    <span class="rating-pill">✈️ 섹터: 항공우주 · eVTOL</span>
+    <span class="rating-pill">🔋 FAA 인증: Stage 5 진입 (최종 단계)</span>
+    <span class="rating-pill">⭐ 컨센서스: Neutral · 평균 목표가 $11.79</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 매출 (예상 대비)</div>
+      <div class="kpi-value" style="color:var(--green);">$24.25M</div>
+      <div class="kpi-sub">예상 $20.2M 대비 +19.8% 서프라이즈</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Q1 순손실 / EPS</div>
+      <div class="kpi-value" style="color:var(--red);">-$110M</div>
+      <div class="kpi-sub">EPS -$0.12 · 예상치 소폭 상회</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">현금 보유 (현재)</div>
+      <div class="kpi-value">$2.5B</div>
+      <div class="kpi-sub">2029년까지 운영 가능 (추정)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026년 매출 가이던스</div>
+      <div class="kpi-value">$105~115M</div>
+      <div class="kpi-sub">YoY +100% 이상 성장 목표</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q1 2026 (발표일: 2026.5.5)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$24.25M <span style="font-size:12px;color:var(--green);">▲ 예상 대비 +19.8%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">BLADE 에어모빌리티 인수 매출 반영 · YoY 성장</div>
+      </div>
+      <div style="background:#fff5f5;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700; color:var(--red);">-$0.12 <span style="font-size:12px;color:var(--green);">▲ 예상치 소폭 상회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">영업비용 $258M · 조정 EBITDA -$179M</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>CEO JoeBen Bevirt 코멘트:</strong> "Q3에 eIPP 협약 서명, 연말에 운항 개시가 최선의 전망이다. 뉴욕 JFK–미드타운 맨해튼 7분 비행은 수년간의 투자와 실행이 만들어낸 결과물." 2026년 H1 현금 소진 가이던스 $340~370M(오하이오 시설 제외). 실적 발표 당일 주가 +20% 급등.
+    </div>
+  </div>
+
+  <!-- SEC/규제 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 주요 공시 &amp; 규제 마일스톤 (SEC / FAA)</div>
+    <div class="milestone-row">
+      <span class="milestone-badge done">✓ 완료</span>
+      <span><strong>FAA Type Certification Stage 4 (SR3 Audit) 통과</strong> — 항공기 설계·안전 요건·시험 결과가 FAA 최종 단계 진입 기준 충족 확인. 서방 eVTOL 기업 최초 Stage 5 진입. (2026.04)</span>
+    </div>
+    <div class="milestone-row">
+      <span class="milestone-badge done">✓ 완료</span>
+      <span><strong>eIPP (eVTOL Integration Pilot Program) 선정</strong> — 백악관 지원 프로그램으로 11~13개 주(뉴욕·텍사스·플로리다 포함) 전형 인증 이전 선상업 운항 가능 경로 확보. (2026.Q1)</span>
+    </div>
+    <div class="milestone-row">
+      <span class="milestone-badge done">✓ 완료</span>
+      <span><strong>FAA 적합 항공기(9호기) 제작 중 · 첫 TIA 비행 완료</strong> — 최종 인증용 항공기로 FAA 조종사 탑승 비행 테스트 진행 중. (2026.Q1)</span>
+    </div>
+    <div class="milestone-row">
+      <span class="milestone-badge active">▶ 진행</span>
+      <span><strong>FAA Stage 5 Testing &amp; Analysis 진행 중</strong> — Type Certificate(형식증명) 취득을 위한 마지막 단계. 인증 예상 시점: <strong>2026년 하반기~말</strong>. (2026.05~현재)</span>
+    </div>
+    <div class="milestone-row">
+      <span class="milestone-badge active">▶ 진행</span>
+      <span><strong>더블린 파트너십 / LA 버티포트 파트너십</strong> — LA Century Plaza에 Reuben Brothers와 버티포트 계약, SAP Center(산호세)와 버티포트 파트너십. 두바이 국제공항 인근 첫 상업용 버티포트 완공. (2026.Q1)</span>
+    </div>
+    <div class="milestone-row" style="border-bottom:none;">
+      <span class="milestone-badge upcoming">예정</span>
+      <span><strong>eIPP 협약 서명 → 실제 운항 개시</strong> — Q3 2026 협약 서명, 2026년 하반기 뉴욕·플로리다·텍사스 운항 목표. Air Carrier Certificate 별도 취득 필요. (2026.Q3~Q4 예정)</span>
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05</span></div>
+      <div class="news-title">뉴욕 JFK→미드타운 맨해튼, 에어택시 7분 비행 세계 최초 성공</div>
+      <div class="news-summary">일반도로 60~120분 거리를 eVTOL로 7분 만에 연결. 뉴욕주 전역 헬리포트 네트워크를 활용한 일주일간 시연 프로그램. NYSE 개장벨 세리머니 주인공, CEO NYSE Live 방송 출연. BLADE 인수로 확보한 뉴욕 3대 헬리포트(JFK·34번가·DowntownSkyport) 접근권을 최초로 시연. (The Next Web, MSN, 2026.5)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04~05</span></div>
+      <div class="news-title">서방 eVTOL 최초 FAA Stage 5(최종 인증 단계) 진입 — 형식증명 2026년 말 전망</div>
+      <div class="news-summary">FAA Stage 4 SR3 감사 통과 후 Stage 5(Testing &amp; Analysis) 진입. 유럽 경쟁사 Lilium·Volocopter 파산, Archer는 Stage 3 수준으로 Joby가 압도적 인증 선두. 일부 독립 컨설팅 업체는 실제 서비스 진입을 2027년 중반으로 전망. (Aircraft Insider, 2026.4)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.19</span></div>
+      <div class="news-title">캐시 우드 ARK, JOBY 11만9000주 추가 매수 — 세계 최고 에어택시 테마주</div>
+      <div class="news-summary">ARK Investment가 JOBY 약 119,000주를 신규 매입하며 기관 관심 확대. 같은 날 켄 그리핀(시타델)도 JOBY·ACHR 양쪽 동시 베팅 확인. Josh Brown(CNBC) "최애 eVTOL 주식" 발언으로 리테일 투자자 관심 급증. (TipRanks, CNBC, 2026.5.19~28)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.05.07</span></div>
+      <div class="news-title">Morgan Stanley·Canaccord 목표주가 하향 — 그러나 중립 유지하며 FAA 진전 재확인</div>
+      <div class="news-summary">Morgan Stanley $15→$13(Equal Weight), Canaccord $15.50→$11.50(Hold) 하향. 두 기관 모두 FAA 인증 진전·eIPP 선정·2026 마일스톤 가시성 개선을 긍정적으로 평가했으며, 기대치 재조정이지 포기가 아님을 강조. Goldman Sachs는 Sell 의견 유지. (Yahoo Finance, InsiderMonkey, 2026.5.7)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.05.19</span></div>
+      <div class="news-title">"천천히 가라" — TipRanks 투자자 경고, 현금 소진 2029년 종료 분석</div>
+      <div class="news-summary">애널리스트 추산 $2.5B 현금이 연간 ~$380M 소진 속도 기준 2029년경 고갈. 잉여현금흐름 흑자 전환은 2031년 예상. P/S 133x라는 극단적 밸류에이션은 2026~2027년 상업화 계획대로 진행될 것을 가정. 항공기 제조 일정 지연 혹은 규제 장애 발생 시 추가 자금 조달 필요. (TipRanks, 2026.5.19)</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 Bull Case — 상승 기대 요인</div>
+      <div class="factor-list">
+        <div class="factor-item factor-bull"><span>✓</span><span><strong>서방 eVTOL 유일한 FAA 최종 인증 단계</strong> — Lilium·Volocopter 파산, Archer는 더 초기 단계. 2026년 형식증명 취득 시 독점적 퍼스트 무버 지위 확보</span></div>
+        <div class="factor-item factor-bull"><span>✓</span><span><strong>Toyota·Delta·Uber 트라이앵글 생태계</strong> — Toyota의 제조 노하우(Gemba Walk, Obeya), Delta의 JFK·LAX 버티포트 투자($200M), Uber의 앱 부킹 플랫폼. 경쟁사가 갖추지 못한 end-to-end 에코시스템</span></div>
+        <div class="factor-item factor-bull"><span>✓</span><span><strong>$2.5B 현금 — 파산 리스크 없는 구조</strong> — 2029년까지 운영 자금 확보. eIPP 선상업 운항으로 2026년 내 실제 수익 창출 가능. 2026 가이던스 $105~115M은 전년 대비 +100% 이상</span></div>
+        <div class="factor-item factor-bull"><span>✓</span><span><strong>eIPP: 인증 전 선상업 운항 경로</strong> — 백악관 지원 프로그램으로 11개 주에서 FAA 형식증명 없이도 상업적·화물 운항 허용. 2026년 하반기 실제 수익 발생 가능</span></div>
+        <div class="factor-item factor-bull"><span>✓</span><span><strong>시장 규모: 2030년 UAM 시장 $15B→2040년 $90B 이상</strong> — 도심 항공 모빌리티 시장 개척자로서 수직 통합 전략(항공기 제조 + 서비스 운영). 가격은 고급 우버 수준($100~$300/좌석)</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 Bear Case — 주의해야 할 리스크</div>
+      <div class="factor-list">
+        <div class="factor-item factor-bear"><span>!</span><span><strong>현금 소진 시계: 2029년 한계</strong> — Q1 현금 소진 $195M, 연간 약 $380M 추정. $2.5B 현금은 2029년경 고갈. FCF 흑자 전환 2031년 이후 예상. 추가 자금 조달 = 희석 리스크</span></div>
+        <div class="factor-item factor-bear"><span>!</span><span><strong>형식증명 이후에도 Air Carrier Certificate 별도 필요</strong> — 형식증명 취득해도 상업 운항 전에 Air Carrier Certificate를 추가로 취득해야 함. 독립 컨설팅 SMG는 실제 서비스 진입 2027년 중반으로 전망, 회사 공식 2026년보다 후행 가능</span></div>
+        <div class="factor-item factor-bear"><span>!</span><span><strong>P/S 133배 극단적 밸류에이션</strong> — 매출 대비 시가총액 133배. 2026~2028년 상업화 계획이 차질 없이 진행될 것을 가정한 가격. 일정 지연 1년만 발생해도 주가 급락 가능</span></div>
+        <div class="factor-item factor-bear"><span>!</span><span><strong>eVTOL 비즈니스 모델 미검증</strong> — 가격 $100~$300/좌석이 대규모로 수요를 창출할지 미검증. 소음·도심 이착륙 규제·조종사 수급 등 운영상 과제 상존</span></div>
+        <div class="factor-item factor-bear"><span>!</span><span><strong>eVTOL 업계 전반 지연 전례</strong> — 2009년 창업 후 수차례 상업 론칭 목표 연기. 유럽 경쟁사들은 파산으로 귀결. 일정 지연 가능성은 구조적 위험 요소</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 전략 파트너십 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🤝 핵심 전략 파트너십</div>
+    <div class="partner-grid">
+      <div class="partner-card">
+        <div class="partner-name">🚗 Toyota</div>
+        <div>투자: $394M+ (2025.5 $250M 추가 클로징)<br>역할: 세계 최고 수준 제조 방법론(Gemba Walk, Obeya room) 전수. 마리나·데이턴 공장 생산성 향상. 2027년 4기/월 목표</div>
+      </div>
+      <div class="partner-card">
+        <div class="partner-name">✈️ Delta Air Lines</div>
+        <div>투자: 최대 $200M<br>역할: JFK·LAX 버티포트 공동 개발. 프리미엄 공항 커넥터 서비스 유통. 탑승객 기반 초기 공급망 제공</div>
+      </div>
+      <div class="partner-card">
+        <div class="partner-name">🚖 Uber</div>
+        <div>투자: 전략적 파트너<br>역할: Uber 앱에서 에어택시 예약 통합. 복합 모달 이동 경험 제공. 어스택시·에어 모빌리티 수요 연결</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);">기타: 블레이드(BLADE) 에어모빌리티 헬리포트 사업 인수(뉴욕 3대 헬리포트 접근권) · Reuben Brothers(LA 버티포트) · Air Space Intelligence(공역 통합)</div>
+  </div>
+
+  <!-- FAA 인증 로드맵 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🛫 FAA Type Certification 로드맵 (5단계)</div>
+    <table>
+      <thead><tr><th>단계</th><th>내용</th><th>현황</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Stage 1</strong></td><td>Conceptual Design Review</td><td style="color:var(--green);">✅ 완료</td></tr>
+        <tr><td><strong>Stage 2</strong></td><td>Requirements Definition</td><td style="color:var(--green);">✅ 완료</td></tr>
+        <tr><td><strong>Stage 3 (SR3)</strong></td><td>Compliance Planning &amp; Safety Review</td><td style="color:var(--green);">✅ 완료 (2026.Q1 SR3 감사 통과)</td></tr>
+        <tr><td><strong>Stage 4 (SR4)</strong></td><td>Implementation &amp; Evidence Review</td><td style="color:var(--green);">✅ 완료 (2026.04 FAA 클리어드)</td></tr>
+        <tr style="background:#dbeafe;"><td><strong>Stage 5 ← 현재</strong></td><td>Testing &amp; Analysis (Type Inspection Authorization)</td><td style="color:var(--blue);font-weight:600;">▶ 진행 중 — 형식증명 예상: 2026 H2~말</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:8px;font-size:12px;color:var(--muted);">※ 형식증명(Type Certificate) 취득 후에도 상업 운항을 위한 Air Carrier Certificate 별도 취득 필요. 현 단계에서 eIPP 프로그램을 통해 인증 전 선운항 가능 경로 존재.</div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5~6월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">H.C. Wainwright (Amit Dayal)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge badge-buy">Buy</span>
+        <span class="target-price">$18.00</span>
+        <span style="font-size:11px;color:var(--muted);">현재가 대비 +51%</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Needham (Chris Pierce)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge badge-buy">Buy</span>
+        <span class="target-price">~$18.00</span>
+        <span style="font-size:11px;color:var(--muted);">+73.7% upside 제시</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Morgan Stanley (Kristine Liwag)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge badge-hold">Equal Weight</span>
+        <span class="target-price">$13.00</span>
+        <span style="font-size:11px;color:var(--muted);">↓ $15→$13 (2026.5.7)</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Canaccord (Austin Moeller)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge badge-hold">Hold</span>
+        <span class="target-price">$11.50</span>
+        <span style="font-size:11px;color:var(--muted);">↓ $15.50→$11.50 (2026.5.7)</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Cantor Fitzgerald</span>
+      <div class="analyst-right">
+        <span class="opinion-badge badge-hold">Hold</span>
+        <span class="target-price">—</span>
+        <span style="font-size:11px;color:var(--muted);">재확인 (2026.5.11)</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Goldman Sachs</span>
+      <div class="analyst-right">
+        <span class="opinion-badge badge-sell">Sell</span>
+        <span class="target-price">—</span>
+        <span style="font-size:11px;color:var(--muted);">Sell 유지 (2026.5.7)</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">JPMorgan (Bill Peterson)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge badge-sell">Underweight</span>
+        <span class="target-price">$7.00</span>
+        <span style="font-size:11px;color:var(--muted);">↓ $8→$7 · 가장 보수적</span>
+      </div>
+    </div>
+    <div style="margin-top:10px;background:#f8fafc;border-radius:8px;padding:10px 14px;font-size:12px;line-height:1.6;">
+      <strong>컨센서스 요약 (최근 3개월):</strong> 매수 6명 · 중립 7명 · 매도 1명 | 평균 목표주가: <strong>$11.79</strong> | 범위: $6~$18. 목표주가 스펙트럼이 $6~$18로 매우 넓어 불확실성이 극도로 높다는 점을 시사.
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      조비에비에이션은 <strong>서방 eVTOL 기업 중 유일하게 FAA 인증 최종 단계(Stage 5)에 진입</strong>한 회사입니다. 뉴욕 JFK→미드타운 맨해튼 7분 비행 시연 성공, 백악관 eIPP 선정(11개 주 선상업 운항 경로 확보), Toyota·Delta·Uber의 생태계 지원이 결합된 이 종목은 도심 항공 모빌리티 시대의 현실화를 가장 가까이서 입증하고 있습니다.
+      <br><br>
+      그러나 이 종목은 전형적인 '장기 내러티브 스토리 주식'입니다. 현재 매출 대비 시가총액이 133배에 달하며, 현금 소진 시계는 2029년을 가리킵니다. 형식증명 이후에도 Air Carrier Certificate 취득이 추가로 필요하고, 대규모 상업 운항의 수익 모델은 아직 검증되지 않았습니다. 목표주가 범위가 $6~$18로 극단적으로 벌어진 점은 이 불확실성을 그대로 반영합니다.
+      <br><br>
+      <strong>2026년 하반기 eIPP 운항 개시 및 FAA 형식증명 취득 여부</strong>가 가장 중요한 카탈리스트입니다. 도심 항공 모빌리티의 장기 성장을 확신하고 고변동성과 희석 리스크를 수용할 수 있는 투자자에게는 매력적인 테마이지만, 단기 수익을 기대하거나 손실 허용 범위가 좁은 투자자에게는 적합하지 않습니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 공개된 시장 데이터와 뉴스를 바탕으로 작성된 투자 참고 자료이며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

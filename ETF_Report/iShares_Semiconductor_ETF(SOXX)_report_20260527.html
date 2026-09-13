@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iShares Semiconductor ETF (SOXX) 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 60%, var(--accent3) 100%);
+    color: white; padding: 2.5rem 2rem 2rem;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .star-badge { background: #f59e0b; color: #1c1917; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; margin-left: 8px; }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-tag { font-size: 9px; padding: 1px 5px; border-radius: 3px; margin-left: 6px; font-weight: 600; }
+  .tag-ai { background: #e0f2fe; color: #0369a1; }
+  .tag-mem { background: #dcfce7; color: #15803d; }
+  .tag-eq { background: #fef9c3; color: #854d0e; }
+  .tag-auto { background: #fce7f3; color: #9d174d; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent2); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .highlight-box { background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #065f46; display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · SOXX · NASDAQ <span class="star-badge">⭐ Morningstar 5★ (10년)</span></div>
+      <div class="etf-name">iShares Semiconductor ETF</div>
+      <div class="etf-index">NYSE Semiconductor Index 추종 | 운용사: BlackRock (iShares) | 설정일: 2001.07.10 | 25년 역사</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 27일</div>
+      <div class="nav-display">$537.33</div>
+      <div class="nav-change up">▲ +74.52% YTD (배당 포함 +78.54%) · 52주 최고 $541.89</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 AUM: ~$33B (대형 반도체 ETF)</span>
+    <span class="pill">📋 총보수: 0.34%</span>
+    <span class="pill">📅 설정일: 2001.07.10</span>
+    <span class="pill">💵 12m 배당수익률: 0.36%</span>
+    <span class="pill">🔄 분기 리밸런싱</span>
+    <span class="pill">📊 보유종목: 34~35개</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 하이라이트 배너 -->
+  <div class="highlight-box">
+    🏆 <strong>2026년 성과 하이라이트:</strong> YTD +74.52% (배당 포함 +78.54%), 1년 수익률 +160.38%. AI 인프라 수혜 + 반도체 사이클 회복이 동시 작용. 4월 한 달 반도체 ETF 업계 전체 자금 유입 기록(+$55억). Morningstar 10년 5★ 등급. 25년 설정 이래 연평균 수익률 +14.23%.
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">NAV (2026.05.22)</div>
+      <div class="kpi-value">$537.33</div>
+      <div class="kpi-sub">52주 범위: $202.47~$541.89</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">YTD 수익률 (배당 포함)</div>
+      <div class="kpi-value" style="color:var(--green);">+78.54%</div>
+      <div class="kpi-sub">1년 총수익: +160.38% · 5년 연환산: +31.92%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">AUM / 총보수</div>
+      <div class="kpi-value">$33B</div>
+      <div class="kpi-sub">총보수 0.34% · 반도체 ETF 중 저비용</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">12개월 배당수익률</div>
+      <div class="kpi-value">0.36%</div>
+      <div class="kpi-sub">최근 분배: $0.208 (2026.03.20)</div>
+    </div>
+  </div>
+
+  <!-- 구성 종목 -->
+  <div class="card">
+    <div class="card-title">📦 상위 보유 종목 (2026.05.15 기준, Yahoo Finance / TradingView)</div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">Micron Technology (MU) <span class="holding-tag tag-mem">메모리</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">9.69%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">Advanced Micro Devices (AMD) <span class="holding-tag tag-ai">AI GPU·CPU</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">8.71%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:90%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">Broadcom Inc. (AVGO) <span class="holding-tag tag-ai">AI ASIC·네트워킹</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">7.34%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:76%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">NVIDIA Corp. (NVDA) <span class="holding-tag tag-ai">AI GPU</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">7.01%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:72%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">Intel Corp. (INTC) <span class="holding-tag tag-ai">CPU·파운드리</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">6.58%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:68%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">Marvell Technology (MRVL) <span class="holding-tag tag-ai">AI 인프라 칩</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">5.97%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:62%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">7</div>
+      <div class="holding-name">Applied Materials (AMAT) <span class="holding-tag tag-eq">반도체 장비</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.82%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:50%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">8</div>
+      <div class="holding-name">Monolithic Power Systems (MPWR)</div>
+      <div class="holding-right">
+        <div class="holding-weight">4.30%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:44%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">9</div>
+      <div class="holding-name">Texas Instruments (TXN) <span class="holding-tag tag-auto">아날로그·산업</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.03%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:42%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">10</div>
+      <div class="holding-name">NXP Semiconductors (NXPI) <span class="holding-tag tag-auto">자동차·IoT</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">3.93%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:41%"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted); background:#f8fafc; border-radius:6px; padding:8px 12px;">
+      상위 10개 합산 비중: ~62% | 총 보유 종목 수: 34~35개 | 상위 5종목 8% 캡 규정 (분기 리밸런싱 시 강제 조정)
+    </div>
+  </div>
+
+  <!-- 섹터 배분 & 수익률 성과 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">섹터 / 밸류체인 배분</div>
+      <div class="sector-item">
+        <div class="sector-name">반도체 설계 (Fabless / IDM)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~61%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#2196f3;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">반도체 장비 (AMAT, LRCX, KLA 등)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~19%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:31%;background:#f59e0b;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">아날로그 / 전력 반도체</div>
+        <div class="sector-right">
+          <div class="sector-pct">~11%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:18%;background:#10b981;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">메모리 (MU)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~10%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:16%;background:#7c3aed;"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;">지역별 배분</div>
+        <div class="sector-item">
+          <div class="sector-name">🇺🇸 미국 (주력 보유)</div>
+          <div class="sector-right">
+            <div class="sector-pct">~90%</div>
+            <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#2563eb;"></div></div>
+          </div>
+        </div>
+        <div class="sector-item">
+          <div class="sector-name">🌍 해외 ADR (최대 10%)</div>
+          <div class="sector-right">
+            <div class="sector-pct">~10%</div>
+            <div class="sector-bar-wrap"><div class="sector-bar" style="width:10%;background:#64748b;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기간별 수익률 (총수익, 배당 포함)</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>기간</th><th>SOXX</th><th>S&P 500</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>YTD 2026</td><td class="positive">+78.54%</td><td>~+15%</td><td>압도적 초과 수익</td></tr>
+          <tr><td>1년</td><td class="positive">+160.38%</td><td>~+25%</td><td>AI 사이클 수혜</td></tr>
+          <tr><td>3년(연환산)</td><td class="positive">+56.58%</td><td>~+12%</td><td>AI 상승 주도</td></tr>
+          <tr><td>5년(연환산)</td><td class="positive">+31.92%</td><td>~+15%</td><td>안정적 장기 초과</td></tr>
+          <tr><td>10년(연환산)</td><td class="positive">+28.1%</td><td>~+13%</td><td>25년 평균: 14.23%</td></tr>
+          <tr><td>2024년</td><td class="positive">+12.97%</td><td>+25%</td><td>사이클 저점 구간</td></tr>
+          <tr><td>2023년</td><td class="positive">+66.90%</td><td>+26%</td><td>AI 수혜 급반등</td></tr>
+          <tr><td>2022년</td><td class="negative">-35.03%</td><td>-18%</td><td>금리·재고 사이클↓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 최근 뉴스 -->
+  <div class="card">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.26</span>
+      </div>
+      <div class="news-title">MU 사상 최고가($902+) 돌파 — SOXX 1번 보유 종목(~9.7%) 폭등이 ETF 직격 수혜</div>
+      <div class="news-summary">SOXX의 최대 보유 종목 Micron Technology가 UBS 목표주가 $1,625 상향 + ByteDance AI칩 수주로 +20% 급등하며 사상 최고가 경신. 시가총액 $1조 첫 돌파. MU 비중 ~9.7%로 SOXX 1위 종목인 만큼 ETF 수익률에 직접적이고 즉각적 영향. AI 메모리 슈퍼사이클이 SOXX 포트폴리오 전반에 긍정적으로 반영.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04월</span>
+      </div>
+      <div class="news-title">반도체 ETF 업계 월간 자금 유입 기록 — 4월 한 달 SOXX 포함 $55억 유입</div>
+      <div class="news-summary">반도체 섹터 ETF들이 4월 한 달 동안 역대 최대 월간 자금 유입($55억)을 기록. AI 인프라 투자 확대 기대감이 개인·기관 투자자 모두의 반도체 ETF 매수로 이어짐. SOXX의 3개월 순유입 $18.3억, 6개월 순유입 $38.1억으로 지속적 자금 유입 추세.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05월</span>
+      </div>
+      <div class="news-title">SOXX 13일 연속 상승 — 24년 만에 최장 연속 상승 기록 달성</div>
+      <div class="news-summary">iShares Semiconductor ETF가 13거래일 연속 상승이라는 24년 만의 최장 상승 기록 달성. AI 반도체 수요 확대 + 메모리 가격 회복 + CHIPS Act 수혜가 동시 반영. 필라델피아 반도체 지수($SOX)도 역대 최고 기록 경신 직전까지 도달.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.05.18</span>
+      </div>
+      <div class="news-title">반도체 ETF 경쟁 심화 — SMH·DRAM·SOXQ 등 대안 ETF와 차별화 전략 재점검 시점</div>
+      <div class="news-summary">SMH(VanEck, $50B AUM, 0.35%)는 TSMC·ASML 비중 높아 아시아 노출 더 큼. 신생 DRAM ETF($10B, 0.65%)는 메모리 퓨어플레이. SOXX는 30개 미국 상장 기업 + 분산 캡 규정으로 "AI 반도체 밸류체인 균형 노출" 포지셔닝. 3x 레버리지 SOXL 과의 비교에서도 변동성 대비 수익 균형 우위.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.12~19</span>
+      </div>
+      <div class="news-title">단기 고점 경고 — RSI 과매수 탈출 · MACD 음전환 · 금리 민감도 재부각</div>
+      <div class="news-summary">5/15 기준 RSI가 과매수 구간에서 탈출했고, 5/18 MACD 지표가 음전환하며 단기 조정 가능성 시사. YTD +78% 급등 후 차익 실현 압력 증가. 또한 SOXX 베타 2.06으로 금리에 매우 민감 — 인플레이션 재가속이나 연준의 매파적 전환 시 밸류에이션 재조정 위험. "Empire State Building Top" 우려 보고서도 등장.</div>
+    </div>
+  </div>
+
+  <!-- Bull/Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">📈</span><span><strong>AI 인프라 슈퍼사이클 + 반도체 밸류체인 전체 노출</strong> — NVDA·AMD(GPU/AI칩) + MU(메모리) + AMAT(장비) + AVGO(ASIC) + MRVL(데이터센터 칩)까지 반도체 산업 전체를 단 하나의 ETF로 취득. 딜로이트 2026 반도체 시장 $9,750억(+26%) 전망</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💡</span><span><strong>25년 운용 역사 · 10년 Morningstar 5★ · 연평균 +14.23%</strong> — 2001년 설정 이래 닷컴 버블·금융위기·코로나·2022년 반도체 다운사이클을 모두 이겨낸 검증된 장기 투자 수단. 10년 누적 +568%, 20년 연환산 +18.81%의 탁월한 장기 성과</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌟</span><span><strong>0.34% 저비용 + BlackRock 운용 신뢰성</strong> — 동종 경쟁 DRAM ETF(0.65%)의 절반 비용. 세계 최대 자산운용사 BlackRock의 안정적 운용 인프라. 하루 평균 $3.8억 거래대금으로 유동성도 매우 우수. 포트폴리오 핵심 반도체 익스포저로 적합</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🔧</span><span><strong>분산 캡 규정 — 과도한 종목 집중 방지</strong> — 상위 5종목 각 8% 캡 적용(분기 리밸런싱). DRAM ETF처럼 상위 3종목이 73%가 되는 극단적 집중을 방지. 34개 종목에 걸쳐 반도체 밸류체인 전방위 분산. AI 비롯 자동차·산업·소비자 반도체까지 커버</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🇺🇸</span><span><strong>미국 집중 구조 → 지정학 리스크 상대적 안전</strong> — 보유 종목의 90%가 미국 상장 기업. 대만(TSMC)·한국(삼성·SK하이닉스) 의존도가 SMH보다 낮음. CHIPS Act 보조금 수혜 기업 집중 포트폴리오. 미중 무역 분쟁 시 상대적으로 안정적</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><strong>베타 2.06 — 시장 하락 시 S&P 500의 2배 낙폭</strong> — 고성장 반도체주들의 높은 P/E(포트폴리오 평균 ~49배)는 금리 상승 환경에 취약. 2022년 -35%, 2000~2002년 -80% 낙폭 전례. YTD +78% 이후 단기 MACD 음전환·RSI 과매수 탈출로 기술적 조정 위험 고조</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>반도체 사이클 집중 리스크 — 경기침체 시 직격탄</strong> — 반도체는 경기에 민감한 산업. AI 자본지출 둔화나 하이퍼스케일러의 구매 축소 시 NVDA·MU·AMAT 등 핵심 종목들 동시 하락. 2022년 재고 사이클처럼 업황 급반전 가능성 상시 존재</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🌍</span><span><strong>지정학 리스크 — 중국 의존 공급망 취약성</strong> — TSMC가 없지만 INTC·AMAT·MU 등 핵심 종목들의 중국 매출 비중 10~30%. 미중 갈등 격화 및 수출 통제 강화 시 구성 종목 일부 타격. 특히 AMAT는 BIS와 $252.5M 합의 직후이며 중국 향 매출 모니터링 필요</span></div>
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><strong>NVDA 주도력 약화 우려 — 맞춤형 ASIC으로 점유율 잠식</strong> — Broadcom·Marvell의 하이퍼스케일러 커스텀 ASIC 성장이 NVIDIA의 데이터센터 GPU 점유율을 장기적으로 잠식할 수 있음. 실제로 SOXX 내 NVDA 비중이 최대(~7%)가 아닌 6~7%대에 머무는 것은 이러한 분산을 반영</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>배당수익률 0.36% — 소득 투자자에게 부적합</strong> — 성장 중심 포트폴리오 특성상 배당수익률이 매우 낮음. SCHD·VYM 등 배당 ETF 대비 수익원으로서의 역할 부재. 단기 시세 하락 시 쿠션 역할을 하는 배당이 거의 없어 변동성 관리 어려움</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 배당/분배금 이력 -->
+  <div class="card">
+    <div class="card-title">💵 배당 / 분배금 현황</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>분배 기준일</th><th>분배금(주당)</th><th>배당수익률(환산)</th><th>비고</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2026.03.20</td><td>$0.208</td><td>~0.14%(분기 환산)</td><td>최신 분배</td></tr>
+        <tr><td>2025.12월</td><td>확인 중</td><td>—</td><td>연간 12m 수익률: 0.36%</td></tr>
+        <tr><td>2025.09월</td><td>확인 중</td><td>—</td><td>분기 지급</td></tr>
+        <tr><td>2025.06월</td><td>확인 중</td><td>—</td><td>30일 SEC 수익률: 0.14%</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);">
+      ※ 분기별 분배금 지급. 배당수익률(0.36%)은 반도체 ETF 특성상 매우 낮음. 총수익의 99%+ 가 가격 상승에서 발생. 배당보다 장기 자본 성장을 목적으로 투자하는 ETF.
+    </div>
+  </div>
+
+  <!-- 경쟁 ETF 비교 -->
+  <div class="card">
+    <div class="card-title">🔄 반도체 ETF 비교 — SOXX vs SMH vs DRAM vs SOXQ</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>ETF</th><th>운용사</th><th>AUM</th><th>총보수</th><th>종목 수</th><th>주요 특징</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:700;color:#1d4ed8;">SOXX</td>
+          <td>BlackRock</td>
+          <td class="positive">$33B</td>
+          <td>0.34%</td>
+          <td>34개</td>
+          <td>미국 상장 30종목 / 상위 5종목 8%캡 / 25년 역사</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;">SMH</td>
+          <td>VanEck</td>
+          <td>~$50B</td>
+          <td>0.35%</td>
+          <td>26개</td>
+          <td>TSMC·ASML 비중 높음 / 아시아 노출↑ / 시총 가중</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;">DRAM</td>
+          <td>Roundhill</td>
+          <td>$10B+</td>
+          <td>0.65%</td>
+          <td>19개</td>
+          <td>메모리 퓨어플레이 / 한국 49% / 2026.04 설정 신규</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;">SOXQ</td>
+          <td>Invesco</td>
+          <td>~$1B</td>
+          <td>0.19%</td>
+          <td>30개</td>
+          <td>PHLX 반도체 추종 / 최저 비용 / SOXX와 유사 구성</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:var(--red);">SOXL</td>
+          <td>Direxion</td>
+          <td>~$10B</td>
+          <td>0.76%</td>
+          <td>레버리지</td>
+          <td>3X 레버리지 불 ETF / 단기 트레이딩 전용 / 장기 부적합</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);">
+      SOXX는 SMH 대비 미국 집중도 높고 분산 캡 규정으로 편중 완화. DRAM 대비 반도체 밸류체인 전체 커버. 장기 핵심 반도체 익스포저라면 SOXX, 메모리 강한 확신 = DRAM, 비용 최소화 = SOXQ(단, 역사 짧음).
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      iShares Semiconductor ETF(SOXX)는 2001년 설정 이래 25년간 반도체 산업의 흥망성쇠를 함께하며 연평균 +14.23%의 수익을 제공해온 미국 반도체 섹터의 대표 ETF다. 2026년에는 AI 인프라 수요 폭발 + 메모리 사이클 회복이 동시에 발화하며 YTD +78.54%라는 놀라운 성과를 달성했고, 1년 수익률은 +160%를 넘어섰다. 오늘 분석한 7개 종목 중 MU·AMD·AVGO·NVDA·AMAT가 SOXX의 핵심 보유 종목으로 이 ETF 하나를 통해 사실상 AI 반도체 밸류체인 전체를 취할 수 있다.
+
+      SOXX의 구조적 강점은 세 가지다. 첫째, 0.34%의 저비용으로 BlackRock의 안정적 운용 인프라를 활용할 수 있다. 둘째, 상위 5종목 8% 캡 규정으로 DRAM ETF(상위 3종목 73%)와 같은 극단적 집중을 방지한다. 셋째, 미국 상장 기업 90% 집중으로 TSMC·삼성 의존 SMH보다 지정학 리스크가 낮다. Morningstar 10년 5성 등급이 이 구조적 일관성을 검증한다.
+
+      리스크도 명확하다. 베타 2.06으로 시장 하락 시 2배 낙폭이 나타나며, 2022년에는 -35%를 기록했다. 현재 YTD +78% 급등 이후 기술적 지표(MACD 음전환, RSI 과매수 탈출)가 단기 조정 가능성을 시사한다. 금리 상승 환경에서 포트폴리오 평균 P/E ~49배의 고평가 부담도 상존한다.
+
+      <strong>SOXX는 AI 반도체 산업 전체의 장기 성장에 투자하고자 하는 투자자에게 가장 균형 잡힌 반도체 ETF다. 개별 종목(MU vs NVDA vs AMAT) 선택의 어려움을 피하면서 반도체 밸류체인 전체에 노출하고 싶을 때, DRAM ETF보다 분산되고 SMH보다 미국에 집중된 "골디락스" 포지션을 제공한다. 포트폴리오의 반도체 섹터 핵심 투자 수단으로 10~20% 비중 배분이 적합하다.</strong>
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. ETF 투자는 원금 손실 가능성이 있으며, 과거 수익률은 미래 성과를 보장하지 않습니다. 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

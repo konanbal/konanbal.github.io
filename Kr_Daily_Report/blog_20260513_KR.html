@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20260513 오늘의 시장 특징주  한국 증시 총정리 — 2026년 5월 13일</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+            font-size: 16px;
+            line-height: 1.9;
+            color: #1c1c1c;
+            background: #f0f2f5;
+        }
+        .page-wrapper {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 0 16px 80px;
+        }
+        .site-header {
+            background: linear-gradient(135deg, #1a5276 0%, #2980b9 100%);
+            color: white;
+            padding: 36px 40px 28px;
+            margin-bottom: 0;
+            border-radius: 0 0 12px 12px;
+        }
+        .site-header .market-label {
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+        .site-header .report-date {
+            font-size: 13px;
+            opacity: 0.7;
+            margin-top: 6px;
+        }
+        .article-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 40px 48px 56px;
+            margin-top: 20px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+        }
+        h1 {
+            font-size: 1.75em;
+            font-weight: 800;
+            line-height: 1.3;
+            color: #111;
+            margin-bottom: 6px;
+            border-bottom: 3px solid #1a5276;
+            padding-bottom: 12px;
+        }
+        h2 {
+            font-size: 1.35em;
+            font-weight: 700;
+            color: #111;
+            margin-top: 2.4em;
+            margin-bottom: 0.7em;
+            padding: 10px 14px;
+            background: #f4f6f9;
+            border-left: 4px solid #1a5276;
+            border-radius: 0 6px 6px 0;
+        }
+        h3 {
+            font-size: 1.15em;
+            font-weight: 700;
+            color: #222;
+            margin-top: 2em;
+            margin-bottom: 0.5em;
+            border-bottom: 1px solid #e8eaed;
+            padding-bottom: 6px;
+        }
+        h4 {
+            font-size: 1.05em;
+            font-weight: 700;
+            color: #333;
+            margin-top: 1.6em;
+            margin-bottom: 0.4em;
+        }
+        h5, h6 {
+            font-size: 1em;
+            font-weight: 600;
+            color: #444;
+            margin-top: 1.2em;
+            margin-bottom: 0.3em;
+        }
+        p { margin-bottom: 1.1em; }
+        a { color: #1a6fb5; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        strong { font-weight: 700; }
+        em { font-style: italic; }
+        ul, ol { margin: 0.6em 0 1.1em 1.6em; }
+        li { margin-bottom: 0.35em; }
+        li > ul, li > ol { margin: 0.3em 0 0.3em 1.3em; }
+        blockquote {
+            margin: 1.2em 0;
+            padding: 12px 18px;
+            border-left: 4px solid #cbd5e0;
+            background: #f8f9fa;
+            color: #555;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.93em;
+        }
+        blockquote p { margin-bottom: 0; }
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.87em;
+            background: #f0f3f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #c0392b;
+        }
+        pre {
+            background: #1e2330;
+            color: #abb2bf;
+            padding: 1.2em 1.5em;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.3em 0;
+            line-height: 1.65;
+            font-size: 0.88em;
+        }
+        pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.4em 0;
+            font-size: 0.93em;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+        }
+        thead tr {
+            background: #1a5276;
+            color: white;
+        }
+        th {
+            font-weight: 600;
+            text-align: left;
+            padding: 11px 14px;
+            white-space: nowrap;
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #edf0f4;
+            vertical-align: top;
+        }
+        tr:last-child td { border-bottom: none; }
+        tbody tr:nth-child(even) { background: #f8f9fc; }
+        tbody tr:hover { background: #eef2f8; transition: background 0.15s; }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5em auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 2.8em 0;
+        }
+        .article-footer {
+            margin-top: 3em;
+            padding-top: 1.2em;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.85em;
+            color: #8a9ab0;
+        }
+        @media (max-width: 640px) {
+            body { font-size: 14px; }
+            .article-card { padding: 24px 20px 40px; }
+            .site-header { padding: 24px 20px 18px; }
+            h1 { font-size: 1.4em; }
+            h2 { font-size: 1.15em; }
+            table { font-size: 0.82em; }
+            th, td { padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="site-header">
+            <div class="market-label">📊 시장 특징주 리포트</div>
+            <div class='report-date'>작성일: 2026년 5월 13일</div>
+        </header>
+        <main class="article-card">
+            <h1 id="20260513">📊 [2026.05.13] 오늘의 시장 특징주 — 한국 증시 총정리</h1>
+<blockquote>
+<p>작성일: 2026년 5월 13일 (수) | 데이터 기준: 당일 장 마감<br />
+코스피 7,844.01 (+2.63%) ★ 종가 기준 역대 최고치 재경신</p>
+</blockquote>
+<hr />
+<h2 id="_1">📌 오늘의 시장 한 줄 요약</h2>
+<blockquote>
+<p>장 초반 7,402선까지 밀렸던 코스피가 개인·기관 저가 매수로 극적 반등하며 7,844.01로 또 다시 사상 최고치를 경신했습니다. 미 CPI 발표 충격과 삼성전자 노조 파업 예고라는 이중 악재를 뚫고, HBM·AI 반도체 수요 모멘텀이 시장을 끌어올린 하루였습니다.</p>
+</blockquote>
+<hr />
+<h2 id="_2">🇰🇷 한국 시장</h2>
+<hr />
+<h3 id="_3">🚀 오늘의 상한가 종목</h3>
+<h4 id="1-kosdaq-2997">1. 코스모로보틱스 (KOSDAQ) +29.97%</h4>
+<ul>
+<li><strong>현재가:</strong> 40,550원 | <strong>거래량:</strong> 1,029만주 | <strong>시총:</strong> 1,302억원</li>
+<li><strong>특징:</strong> 2일연속상한가 (상장 3거래일째 연속 상한가)</li>
+<li><strong>왜 올랐나?</strong> 5월 11일 코스닥에 입성한 웨어러블 재활로봇 전문기업으로, 상장 첫날 따따블(공모가 6,000원 → 24,000원)을 기록한 데 이어 사흘 연속 상한가 행진 중이다. 뇌졸중·뇌성마비·척수손상 환자의 보행 재활을 돕는 의료용 로봇과 산업용 웨어러블 로봇 포트폴리오를 보유하고 있으며, 공모 청약 경쟁률 2,013대 1·증거금 6조 3,000억원을 기록한 열기가 그대로 주가에 반영되고 있다. 미·일·유럽 등 해외법인을 통한 글로벌 확장 기대감도 투심을 자극하고 있다. <em>(출처: 이데일리·전자신문, 2026.5.13)</em></li>
+</ul>
+<hr />
+<h4 id="2-kosdaq-2996">2. 피델릭스 (KOSDAQ) +29.96%</h4>
+<ul>
+<li><strong>현재가:</strong> 3,210원 | <strong>거래량:</strong> 1,149만주 | <strong>시총:</strong> 1,064억원</li>
+<li><strong>특징:</strong> 2일연속상한가</li>
+<li><strong>왜 올랐나?</strong> 미국이 저사양 AI 칩까지 대중국 반도체 수출통제를 확대하면서, 중국 최대 반도체 파운드리 SMIC와 플래시 메모리 부문 전략적 제휴 관계에 있는 피델릭스가 '중국 반도체 굴기' 수혜주로 강하게 부각됐다. 최대주주가 중국 기업(동심반도체주식유한공사)이라는 점에서 중국 반도체 내재화 수요 직접 수혜가 가능하다는 분석이다. 2025년 매출 536억원(전년비 +19.7%)에 이어 2026년 1분기 차량용 칩셋 공급 확대로 분기 흑자 전환이 가시화되고 있는 점도 기관·외인 매수세를 끌어당겼다. <em>(출처: 데일리머니, 2026.5.11)</em></li>
+</ul>
+<hr />
+<h4 id="3-kospi-3000">3. 한화갤러리아 (KOSPI) +30.00%</h4>
+<ul>
+<li><strong>현재가:</strong> 3,640원 | <strong>거래량:</strong> 4,941만주 | <strong>시총:</strong> 7,056억원</li>
+<li><strong>특징:</strong> 첫상한가</li>
+<li><strong>왜 올랐나?</strong> 서울시가 전날 열린 제7차 건축위원회에서 압구정 갤러리아 서관·동관 건립사업을 심의 통과시키면서, 수 조원 규모의 명품관 재건축 사업이 본궤도에 오를 것이란 기대감이 단숨에 주가를 끌어올렸다. 압구정·청담 일대 초대형 개발 이슈가 자산 가치 재평가 재료로 작용했으며, 우선주(한화갤러리아우)도 동반 상한가를 기록했다. <em>(출처: 이투데이·컨슈머타임스, 2026.5.13)</em></li>
+</ul>
+<hr />
+<h3 id="_4">🔥 거래량 폭발 종목 — 개별주</h3>
+<hr />
+<h4 id="ai">🤖 반도체·AI 인프라 테마</h4>
+<h5 id="sk-kospi-987">SK하이닉스 (KOSPI) +9.87%</h5>
+<ul>
+<li><strong>현재가:</strong> 1,992,000원 | <strong>거래량:</strong> 1,280만주 | <strong>시총:</strong> 141조 9,703억원</li>
+<li><strong>특징:</strong> 3일연속천만주 | 장중 199만원 돌파 신고가</li>
+<li><strong>배경:</strong> AI 서버용 HBM 시장 독보적 선두 지위를 바탕으로 1분기 영업이익이 전년 동기 대비 405% 급증했다. SK증권은 목표주가를 200만원에서 300만원으로 상향 조정하며 "메모리 재평가는 여전히 초입"이라고 밝혔다. 개인 레버리지 ETF 신규 상장 앞두고 선매수 수요까지 더해지며 3거래일 연속 천만주 돌파를 이어가고 있다. <em>(출처: 비즈한국, 2026.5.8)</em></li>
+</ul>
+<h5 id="kospi-514">삼성전자 (KOSPI) +5.14%</h5>
+<ul>
+<li><strong>현재가:</strong> 286,500원 | <strong>거래량:</strong> 7,179만주 | <strong>시총:</strong> 1,674조 9,588억원</li>
+<li><strong>특징:</strong> 3일연속천만주</li>
+<li><strong>배경:</strong> HBM4 기대감과 메모리 가격 강세로 1분기 영업이익이 전년비 756% 폭증한 가운데, KB증권이 2분기 영업이익 84조원을 전망했다. 다만 새벽에 중앙노동위원회 사후조정이 결렬되며 21일부터 총파업이 예고돼 장 초반 6%대 급락했으나, 저가 매수 수요로 반등에 성공했다. <em>(출처: 뉴데일리·부산일보, 2026.5.13)</em></li>
+</ul>
+<h5 id="kosdaq-1368">서울반도체 (KOSDAQ) +13.68%</h5>
+<ul>
+<li><strong>현재가:</strong> 18,280원 | <strong>거래량:</strong> 1,549만주 | <strong>시총:</strong> 1조 658억원</li>
+<li><strong>특징:</strong> 첫천만주</li>
+<li><strong>배경:</strong> 자동차용 지능형 헤드램프 및 마이크로 LED 패키지 채택 확대에 따른 실적 개선 기대감이 매수세를 자극했다. 전방 전기차 업체들의 신차 모델 출시와 LED 고부가 제품 수요 증가 소식이 복합적으로 작용한 것으로 풀이된다. <em>(출처: 이투데이, 2026.2)</em></li>
+</ul>
+<h5 id="kosdaq-1145">프로이천 (KOSDAQ) +11.45%</h5>
+<ul>
+<li><strong>현재가:</strong> 4,430원 | <strong>거래량:</strong> 1,522만주 | <strong>시총:</strong> 1,249억원</li>
+<li><strong>특징:</strong> 첫천만주</li>
+<li><strong>배경:</strong> 반도체·AI 인프라 주변 소부장 테마 수급 유입 추정. 관련 공시 뉴스 미확인.</li>
+</ul>
+<hr />
+<h4 id="_5">⚙️ 로봇·전장 테마</h4>
+<h5 id="kospi-1265">계양전기 (KOSPI) +12.65%</h5>
+<ul>
+<li><strong>현재가:</strong> 12,380원 | <strong>거래량:</strong> 3,953만주 | <strong>시총:</strong> 3,370억원</li>
+<li><strong>특징:</strong> 3일연속천만주</li>
+<li><strong>배경:</strong> 지난해 12월 현대트랜시스와 2030년까지 5년간 로보틱스 모듈 상품 공급 계약을 체결하면서 현대차그룹 로봇 밸류체인 편입이 공식화됐다. 전동공구·차량용 모터 제조 기반 위에 로봇 구동 부품 사업이 더해지며 사업 영역이 확장됐다는 점에서 로봇·전장 테마 수급이 꾸준히 유입되고 있다. <em>(출처: 금강일보·이투데이, 2025.12~2026.5)</em></li>
+</ul>
+<h5 id="kospi-898">현대무벡스 (KOSPI) +8.98%</h5>
+<ul>
+<li><strong>현재가:</strong> 44,300원 | <strong>거래량:</strong> 2,315만주 | <strong>시총:</strong> 49340억원</li>
+<li><strong>특징:</strong> 3일연속천만주</li>
+<li><strong>배경:</strong> 물류 자동화·스마트팩토리 솔루션 기업으로 현대차그룹 물류 시스템 고도화 수혜 기대감에 수급이 집중됐다. 로봇·전장 테마의 확산 흐름 속에서 동반 강세를 보이고 있다.</li>
+</ul>
+<h5 id="lg-kospi-648">LG전자 (KOSPI) +6.48%</h5>
+<ul>
+<li><strong>현재가:</strong> 192,200원 | <strong>거래량:</strong> 1,147만주 | <strong>시총:</strong> 31조 3,068억원</li>
+<li><strong>특징:</strong> 2일연속천만주</li>
+<li><strong>배경:</strong> 1분기 역대 최대 매출(23조 7,272억원)을 기록하고 전장 사업 영업이익이 2,116억원으로 급성장하면서 연간 사상 최대 실적 기대감이 반영되고 있다. 2026년 상반기 로봇 액추에이터 초도 물량 판매 예정 소식도 투심을 끌어올렸다. <em>(출처: 가젯, 2026.5)</em></li>
+</ul>
+<h5 id="ps-kosdaq-1700">PS일렉트로닉스 (KOSDAQ) +17.00%</h5>
+<ul>
+<li><strong>현재가:</strong> 14,180원 | <strong>거래량:</strong> 2,488만주 | <strong>시총:</strong> 6,624억원</li>
+<li><strong>특징:</strong> 2일연속천만주</li>
+<li><strong>배경:</strong> 북미 최대 전기차 제조사의 2026년 미주 모델 전체에 5G 텔레매틱스 통신 모듈 핵심 부품인 RF FEM 수주가 확정됐으며, 연말 양산 시 300~400억원의 신규 매출이 예상된다. 자율주행용 RF FEM, 반도체 장비 양산까지 복수의 신규 매출원이 동시에 열리는 시점이라는 분석이다. <em>(출처: 씽크풀, 2026.5)</em></li>
+</ul>
+<hr />
+<h4 id="_6">🏗️ 건설·부동산·소재 테마</h4>
+<h5 id="kosdaq-1259">삼표시멘트 (KOSDAQ) +12.59%</h5>
+<ul>
+<li><strong>현재가:</strong> 15,560원 | <strong>거래량:</strong> 2,783만주 | <strong>시총:</strong> 1,679억원</li>
+<li><strong>특징:</strong> 첫천만주</li>
+<li><strong>배경:</strong> 성수동 산업 용도지역 개편 및 서울시 대규모 개발 구역 지정 소식이 이어지며 토지·부동산 자산 가치 재평가 기대감이 시멘트·건자재 관련주로 확산됐다. 재건축 사업 본격화 기대에 건설 소재 수요 증가 전망도 가세했다. <em>(출처: 강일보, 2026.1)</em></li>
+</ul>
+<h5 id="kospi-1380">이구산업 (KOSPI) +13.80%</h5>
+<ul>
+<li><strong>현재가:</strong> 6,760원 | <strong>거래량:</strong> 1,328만주 | <strong>시총:</strong> 2,261억원</li>
+<li><strong>특징:</strong> 첫천만주</li>
+<li><strong>배경:</strong> 구리·동합금을 가공해 산업용 소재를 공급하는 기업으로, 미·중 무역 협상 기대감 및 구리 가격 상승 흐름 속에서 비철금속·동 관련주로 수급이 유입됐다. <em>(출처: 머니투데이, 2026.5.13)</em></li>
+</ul>
+<h5 id="kosdaq-1009">드림씨아이에스 (KOSDAQ) +10.09%</h5>
+<ul>
+<li><strong>현재가:</strong> 7,420원 | <strong>거래량:</strong> 1,242만주 | <strong>시총:</strong> 1,825억원</li>
+<li><strong>특징:</strong> 첫천만주</li>
+<li><strong>배경:</strong> 건설·인테리어 자재 관련 기업으로, 토지·부동산 자산 재평가 테마 확산 속 수급 유입 추정.</li>
+</ul>
+<hr />
+<h4 id="_7">📉 주목할 급락 종목</h4>
+<h5 id="kosdaq-1495">대한광통신 (KOSDAQ) -14.95%</h5>
+<ul>
+<li><strong>현재가:</strong> 24,750원 | <strong>거래량:</strong> 3,448만주 | <strong>시총:</strong> 3조 8,483억원</li>
+<li><strong>특징:</strong> 3일연속천만주</li>
+<li><strong>배경:</strong> 엔비디아 AI 데이터센터 투자 기대감으로 1년간 주가가 3,500% 이상 폭등했던 광통신 대장주가 과열 투자경고 지정과 5월 18일 실적 발표 부담으로 차익 실현 매물이 쏟아졌다. 밸류에이션 부담(PBR 36배 수준)과 기관 수급 이탈이 맞물려 큰 폭의 하락을 기록했다. <em>(출처: 다음뉴스·온블랑크, 2026.4~5)</em></li>
+</ul>
+<h5 id="kbi-kosdaq-1696">KBI메탈 (KOSDAQ) -16.96%</h5>
+<ul>
+<li><strong>현재가:</strong> 7,640원 | <strong>거래량:</strong> 1,117만주 | <strong>시총:</strong> 2,690억원</li>
+<li><strong>특징:</strong> 3일연속천만주</li>
+<li><strong>배경:</strong> 관련 뉴스 미확인 — 단기 급등 이후 차익 실현 매물 출회 영향으로 추정.</li>
+</ul>
+<hr />
+<h3 id="etfetn">📈 ETF·ETN 거래량 동향</h3>
+<table>
+<thead>
+<tr>
+<th>종목명</th>
+<th>시장</th>
+<th>현재가</th>
+<th>등락률</th>
+<th>거래량</th>
+<th>연관 테마</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>KODEX 200</td>
+<td>KOSPI</td>
+<td>122,655원</td>
+<td>+2.98%</td>
+<td>2,323만주</td>
+<td>코스피 추종</td>
+</tr>
+<tr>
+<td>KODEX 레버리지</td>
+<td>KOSPI</td>
+<td>171,900원</td>
+<td>+6.34%</td>
+<td>1,871만주</td>
+<td>코스피 2배</td>
+</tr>
+<tr>
+<td>TIGER 반도체TOP10</td>
+<td>KOSPI</td>
+<td>49,910원</td>
+<td>+4.84%</td>
+<td>3,177만주</td>
+<td>반도체·AI</td>
+</tr>
+<tr>
+<td>SOL AI반도체TOP2플러스</td>
+<td>KOSPI</td>
+<td>18,895원</td>
+<td>+5.29%</td>
+<td>2,710만주</td>
+<td>반도체·AI</td>
+</tr>
+<tr>
+<td>TIGER 2차전지TOP10레버리지</td>
+<td>KOSPI</td>
+<td>2,500원</td>
+<td>-2.72%</td>
+<td>1,717만주</td>
+<td>2차전지 레버리지</td>
+</tr>
+<tr>
+<td>KODEX 2차전지산업레버리지</td>
+<td>KOSPI</td>
+<td>2,335원</td>
+<td>-2.51%</td>
+<td>5,527만주</td>
+<td>2차전지 레버리지</td>
+</tr>
+<tr>
+<td>KODEX 코스닥150</td>
+<td>KOSPI</td>
+<td>19,540원</td>
+<td>+0.03%</td>
+<td>3,172만주</td>
+<td>코스닥150</td>
+</tr>
+<tr>
+<td>KODEX 코스닥150레버리지</td>
+<td>KOSPI</td>
+<td>16,010원</td>
+<td>+0.19%</td>
+<td>4,163만주</td>
+<td>코스닥150 2배</td>
+</tr>
+<tr>
+<td>KODEX 코스닥150선물인버스</td>
+<td>KOSPI</td>
+<td>2,030원</td>
+<td>0.00%</td>
+<td>4,703만주</td>
+<td>코스닥 인버스</td>
+</tr>
+<tr>
+<td>TIGER 미국S&amp;P500</td>
+<td>KOSPI</td>
+<td>27,410원</td>
+<td>+0.48%</td>
+<td>1,572만주</td>
+<td>미국 시장</td>
+</tr>
+<tr>
+<td>KODEX 미국S&amp;P500</td>
+<td>KOSPI</td>
+<td>25,000원</td>
+<td>+0.56%</td>
+<td>1,774만주</td>
+<td>미국 시장</td>
+</tr>
+<tr>
+<td>KODEX AI전력핵심설비</td>
+<td>KOSPI</td>
+<td>58,885원</td>
+<td>-2.04%</td>
+<td>1,017만주</td>
+<td>AI 전력 인프라</td>
+</tr>
+<tr>
+<td>TIGER 코리아휴머노이드로봇산업</td>
+<td>KOSPI</td>
+<td>14,305원</td>
+<td>+2.29%</td>
+<td>1,429만주</td>
+<td>로봇·휴머노이드</td>
+</tr>
+<tr>
+<td>TIGER 미국우주테크</td>
+<td>KOSPI</td>
+<td>12,840원</td>
+<td>+5.64%</td>
+<td>1,095만주</td>
+<td>우주테크</td>
+</tr>
+<tr>
+<td>KODEX 미국우주항공</td>
+<td>KOSPI</td>
+<td>12,250원</td>
+<td>+5.42%</td>
+<td>1,112만주</td>
+<td>우주항공</td>
+</tr>
+<tr>
+<td>RISE 삼성전자SK하이닉스채권혼합50</td>
+<td>KOSPI</td>
+<td>13,615원</td>
+<td>+1.79%</td>
+<td>2,021만주</td>
+<td>삼전·하닉 혼합</td>
+</tr>
+<tr>
+<td>KODEX 200타겟위클리커버드콜</td>
+<td>KOSPI</td>
+<td>24,655원</td>
+<td>+1.88%</td>
+<td>1,872만주</td>
+<td>커버드콜 배당</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_8">📝 오늘의 시장 요약</h2>
+<p>오늘 코스피는 역대 최고치를 또 한 번 갈아치우며 '쉬어가기'를 거부한 하루였습니다. 장 초반 미국 4월 CPI 상승(3.8%, 2023년 5월 이후 최고) 충격과 삼성전자 노사 사후조정 결렬 소식이 겹치며 7,400선이 순식간에 무너졌지만, 개인과 기관이 각각 1조 8,751억원, 1조 6,982억원을 동반 저가 매수하며 완전한 반등을 이끌어냈습니다.</p>
+<p>이날 시장을 관통한 핵심 테마는 세 가지입니다. <strong>① AI·반도체 슈퍼사이클</strong>: SK하이닉스와 삼성전자는 AI HBM 수요 폭증과 잇따른 목표주가 상향(하이닉스 300만원, 삼전 50만원)에 힘입어 증시 쌍두마차 역할을 이어갔습니다. JP모건에 이어 모건스탠리까지 코스피 1만 가능성을 언급한 날이기도 했습니다. <strong>② 로봇·전장 확산</strong>: 코스모로보틱스 3일 연속 상한가, 계양전기의 꾸준한 강세로 로봇 테마가 반도체 이후 시장의 두 번째 축으로 자리잡는 모양새입니다. <strong>③ 부동산·자산 재평가</strong>: 압구정 갤러리아 재건축 심의 통과로 한화갤러리아가 첫 상한가를 기록하고, 삼표시멘트·이구산업 등 소재·건설주도 동반 수급을 받았습니다. 반면 광통신 테마는 단기 과열 우려와 실적 확인 부담으로 대한광통신이 15% 가까이 하락하며 분화 양상을 보였습니다.</p>
+<hr />
+<p><em>본 내용은 공개된 시장 데이터 및 뉴스 기반 정보 정리이며, 투자 권유가 아닙니다. 개별 종목 투자는 반드시 본인 판단 하에 신중하게 결정하시기 바랍니다.</em></p>
+        </main>
+    </div>
+</body>
+</html>

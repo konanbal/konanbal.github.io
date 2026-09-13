@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copart(CPRT) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">CPRT · NASDAQ</div>
+      <div class="company-name">Copart, Inc.</div>
+      <div class="company-desc">VB3 플랫폼 기반 글로벌 온라인 차량 경매·리마케팅 서비스 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 08월 17일</div>
+      <div class="price-display">$31.61</div>
+      <div class="price-change up">▲ +7.55% (8/14 종가 기준, 전일 대비)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $29.8B</span>
+    <span class="rating-pill">🏢 섹터: 상업서비스 / 자동차 경매</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (CEO 교체 후 의견 엇갈림)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (FY26 3분기)</div>
+      <div class="kpi-value">$1.24B</div>
+      <div class="kpi-sub">YoY +2.1%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">매출총이익률</div>
+      <div class="kpi-value">약 46%</div>
+      <div class="kpi-sub">전년동기 대비 소폭 개선</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$40.90</div>
+      <div class="kpi-sub">현재가 대비 +29.4%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$26.81~$50.11</div>
+      <div class="kpi-sub">현재가 위치: 약 21% (저점권)</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 · FY2026 3분기, 2026.04.30 마감)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.24B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +3.3%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.20B · YoY +2.1%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상, 희석)</div>
+        <div style="font-size:18px;font-weight:700;">$0.43 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +4.9%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $0.41 · YoY +2.4%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      실적 발표일: 2026년 5월 21일(장 마감 후). 물량(대수) 감소를 평균판매단가 +4.6% 상승과 해외 매출 +14.1% 성장이 상쇄하며 매출을 견인했습니다. 순이익은 전년 대비 -1.0%였으나 자사주 매입에 따른 유통주식수 감소로 EPS는 소폭 증가했습니다. 4분기 가이던스는 EPS $0.38, 매출 약 $11.4억이며, 다음 실적(4분기·연간)은 2026년 9월 3일 발표 예정입니다.
+    </div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">임원변동</span>
+        <span style="font-size:13px;font-weight:500;">Jeff Liaw CEO 사임(7/31 발효), Jay Adair 대표이사 복귀</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.29</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2026년 3분기(2026.04.30 마감) 실적 발표</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.21</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">임원변동</span>
+        <span style="font-size:13px;font-weight:500;">Jane Pocock 사장 승진(국제사업 총괄), 8/1 발효</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.08</span>
+    </div>
+  </div>
+  <div style="font-size:12px;color:var(--muted);margin:-0.5rem 0 1rem 0.25rem;">📌 투자자 주목 공시: CEO 교체 발표 직후 Bragar Eagel & Squire 등 다수 로펌이 증권법 위반 여부에 대한 주주 대상 조사에 착수했습니다. 회사는 $42억 규모의 무차입 현금을 보유하고 있으며, 최근 6개월간 약 $16억 규모 자사주를 매입했습니다.</div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.06.29</span></div>
+      <div class="news-title">깜짝 CEO 교체 발표로 주가 -8% 52주 신저가 경신</div>
+      <div class="news-summary">불과 5주 전 사상 최고 경매가·평균판매단가를 발표했던 회사가 3대 CEO였던 Jeff Liaw의 사임과 창업 초기 리더였던 Jay Adair의 복귀를 발표하며 시장에 충격을 줬습니다. 실적보다 지배구조 이슈가 주가를 흔든 이례적 사례로 꼽힙니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.07.06</span></div>
+      <div class="news-title">Adair 신임 CEO, 상장 32년 만에 최초로 실적발표 사이 특별 투자자 콜 개최</div>
+      <div class="news-summary">$42억 규모 무차입 현금을 M&A와 신규 사업 구축(building)에 동시에 투입하겠다고 밝히며, 국제 확장과 홀카(Whole Car) 성장을 가속화하겠다는 의지를 재확인했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026년 7월 (진행 중)</span></div>
+      <div class="news-title">다수 로펌, CEO 교체 관련 증권법 위반 여부 조사 착수</div>
+      <div class="news-summary">Bragar Eagel & Squire 등이 CEO 교체 발표 전후 회사의 공시·업무 관행에 잠재적 위법 소지가 있는지 조사에 나섰습니다. 아직 소송 제기 단계는 아니지만, 지배구조 관련 오버행 요인으로 작용하고 있습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.21</span></div>
+      <div class="news-title">3분기 매출·EPS 모두 컨센서스 상회, 평균판매단가·해외 매출 견조</div>
+      <div class="news-summary">전체 물량은 줄었지만 평균판매단가가 4.6% 상승하고 해외 매출이 14.1% 성장하며 이를 상쇄했습니다. 보험 손해사정 물량 정상화 국면에서도 가격결정력이 유지되고 있음을 보여줍니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.07.21</span></div>
+      <div class="news-title">Barclays, 목표주가 $32→$26로 하향하며 Sell 의견 재확인</div>
+      <div class="news-summary">Barclays는 성장 둔화와 지배구조 불확실성을 근거로 지속적인 Sell 의견을 유지하며 목표주가를 추가 하향했습니다. 반면 Jefferies·Freedom Broker 등은 Buy 의견을 유지하고 있어 하우스별 시각차가 뚜렷합니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>온라인 차량 경매 시장의 압도적 지배력과 높은 진입장벽 — 보험사와의 장기 관계 기반 견고한 해자</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>$42억 무차입 현금 보유, 신임 CEO 주도의 적극적 자본배분(M&A·자사주매입·국제확장) — 최근 6개월 $16억 자사주 매입</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>국제 사업 고성장 지속(전분기 해외 매출 +14.1%), 국제통 Jane Pocock 사장 승진으로 해외 성장 가속 기대</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>52주 저점권에서 컨센서스 목표주가 대비 업사이드 약 29%, 대다수 애널리스트는 여전히 Buy 의견</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>예상치 못한 CEO 교체에 따른 지배구조 불확실성 — 다수 로펌의 증권법 위반 조사 착수, 주주소송 가능성 오버행</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>보험 손해사정 물량 정상화로 매출 성장률이 한 자릿수 초반대로 둔화 — 가격 상승이 물량 감소를 상쇄하는 구조 지속 여부 불확실</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>Barclays 등 일부 하우스는 Sell 의견 견지 — 밸류에이션 프리미엄 대비 성장 둔화에 대한 신중론 상존</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>신임 경영진의 자본배분 전략(M&A vs 자사주매입 vs 신사업)이 구체적 실행 성과로 아직 증명되지 않은 상태</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026.07 최근 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Jefferies</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$45 (하향, 이전 $47)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Freedom Broker (신규 커버리지)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$39</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Barclays</span>
+      <div class="analyst-right"><span class="opinion-badge sell">매도 (Sell)</span><span class="target-price">$26 (하향, 이전 $32)</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">Copart는 VB3 플랫폼을 기반으로 한 글로벌 온라인 차량 경매 시장의 압도적 지배자로, FY2026 3분기에 매출·EPS 모두 컨센서스를 상회하는 견조한 실적을 냈습니다. 그러나 실적 발표 5주 뒤 전격적인 CEO 교체(Jeff Liaw 사임, 창업 초기 리더 Jay Adair 복귀)가 발표되며 주가가 급락, 다수 로펌의 증권법 위반 조사 착수로 지배구조 불확실성이라는 새로운 리스크가 부각됐습니다. $42억에 달하는 무차입 현금을 바탕으로 한 적극적 자본배분(M&A·자사주매입·국제확장) 전략은 긍정적이나, 아직 구체적 성과로 증명되지는 않았습니다. 보험 물량 정상화에 따른 성장 둔화와 Barclays의 지속적인 Sell 의견도 유의할 부분입니다. 컨센서스 목표주가 대비 업사이드가 29%에 달하는 만큼, 이 종목은 지배구조 전환기의 불확실성을 감내하며 온라인 차량 경매 시장의 구조적 해자를 신뢰하는 중장기 투자자에게 적합합니다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

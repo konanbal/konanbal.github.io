@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>주간 금융 뉴스레터 | 2026년 5월 9일</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #f0f4f8;
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #1e293b;
+      padding: 24px 16px;
+      line-height: 1.75;
+    }
+
+    .wrapper {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+      border-radius: 16px;
+      padding: 36px 32px;
+      text-align: center;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .header .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #93c5fd;
+      margin-bottom: 10px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .header .date {
+      font-size: 13px;
+      color: #bfdbfe;
+    }
+
+    /* ── SUMMARY BAND ── */
+    .summary-band {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      border-left: 4px solid #1d4ed8;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    }
+    .summary-band h2 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1d4ed8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .summary-band ul {
+      list-style: none;
+      padding: 0;
+    }
+    .summary-band ul li {
+      font-size: 14px;
+      padding: 5px 0;
+      border-bottom: 1px dashed #e2e8f0;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .summary-band ul li:last-child { border-bottom: none; }
+    .summary-band ul li .emoji { flex-shrink: 0; font-size: 16px; }
+
+    /* ── SECTION CARD ── */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    .card-header .icon {
+      font-size: 26px;
+      line-height: 1;
+    }
+    .card-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* Key Numbers */
+    .key-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .kn-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      flex: 1;
+      min-width: 120px;
+    }
+    .kn-item .kn-label {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kn-item .kn-value {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 2px;
+    }
+    .kn-item .kn-change {
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 1px;
+    }
+    .up   { color: #ef4444; }   /* 국내 상승은 빨간색 */
+    .down { color: #3b82f6; }
+    .up-us { color: #16a34a; } /* 미국 상승은 초록색 */
+
+    .body-text {
+      font-size: 14.5px;
+      color: #334155;
+      margin-bottom: 18px;
+      line-height: 1.8;
+    }
+
+    /* Insight Box */
+    .insight {
+      background: #eff6ff;
+      border-left: 4px solid #1d4ed8;
+      border-radius: 0 10px 10px 0;
+      padding: 14px 16px;
+    }
+    .insight .insight-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1d4ed8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .insight p {
+      font-size: 13.5px;
+      color: #1e40af;
+      line-height: 1.7;
+    }
+
+    /* ── NEXT WEEK CARD ── */
+    .next-week {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border: 1px solid #86efac;
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .next-week h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #166534;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .event-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px dashed #bbf7d0;
+    }
+    .event-row:last-child { border-bottom: none; }
+    .event-date {
+      font-size: 12px;
+      font-weight: 700;
+      color: #166534;
+      background: #dcfce7;
+      border-radius: 6px;
+      padding: 3px 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .event-desc {
+      font-size: 13.5px;
+      color: #14532d;
+    }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      background: #fefce8;
+      border: 1px solid #fde68a;
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 12px;
+      color: #92400e;
+      line-height: 1.6;
+    }
+    .disclaimer strong { font-weight: 700; }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      padding: 20px 0 8px;
+    }
+
+    /* ── HOT ISSUE BADGE ── */
+    .hot-badge {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid #fde68a;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 480px) {
+      .key-numbers { flex-direction: column; }
+      .header h1 { font-size: 20px; }
+      .card { padding: 20px 18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="label">📊 Weekly Finance Brief</div>
+    <h1>주간 금융 시장 뉴스레터</h1>
+    <div class="date">2026년 5월 4일(월) — 5월 9일(토) 기준</div>
+  </div>
+
+  <!-- 한줄 요약 -->
+  <div class="summary-band">
+    <h2>이번 주 핵심 요약</h2>
+    <ul>
+      <li>
+        <span class="emoji">📈</span>
+        <span><strong>국내 증시</strong> — 반도체 초강세에 코스피, 4일 만에 6,599 → 7,499 돌파, 사상 최고치 연속 경신</span>
+      </li>
+      <li>
+        <span class="emoji">🌐</span>
+        <span><strong>글로벌 매크로</strong> — 연준 4회 연속 금리 동결(3.5~3.75%), 미·이란 휴전 지속으로 유가 하락 안정</span>
+      </li>
+      <li>
+        <span class="emoji">🇺🇸</span>
+        <span><strong>미국 증시</strong> — S&amp;P500·나스닥 연속 사상 최고치 경신, 4월 고용 호조 + 반도체 실적 서프라이즈 견인</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 섹션 A: 국내 증시 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">📈</span>
+      <h2>국내 주식·증시 <span class="hot-badge">⚡ 이슈</span></h2>
+    </div>
+
+    <div class="key-numbers">
+      <div class="kn-item">
+        <div class="kn-label">코스피</div>
+        <div class="kn-value">7,499.07</div>
+        <div class="kn-change up">+13.5% (주간)</div>
+      </div>
+      <div class="kn-item">
+        <div class="kn-label">삼성전자</div>
+        <div class="kn-value">신고가</div>
+        <div class="kn-change up">반도체 주도</div>
+      </div>
+      <div class="kn-item">
+        <div class="kn-label">SK하이닉스</div>
+        <div class="kn-value">140만 원</div>
+        <div class="kn-change up">+12% (주 중)</div>
+      </div>
+    </div>
+
+    <div class="body-text">
+      이번 주 국내 증시는 역사적인 한 주였습니다. 코스피는 5월 4일 6,598 포인트에서 출발해 단 3거래일 만에 7,499.07을 기록하며 <strong>약 891포인트(+13.5%)</strong>라는 전례 없는 단기 급등을 연출했습니다. 지수를 이끈 주인공은 단연 <strong>삼성전자와 SK하이닉스</strong>였습니다. AI 설비투자(CAPEX) 급증에 따른 HBM(고대역폭 메모리) 수요가 구조적으로 확대되면서, 반도체가 지수 상승의 핵심 엔진 역할을 했습니다.
+      <br><br>
+      다만 시장 내부를 들여다보면 온도차가 극명합니다. 유진투자증권은 "반도체를 제외한 코스피는 사실상 4,100선에 불과하다"고 분석했으며, 전체 섹터 중 연고점을 넘어선 비율은 3분의 1 수준에 그쳤습니다. 반도체 랠리 이후의 '순환매' 시나리오로 전력·원전·방산주 등 소외업종에 대한 관심이 높아지고 있습니다.
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">📌 인사이트</div>
+      <p>AI 인프라 투자 사이클에 올라탄 반도체 섹터의 구조적 성장은 지속 가능하나, 단기 급등에 따른 쏠림 현상은 차익 실현 압력을 높이고 있습니다. 반도체 랠리가 일시 소강될 경우, 상대적 저평가 상태인 전력·원전·방산 업종으로의 순환매 흐름이 전개될 가능성에 주목할 필요가 있습니다.</p>
+    </div>
+  </div>
+
+  <!-- 섹션 B: 글로벌 매크로 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🌐</span>
+      <h2>글로벌 매크로</h2>
+    </div>
+
+    <div class="key-numbers">
+      <div class="kn-item">
+        <div class="kn-label">미 기준금리</div>
+        <div class="kn-value">3.5~3.75%</div>
+        <div class="kn-change" style="color:#64748b">4회 연속 동결</div>
+      </div>
+      <div class="kn-item">
+        <div class="kn-label">WTI 유가</div>
+        <div class="kn-value">$95.4</div>
+        <div class="kn-change down">▼ 이란 협상</div>
+      </div>
+      <div class="kn-item">
+        <div class="kn-label">원/달러</div>
+        <div class="kn-value">1,467원</div>
+        <div class="kn-change" style="color:#64748b">달러 약세</div>
+      </div>
+    </div>
+
+    <div class="body-text">
+      <strong>연준(Fed)</strong>은 4월 FOMC에서 기준금리를 3.5~3.75%로 동결, 올해 들어 네 차례 연속 동결 기조를 유지했습니다. 8-4 투표(4명 반대)는 1992년 이후 처음으로 많은 반대표가 나온 분열된 회의로, 금리 인하에 대한 의견 차이가 위원 간에 벌어지고 있음을 보여줍니다. 시장은 <strong>9월 이전 금리 인하 가능성을 낮게</strong> 보고 있으며, 일부 투자은행(IB)은 인상 전환 시나리오까지 언급하고 있습니다.
+      <br><br>
+      원자재 시장에서는 미·이란 평화 협상 진전이 주목할 변수였습니다. 루비오 국무장관이 "이란 공격 작전 종료"를 발표하고 호르무즈 해협 선박 안내 작전 중단이 이어지면서 WTI 유가는 배럴당 $95 수준으로 내려앉았습니다. 다만 협상 최종 타결까지는 불확실성이 남아 있어 유가의 하방 안정과 상방 재상승 가능성이 공존합니다. 달러 인덱스는 중동 긴장 완화와 함께 약세 흐름을 보이며 원/달러 환율도 1,460원대 초반으로 소폭 하락했습니다.
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">📌 인사이트</div>
+      <p>연준의 금리 동결 장기화 전망 속 유가 안정이 겹치며 인플레이션 우려는 다소 완화됐습니다. 그러나 미·이란 협상 최종 결과와 중동 지정학 변수는 여전히 유가 변동성의 핵심 요인으로 남아 있습니다. 다음 주 미·중 무역협상과 CPI 발표가 달러화 방향성을 결정하는 분기점이 될 전망입니다.</p>
+    </div>
+  </div>
+
+  <!-- 섹션 C: 미국 증시 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🇺🇸</span>
+      <h2>미국 증시</h2>
+    </div>
+
+    <div class="key-numbers">
+      <div class="kn-item">
+        <div class="kn-label">S&amp;P 500</div>
+        <div class="kn-value">7,398.93</div>
+        <div class="kn-change up-us">+0.84% (5/8)</div>
+      </div>
+      <div class="kn-item">
+        <div class="kn-label">나스닥</div>
+        <div class="kn-value">26,247.08</div>
+        <div class="kn-change up-us">+1.71% (5/8)</div>
+      </div>
+      <div class="kn-item">
+        <div class="kn-label">다우존스</div>
+        <div class="kn-value">49,609.16</div>
+        <div class="kn-change up-us">+0.02% (5/8)</div>
+      </div>
+    </div>
+
+    <div class="body-text">
+      미국 증시는 이번 주도 상승 기조를 이어갔습니다. <strong>S&amp;P500과 나스닥은 6주 연속 상승세</strong>를 기록하며 나란히 사상 최고치를 경신했습니다. 상승을 이끈 두 가지 축은 <strong>① 호조로운 고용 지표</strong>와 <strong>② 반도체 실적 서프라이즈</strong>였습니다. 4월 비농업 고용은 11만 5천 건 증가로 시장 예상을 웃돌았고, 엔비디아는 장중 사상 최고가($217.80)를 경신했습니다. 특히 인텔은 애플과의 반도체 위탁 생산 파트너십 기대감에 하루 만에 12~14% 급등하며 반도체 섹터 전반을 이끌었습니다.
+      <br><br>
+      실적 시즌도 긍정적인 흐름을 보이고 있습니다. 현재까지 실적을 발표한 S&amp;P500 기업의 82%가 시장 전망을 상회하는 어닝 서프라이즈를 기록했습니다. 다만 팔란티어는 가이던스 실망으로 급락하는 등 개별 종목 간 차별화가 뚜렷하게 나타나고 있어, 실적 내용을 꼼꼼히 살펴보는 접근이 필요한 시점입니다.
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">📌 인사이트</div>
+      <p>빅테크 주도 없이도 S&amp;P500이 사상 최고치를 경신한 것은 상승 폭이 시장 전반으로 확산되고 있다는 긍정적 신호입니다. 그러나 고금리가 지속되는 환경에서 가이던스 미달 종목의 낙폭이 크게 나타나고 있어, 다음 주 예정된 주요 빅테크 실적 발표 결과가 추가 상승 여력의 분기점이 될 것으로 보입니다.</p>
+    </div>
+  </div>
+
+  <!-- 다음 주 일정 -->
+  <div class="next-week">
+    <h2>📅 다음 주 주목할 이벤트</h2>
+
+    <div class="event-row">
+      <span class="event-date">5/12 (화)</span>
+      <span class="event-desc">🇺🇸 미국 4월 CPI 발표 — 인플레이션 재확인 여부, 금리 경로 재설정 가능성</span>
+    </div>
+    <div class="event-row">
+      <span class="event-date">5/12~</span>
+      <span class="event-desc">🇨🇳🇺🇸 미·중 무역협상 본격 개시 — 런던 회담 결과를 토대로 추가 협의 예정</span>
+    </div>
+    <div class="event-row">
+      <span class="event-date">5/13 (수)</span>
+      <span class="event-desc">🇺🇸 미국 4월 PPI 발표 — 생산자물가 동향 확인</span>
+    </div>
+    <div class="event-row">
+      <span class="event-date">주간</span>
+      <span class="event-desc">📊 빅테크 추가 실적 발표 시즌 지속 — 개별 종목 가이던스 주목</span>
+    </div>
+    <div class="event-row">
+      <span class="event-date">주간</span>
+      <span class="event-desc">🛢️ 미·이란 협상 최종 타결 여부 — 유가 방향성 결정 변수</span>
+    </div>
+    <div class="event-row">
+      <span class="event-date">6/3</span>
+      <span class="event-desc">🇰🇷 한국 지방선거 — 정책 방향성에 대한 시장 관심</span>
+    </div>
+  </div>
+
+  <!-- 면책 -->
+  <div class="disclaimer">
+    <strong>⚠️ 면책 고지:</strong> 본 뉴스레터는 정보 제공 목적으로만 작성되었으며, 투자 권유나 재정적 조언이 아닙니다. 투자 결정은 본인의 판단과 책임 하에 이루어져야 하며, 본 자료에 포함된 데이터는 공개된 시황 정보를 기반으로 하나 정확성을 보장하지 않습니다.
+  </div>
+
+  <div class="footer">
+    <p>📬 Weekly Finance Brief — 2026년 5월 9일 발행</p>
+    <p style="margin-top:4px">데이터 기준: 5/8(금) 뉴욕 종가 / 5/9(토) 서울 기준</p>
+  </div>
+
+</div>
+</body>
+</html>

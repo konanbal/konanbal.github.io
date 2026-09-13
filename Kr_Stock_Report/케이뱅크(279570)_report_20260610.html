@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>케이뱅크(279570) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0a1628;
+    --accent: #1d6fc4;
+    --accent2: #1b3a6b;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .warning-banner { background: #fef3c7; border: 1px solid #fbbf24; color: #92400e; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">279570 · KOSPI</div>
+      <div class="company-name">케이뱅크</div>
+      <div class="company-desc">국내 1호 인터넷전문은행 — 업비트 제휴·SME 대출 확대·스테이블코인 전략을 통한 디지털 금융 허브 도약 추진</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 6월 10일</div>
+      <div class="price-display">약 5,570원</div>
+      <div class="price-change down">▼ 공모가(8,300원) 대비 -32.9%</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 2.3조원</span>
+    <span class="rating-pill">🏢 섹터: 인터넷전문은행</span>
+    <span class="rating-pill">⚠️ 상장일: 2026.03.05</span>
+    <span class="rating-pill">🔓 6/5 FI 락업 해제 3,576만주</span>
+  </div>
+</div>
+<div class="container">
+
+  <!-- 오버행 경고 -->
+  <div class="warning-banner">
+    ⚠️ 6월 5일 FI 락업 1차 해제(3,576만주·전체의 8.8%) 완료. 9월 우리은행 보호예수 해제 시 최대 1억1,900만주(약 29.3%) 출회 가능 — 오버행 모니터링 필요
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">1Q26 순이익 (최신)</div><div class="kpi-value">332억원</div><div class="kpi-sub">YoY +106.9%</div></div>
+    <div class="kpi"><div class="kpi-label">1Q26 NIM</div><div class="kpi-value">1.57%</div><div class="kpi-sub">전년 1Q 1.41% → 개선</div></div>
+    <div class="kpi"><div class="kpi-label">2025년 연간 순이익</div><div class="kpi-value">1,126억원</div><div class="kpi-sub">YoY -12.1% (기저효과)</div></div>
+    <div class="kpi"><div class="kpi-label">52주 범위</div><div class="kpi-value">5,570~9,880원</div><div class="kpi-sub">공모가 8,300원 대비 -32.9%</div></div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (2026년 1분기 · 최신 분기)</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">당기순이익</div>
+        <div style="font-size:18px;font-weight:700;">332억원</div>
+        <div style="font-size:11px;color:var(--green);margin-top:2px;">YoY +106.9% (전년 161억 대비 2배↑)</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">이자이익</div>
+        <div style="font-size:18px;font-weight:700;">1,252억원</div>
+        <div style="font-size:11px;color:var(--green);margin-top:2px;">YoY +15.4%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">비이자이익</div>
+        <div style="font-size:18px;font-weight:700;">142억원</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +4%</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">고객 수</div>
+        <div style="font-size:14px;font-weight:700;">1,607만명</div>
+        <div style="font-size:10px;color:var(--green);">+54만명</div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">여신 잔액</div>
+        <div style="font-size:14px;font-weight:700;">18.75조원</div>
+        <div style="font-size:10px;color:var(--green);">YoY +10.7%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">기업대출</div>
+        <div style="font-size:14px;font-weight:700;">2.75조원</div>
+        <div style="font-size:10px;color:var(--green);">YoY +2배↑</div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">대손비용률</div>
+        <div style="font-size:14px;font-weight:700;">1.09%</div>
+        <div style="font-size:10px;color:var(--green);">YoY 개선</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>최우형 행장:</strong> "올해 1분기는 선제적인 개인사업자 대출 확대를 통해 성장 기반을 강화한 시기. 향후 기업금융 포트폴리오를 고도화하고 스테이블코인 등 글로벌 디지털자산 시장에서 경쟁력을 확보해 차별화된 혁신을 이어가겠다." — 연간 대손비용률 1% 이하 목표 제시. 업비트 예치금 제외 NIM은 1.97%로 실질 수익력 양호.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 분기보고서 제출 / 실적발표(순익 332억원)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.30</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">의무보유해제</span>
+        <span style="font-size:13px;font-weight:500;">FI 4곳 락업 1차 해제 — 3,576만주(전체 8.8%) 의무보유 등록 해제</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">임원변동</span>
+        <span style="font-size:13px;font-weight:500;">사외이사 5명 선임·재선임 — 사외이사 비율 57.1%→71.4% 확대</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.31</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">사업보고서</span>
+        <span style="font-size:13px;font-weight:500;">2025년 사업보고서 제출 (순익 1,126억원 확정)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">상장</span>
+        <span style="font-size:13px;font-weight:500;">코스피 상장 완료 — 공모가 8,300원, 시총 3.37조원 (IPO 삼수 완주)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.05</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#fff7ed;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;color:var(--text);">
+      📌 <strong>투자자 주목:</strong> 9월 우리은행 보호예수 해제 시 최대 1억1,900만주(전체의 약 29.3%)가 추가로 출회 가능. FI들의 현재 평가손실(주당 투자단가 6,500원 대비 현 5,570원) 감안 시 당장 대규모 매물 출현 가능성은 제한적이나, 9월까지는 오버행 리스크 상존.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.30</span></div>
+      <div class="news-title">1Q26 순이익 332억원 — 전년비 2배 이상 성장, NIM 1.57% 반등</div>
+      <div class="news-summary">기업대출(소호 중심) 급성장으로 여신 잔액이 YoY 10.7% 증가. NIM은 1.41%→1.57%로 개선. 대손비용률도 1.09%로 낮아지며 건전성 동반 개선. 상장 후 첫 분기 성적표로 시장 예상치 대비 양호한 평가. 업비트 예치금 비중도 24.6%(2025년 3분기)→18.4%(2026년 1분기)로 축소 중.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.05.18</span></div>
+      <div class="news-title">하나금융, 두나무 지분 1조33억원 취득 — 업비트·케이뱅크 6년 제휴 계약(10월 만료) 재계약 불확실성 부상</div>
+      <div class="news-summary">하나은행이 두나무(업비트 운영사) 지분 6.55%를 인수하면서 10월 만료되는 케이뱅크-업비트 실명계좌 제휴 재계약에 대한 시장 우려가 확대됐다. 케이뱅크 측은 "협력관계는 유지될 것"이라고 강조했으나, 경쟁 구도 형성은 중장기 리스크 요인.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.17</span></div>
+      <div class="news-title">삼성증권 신규 커버리지 개시 — "과도한 우려가 가린 본업의 성장, 실적 퀀텀점프의 서막"</div>
+      <div class="news-summary">MAU 540만명(3년간 2.2배 성장), 대환대출 플랫폼 수혜 등 본업 성장 가시화를 강조. 2026년~부터 SME 대출 본격화로 수익 구조 전환이 시작된다고 분석. 상장 후 첫 기관 커버리지 개시로 투자자 신뢰 제고.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.06.05</span></div>
+      <div class="news-title">FI 락업 1차 해제 — 공모가 대비 -32.9% 주가 부진 속 오버행 우려 현실화</div>
+      <div class="news-summary">BCC KINGPIN, KHAN SS 등 FI 4곳의 3,576만주(전체 8.8%)가 6월 5일 의무보유 해제. 현 주가가 FI 투자단가(6,500원)를 하회해 대규모 매도 가능성은 제한적이나, 9월 2차 해제(우리은행 포함) 시 최대 1억1,900만주까지 출회 가능 — 향후 3개월이 최대 관문.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.04.15</span></div>
+      <div class="news-title">상장 후 NIM·ROE 동반 하락 — "성장과 이익의 괴리" 지적 속 희망퇴직 단행</div>
+      <div class="news-summary">2025년 NIM 1.40%(2022년 2.51%에서 3년 연속 하락), ROE 5.2% 수준으로 수익성 지표 동반 약화. 희망퇴직을 통한 비용 구조 효율화 시도. 업비트 예치금(연간 이자비용 1,000억원 이상)이 NIM 하락의 구조적 원인으로 지목되고 있으나, 1Q26 NIM은 1.57%로 반등 확인.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.03.05</span></div>
+      <div class="news-title">코스피 상장 완주 — 총 공모금액 4,980억원, IPO 삼수 끝에 상장 완료</div>
+      <div class="news-summary">공모가 8,300원(희망밴드 하단), 신주 3,000만주(2,490억원)를 통해 SME 대출 확대·신사업 투자 재원 마련. 상장 첫날 장중 9,880원까지 상승 후 현재 5,570원대 주가로 공모가 하회. 상장에 따른 BIS 비율 개선, 자본력 확충 효과는 유효.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>1Q26 순이익 2배 성장·NIM 1.57% 반등 — 기업대출 확대 전략이 실적으로 가시화되기 시작</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>SME(개인사업자·중소기업) 대출 급성장 — 기업대출 잔액 1년간 2배(1.31조→2.75조), 2027년 비중 32% 목표</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>업비트 제휴 기반 600만 디지털자산 고객 — 스테이블코인 해외송금·법인 디지털자산 사업 확장 중장기 성장 동력</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>변동금리 대출 70% 구조 — 금리 상승기에 NIM 확대 수혜, 대출의 60%가 1년 주기 금리 재산정</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>고객 1,607만명·연간 대출성장률 20% 가이던스 — 24조원 규모 대출 성장 여력 확보</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>공모가 대비 -33% 낙폭 — 이미 과도한 우려가 선반영됐다는 저평가 관점 유효</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>업비트 실명계좌 제휴 10월 만료 — 하나금융-두나무 동맹 후 재계약 불확실성 증가. 계약 상실 시 수신 기반 타격</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>오버행 9월까지 지속 — 2차 락업 해제 포함 최대 1.19억주(29.3%) 시장 출회 가능성. 주가 상단 압박</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>NIM 구조적 약세 — 업비트 예치금 이자비용 연 1,000억원+. 업비트 제외 NIM(1.97%)과 실제 NIM(1.57%) 격차가 여전히 0.4%p 이상</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>ROE<COE 구간 지속 가능성 — 2025년 ROE 5.2%로 자본비용 하회. 밸류에이션 디스카운트 지속 요인</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>인터넷은행 경쟁 심화 — 카카오뱅크(1Q26 순익 1,873억원), 토스뱅크와의 2위 경쟁 심화. 상품 마진 압박</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>스테이블코인 법제화 지연 리스크 — 원화 스테이블코인 관련 규제 미확정으로 신성장동력의 실현 시점 불확실</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">삼성증권 (신규 개시, 4월 17일)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">커버리지 신규 개시</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">메리츠증권</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">2027년 ROE 6.9% · 실적 가시화 시점 2027년</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">한국투자증권 (3월 개시)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">스테이블코인 법제화 시 멀티플 리레이팅 가능</span></div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#fffbf0;border-radius:6px;padding:10px 14px;color:var(--text);">
+      💡 <strong>컨센서스 요약:</strong> 상장 초기로 아직 커버리지 증권사 수가 제한적. 상장 후 첫 1분기 실적에서 순익 2배 성장이 확인되면서 삼성증권이 긍정적 신규 커버리지를 개시했으나, 메리츠·한국투자는 실질적인 실적 개선이 2027년에 가시화될 것으로 보고 현 시점에서는 중립을 유지. 공모가 대비 현 주가는 이미 33% 하락해 '저평가 구간 진입'이라는 시각도 존재.
+    </div>
+  </div>
+
+  <!-- 업비트 의존도 시각화 카드 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🔗 업비트 의존도 및 NIM 추이 (핵심 구조 리스크)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:10px;">NIM 추이 (업비트 의존도 역관계)</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="width:50px;color:var(--muted);">2022</span><div style="height:12px;background:#3b82f6;border-radius:3px;width:100%;"></div><span>2.51%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="width:50px;color:var(--muted);">2023</span><div style="height:12px;background:#60a5fa;border-radius:3px;width:94%;"></div><span>2.35%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="width:50px;color:var(--muted);">2024</span><div style="height:12px;background:#93c5fd;border-radius:3px;width:76%;"></div><span>1.91%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="width:50px;color:var(--muted);">2025</span><div style="height:12px;background:#fca5a5;border-radius:3px;width:56%;"></div><span>1.40%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="width:50px;color:var(--green);font-weight:700;">1Q26</span><div style="height:12px;background:#6ee7b7;border-radius:3px;width:63%;"></div><span style="color:var(--green);font-weight:700;">1.57% ↑</span></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:10px;">업비트 예치금 비중 (수신 잔액 대비)</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="width:70px;color:var(--muted);">2025년 3Q</span><div style="height:12px;background:#fca5a5;border-radius:3px;width:100%;"></div><span>24.6%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="width:70px;color:var(--muted);">2025년 4Q</span><div style="height:12px;background:#fcd34d;border-radius:3px;width:83%;"></div><span>20.5%</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="width:70px;color:var(--green);font-weight:700;">2026년 1Q</span><div style="height:12px;background:#6ee7b7;border-radius:3px;width:75%;"></div><span style="color:var(--green);font-weight:700;">18.4% ↓</span></div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6;">
+          업비트 제외 실질 NIM 1.97% → 실제 NIM 1.57% (격차 0.4%p)<br>
+          예치금 비중 감소는 NIM 구조 개선 신호
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      케이뱅크는 2026년 3월 코스피에 상장(공모가 8,300원)하며 IPO 삼수를 완주했고, 상장 후 첫 분기인 1Q26에 순이익 332억원(YoY +106.9%)으로 시장 기대치를 충족시키며 본업 성장을 증명하기 시작했다. 기업대출 잔액이 1년간 2배로 증가하고 NIM도 1.57%로 반등하는 등 핵심 지표가 개선 추세에 접어든 점은 긍정적이다. 중장기적으로는 SME 대출 확대(2027년 비중 32% 목표), 스테이블코인 기반 해외송금 사업, 업비트 제휴 600만 디지털자산 고객 기반이 차별화된 성장 동력으로 작용할 것으로 기대된다.
+      
+      그러나 단기적으로는 해소되지 않은 리스크가 뚜렷하다. 6월 1차 락업 해제에 이어 9월 우리은행 보호예수 해제 시 최대 1.19억주(29.3%)가 추가로 출회 가능한 오버행 부담이 9월까지 주가 상단을 제한할 가능성이 높다. 또한 10월 만료되는 업비트 실명계좌 제휴 재계약 불확실성과 NIM의 구조적 약세(업비트 예치금 이자비용 연 1,000억원+)는 중장기 수익성 개선의 속도를 제한하는 요인이다. <strong>이 종목은 오버행 해소 구간(9월 이후)을 확인하고 진입하려는 중장기 가치 투자자, 또는 디지털자산·스테이블코인 성장에 베팅하는 테마 투자자에게 적합합니다.</strong> 현 주가가 공모가 대비 -33% 낙폭으로 상당한 악재를 선반영한 점은 위안이 되나, 9월 오버행 완전 해소 이후의 수급 안정이 확인될 때까지 추가 관찰이 필요하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

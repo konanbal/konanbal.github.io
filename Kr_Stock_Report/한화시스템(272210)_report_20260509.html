@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한화시스템 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .price-change.up { color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .kpi-sub.up { color: var(--green); }
+  .kpi-sub.down { color: var(--red); }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .upside { font-size: 11px; color: var(--green); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .business-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+  .biz-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+  .biz-icon { font-size: 24px; margin-bottom: 6px; }
+  .biz-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .biz-share { font-size: 20px; font-weight: 700; color: var(--accent2); }
+  .biz-desc { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .business-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">272210 · KOSPI</div>
+      <div class="company-name">한화시스템</div>
+      <div class="company-desc">방산·ICT·우주·조선을 아우르는 한화그룹 핵심 방산전자 계열사</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 09일</div>
+      <div class="price-display">116,700원</div>
+      <div class="price-change down">▼ -4.50% (2026.05.07 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 24.4조원</span>
+    <span class="rating-pill">🏢 섹터: 방위산업·ICT</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 매수(BUY)</span>
+    <span class="rating-pill">🎯 52주 범위: 37,800 ~ 184,000원</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 매출 (연결)</div>
+      <div class="kpi-value">8,071억</div>
+      <div class="kpi-sub up">YoY +17.0%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익</div>
+      <div class="kpi-value">343억</div>
+      <div class="kpi-sub up">YoY +1.9% / OPM 4.2%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">애널리스트 평균 목표가</div>
+      <div class="kpi-value">~150,000원</div>
+      <div class="kpi-sub up">현재가 대비 +약 28%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">수주잔고</div>
+      <div class="kpi-value">12.2조원</div>
+      <div class="kpi-sub">안정적 실적 가시성 확보</div>
+    </div>
+  </div>
+
+  <!-- 사업 포트폴리오 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">사업 포트폴리오 구성 (2025년 기준)</div>
+    <div class="business-grid">
+      <div class="biz-card">
+        <div class="biz-icon">🛡️</div>
+        <div class="biz-name">방산</div>
+        <div class="biz-share">66.5%</div>
+        <div class="biz-desc">천궁-II, KF-21 AESA 레이다<br>대드론 레이저 '천광'</div>
+      </div>
+      <div class="biz-card">
+        <div class="biz-icon">💻</div>
+        <div class="biz-name">ICT</div>
+        <div class="biz-share">17.8%</div>
+        <div class="biz-desc">계열사 대상 IT서비스<br>한화에어로스페이스 외</div>
+      </div>
+      <div class="biz-card">
+        <div class="biz-icon">🚢</div>
+        <div class="biz-name">조선(기타)</div>
+        <div class="biz-share">15.7%</div>
+        <div class="biz-desc">한화필리조선소(미국)<br>미 해군 함정 사업 진출 추진</div>
+      </div>
+    </div>
+    <div style="background:#f0f4ff;border-radius:8px;padding:12px 14px;font-size:13px;color:#1a1a2e;line-height:1.6;">
+      🚀 <strong>우주사업</strong>(방산 내 비중 18%): 제주우주센터(연 최대 100기 생산) 가동 중. 2026년 하반기 '다부처초소형 SAR위성' 사업자 선정(6,000억원 규모) 예정. 우주 매출 2025년 3,000억원 → 2030년 <strong>1조원 이상</strong> 목표.
+    </div>
+  </div>
+
+  <!-- 최근 주요 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.07</span></div>
+      <div class="news-title">유안타·SK증권 '매수' 커버리지 개시 — 목표가 최대 169,000원</div>
+      <div class="news-summary">유안타증권은 2026년 영업이익 3,036억원(+145.7% YoY)을 전망하며 목표주가 169,000원으로 커버리지를 개시했다. 2028년 제주우주센터 램프업·천궁2 MFR 중동 3개국 양산 오버랩·미 해군 함정 성과 가시화 시점을 기준으로 한 밸류에이션을 적용했다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.27</span></div>
+      <div class="news-title">1Q26 매출 8,071억원 — 방산 수출 30% 비중, 수주잔고 12.2조원</div>
+      <div class="news-summary">UAE·사우디 천궁-II MFR 매출이 본격 인식되며 방산 부문 영업이익률이 14.6%로 급등했다. 수출 비중이 전년 연간 21%에서 30%로 확대되며 고마진 구조로 전환 중임을 확인했다. 수주잔고 12.2조원으로 향후 2~3년 실적 가시성 높다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.03.16</span></div>
+      <div class="news-title">주가 3개월 새 200% 급등 — 방산·우주·조선 '삼각 성장' 기대감</div>
+      <div class="news-summary">중동 지정학 긴장, 천궁-II 실전 방어 성능 입증, UAE 조기 공급 요청 소식이 겹치며 방산주 재평가 흐름. 미국 필리조선소의 미 해군 함정 사업 협의 보도가 주가 상승 촉매제가 됐다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.04.15</span></div>
+      <div class="news-title">필리조선소 인수 1년 — 조선이 '제3 매출축'으로 자리매김</div>
+      <div class="news-summary">필리조선소 편입 이후 기타 사업부문 매출이 전년 대비 55배 급증(5,755억원). 2025년 연간 매출 3조6,642억원(+30.7%). 상반기 적자 선종 인도 마무리 후 하반기 흑자 전환 전망.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.04.27</span></div>
+      <div class="news-title">1Q26 영업이익 컨센서스 대비 43% 하회 — 필리조선소 어닝쇼크</div>
+      <div class="news-summary">시장 컨센서스 603억원의 절반 수준인 343억원에 그쳤다. 2026년 1~2월 미국 북동부 기록적 폭설로 필리조선소 조업이 일시 중단됐고, 당기순손실 958억원으로 적자 전환. 신사업 초기 투자 부담이 실적 변동성을 높이고 있다.</div>
+    </div>
+  </div>
+
+  <!-- Bull / Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">🚀</span>
+          <span><strong>우주 사업 독보적 경쟁력</strong> — 제주우주센터 연 최대 100기 생산 역량. 2026년 하반기 6,000억원 SAR위성 사업자 선정 수주 시 독주 예상. 2030년 매출 1조원 목표.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🎯</span>
+          <span><strong>방산 수출 가속화</strong> — UAE·사우디 천궁-II MFR 양산 진입, 이라크·폴란드 K2 2차 사업, L-SAM 수주 파이프라인 확대. 1Q26 수출 비중 30% 돌파.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">⚓</span>
+          <span><strong>미 해군 함정 사업 진입</strong> — 필리조선소가 수상함·잠수함·무인함정 사업 협의 중. FCL 인증 완료 시 미 해군 건조 계약 성사 가능. 조선소 도크 확장 논의도 진행 중.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">📦</span>
+          <span><strong>12.2조 수주잔고</strong> — 2~3년 치 매출 백로그 확보. 방산 특성상 계약 취소 리스크 낮아 안정적 실적 흐름 지속 가능.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">⚠️</span>
+          <span><strong>필리조선소 지속적 손실</strong> — 상반기 적자 선종(NSMV·SRIV) 인도가 집중. 자연재해 등 외부 변수 시 추가 손실 가능. 2026년 흑자 전환은 하반기 이후 가능 전망.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">📊</span>
+          <span><strong>높은 밸류에이션 부담</strong> — 신한투자증권 기준 2026년 PER 438배. 미래 기대가 선반영된 상태로, 실적 실망 시 급락 위험. LS증권은 EV/수주잔고 2.7배로 업종 최고 수준.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">🔬</span>
+          <span><strong>R&D 비용 급증</strong> — 방산 수출·우주 사업 관련 연구개발비 400억원 추가 집행 예정. 매출 성장이 이를 커버하는 수준 유지 여부가 관건.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">🌐</span>
+          <span><strong>지정학 리스크의 양면성</strong> — 중동 긴장 완화 시 방산 수요 둔화 가능성. 글로벌 방산 예산 사이클 변화에 따른 수출 모멘텀 약화 우려.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 투자 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유안타증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수 BUY</span>
+        <span class="target-price">169,000원</span>
+        <span class="upside">▲ +44.8%</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">SK증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수 BUY</span>
+        <span class="target-price">160,000원</span>
+        <span class="upside">▲ +37.1%</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">대신증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수 BUY</span>
+        <span class="target-price">150,000원</span>
+        <span class="upside">▲ +28.5%</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유진투자증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수 BUY</span>
+        <span class="target-price">140,000원</span>
+        <span class="upside">▲ +19.9%</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">DS투자증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수 BUY</span>
+        <span class="target-price">137,000원</span>
+        <span class="upside">▲ +17.4%</span>
+      </div>
+    </div>
+    <div style="margin-top:12px; padding:10px 12px; background:#f8f9fc; border-radius:8px; font-size:12px; color:var(--muted);">
+      * 2026.04.28 기준 전체 증권사 평균 목표가 105,682원(6개월 컨센서스). 최근 신규 커버리지 개시 증권사들의 높은 목표가 반영 시 평균 상승 추세. 주가 기준일(2026.05.07): 116,700원.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 의견 요약</div>
+    <div class="summary-text">
+      한화시스템은 방산·ICT라는 검증된 캐시카우 위에 우주(제주우주센터)와 조선(한화필리조선소)이라는 두 가지 고성장 신사업을 얹은 독보적인 포트폴리오를 보유하고 있다. 2026년 1분기는 필리조선소의 일시적 손실로 어닝쇼크를 기록했지만, 방산 부문 영업이익률 14.6%와 30%에 달하는 수출 비중은 본업의 체력이 건재함을 입증한다. 핵심 카탈리스트는 ① 상반기 필리조선소 적자 선종 인도 완료 후 하반기 흑자 전환, ② 2026년 하반기 다부처초소형 SAR위성 사업자 선정(6,000억원), ③ 미 해군 함정 건조 계약 가시화 여부로 요약된다. 다만 현재 주가는 2026년 PER 기준 100배를 훌쩍 넘는 수준으로, 미래 성장이 이미 상당 부분 선반영된 상태임을 유의해야 한다. 중장기(2028년 이후) 관점에서 우주·조선·방산 세 축이 동시에 수확기에 진입하는 시나리오에 베팅하는 투자자에게 적합하며, 단기 실적 민감도가 높은 투자자에게는 변동성 위험 관리가 필수다.
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ 본 보고서는 공개된 뉴스 및 애널리스트 자료를 기반으로 작성된 참고용 분석 자료이며, 투자 권유가 아닙니다. 주식 투자에는 원금 손실 위험이 있으며, 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 작성일: 2026.05.09
+  </div>
+</div>
+</body>
+</html>

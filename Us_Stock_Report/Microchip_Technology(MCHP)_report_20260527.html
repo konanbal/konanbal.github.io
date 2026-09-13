@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microchip Technology (MCHP) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1e3a5f;
+    --accent: #e63946;
+    --accent2: #1d3557;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --teal: #0d9488;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #1e3a5f 0%, #1d3557 50%, #457b9d 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #e63946; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 550px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 36px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #f0f0ff 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .recovery-banner { background: linear-gradient(90deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #6ee7b7; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #065f46; display: flex; align-items: center; gap: 8px; }
+  .warn-banner { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #92400e; display: flex; align-items: flex-start; gap: 8px; }
+  .bu-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .bu-grid { grid-template-columns: 1fr 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">MCHP · NASDAQ</div>
+      <div class="company-name">Microchip Technology Incorporated</div>
+      <div class="company-desc">MCU(마이크로컨트롤러)·아날로그·FPGA·PCIe 스위치 등 임베디드 제어 솔루션 전문. 산업·자동차·항공우주·데이터센터 전방위 고객. 2024~2025 사이클 최저점 통과 후 강력한 회복 중.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 27일</div>
+      <div class="price-display">$94.84</div>
+      <div class="price-change up">▲ 52주 저점 대비 +100%+ · YTD 강세 지속</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$50.6B</span>
+    <span class="rating-pill">🏢 섹터: 반도체 (MCU·임베디드)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy / Moderate Buy</span>
+    <span class="rating-pill">📅 다음 실적: Q1 FY2027 (2026.08월 예정)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 회복 배너 -->
+  <div class="recovery-banner">
+    🔄 <strong>회복 서사:</strong> 2024~2025년 반도체 사이클 최악의 재고 과잉(재고일수 266일 피크)을 통과하고, 스티브 상기 CEO 복귀 후 9가지 회복 플랜 실행. Q4 FY2026에서 매출 +35.1% YoY, 총이익률 61.6% 복구. 4월 = 4년 만에 최대 수주 달성. 사이클 전환점 확인.
+  </div>
+
+  <!-- 내부자 매도 경고 -->
+  <div class="warn-banner">
+    ⚠️ <strong>내부자 매도 주의:</strong> 최근 3개월간 임원진 합산 약 $5,650만 규모의 주식 매도. 실적 개선에도 불구하고 경영진이 주가 고점권에서 차익실현 중. 정례 베스팅 가능성이 있으나 규모가 상당하므로 모니터링 권장.
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q4 FY2026 매출 (최신)</div>
+      <div class="kpi-value">$1.311B</div>
+      <div class="kpi-sub" style="color:var(--green);">YoY +35.1% · QoQ +10.6% · 가이던스 상단 초과</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Non-GAAP 총이익률</div>
+      <div class="kpi-value">61.6%</div>
+      <div class="kpi-sub" style="color:var(--green);">사이클 저점 52%에서 회복 · 목표 65%로 진행</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 컨센서스</div>
+      <div class="kpi-value">~$112</div>
+      <div class="kpi-sub">26개사 평균 · 최고 $130(UBS) · Buy 기조</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">재고일수</div>
+      <div class="kpi-value">185일</div>
+      <div class="kpi-sub" style="color:var(--green);">피크 266일에서 정상화 · 유통재고 정상 이하</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q4 FY2026 / FY2026 연간 (2026.05.07 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Q4 매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.311B <span style="font-size:12px;color:var(--green);">▲ +4.0% 컨센서스 초과</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.260B · YoY +35.1% · QoQ +10.6%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Non-GAAP EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$0.57 <span style="font-size:12px;color:var(--green);">▲ +11.8% 어닝 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 ~$0.51 · GAAP EPS $0.21</div>
+      </div>
+    </div>
+    <!-- 세부 지표 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:0.75rem;">
+      <div style="background:#f8f9ff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">Non-GAAP 영업이익률</div>
+        <div style="font-weight:700;color:var(--green);">30.6%</div>
+        <div style="font-size:10px;color:var(--muted);">트로프 14%에서 회복</div>
+      </div>
+      <div style="background:#f8f9ff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">조정 EBITDA (Q4)</div>
+        <div style="font-weight:700;">$466.8M</div>
+        <div style="font-size:10px;color:var(--green);">YoY +132.9%</div>
+      </div>
+      <div style="background:#f8f9ff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">FY2026 배당 환원</div>
+        <div style="font-weight:700;">$984M</div>
+        <div style="font-size:10px;color:var(--muted);">분기 $0.455/주</div>
+      </div>
+      <div style="background:#f8f9ff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">재고 감소액</div>
+        <div style="font-weight:700;color:var(--green);">$320.9M</div>
+        <div style="font-size:10px;color:var(--muted);">피크 대비 절감</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#f0f9ff;border-left:3px solid #3b82f6;padding:10px 14px;border-radius:0 6px 6px 0;margin-bottom:0.75rem;">
+      <strong>CEO 스티브 상기</strong>: "3월 분기 결과가 가이던스 상단을 크게 초과했다. 유통채널 재고 조정이 완료됐으며, 유통 재고는 정상 이하로 낮아져 대형 재입고 주문이 나오기 시작했다. 4월은 거의 4년 만에 최대 수주 달성. 다음 계절적 강세 6·9월 분기에도 수주 강세와 가시성 개선이 지속되고 있다."
+    </div>
+    <!-- Q1 FY2027 가이던스 -->
+    <div style="background:#ecfdf5;border-radius:8px;padding:12px;border:1px solid #6ee7b7;">
+      <div style="font-size:11px;font-weight:600;color:#065f46;margin-bottom:8px;">🔭 Q1 FY2027 가이던스 — 2026년 6월 분기 (다음 실적 발표 2026.08월)</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px;">
+        <div><div style="font-size:10px;color:var(--muted);">매출 가이던스</div><div style="font-weight:700;color:#065f46;">$1.442~$1.469B</div><div style="font-size:10px;color:var(--green);">vs 컨센서스 $1.30B 대폭 상회</div></div>
+        <div><div style="font-size:10px;color:var(--muted);">Non-GAAP EPS</div><div style="font-weight:700;color:#065f46;">$0.67~$0.71</div><div style="font-size:10px;color:var(--green);">vs 컨센서스 $0.56 대폭 상회</div></div>
+        <div><div style="font-size:10px;color:var(--muted);">총이익률 가이던스</div><div style="font-weight:700;color:#065f46;">62.25%~63.25%</div></div>
+        <div><div style="font-size:10px;color:var(--muted);">연간 자본지출</div><div style="font-weight:700;color:#065f46;">~$100M</div><div style="font-size:10px;color:var(--muted);">절감 지속</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">※ Q1 FY2027 EPS 가이던스($0.69 중간값)가 컨센서스($0.56)를 약 23% 초과 — 회복 속도가 시장 예상보다 빠름. 공급 타이트로 리드타임 연장 중 (4~8주→더 연장 예고).</div>
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 & 주요 이벤트</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K 실적</span>
+        <span style="font-size:13px;font-weight:500;">Q4 & FY2026 결과 발표 — 9가지 회복 플랜 실질적 완료, 데이터센터 PCIe Gen6 6개 설계 수주</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.07</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#166534;margin-right:8px;">배당</span>
+        <span style="font-size:13px;font-weight:500;">분기 배당 $0.455/주 선언 — 2026년 6월 5일 지급 (배당 수익률 ~1.9%)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.07</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">제품 출시</span>
+        <span style="font-size:13px;font-weight:500;">EX-423 Rugged OCXO (극저진공 초안정 발진기) 출시 — 항공우주·방산 통신 시스템 대상</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">내부자 매도</span>
+        <span style="font-size:13px;font-weight:500;">임원진 합산 ~$5,650만 주식 매도 (3개월 누계) — 5월 11일 대규모 매도 보도</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.11</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">투자자 행사</span>
+        <span style="font-size:13px;font-weight:500;">JP Morgan 글로벌 기술·미디어 컨퍼런스 발표 — 수요 트렌드·자본배분 전략 업데이트</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.20</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#eff6ff;border-radius:6px;padding:8px 12px;color:#1e3a8a;">
+      📌 <strong>투자자 주목</strong>: $2B 자사주 매입 프로그램 가동 중. 공급 타이트로 리드타임이 4~8주에서 추가 연장 예고 — 이중주문(double ordering) 가능성 vs 실질 수요 강세 논쟁 주목. PCIe Gen6 리타이머 시장 신규 진입으로 데이터센터 매출 다각화 시작.
+    </div>
+  </div>
+
+  <!-- 9가지 회복 플랜 & 사업부 재편 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🔧 9가지 회복 플랜 & 5대 사업부 재편</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="background:#f8f9ff;border-radius:8px;padding:12px;">
+        <div style="font-size:12px;font-weight:600;color:#1e3a8a;margin-bottom:8px;">✅ 9가지 회복 플랜 (스티브 상기 CEO 복귀 후)</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.8;">
+          1. 공장 공간 최적화 (Fab2 폐쇄) ✔<br>
+          2. 유통채널 재고 조정 완료 ✔<br>
+          3. 메가트렌드 사업 정렬 ✔<br>
+          4. 사업부 재편 (2→5개) ✔<br>
+          5. 유통 채널 재정비 ✔<br>
+          6. 고객 재참여 개선 ✔<br>
+          7. <span style="color:var(--amber);">총이익률 목표 65% 달성</span> 진행 중<br>
+          8. <span style="color:var(--amber);">운영비용 최적화</span> 진행 중<br>
+          9. <span style="color:var(--amber);">부채 감축</span> 진행 중
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#1e3a8a;margin-bottom:8px;">📦 5대 사업부 (기존 2개에서 확대)</div>
+        <div class="bu-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div style="background:#f0fdf4;border-radius:6px;padding:8px;text-align:center;font-size:11px;border:1px solid #86efac;">
+            <div style="font-weight:600;">MCU</div>
+            <div style="color:var(--muted);font-size:10px;">마이크로컨트롤러</div>
+          </div>
+          <div style="background:#eff6ff;border-radius:6px;padding:8px;text-align:center;font-size:11px;border:1px solid #bfdbfe;">
+            <div style="font-weight:600;">아날로그</div>
+            <div style="color:var(--muted);font-size:10px;">신호처리·전원</div>
+          </div>
+          <div style="background:#faf5ff;border-radius:6px;padding:8px;text-align:center;font-size:11px;border:1px solid #ddd6fe;">
+            <div style="font-weight:600;">네트워킹</div>
+            <div style="color:var(--muted);font-size:10px;">PCIe·이더넷</div>
+          </div>
+          <div style="background:#fff7ed;border-radius:6px;padding:8px;text-align:center;font-size:11px;border:1px solid #fed7aa;">
+            <div style="font-weight:600;">고성능 컴퓨트</div>
+            <div style="color:var(--muted);font-size:10px;">FPGA·HPC</div>
+          </div>
+          <div style="background:#fef2f2;border-radius:6px;padding:8px;text-align:center;font-size:11px;border:1px solid #fecaca;">
+            <div style="font-weight:600;">엣지 AI</div>
+            <div style="color:var(--muted);font-size:10px;">온디바이스 AI</div>
+          </div>
+          <div style="background:#ecfdf5;border-radius:6px;padding:8px;text-align:center;font-size:11px;border:1px solid #6ee7b7;">
+            <div style="font-weight:600;">항공우주·방산</div>
+            <div style="color:var(--muted);font-size:10px;">성장 1위 부문</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 데이터센터 하이라이트 -->
+    <div style="background:#f0f9ff;border-radius:8px;padding:12px;border:1px solid #bae6fd;">
+      <div style="font-size:11px;font-weight:600;color:#0369a1;margin-bottom:8px;">🖥️ 데이터센터 솔루션 — Q4의 스타 부문</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.7;">
+        • <strong>PCIe Gen6 스위치 6개 설계 수주</strong> — 세계 최초 3nm PCIe Gen6 스위치 개발. 대역폭 64GT/s/레인으로 PCIe 5.0 대비 2배<br>
+        • <strong>PCIe 리타이머 시장 신규 진입</strong> — 대형 OEM 고객에서 경쟁사 소켓 대체 설계 수주. Gen6 스위치+리타이머 원스톱 공급으로 고객 편의성↑<br>
+        • <strong>SmartRAID NVMe 가속기</strong> — 경쟁사 대비 읽기/쓰기 3배 성능, XPU 활용률 향상<br>
+        • <strong>CXL·NVMe 포트폴리오</strong> — AI 추론 인프라 확장에 맞는 메모리 확장 인터페이스 솔루션
+      </div>
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.08</span>
+      </div>
+      <div class="news-title">Q4 실적 발표 후 10개 이상 증권사 목표주가 일제히 상향 — UBS $130, Needham $120, Jefferies $120</div>
+      <div class="news-summary">Q4 실적 발표 다음날 UBS($130), Needham($120), Jefferies($120), Susquehanna($120), Citigroup($113), Mizuho($112), Truist($105), Barclays($105) 등 대형사들이 목표주가를 일제히 인상. 4월 수주가 4년 만에 최대라는 소식과 Q1 FY2027 EPS 가이던스가 컨센서스를 23% 초과한 것이 주요 촉매. 공급 타이트화와 리드타임 연장도 가격 결정력 복원의 증거로 해석.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.07</span>
+      </div>
+      <div class="news-title">4월 = 4년 만에 최대 수주 달성 — 유통 재고 정상 이하, 재입고 대형 주문 시작</div>
+      <div class="news-summary">CEO 상기는 "분배 재고 조정이 완료됐으며 4월은 거의 4년 만에 가장 큰 수주 달성"이라고 발표. 3월 수주도 12월 대비 "유의미하게 높았고" book-to-bill은 "1을 훨씬 상회." 이는 단순 사이클 반등이 아닌 실수요 회복과 재입고 수요가 동시에 작용하는 신호로 해석됨.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026년 진행 중</span>
+      </div>
+      <div class="news-title">항공우주·방산 부문 최강 성장 — FPGA 선도, 글로벌 방위비 확대 수혜</div>
+      <div class="news-summary">Q4 FY2026에서 항공우주&방산이 "모든 사업부 중 가장 강력한 성과"를 낸 부문으로 지목. 글로벌 지정학 긴장 고조로 NATO 방위비 증가, 미국 국방 예산 확대, 우주 개발 가속화 등이 복합 촉매. 고신뢰성·내방사선 MCU와 FPGA가 미사일·위성·항공기 전자장비에 필수.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.05월 진행 중</span>
+      </div>
+      <div class="news-title">공급 타이트화 — 리드타임 4~8주에서 추가 연장 예고, 기판(Substrate) 특히 부족</div>
+      <div class="news-summary">상기는 "한 분기 후 4~6주 내 납품 가능한 물량이 없을 수 있다"고 경고. 공정 노드의 70~80%에서 파운드리 용량이 매우 타이트. 기판 특히 부족해 신규 공급사 자격 심사 중. 이는 MCHP 가격 결정력 강화 호재이지만, 이중주문(double-ordering) 위험도 내포.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.11</span>
+      </div>
+      <div class="news-title">임원진 3개월간 $5,650만 주식 대규모 매도 — 실적 발표 직후 집중</div>
+      <div class="news-summary">실적 발표 후 주가가 $99-103 부근에서 주요 임원들이 대규모 매도 실행. 정례 베스팅 타이밍으로 해석할 수 있으나, 규모($5,650만)가 상당해 시장에서 단기 부정 신호로 받아들여짐. 실제로 실적 발표 후 주가가 일시적으로 -6.1% 하락한 바 있음.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>사이클 최저점 완전 통과 — 이제 상승 국면</strong> — 재고일수 266→185일, 유통재고 정상 이하, 4월 수주 4년 최대. 9가지 회복 플랜의 실질적 완료로 경영 체질 개선. 계절적 강세 구간(6·9월 분기) 진입 중</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>총이익률 65% 장기 목표 — 개선 가속</strong> — Q4 61.6%(저점 52%에서 +960bps), Q1 FY2027 가이던스 62.25~63.25%. 65% 목표까지 지속 개선 여지 있음. 언더유틸리제이션 차지($46.6M) 감소도 이익률 개선 추가 촉매</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>데이터센터 AI 새 성장축 — PCIe Gen6 독보적 위치</strong> — 세계 최초 3nm PCIe Gen6 스위치, 리타이머 시장 신규 진입. AI 데이터센터의 GPU-CPU 연결 대역폭 병목 해소에 필수. 기존 MCU 산업·자동차 기반에 데이터센터 성장이 더해지는 구조</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>항공우주·방산·산업 — 안정적 수요 기반</strong> — Q4에서 A&D가 최강 성장 부문. 글로벌 방위비 증가, NATO 2% 공약 이행, 드론·로봇·위성 전자 시스템 확대. 산업 자동화·산업 IoT도 구조적 성장 트렌드 탑승</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>안정적 배당 + 자사주 매입</strong> — 분기 $0.455/주 배당(연 수익률 ~1.9%), $2B 자사주 매입 프로그램 진행 중. FY2026에만 $984M 배당 환원. 반도체 기업 중 드물게 안정적 주주환원 의지 보유</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>높은 레버리지(부채) 리스크</strong> — 과거 대규모 M&A(Microsemi 등) 이후 누적된 부채가 아직 상당. 금리 상승 시 이자 부담 증가, 추가 인수 능력 제한. 재무 레버리지는 경영진이 직접 "핵심 리스크"로 인정한 상황. 부채 감축이 9가지 플랜 중 여전히 진행 중</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>리드타임 연장 = 이중주문 위험</strong> — 공급 타이트로 리드타임 연장 시 고객들이 확보용 이중주문 증가 가능. 2022~2023년처럼 갑작스러운 주문 취소 및 재고 급증 재현 위험. "사이클 회복"과 "이중주문 착각"의 구분이 핵심 모니터링 포인트</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>GAAP 손실 구조 — P/E 428배의 함정</strong> — GAAP EPS $0.22(FY2026 연간)로 실질 수익성은 여전히 극히 낮음. 높은 상각비·구조조정 비용이 GAAP 이익을 압박. 일부 가치 투자자는 non-GAAP 중심 평가에 비판적. 자본구조 정상화에 수년 소요 전망</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>임원진 $5,650만 내부자 매도</strong> — Q4 호실적 발표 직후 임원진이 대규모 매도. 단기적으로 주가 부정 영향. "경영진이 현재 주가를 고점으로 본다"는 시그널 해석 가능. 실적 발표 후 주가 -6.1% 하락의 주요 요인 중 하나</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>NXP·TI·STM과의 MCU 경쟁 심화</strong> — 자동차·산업 MCU 시장에서 NXP Semiconductors, TI, STMicroelectronics와 지속 경쟁. AI 엣지 칩 영역에선 후발 주자. 데이터센터에서도 Marvell, Broadcom 등 강자와 경쟁. 시장 점유율 방어 비용 증가 가능성</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (Q4 FY2026 실적 발표 후 최신)</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">UBS (Pradeep Ramani)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08 — Street-high</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price" style="color:var(--purple);">$130 🔺</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Needham (N. Quinn Bolton)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08 — $84→$120</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$120</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Jefferies</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08 — $90→$120</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$120</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Susquehanna</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08 — $95→$120</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Positive</span><span class="target-price">$120</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Citigroup</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08 — $91→$113</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$113</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Mizuho</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08 — $90→$112</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$112</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Barclays (Tom O'Malley)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.10 — $80→$105 (Equal Weight 유지)</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge hold">Equal Weight</span><span class="target-price">$105</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Morgan Stanley</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$94</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">컨센서스 (26개사)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">Buy 다수 · Moderate Buy 기조</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Moderate Buy</span><span class="target-price">평균 ~$112</span></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);background:#f9fafb;border-radius:6px;padding:8px;">
+      ※ 현재가 $94.84에서 컨센서스 평균 ~$112까지 +18% 잠재 상승. UBS $130까지는 +37% 잠재 상승. 다음 주요 촉매: Q1 FY2027 실적 (2026년 8월), 리드타임 추이 및 이중주문 여부, 총이익률 65% 달성 속도.
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Microchip Technology는 2024~2025년 반도체 사이클에서 가장 극심한 재고 과잉(재고일수 피크 266일)을 경험한 기업 중 하나였으나, 스티브 상기 CEO가 복귀해 9가지 회복 플랜을 실행한 결과, Q4 FY2026에서 매출 +35.1% YoY, 총이익률 61.6%, 4년 만에 최대 수주라는 강력한 회복 신호를 보냈다. Q1 FY2027 가이던스는 EPS $0.69(컨센서스 $0.56 대폭 초과)로 회복 속도가 시장 예상보다 빠르다는 것을 확인했다. 전통 강점인 MCU·아날로그·항공우주 FPGA에 데이터센터 PCIe Gen6 스위치·리타이머까지 추가되며 성장 동력이 다각화되고 있다. 리스크는 명확하다. 높은 레버리지(부채), 리드타임 연장에 따른 이중주문 위험, GAAP P/E 428배의 극단적 밸류에이션 왜곡, 임원진 대규모 내부자 매도가 단기 부담이다. <strong>MCHP는 MCU/임베디드 사이클 반등에 올라타면서 데이터센터 AI 인프라 성장도 추가로 취하고 싶은 투자자에게 적합한 '회복 + 성장' 복합 플레이다. 부채 리스크와 이중주문 모니터링을 전제로, 65% 총이익률 달성 궤도를 확인하면서 중기적으로 보유하는 전략이 유효하다.</strong>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주식 투자에는 원금 손실 위험이 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

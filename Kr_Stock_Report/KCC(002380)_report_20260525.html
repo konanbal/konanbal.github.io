@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KCC(002380) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1c3a2a;
+    --accent: #1a7a46;
+    --accent2: #145e35;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #1c3a2a 0%, #1a5c38 60%, #14784a 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #1a7a46; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .price-up { font-size: 14px; margin-top: 2px; color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.red { color: var(--red); }
+  .kpi-value.amber { color: var(--amber); }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0fdf4 0%, #f0f9ff 100%); border: 1px solid #a7f3d0; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .biz-seg { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .seg-pill { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
+  .seg-silicon { background: #e0f2fe; color: #075985; }
+  .seg-build { background: #fef3c7; color: #92400e; }
+  .seg-paint { background: #ede9fe; color: #5b21b6; }
+  .seg-samsung { background: #d1fae5; color: #065f46; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">002380 · KOSPI</div>
+      <div class="company-name">KCC (케이씨씨)</div>
+      <div class="company-desc">실리콘(모멘티브)·건자재·도료 3축 종합화학 대기업 — 삼성물산 지분 4조+, 행동주의 주주환원 모멘텀 점화</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 25일</div>
+      <div class="price-display">590,000원</div>
+      <div class="price-up">▲ +9.87% (5/26 장중 기준) | 52주: 231,000 ~ 608,000원</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 4.8조원 (KOSPI 중형)</span>
+    <span class="rating-pill">🏢 섹터: 화학·건자재</span>
+    <span class="rating-pill">⭐ 컨센서스: Buy (TP 최대 73만원)</span>
+    <span class="rating-pill">💎 삼성물산 지분가치: 약 6.4조원</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 핵심 구조 배너 -->
+  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:1rem;font-size:13px;color:#14532d;">
+    💡 <b>KCC 투자 핵심 구조</b>: KCC는 단순 화학·건자재 기업이 아닙니다. <b>보유 삼성물산 지분가치(약 6.4조원)가 시가총액(약 4.8조원)을 훨씬 초과하는 자산가치 할인주</b>입니다. 행동주의 펀드 트러스톤의 압박으로 자사주 소각·자산 유동화 시동이 걸린 것이 2026년 최대 모멘텀입니다.
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025 연간 매출 (연결)</div>
+      <div class="kpi-value amber">6조4,843억원</div>
+      <div class="kpi-sub">YoY -2.63%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025 연간 영업이익</div>
+      <div class="kpi-value amber">4,276억원</div>
+      <div class="kpi-sub">YoY -9.23%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025 당기순이익</div>
+      <div class="kpi-value green">1조5,484억원</div>
+      <div class="kpi-sub">YoY +374.1% (삼성물산 지분 효과)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">삼성물산 지분가치</div>
+      <div class="kpi-value green">~6.4조원</div>
+      <div class="kpi-sub">지분율 10.01%, 1701만주</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (최신)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">2026 1Q 매출 (연결 추정)</div>
+        <div style="font-size:18px;font-weight:700;">1조5,871억원 <span style="font-size:12px;color:var(--amber);">▼ YoY -1%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">LS증권 추정치</div>
+      </div>
+      <div style="background:#fff8f0;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">2026 1Q 영업이익 (연결 확정)</div>
+        <div style="font-size:18px;font-weight:700;">881억원 <span style="font-size:12px;color:var(--amber);">▼ 컨센 -10%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">시장 기대치(975억) 하회 — 실리콘 회복 지연</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fff8f0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <b>1Q 부진 원인</b>: 매출 절반(49%)을 차지하는 실리콘 부문의 회복 속도 지연. 이란 전쟁으로 촉매 가격·운송비 상승이 비용을 높였고, 원재료(실리콘메탈) 가격 안정에도 판가 반영이 늦었음. 건자재·도료 부문은 국내 건설 수요 약세 속에서도 견조한 이익률 유지.<br>
+      <b>긍정 신호</b>: 전 분기(665억) 대비 33% 영업이익 증가. 실리콘 부문 적자→흑자 전환. 하나증권은 이를 "실리콘 업사이클 본격 진입"으로 평가하며 실리콘 판가 상승 흐름이 2Q부터 가시화될 것으로 전망.
+    </div>
+    <div style="margin-top:0.875rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <div style="background:#f8faff;border-radius:8px;padding:0.75rem 1rem;">
+        <div style="font-size:11px;color:var(--muted);">실리콘(모멘티브)</div>
+        <div style="font-size:13px;font-weight:600;margin-top:2px;">매출 비중 49%</div>
+        <div style="font-size:11px;color:var(--amber);">전분기 적자 → 흑자전환</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:0.75rem 1rem;">
+        <div style="font-size:11px;color:var(--muted);">건자재</div>
+        <div style="font-size:13px;font-weight:600;margin-top:2px;">2025년 매출 9,666억</div>
+        <div style="font-size:11px;color:var(--red);">YoY -11.9% (건설경기 부진)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:0.75rem 1rem;">
+        <div style="font-size:11px;color:var(--muted);">도료</div>
+        <div style="font-size:13px;font-weight:600;margin-top:2px;">국내+글로벌 도장</div>
+        <div style="font-size:11px;color:var(--green);">견조한 이익률 유지</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 DART 공시</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">자사주소각</span>
+        <span style="font-size:13px;font-weight:500;">자기주식 소각 결정 — 보통주 29만3,575주 소각 (1,630억원, 2026.04.29 소각)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.22</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">자사주소각</span>
+        <span style="font-size:13px;font-weight:500;">자기주식 117만4,300주 분할 소각 계획 발표 — 2027년 9월까지 단계적 소각 (총 6,500억+ 규모)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.09</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">사업보고서</span>
+        <span style="font-size:13px;font-weight:500;">2025년 연결 사업보고서 — 매출 6.48조(-2.6%), 영업이익 4,276억(-9.2%), 순이익 1조5,484억(+374%)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.25</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fde68a;color:#78350f;margin-right:8px;">주총</span>
+        <span style="font-size:13px;font-weight:500;">정기주주총회 — 트러스톤 주주제안 철회 (KCC가 자산 유동화·자사주 소각 수용 확인)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.26</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#f0fdf4;padding:10px 14px;border-radius:8px;color:#14532d;line-height:1.7;">
+      📌 <b>투자자 주목 공시</b>: 1,630억원 자사주 소각(4/29)은 시작에 불과합니다. 분할 소각 계획(총 117만주)이 진행 중이며, 삼성물산 지분 유동화 공식 발표까지 더해지면 본격적인 기업가치 재평가가 가능합니다. 트러스톤이 주주제안을 철회한 것은 "KCC가 주주 요구를 실질적으로 반영했다"는 신호입니다.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.07</span></div>
+      <div class="news-title">하나증권 목표주가 73만원으로 대폭 상향 — "실리콘 판가 인상 본격화, 업사이클 진입"</div>
+      <div class="news-summary">실리콘 업황 업사이클 진입 + 삼성물산 보유지분 가치를 5.2조→6.4조원으로 상향 반영 + 자사주 117만주 소각 계획 긍정 평가. Target PBR 0.77배(2021~22년 고점 수준) 적용. "실리콘 판가 상승 흐름이 이어질 것으로 전망".</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.22</span></div>
+      <div class="news-title">자사주 1,630억원 소각 공시 — 주가 당일 +9%대 급등</div>
+      <div class="news-summary">보통주 29만3,575주 소각 결정(4/29 소각). LS증권 "삼성물산 지분가치 상승을 반영해 목표주가를 652,000원으로 상향". 이사회 결의 당일 주가 +9%대 급등. 3월 발표한 117만주 분할 소각 계획의 첫 번째 실행.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.03.16</span></div>
+      <div class="news-title">트러스톤 주주제안 철회 — KCC, 자산 유동화·자사주 소각 수용 공식화</div>
+      <div class="news-summary">행동주의 펀드 트러스톤자산운용이 KCC 이사회로부터 삼성물산 지분 유동화 및 자사주 소각 계획을 담은 공문을 받고 주주제안 전량 철회. "KCC 이사회가 일반 주주의 합리적인 목소리를 실질적으로 반영하기 시작"한 이정표로 평가.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.22</span></div>
+      <div class="news-title">건자재 넘어 첨단소재로 — 실리콘·반도체·AI 방열 소재 사업 재편 가속</div>
+      <div class="news-summary">AI 데이터센터 전력 소모 급증으로 전기 절연용 실리콘·AI반도체 방열 실리콘 수요 확대. 인도 HPCI 2026에서 차세대 뷰티용 실리콘 소재 공개. "응용소재화학기업으로 정체성 강화 단계" — KCC 관계자.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.04~</span></div>
+      <div class="news-title">1분기 영업이익 컨센서스 10% 하회 — 실리콘 업황 회복 예상보다 더딘 속도</div>
+      <div class="news-summary">881억원 vs 컨센서스 975억원. 이란 전쟁 촉매 가격·운송비 상승이 비용 부담 가중. 중국 범용 실리콘 과잉공급 경쟁도 지속. 다만 전분기 대비 +33% 증가, 실리콘 흑자 전환이라는 점은 방향성이 맞다는 시각.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2025~2026</span></div>
+      <div class="news-title">순차입금 약 4.2조원 — 모멘티브 인수 차입 부담, 신용등급 압박 요인</div>
+      <div class="news-summary">2019년 모멘티브 인수 차입금이 재무부담의 핵심. 순차입금/EBITDA 지표가 신용등급(AA-, 안정적) 유지를 위협할 수준. KCC는 삼성물산 지분 유동화를 통한 재무 개선을 검토 중. 삼성물산을 담보로 교환사채(EB) 발행 시 연 2,000억원 이자 절감 가능(트러스톤 추산).</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>삼성물산 지분가치가 시총을 초과 — 구조적 저평가</b> — KCC가 보유한 삼성물산 지분(10.01%)의 평가가치가 약 6.4조원으로 KCC 시가총액 4.8조원을 훌쩍 넘습니다. 지분 유동화가 진행될수록 할인율이 줄어드는 구조. 트러스톤은 매각 시 약 78% 주주가치 상승을 예측.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>행동주의 압박 수용 — 자사주 소각 실행 중</b> — 트러스톤 압박에 자사주 117만4,300주 분할 소각 계획 발표, 1차 29만주(1,630억) 이미 집행. 2027년 9월까지 순차 소각으로 주식 수 감소 및 EPS 개선 효과.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>실리콘 업사이클 진입 — 판가 상승 본격화</b> — 1분기에 전 분기 대비 흑자 전환. AI·전기차·의료 수요로 고부가 실리콘 성장. 하나증권 "2Q부터 실리콘 판가 상승이 가시화될 것"으로 전망. 실리콘이 매출 49% 차지하므로 회복 시 이익 레버리지 막대.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>AI·반도체용 방열 실리콘 신성장 동력</b> — AI 데이터센터 전력 급증 → 전기 절연·방열 실리콘 수요 폭증. 모멘티브 글로벌 고객 기반을 활용한 고부가 특수 실리콘 확대 전략 가속. 반도체 EMC 소재도 성장 품목.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>밸류에이션 할인 극단적 — SOTP 대비 현저한 저평가</b> — SOTP(사업별 가치 합산) 평가 시 삼성물산 지분가치만으로 시총을 커버. 영업가치(건자재+도료+실리콘)는 추가 가치. 하나증권 목표가 73만원 vs 현 주가 59만원, 상승여력 +24%.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>순차입금 4.2조원 — 모멘티브 인수 차입 부담</b> — 2019년 모멘티브 인수 차입금이 여전히 재무 부담. AA- 신용등급 유지 압박. 이자비용이 연간 순이익을 잠식. 삼성물산 지분 유동화 없이는 근본적 해소가 어려운 구조.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>실리콘 회복 속도 불확실 — 중국 과잉공급 지속</b> — 1분기 영업이익이 컨센서스를 10% 하회. 중국 범용 실리콘 과잉공급이 글로벌 가격 억제. 이란 전쟁 여파 등 외부 비용 변수도 잔존.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>건자재 매출 구조적 역풍</b> — 국내 건설경기 침체로 2025년 건자재 매출 -11.9%. 국내 주택 시장 회복 전까지 개선이 제한적. KCC의 두 번째 주력 사업이라는 점에서 전체 실적 회복의 걸림돌.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>삼성물산 지분 유동화 — 속도와 방법의 불확실성</b> — KCC가 유동화 의사를 밝혔지만 구체적 일정은 미공개. EB 발행 vs 직접 매각 방법론, 시장 소화 여부, 지분율 하락에 따른 영향 등 변수 존재. 지연 시 할인율 지속.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>대주주 지배구조 — 정몽진 회장 일가 오너십</b> — 행동주의 압박이 일부 수용됐지만 오너 일가 의사결정 구조상 주주친화 정책의 지속성은 불확실. 자사주 소각 이후 추가 주주환원 강도가 약해질 가능성.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견</div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">하나증권 (윤재성)</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">목표가 상향 (2026.05.07)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 730,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">LS증권 (정경희)</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">목표가 상향 (2026.04.22)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 652,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">IBK투자증권 (이동욱)</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">커버 지속</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 650,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">컨센서스 평균 (4개사)</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">Investing.com 기준</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">적극매수</span><span class="target-price">평균 582,000원 (최고 650,000)</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);padding:10px 0 0;">
+      ※ 현 주가(590,000원) 기준 컨센서스 평균 대비 소폭 고평가 구간이나, 하나증권 목표가(730,000원) 기준으로는 +24% 상승여력. 삼성물산 주가 추가 상승·자사주 소각 진행에 따라 목표가 추가 상향 가능성 있음.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      KCC(002380)는 실리콘(모멘티브)·건자재·도료 3축의 종합화학 대기업이지만, 투자 관점에서 2026년의 핵심 테마는 <b>자산가치 재평가</b>입니다. 보유 삼성물산 지분 약 6.4조원이 KCC 시가총액(4.8조원)을 초과하는 극단적 저평가 상황에서, 행동주의 펀드 트러스톤의 공개 압박에 KCC 이사회가 자사주 소각(1차 1,630억·총 117만주 분할 계획)과 삼성물산 지분 유동화를 공식 수용한 것이 올해 최대 모멘텀입니다. 실적 면에서는 2025년 영업이익이 -9.2% 역성장했고 2026년 1분기도 컨센서스를 10% 하회했습니다만, 핵심 실리콘 부문이 전분기 적자에서 흑자로 전환했고 하나증권은 2분기부터 판가 상승이 본격화될 것으로 전망합니다. AI 데이터센터·반도체 방열 실리콘 등 고부가 신수요도 성장 동력입니다. 리스크는 4.2조원의 모멘티브 인수 차입금, 건자재 부문의 건설경기 부진, 삼성물산 지분 유동화 일정 불확실성입니다. <b>이 종목은 한국 주식의 코리아 디스카운트 해소에 베팅하면서 자사주 소각→삼성물산 지분 유동화→실리콘 업사이클이라는 3단계 가치 실현을 중장기적으로 기다리는 가치주 투자자에게 적합합니다.</b>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

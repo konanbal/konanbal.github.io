@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>디웨이브 퀀텀 (QBTS) 분석 보고서</title>
+<style>
+  :root {
+    --accent: #0c2a4a;
+    --accent2: #155fa0;
+    --teal: #0891b2;
+    --bg: #f0f9ff;
+    --card: #ffffff;
+    --text: #0c1a2e;
+    --muted: #6b7280;
+    --border: #bae6fd;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0c2a4a 0%, #155fa0 55%, #0891b2 100%);
+    color: white; padding: 2.5rem 2rem 2rem; position: relative; overflow: hidden;
+  }
+  .report-header::before {
+    content: '🌊';
+    position: absolute; right: 2.5rem; top: 50%;
+    transform: translateY(-50%);
+    font-size: 120px; opacity: 0.07; pointer-events: none;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #0891b2; color: white; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.75; max-width: 530px; line-height: 1.6; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.55; }
+  .price-display { font-size: 34px; font-weight: 700; margin-top: 4px; letter-spacing: -1px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); }
+  .rating-pill.unique { background: #0891b2; border-color: #0891b2; }
+  .rating-pill.gov { background: #16a34a; border-color: #16a34a; }
+  .rating-pill.warn { background: #ef4444; border-color: #ef4444; }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--teal); border-radius: 2px; }
+
+  /* 정부 투자 배너 */
+  .gov-banner {
+    background: linear-gradient(90deg, #14532d 0%, #15803d 100%);
+    color: white; padding: 12px 18px; border-radius: 12px;
+    font-size: 13px; margin-bottom: 1rem;
+    display: flex; align-items: flex-start; gap: 12px; line-height: 1.7;
+  }
+
+  /* 역설 배너: 매출 -81% vs 북스 +1994% */
+  .paradox-banner {
+    background: linear-gradient(90deg, #1e3a5f 0%, #155fa0 100%);
+    color: white; padding: 10px 18px; border-radius: 10px;
+    font-size: 13px; margin-bottom: 1rem;
+    display: flex; align-items: flex-start; gap: 10px; line-height: 1.7;
+  }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* 이중 플랫폼 설명 */
+  .dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .dual-box { border-radius: 10px; padding: 1.1rem; border: 1px solid; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-gov { background: #dbeafe; color: #1e40af; }
+  .tag-deal { background: #ede9fe; color: #4c1d95; }
+  .tag-tech { background: #ccfbf1; color: #115e59; }
+  .tag-warn { background: #fef3c7; color: #78350f; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); color: #1a3a2e; }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); color: #3a1a1a; }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; color: var(--text); }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .target-up { color: var(--green); font-size: 11px; }
+  .target-down { color: var(--red); font-size: 11px; }
+
+  .earnings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; }
+  .earnings-box { background: #f0f9ff; border-radius: 10px; padding: 1rem 1.1rem; border: 1px solid var(--border); }
+  .earnings-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .earnings-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .earnings-beat { font-size: 11px; color: var(--green); font-weight: 600; margin-left: 6px; }
+  .earnings-miss { font-size: 11px; color: var(--red); font-weight: 600; margin-left: 6px; }
+  .earnings-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .filing-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .filing-row:last-child { border-bottom: none; }
+  .filing-type { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-right: 8px; white-space: nowrap; }
+  .ft-10q { background: #e0e7ff; color: #3730a3; }
+  .ft-8k { background: #fce7f3; color: #9d174d; }
+  .ft-8k-pos { background: #d1fae5; color: #065f46; }
+  .ft-8k-gov { background: #dbeafe; color: #1e40af; }
+  .ft-8k-acq { background: #ede9fe; color: #4c1d95; }
+
+  /* 수익 타임라인 */
+  .rev-timeline { display: flex; gap: 1px; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .rev-seg { height: 100%; }
+
+  .summary-box { background: linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 100%); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); line-height: 1.6; }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .earnings-grid, .dual-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+    .price-display { font-size: 26px; }
+    .company-name { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">QBTS · NYSE · 양자컴퓨팅 / 이중 플랫폼</div>
+      <div class="company-name">디웨이브 퀀텀 (D-Wave Quantum)</div>
+      <div class="company-desc">세계 <strong>유일</strong>한 어닐링+게이트 모델 이중 플랫폼 양자컴퓨팅 기업. Advantage2(4,400+큐비트 어닐링)와 Quantum Circuits 인수로 확보한 듀얼레일 게이트 모델을 동시 운영. CEO Dr. Alan Baratz. 25개국+ 기업·정부 고객, Fortune 100 기업과 엔터프라이즈 QCaaS 계약.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 23일</div>
+      <div class="price-display">$29.40</div>
+      <div class="price-change up">▲ 1주 +43% (CHIPS LOI 발표 후 급등)</div>
+      <div style="font-size:11px;opacity:0.55;margin-top:4px;">기준: NYSE 5/23/2026, 52주 범위 $12.75~$46.75</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시총: ~$9.5B</span>
+    <span class="rating-pill">💵 현금+투자: $588.4M (무부채)</span>
+    <span class="rating-pill gov">🏛️ CHIPS $1억 LOI (5/21)</span>
+    <span class="rating-pill unique">🌊 업계 유일 이중 플랫폼</span>
+    <span class="rating-pill">⭐ Strong Buy (13/15 매수)</span>
+    <span class="rating-pill">🎯 목표가 $35.17 (+19%)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 정부 투자 배너 -->
+  <div class="gov-banner">
+    <span style="font-size:20px;flex-shrink:0;">🏛️</span>
+    <span><strong>5/21 긴급: 美 상무부 CHIPS $1억 LOI 체결 + 정부가 주주로 직접 참여</strong><br>
+    일반적인 보조금이 아닌 <strong>지분 투자 방식</strong> — 미 상무부가 D-Wave 보통주 $1억어치를 취득. 트럼프 $2.013B 양자 패키지 중 D-Wave 몫. 어닐링+게이트 모델 두 기술 모두에 대한 미국 정부의 공식 인정. 플로리다 보카라튼 R&D 시설·코네티컷·캐나다 번비 확장에 활용 예정.</span>
+  </div>
+
+  <!-- 역설 배너 -->
+  <div class="paradox-banner">
+    <span style="font-size:18px;flex-shrink:0;">📊</span>
+    <span><strong>"매출 -81%" vs "북스 +1,994%" — 역설의 분기.</strong> Q1 2026 수익 인식 $2.9M(전년 대비 -81%)은 전년 Q1의 대형 시스템 판매 $12.6M이 반복되지 않은 기저 효과. 하지만 신규 수주(Bookings)는 $33.4M으로 +1,994% 급증, RPO $42.4M(+563%). 매출과 수주잔고가 정반대 방향을 가리키는 전형적 전환점 분기.</span>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 수익 인식</div>
+      <div class="kpi-value" style="color:var(--red);">$2.9M</div>
+      <div class="kpi-sub">YoY -81% · 전년 Q1 대형 시스템 판매 기저효과</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Q1 신규 수주(Bookings)</div>
+      <div class="kpi-value" style="color:var(--green);">$33.4M</div>
+      <div class="kpi-sub">YoY +1,994% · 전분기 대비 +149%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">잔여 이행 의무(RPO)</div>
+      <div class="kpi-value" style="color:var(--green);">$42.4M</div>
+      <div class="kpi-sub">YoY +563% — 미래 매출 가시성 급상승</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">현금+유가증권 (무부채)</div>
+      <div class="kpi-value" style="font-size:16px;">$588.4M</div>
+      <div class="kpi-sub">+CHIPS $1억 LOI → $688M+ 예상</div>
+    </div>
+  </div>
+
+  <!-- ── Q1 실적 상세 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 Q1 2026 실적 (2026.05.12 발표) — 매출 미스 vs EPS 비트 + 가이던스</div>
+    <div class="earnings-grid">
+      <div class="earnings-box">
+        <div class="earnings-label">매출 (실제 vs 컨센서스)</div>
+        <div class="earnings-value">$2.9M <span class="earnings-miss">▼ -30% 하회</span></div>
+        <div class="earnings-sub">컨센서스 $4.14M · 전년 Q1 $15M(대형 시스템 판매 포함)과 비교 부적절</div>
+      </div>
+      <div class="earnings-box">
+        <div class="earnings-label">EPS (실제 vs 컨센서스)</div>
+        <div class="earnings-value">-$0.05 <span class="earnings-beat">▲ 컨센서스 -$0.07~$0.08 비트</span></div>
+        <div class="earnings-sub">GAAP 순손실 -$18.4M · 총이익률 63.6% (전년 92.5%)</div>
+      </div>
+    </div>
+    <!-- Q2/Q3 가이던스 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;text-align:center;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:#065f46;">Q2 2026 매출 가이던스</div>
+        <div style="font-size:18px;font-weight:700;color:#059669;">$6.26M</div>
+        <div style="font-size:11px;color:#065f46;">QoQ +116% 예상</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;text-align:center;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:#065f46;">Q3 2026 매출 가이던스</div>
+        <div style="font-size:18px;font-weight:700;color:#059669;">$12.85M</div>
+        <div style="font-size:11px;color:#065f46;">시스템 납품 반영</div>
+      </div>
+      <div style="background:#fff7ed;border-radius:8px;padding:0.75rem;text-align:center;border:1px solid #fed7aa;">
+        <div style="font-size:11px;color:#78350f;">2026 시스템 판매 전망</div>
+        <div style="font-size:18px;font-weight:700;color:#b45309;">2~3건</div>
+        <div style="font-size:11px;color:#78350f;">기존 1건/년 → 상향</div>
+      </div>
+    </div>
+    <!-- 수익 구성 -->
+    <div style="font-size:12px;margin-bottom:0.75rem;background:#f0f9ff;border-radius:8px;padding:0.875rem;border:1px solid var(--border);">
+      <div style="font-weight:600;color:#0c2a4a;margin-bottom:8px;">Q1 2026 수익 구성 (총 $2.9M)</div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        <div><span style="color:#0891b2;font-weight:700;">QCaaS 구독</span>: $1.8M (+15% YoY)</div>
+        <div><span style="color:#059669;font-weight:700;">전문 서비스</span>: $1.0M (+26% YoY)</div>
+        <div><span style="color:#d97706;font-weight:700;">시스템 판매</span>: $0.1M (당분기 없음)</div>
+        <div><span style="color:#7c3aed;font-weight:700;">상업 고객 비중</span>: 73%+</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.8;background:#f0f9ff;border-left:3px solid var(--teal);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:4px;">
+      <strong>CEO Dr. Alan Baratz:</strong> "우리는 기술적 차별화, 상업적 증명, 스케일 실행 능력을 결합한 기업이 양자 시장 승자가 될 것이라고 본다. D-Wave가 그 기업 중 하나다. 1분기 결과와 2분기 모멘텀이 이를 뒷받침한다. 파이프라인이 두 배 이상 증가했고 평균 딜 규모도 두 배가 됐다. 연간 최소 2건의 시스템 납품을 예상한다 — 기존 1건/년 가이던스에서 상향."
+    </div>
+  </div>
+
+  <!-- ── 이중 플랫폼 설명 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🌊 세계 유일 이중 플랫폼 — 어닐링 + 게이트 모델</div>
+    <div class="dual-grid">
+      <div class="dual-box" style="background:#f0f9ff;border-color:#7dd3fc;">
+        <div style="font-size:12px;font-weight:700;color:#0c4a6e;margin-bottom:8px;">🔵 어닐링 양자 컴퓨팅 (현재 수익 창출)</div>
+        <div style="font-size:12px;color:#0c4a6e;line-height:1.8;">
+          • <strong>Advantage2</strong>: 4,400+큐비트, 세계 최대 어닐링 시스템<br>
+          • <strong>실용적 적용</strong>: 최적화(물류·금융·스케줄링) — 지금 당장 가능<br>
+          • <strong>기존 고객</strong>: BMW, Volkswagen, 일본 JSR, BASF 등<br>
+          • <strong>장기 목표</strong>: 100,000큐비트 슈퍼컨덕팅 어닐링 시스템<br>
+          • QCaaS 구독 형태로 매월 반복 수익 창출 중
+        </div>
+      </div>
+      <div class="dual-box" style="background:#f5f3ff;border-color:#c4b5fd;">
+        <div style="font-size:12px;font-weight:700;color:#4c1d95;margin-bottom:8px;">🟣 게이트 모델 (QCI 인수 기반, 미래 성장)</div>
+        <div style="font-size:12px;color:#4c1d95;line-height:1.8;">
+          • <strong>Quantum Circuits Inc.(QCI)</strong>: $550M 인수(2026.1월)<br>
+          • <strong>듀얼레일 큐비트</strong>: 논리 큐비트당 물리 큐비트 최대 10배 절감<br>
+          • <strong>2026 말</strong>: 17큐비트 게이트 시스템 출시 목표<br>
+          • <strong>장기 목표</strong>: 10,000큐비트 듀얼레일 게이트 시스템<br>
+          • 약 100개 논리 큐비트 → 양자 화학·AI 적용 가능
+        </div>
+      </div>
+    </div>
+    <div style="font-size:12px;background:#ecfdf5;border-left:3px solid var(--green);padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.7;color:#065f46;">
+      💡 <strong>핵심 투자 논거:</strong> 경쟁사들은 IBM·Google 게이트 모델이 성숙해지면 어닐링이 구식화된다고 주장했다. QCI 인수로 이 리스크가 제거됐다. 지금 어닐링으로 현금 창출하면서 미래 게이트 모델로 전환하는 "안전한" 양자 투자 스토리가 완성됐다.
+    </div>
+  </div>
+
+  <!-- ── SEC 공시 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 및 주요 이벤트</div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-gov">🏛️ D-3</span><span style="font-weight:600;color:#1e40af;">美 상무부 CHIPS $1억 LOI — 지분 투자 방식, 어닐링+게이트 R&D 가속 (5/21 체결)</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.21</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-10q">10-Q</span><span style="font-weight:500;">Q1 2026 분기보고서 — 매출 $2.9M, Bookings $33.4M(+1,994%), RPO $42.4M(+563%)</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.12</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-acq">8-K M&A</span><span style="font-weight:500;">Quantum Circuits Inc.(QCI) $550M 인수 완료 — 듀얼레일 큐비트 게이트 모델 기술 확보</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.01월</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-pos">8-K 계약</span><span style="font-weight:500;">Florida Atlantic University $20M Advantage2 시스템 판매 계약</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.01월</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-pos">8-K 계약</span><span style="font-weight:500;">Fortune 100 기업과 $10M 2년 QCaaS 엔터프라이즈 라이선스 계약 (업계 최초)</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.01월</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k">8-K</span><span style="font-weight:500;">NYSE에서 첫 Investor Day 개최 예정 (2026.04.29 발표)</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.29</span>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#1e3a5f;background:#eff6ff;border-left:3px solid var(--blue);padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.7;">
+      📌 <strong>투자자 주목:</strong> CHIPS $1억 LOI는 <strong>보조금이 아닌 지분 투자</strong> — 상무부가 $1억어치 D-Wave 보통주를 취득. 기존 주주 희석 효과. 최종 계약 체결 전 LOI 단계이나, D-Wave는 미 정부 투자 의향이 있는 9개 양자기업 중 하나. 내부자 매도($110M 초과 순매도, 지난 12개월)는 지속적인 희석 우려 요인.
+    </div>
+  </div>
+
+  <!-- ── 주요 뉴스 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-gov">정부투자</span><span class="news-date">2026.05.21</span></div>
+      <div class="news-title">美 정부 D-Wave에 $1억 지분 투자 — 주가 1주 +43% 급등, "양자 국가대표" 선정</div>
+      <div class="news-summary">미 상무부가 CHIPS Act $2.013B 양자 패키지 중 D-Wave에 $1억 지분 투자 LOI를 체결했다. 보조금이 아닌 <strong>보통주 취득</strong> 방식으로, 정부가 D-Wave의 주주가 된다는 점에서 전례 없는 신뢰 표시다. 어닐링과 게이트 모델 두 기술 모두를 미국 전략 기술로 인정받은 것. 플로리다 보카라튼·코네티컷·캐나다 번비 R&D 시설에 활용 예정.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-deal">대형 계약</span><span class="news-date">2026.01월</span></div>
+      <div class="news-title">Q1 Bookings $33.4M(+1,994%) — FAU $20M 시스템 + Fortune 100 $10M QCaaS</div>
+      <div class="news-summary">플로리다 애틀랜틱 대학교(FAU)와 $20M Advantage2 어닐링 시스템 판매, Fortune 100 기업과 $10M 2년 엔터프라이즈 QCaaS 계약을 동시에 체결했다. $10M QCaaS 계약은 양자컴퓨팅 업계 최초의 대형 엔터프라이즈 구독 계약으로, "기업들이 실제로 양자에 돈을 쓰기 시작했다"는 신호탄. 파이프라인은 전분기 대비 두 배 이상 증가했다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-tech">기술</span><span class="news-date">2026.01월</span></div>
+      <div class="news-title">QCI $550M 인수 완료 — 듀얼레일 큐비트로 게이트 모델 "어닐링 구식화" 리스크 제거</div>
+      <div class="news-summary">Quantum Circuits Inc. 인수로 듀얼레일 큐비트 기술을 확보했다. 기존 접근법 대비 논리 큐비트당 물리 큐비트 최대 10배 절감이 가능해 빠른 오류 수정이 기대된다. 2026년 말 17큐비트 게이트 시스템, 장기로는 10,000큐비트 듀얼레일 시스템을 목표로 한다. D-Wave는 이제 IBM·Google과 같은 게이트 모델 기술도 보유한 유일한 상장 양자기업이 됐다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-warn">리스크</span><span class="news-date">2026.Q1</span></div>
+      <div class="news-title">운영비 +125% 급증 — QCI 통합비용 $9.1M + 인건비 $8.6M + 비현금 $7.4M</div>
+      <div class="news-summary">Q1 운영비가 $56.5M으로 전년 대비 125% 폭증했다. QCI 인수 일회성 비용 $9.1M, 인원 확대에 따른 급여 $8.6M, 비현금 항목 $7.4M이 복합 작용했다. 순손실은 -$18.4M으로 전년 -$5.4M에서 급격히 확대됐으며, FY2026 전반에 걸쳐 EPS -$0.31 손실이 예상된다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-warn">리스크</span><span class="news-date">지난 12개월</span></div>
+      <div class="news-title">내부자 순매도 $110M — 지속적 지분 희석 우려</div>
+      <div class="news-summary">지난 12개월간 내부자들이 $110M 이상 순매도했다. CEO Rohit Ghai(CFO?)는 24,000주 매도 예정을 공시했다. 또한 FY2025에 발행주식수가 67% 급증(1년 만)하는 등 지속적인 희석이 이루어지고 있다. $550M QCI 인수 자금 마련도 대부분 주식 발행을 통해 이루어졌다.</div>
+    </div>
+  </div>
+
+  <!-- ── 투자 포인트 ── -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>세계 유일 이중 플랫폼 — "어닐링 구식화" 리스크 완전 제거</strong> — QCI 인수로 이제 어닐링과 게이트 모델 두 기술 모두를 보유. 경쟁사가 "게이트 모델이 어닐링을 대체한다"고 해도 D-Wave는 두 시장 모두에서 생존 가능. 가장 강력한 Bear Case를 직접 차단한 전략적 움직임.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>Bookings $33.4M(+1,994%) + RPO $42.4M(+563%) — 수주 폭발</strong> — 수익 인식은 -81%이지만 신규 수주는 +1,994%라는 극적 역설. RPO $42.4M은 이미 확정된 미래 수익. Q2 $6.26M·Q3 $12.85M 가이던스는 수주잔고가 수익으로 전환되기 시작함을 보여준다.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>미 정부 $1억 지분 투자 LOI — 기술 신뢰도의 최고 보증</strong> — 미국 정부가 돈이 아닌 주식 보유자로서 D-Wave의 파트너가 됐다. 정부의 신뢰 표시는 민간 기업 계약 유치에도 강력한 레퍼런스로 작용. $688M+ 유동성으로 런웨이도 크게 연장됨.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>실질적 엔터프라이즈 수요 증명 — Fortune 100 $10M QCaaS</strong> — 업계 최초 $10M 규모 엔터프라이즈 양자 구독 계약은 "양자는 미래 기술"을 넘어 "양자는 지금 비용을 지불할 만한 기술"임을 증명한다. 73% 상업 고객 비중은 정부 보조금에만 의존하지 않는 구조.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>$588M 현금(무부채) + 분기 운영비 $56.5M — 런웨이 10분기 이상</strong> — CHIPS $1억 더해지면 $688M+. 현재 운영비 기준 10분기 이상 자생 가능. 재무적 파산 리스크 없이 기술 개발을 지속할 수 있는 안전망.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>수익 인식의 극단적 변동성 — 분기 예측 불가</strong> — FY2025 연 $24.6M → Q1 2026 단 $2.9M으로 급락. 대형 시스템 납품 타이밍에 따라 분기 매출이 폭등·폭락하는 구조. 투자자가 분기 실적으로 기업 건강을 판단하기 어려움. Q2~Q3 가이던스($6.26M, $12.85M)도 시스템 납품 여부에 달림.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>P/S ~200배 + 지속 희석 — 밸류에이션 극단적</strong> — 시총 $9.5B vs TTM 매출 ~$25M이면 P/S ~380배. FY2025 발행주식수 +67%(1년). CHIPS LOI 완료 시 추가 희석, QCI 인수 후 연동 마일스톤 도달 시 추가 주식 발행 가능. 내부자 순매도 $110M(12개월).</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>QCI 인수 $550M — 운영비 폭증 + 통합 리스크</strong> — Q1 운영비가 $56.5M(+125%)로 폭증했으며, 대부분 QCI 통합 비용. 듀얼레일 큐비트가 경쟁력 있는 시스템으로 발전하려면 수년간의 R&D가 더 필요. 2026년 말 17큐비트 게이트 시스템 목표 달성이 불확실.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>어닐링 기술의 범용성 한계 — 최적화에만 적합</strong> — 어닐링은 최적화 문제에 특화됐지만 범용 계산은 게이트 모델이 필요. IBM·Google의 게이트 모델이 빠르게 발전하면 어닐링 시장 자체가 위축될 수 있다. QCI 인수가 이를 부분 해소했지만 게이트 모델에서 경쟁사 대비 뒤처짐.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>CHIPS LOI 지분 희석 + 최종 계약 불확실</strong> — $1억 지분 투자는 추가 희석을 의미. 정부 지분 취득은 향후 사업 결정에 간접 영향 가능. LOI는 최종 계약이 아니며, 계약 조건 협상 과정에서 조건이 변경될 수 있다. 정부 지분 보유자가 된 이후 정책 변화 시 관계 복잡해질 가능성.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 애널리스트 의견 ── -->
+  <div class="card" style="margin-top:1rem;margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <div style="background:#f0fdf4;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">컨센서스</div>
+        <div style="font-size:18px;font-weight:700;color:#065f46;">Strong Buy</div>
+        <div style="font-size:11px;color:var(--muted);">13/15 매수 · 0 매도</div>
+      </div>
+      <div style="background:#f0f9ff;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">평균 목표주가</div>
+        <div style="font-size:18px;font-weight:700;">$35.17</div>
+        <div style="font-size:11px;color:var(--green);">현재가 대비 +19.6%</div>
+      </div>
+      <div style="background:#f0f9ff;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">목표가 범위</div>
+        <div style="font-size:16px;font-weight:700;">$8.50 ~ $45</div>
+        <div style="font-size:11px;color:var(--muted);">중앙값 $40</div>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Rosenblatt Securities (가장 강세)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$43</span><span class="target-up">+46.3%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Needham & Company</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$40</span><span class="target-up">+36.1%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Benchmark</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$35</span><span class="target-up">+19.0%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Investing.com 컨센서스</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy</span><span class="target-price">$35.17</span><span class="target-up">+19.6%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Zacks (약세 유일)</span>
+      <div class="analyst-right"><span class="opinion-badge sell">Bear Case</span><span class="target-price">$8.50</span><span class="target-down">-71.1%</span></div>
+    </div>
+    <div style="margin-top:12px;padding:10px 14px;background:#f0f9ff;border-radius:8px;font-size:12px;color:#0c4a6e;line-height:1.7;border:1px solid var(--border);">
+      📊 <strong>목표가 격차 분석:</strong> $8.50(Zacks) vs $43(Rosenblatt)의 5배 격차는 "어닐링이 틈새 기술로 남는다"(비관)와 "이중 플랫폼이 엔터프라이즈 표준이 된다"(낙관)의 시나리오 차이. CHIPS LOI 이후 기관들이 목표가를 상향하는 과정 중. 5/21 이후 +43% 급등으로 단기 목표가 소진 가능성 주의.
+    </div>
+  </div>
+
+  <!-- ── 종합 요약 ── -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      디웨이브 퀀텀(QBTS)은 양자컴퓨팅 4대 순수주(IONQ·RGTI·QUBT·QBTS) 중 가장 독특한 포지셔닝을 가졌다. 어닐링 방식으로 현재 실질 수익을 창출하면서, QCI $550M 인수를 통해 미래 게이트 모델도 보유한 세계 유일의 이중 플랫폼 기업이다. Q1 2026 수익 인식은 -81%로 급감했지만 이는 전년 대형 시스템 판매의 기저 효과이며, 실제 신규 수주는 +1,994%로 폭발적 성장세를 보였다. Fortune 100 기업과 업계 최초 $10M QCaaS 계약 체결, FAU $20M 시스템 판매, 그리고 5/21 미 정부 $1억 지분 투자 LOI가 상업화 스토리를 강화하고 있다.
+      <br><br>
+      그러나 P/S ~200~380배의 극단적 밸류에이션, 지속적 희석(지난 1년 발행주식수 +67%), 내부자 순매도 $110M, QCI 통합으로 폭증한 운영비는 투자 판단을 어렵게 한다. 분기 매출이 대형 시스템 납품 타이밍에 따라 폭등·폭락하는 구조는 예측을 어렵게 한다. 5/21 CHIPS LOI 발표 이후 이미 +43% 급등해 단기 추격 매수 부담이 있다.
+      <br><br>
+      <strong>결론:</strong> QBTS는 양자컴퓨팅 4대 순수주 중 가장 차별화된 사업 모델(현재 매출 + 미래 기술)과 가장 최근 정부 인정을 받은 종목이다. 단, 5/21 이후 급등으로 평균 목표가 $35.17를 이미 넘어선 $29.40에서 거래 중이어서 단기 업사이드가 제한적이다. 중기 관점에서는 Q2~Q3 가이던스($6.26M·$12.85M) 달성, CHIPS LOI 최종 계약 확정, 17큐비트 게이트 시스템 출시가 다음 재평가 트리거다. 포트폴리오 내 1~3% 소규모 비중으로 접근하는 것이 적합하다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. 양자컴퓨팅은 초기 산업으로 기술·규제 불확실성이 극히 높습니다. D-Wave의 회계연도는 12월 31일 종료 기준이며 Q1=1~3월. GAAP 순이익/손실은 비현금 파생상품 평가 변동의 영향을 크게 받습니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 데이터 기준일: 2026년 5월 23일.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

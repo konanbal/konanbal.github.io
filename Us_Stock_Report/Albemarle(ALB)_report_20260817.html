@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Albemarle Corporation (ALB) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">ALB · NYSE</div>
+      <div class="company-name">Albemarle Corporation (앨버말)</div>
+      <div class="company-desc">미국 노스캐롤라이나 소재 글로벌 스페셜티케미컬 기업. 세계 최대 리튬 생산업체로 에너지스토리지(리튬)와 스페셜티(브롬 등) 두 개 사업부문을 운영</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 8월 17일</div>
+      <div class="price-display">$137.13</div>
+      <div class="price-change up">▲ 실적 발표 후 강세 지속 (2026.08.15~16 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $16.1B</span>
+    <span class="rating-pill">🏢 섹터: 소재/스페셜티케미컬(리튬)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy(Moderate Buy) 우세</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (FY26 Q2)</div>
+      <div class="kpi-value">$1.74B</div>
+      <div class="kpi-sub">YoY +31% · 컨센서스($1.62B) 대비 +7.7%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">확인 불가</div>
+      <div class="kpi-sub">참고: 조정 EBITDA마진 49.2%(전년比 대폭 개선)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스, 약 20명)</div>
+      <div class="kpi-value">$184</div>
+      <div class="kpi-sub">현재가 대비 +34%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$71.25~$221.00</div>
+      <div class="kpi-sub">현재가 위치: 약 44%</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (2026 회계연도 2분기, 4~6월)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.74B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +7.7%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.62B · YoY +31%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">조정 EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$3.75 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +15.7%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $3.24 · 전년동기 $0.11</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      발표일 2026.08.05(장 마감 후), 다음날 주가 11.5% 급등. 순이익 $4.80억(전년 $2,290만), 조정EBITDA $8.58억(+155% YoY, 마진 49.2%)으로 리튬가 상승 사이클을 뚜렷이 반영. 에너지스토리지 매출 +78%, 리튬 실현가 $19.53/kg(전년 $12.17). 스페셜티(브롬) 부문도 매출 +20%·EBITDA +61%로 호실적을 기록하며 회사는 2026년 스페셜티 가이던스를 매출 $14~16억·조정EBITDA $2.75~3.25억으로 상향했다. 다만 6월 호주 Greenbushes CGP3 화재로 리튬 완전 정상가동은 2027년 1분기로 지연(연간 판매량 가이던스 22.5만~23.5만톤, YoY 보합~-4%).
+    </div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-K</span>
+        <span style="font-size:13px;font-weight:500;">2025 회계연도 연차보고서</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2분기 실적 발표 (순매출 +31%, 조정EBITDA +155%, 스페셜티 가이던스 상향)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">배당결정</span>
+        <span style="font-size:13px;font-weight:500;">분기 보통주 배당 $0.41/주 선언 (기준일 8/14, 지급일 9/11)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.21</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">임원매도</span>
+        <span style="font-size:13px;font-weight:500;">CEO 등 경영진 지속적 자사주 매도 (최근 6개월 7건, 전량 매도)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026년 상반기~8월</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.06~08</span></div>
+      <div class="news-title">2분기 실적 서프라이즈에 주가 11.5% 급등</div>
+      <div class="news-summary">리튬가 상승과 스페셜티 부문 호실적이 겹치며 EPS·매출 모두 컨센서스를 크게 상회, 2026년 가이던스 상향과 맞물려 강한 매수세가 유입됐다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.08월</span></div>
+      <div class="news-title">브롬(스페셜티) 부문, 중동發 공급차질 반사이익으로 가이던스 상향</div>
+      <div class="news-summary">중동 지정학 리스크로 브롬 공급망이 교란되며 가격결정력이 부각, 2분기 스페셜티 EBITDA가 전년比 61% 급증하며 연간 가이던스 상향으로 이어졌다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08월</span></div>
+      <div class="news-title">최근 3개월 주가 -27.7% 조정 — 리튬가 변동성이 여전히 큰 요인</div>
+      <div class="news-summary">3분기 리튬가가 정점 대비 눌리며 단기 주가 변동성이 확대, 최근 급등에도 불구하고 리튬가 사이클에 대한 시장의 경계감은 여전하다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.06.09~08.01</span></div>
+      <div class="news-title">호주 Greenbushes CGP3 화재 — 리튬 완전 정상가동 2027년 1분기로 지연</div>
+      <div class="news-summary">6월 화재로 가동이 중단됐던 CGP3 플랜트가 8월 1일 재가동됐으나, 완전 정상 생산 시점은 당초 목표보다 늦춰지며 연간 판매량 가이던스가 보합~소폭 감소로 제시됐다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08월</span></div>
+      <div class="news-title">칠레 리튬 수출액 반기 기준 3배 급증 — 글로벌 리튬 수요 회복 뒷받침</div>
+      <div class="news-summary">칠레가 세계 2대 리튬 생산국 중 하나로서 수출 호조를 보이는 가운데, 경영진은 5월까지 글로벌 리튬 소비가 전년比 45% 성장했다고 밝혀 수급 타이트화 기대를 높였다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>에너지스토리지(리튬) 매출 +78%, 실현가격 $19.53/kg(전년 $12.17) — 리튬가 상승 사이클이 실적에 본격 반영</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>스페셜티(브롬) 매출 +20%·EBITDA +61%, 2026년 가이던스 상향 — 중동발 공급차질 속 가격결정력 입증</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>순부채/EBITDA 0.5배, 유동성 $32억, 잉여현금흐름 $6.38억(전환율 83%) — 매우 견고한 재무구조</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>글로벌 리튬 수요 5월까지 +45% 성장, 2030년 수요 전망 상향 — 그리드 스토리지·AI데이터센터향 구조적 수요 확대</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>최근 3개월 주가 -27.7% 조정 — 리튬가 급등락에 실적·주가가 여전히 크게 연동되는 구조</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>호주 CGP3 화재로 리튬 완전 정상가동이 2027년 1분기로 지연, 연간 판매량 가이던스도 보합~-4%로 제한적</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>중동 지정학 리스크로 연간 $7천만~9천만 규모 추가 비용 발생 예상 — 마진 압박 요인 상존</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>CEO 등 경영진의 지속적 자사주 매도(최근 6개월 매수 0건) — 내부자 신뢰 신호는 다소 약한 편</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026.08 실적 발표 이후 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Truist Financial (2026.08.11)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$225 (기존 $245)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Scotiabank (2026.08.10)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Sector Outperform)</span><span class="target-price">$190 (기존 $200)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Morgan Stanley (2026.08.10)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립(Equal Weight)</span><span class="target-price">$161 (기존 $189)</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Albemarle(ALB)는 2분기 실적에서 매출·EPS 모두 컨센서스를 큰 폭으로 상회하며 리튬가 상승 사이클과 브롬 부문의 가격결정력을 동시에 입증했다. 순부채/EBITDA 0.5배의 견고한 재무구조와 잉여현금흐름 개선은 리튬 업황 변동성 속에서도 회사가 자본배분 유연성을 확보하고 있음을 보여준다. 다만 최근 3개월간 주가가 27.7% 조정받은 데서 알 수 있듯 리튬가 변동성은 여전히 핵심 리스크이며, 호주 CGP3 화재로 인한 생산 정상화 지연과 중동發 추가 비용 부담도 유의할 부분이다. 대다수 애널리스트가 매수 의견을 유지하는 가운데 목표주가는 현재가 대비 약 34%의 상승여력을 제시하고 있으나, 모건스탠리 등 일부는 밸류에이션 부담을 이유로 중립으로 목표가를 낮췄다. 이 종목은 리튬·에너지스토리지 시장의 구조적 성장 스토리에 투자하면서 원자재 가격 사이클에 따른 높은 변동성을 감내할 수 있는 중장기 투자자에게 적합하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

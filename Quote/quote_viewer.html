@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>명언 뷰어 — 주식 리서치 허브</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1a56db;--primary-dark:#1239a0;--primary-light:#3b82f6;
+  --navy:#0f2244;--navy-mid:#1e3a5f;--accent:#60a5fa;
+  --gold:#fcd34d;--gold-light:#fef9c3;
+  --bg:#f0f5fb;--card:#fff;--border:#dbe8f8;
+  --text:#1e293b;--muted:#64748b;--light:#94a3b8;
+  --shadow-sm:0 1px 4px rgba(26,86,219,.08);
+  --shadow-md:0 4px 20px rgba(26,86,219,.12);
+  --radius:14px;--radius-sm:8px;
+  --t:.22s cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{text-decoration:none;color:inherit}
+
+/* 네브바 */
+.navbar{position:sticky;top:0;z-index:100;background:var(--navy);box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.nb{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:8px;height:60px}
+.logo{display:flex;align-items:center;gap:10px;color:#fff;font-size:1.05rem;font-weight:700;margin-right:12px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--primary-light),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-links{display:flex;align-items:center;gap:2px;list-style:none;flex:1}
+.nav-links a{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;color:rgba(255,255,255,.75);font-size:.88rem;font-weight:500;transition:var(--t)}
+.nav-links a:hover,.nav-links a.active{background:rgba(255,255,255,.12);color:#fff}
+
+/* 툴바 */
+.toolbar{position:sticky;top:60px;z-index:90;background:var(--card);border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.tb{max-width:1280px;margin:0 auto;padding:0 24px;height:54px;display:flex;align-items:center;gap:12px}
+.tb-title{flex:1;font-size:.95rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{background:var(--gold-light);color:#854d0e;font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid var(--gold);white-space:nowrap}
+.tb-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:.83rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;transition:var(--t);white-space:nowrap}
+.tb-btn:hover{border-color:var(--primary);color:var(--primary);background:#eff6ff}
+.tb-btn.prev-btn,.tb-btn.next-btn{background:#f8fafc}
+.tb-btn:disabled{opacity:.35;cursor:default;pointer-events:none}
+
+/* iframe 영역 */
+.viewer{width:100%;min-height:calc(100vh - 114px);background:var(--card)}
+iframe{width:100%;border:none;display:block;min-height:calc(100vh - 114px)}
+
+/* 로딩 */
+.loading{position:fixed;inset:0;z-index:200;background:rgba(255,255,255,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.spinner{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 하단 네비 */
+.bottom-nav{max-width:960px;margin:0 auto;padding:24px 24px 48px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.nav-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;transition:var(--t);cursor:pointer}
+.nav-card:hover{box-shadow:var(--shadow-md);border-color:var(--gold)}
+.nav-card.prev{text-align:left}
+.nav-card.next{text-align:right}
+.nav-card.hidden{visibility:hidden}
+.nav-label{font-size:.72rem;color:var(--light);margin-bottom:4px}
+.nav-title{font-size:.88rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-btn{display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:12px 20px;border-radius:10px;background:var(--gold-light);border:1px solid var(--gold);color:#854d0e;font-size:.82rem;font-weight:700;cursor:pointer;transition:var(--t);white-space:nowrap}
+.list-btn:hover{background:var(--gold);color:#713f12}
+
+@media(max-width:700px){.nav-links{display:none}.bottom-nav{grid-template-columns:1fr;grid-template-rows:auto auto auto}}
+</style>
+<script src="../manifest.js"></script>
+<script src="../navbar.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nb">
+    <a href="../index.html" class="logo">
+      <div class="logo-icon">📈</div>주식 리서치 허브
+    </a>
+    <ul class="nav-links"></ul>
+  </div>
+</nav>
+
+<div class="toolbar">
+  <div class="tb">
+    <button class="tb-btn prev-btn" id="prevBtn" onclick="goPrev()">← 이전</button>
+    <span class="tb-title" id="tbTitle">—</span>
+    <span class="badge" id="posBadge">—</span>
+    <button class="tb-btn" onclick="location.href='quote_list.html'">☰ 목록으로</button>
+    <button class="tb-btn next-btn" id="nextBtn" onclick="goNext()">다음 →</button>
+  </div>
+</div>
+
+<div class="viewer">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <span style="color:var(--muted);font-size:.9rem">불러오는 중...</span>
+  </div>
+  <iframe id="frame" scrolling="yes" onload="onFrameLoad()"></iframe>
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-card prev hidden" id="prevCard" onclick="goPrev()">
+    <div class="nav-label">← 이전 명언</div>
+    <div class="nav-title" id="prevTitle"></div>
+  </div>
+  <a href="quote_list.html" class="list-btn">
+    <span style="font-size:1.3rem">☰</span>
+    목록으로 돌아가기
+  </a>
+  <div class="nav-card next hidden" id="nextCard" onclick="goNext()">
+    <div class="nav-label">다음 명언 →</div>
+    <div class="nav-title" id="nextTitle"></div>
+  </div>
+</div>
+
+<script>
+var DATA = (window.SITE_MANIFEST && window.SITE_MANIFEST["Quote"]) || [];
+var currentFile = '';
+var currentIdx  = 0;
+
+function getParam(k){
+  return new URLSearchParams(window.location.search).get(k)||'';
+}
+function setParam(k,v){
+  var p = new URLSearchParams(window.location.search);
+  p.set(k,v);
+  return window.location.pathname+'?'+p.toString();
+}
+function findIdx(file){
+  for(var i=0;i<DATA.length;i++) if(DATA[i].file===file) return i;
+  return 0;
+}
+
+function loadReport(file){
+  currentFile = file;
+  currentIdx  = findIdx(file);
+  var item    = DATA[currentIdx] || {};
+
+  // 툴바 업데이트
+  document.getElementById('tbTitle').textContent = item.title || file;
+  document.getElementById('posBadge').textContent = (currentIdx+1)+'/'+DATA.length;
+
+  var hasPrev = currentIdx < DATA.length-1;
+  var hasNext = currentIdx > 0;
+
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  prevBtn.disabled = !hasPrev;
+  nextBtn.disabled = !hasNext;
+
+  // 하단 카드
+  var prevCard  = document.getElementById('prevCard');
+  var nextCard  = document.getElementById('nextCard');
+  var prevTitle = document.getElementById('prevTitle');
+  var nextTitle = document.getElementById('nextTitle');
+
+  if(hasPrev){
+    prevCard.classList.remove('hidden');
+    prevTitle.textContent = DATA[currentIdx+1].title||DATA[currentIdx+1].file;
+  } else {
+    prevCard.classList.add('hidden');
+  }
+  if(hasNext){
+    nextCard.classList.remove('hidden');
+    nextTitle.textContent = DATA[currentIdx-1].title||DATA[currentIdx-1].file;
+  } else {
+    nextCard.classList.add('hidden');
+  }
+
+  // iframe 로드
+  document.getElementById('loading').style.display='flex';
+  document.getElementById('frame').src = file;
+  history.replaceState(null,'', setParam('file', file));
+}
+
+function onFrameLoad(){
+  document.getElementById('loading').style.display='none';
+  var frame = document.getElementById('frame');
+  try{
+    var h = frame.contentWindow.document.documentElement.scrollHeight;
+    if(h>200) frame.style.height = h+'px';
+  } catch(e){
+    frame.style.height = '90vh';
+  }
+}
+
+function goPrev(){
+  if(currentIdx < DATA.length-1) loadReport(DATA[currentIdx+1].file);
+}
+function goNext(){
+  if(currentIdx > 0) loadReport(DATA[currentIdx-1].file);
+}
+
+// 초기 로드
+var initFile = getParam('file');
+if(!initFile && DATA.length) initFile = DATA[0].file;
+if(initFile) loadReport(initFile);
+else document.getElementById('loading').style.display='none';
+</script>
+</body>
+</html>

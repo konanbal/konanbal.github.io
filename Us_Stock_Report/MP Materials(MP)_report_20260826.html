@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MP Materials Corp. (MP) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">MP · NYSE</div>
+      <div class="company-name">MP Materials Corp.</div>
+      <div class="company-desc">미국 유일의 수직계열화된 희토류 생산기업 — 마운틴패스 채굴·정제부터 텍사스 자석 제조까지 전체 공급망을 보유</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 8월 26일</div>
+      <div class="price-display">$57.66</div>
+      <div class="price-change up">▲ +0.42% (+$0.24, 전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.08.25 종가 · 출처: Robinhood / Macroaxis</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $10.2B</span>
+    <span class="rating-pill">🏢 섹터: 소재(희토류·금속광업)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy (매수 우세)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (Q2 FY2026)</div>
+      <div class="kpi-value">$108.5M</div>
+      <div class="kpi-sub">YoY +89%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">조정 EBITDA (Q2)</div>
+      <div class="kpi-value">$28.5M</div>
+      <div class="kpi-sub">전년 동기 대비 +$41.0M (적자→흑자 전환)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$75.38</div>
+      <div class="kpi-sub">현재가 대비 +30.7% (18명 평균)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$37.81~$100.25</div>
+      <div class="kpi-sub">현재가 위치: 약 32%</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: MP Materials 실적발표자료(Form 8-K/10-Q), Stockanalysis.com(S&P Global 집계, 18명 애널리스트), MacroTrends (기준일 2026.08.25)</div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기: FY2026 2분기, 2026.06.30 마감)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$108.5M <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +13.3%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $95.7M · YoY +89%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">조정 EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">-$0.01 <span style="font-size:12px;color:var(--red);">▼ 컨센서스($0.01 흑자 예상) 미달</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년동기 대비 손실폭은 $0.12 개선</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      2026.08.06 실적 발표. NdPr 판매량 YoY +127%, 신규 항공우주·방위산업 고객과 가돌리늄(HREE) 장기 오프테이크 계약 체결. 드론업계 수요를 묶는 'Project Swarm' 출범. Dy/Tb(디스프로슘/터븀) 서킷 커미셔닝 진행 중이며 3분기 NdPr 생산량은 1,000금속톤 이상을 예상.
+    </div>
+    <div class="source-note">※ 출처: MP Materials 실적발표자료(Form 8-K), Investing.com</div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC EDGAR)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서(10-Q)</span>
+        <span style="font-size:13px;font-weight:500;">FY2026 2분기(2026.06.30 마감) 분기보고서</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">[2026.08.06] · SEC EDGAR</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항보고(8-K)</span>
+        <span style="font-size:13px;font-weight:500;">Q2 2026 실적발표 보도자료 첨부 공시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">[2026.08.06] · SEC EDGAR</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">임원변동(Form 4)</span>
+        <span style="font-size:13px;font-weight:500;">내부자(임원) 지분 거래 보고</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">[2026.06.30] · SEC EDGAR</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.24</span><span class="news-source">· The Motley Fool</span></div>
+      <div class="news-title">신규 항공우주·방위산업 고객과 가돌리늄 장기 오프테이크 계약 체결</div>
+      <div class="news-summary">Pentagon, Apple에 이어 항공우주·방위 고객까지 확보하며 미국 내 희토류 탈중국 공급망 구축 흐름의 중심에 서 있다는 평가. 유사한 장기계약이 추가로 이어질 가능성이 제기됐다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.08.06</span><span class="news-source">· Investing.com</span></div>
+      <div class="news-title">Q2 2026 실적, 매출은 서프라이즈지만 조정 EPS는 소폭 미달</div>
+      <div class="news-summary">매출 $108.5M으로 컨센서스를 13.3% 상회했으나 조정 EPS는 -$0.01로 흑자 전환 기대치를 밑돌았다. 시장 반응은 제한적이었으며 주가는 소폭 하락 마감했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.19</span><span class="news-source">· TipRanks</span></div>
+      <div class="news-title">Morgan Stanley, 목표주가 $71.50→$73로 상향 (Overweight 유지)</div>
+      <div class="news-summary">희토류·구리 등 금속 섹터 전반의 목표가 조정 과정에서 MP Materials에 대해서도 긍정적 시각을 재확인했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.21</span><span class="news-source">· Seeking Alpha</span></div>
+      <div class="news-title">"시장은 이미 낙관적 시나리오를 선반영" — Sell 등급, 목표가 $39 제시</div>
+      <div class="news-summary">정부 지원과 성장 스토리에도 불구하고 대규모 자본지출과 지분희석 리스크를 감안하면 현 주가가 과도하게 낙관적인 실행 시나리오를 반영하고 있다는 분석. 조정 EBITDA가 $10억 수준까지 커져야 현재 밸류에이션이 정당화된다고 지적했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.21</span><span class="news-source">· The American Prospect</span></div>
+      <div class="news-title">DoD-MP 파트너십 관련 이해상충 의혹 제기</div>
+      <div class="news-summary">국방부의 $400M 지분투자 계약 체결 과정에 사모펀드(Cerberus) 출신 인사가 관여했다는 의혹이 보도됐다. 국방부는 절차상 문제가 없다는 입장이지만, 정부 주도 계약의 평판 리스크로 부각될 가능성이 있다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026년 중(진행중)</span><span class="news-source">· Yahoo Finance / MP Materials</span></div>
+      <div class="news-title">Mountain Pass 중희토류 분리설비 커미셔닝, 10X 자석공장 착공</div>
+      <div class="news-summary">국방부와의 10년 자석 오프테이크 계약을 뒷받침하기 위해 Mountain Pass에서 중희토류(Dy/Tb) 분리 상업화 작업이 진행 중이며, 신규 10X 자석 제조시설도 착공했다. 2027년까지 중국산 희토류의 미 국방 공급망 배제를 목표로 하는 정책과 직접 연동된 행보다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>미국 유일의 수직계열화 희토류 생산업체로, 채굴부터 자석 제조까지 전체 밸류체인을 보유하며 DoD의 $400M 지분투자와 10년 가격보장계약(PPA)으로 국가전략자산 지위를 확보</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>NdPr 생산·판매가 기록적으로 증가(Q2 판매 YoY +127%)하는 가운데 Apple, 항공우주·방위 고객사 등과의 신규 장기 오프테이크 계약이 이어지며 수요처가 다변화</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>Dy/Tb 중희토류 분리 상업화, 10X 자석공장 착공 등으로 사업영역이 확장되고 있고, 드론용 수요를 묶는 'Project Swarm' 등 신규 판로도 개척 중</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>여전히 순손실 구간(조정 EPS 마이너스)이며, 현재 밸류에이션이 조정 EBITDA 10억 달러 수준의 장기 성장 시나리오를 이미 선반영했다는 지적(Seeking Alpha Sell, $39 목표가)</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>10X·Independence 등 대규모 설비투자에 따른 자본지출 부담과 향후 추가 지분희석 가능성</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>국방부와의 파트너십 체결 과정을 둘러싼 이해상충 의혹 보도로 정치적·평판 리스크가 부각</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>희토류 가격 변동성 및 중국의 공급망 지배력(가격 정책 등)에 따른 매출·마진 변동 위험</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Morgan Stanley <span style="color:var(--muted);font-weight:400;">(2026.08.19)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Overweight)</span><span class="target-price">$73</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Barclays <span style="color:var(--muted);font-weight:400;">(2026.08월)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Overweight)</span><span class="target-price">$65</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">JPMorgan <span style="color:var(--muted);font-weight:400;">(2026.07.24)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Overweight)</span><span class="target-price">$60</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Deutsche Bank <span style="color:var(--muted);font-weight:400;">(2026.08.10)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Buy)</span><span class="target-price">$58</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">MP Materials는 미국 정부의 희토류 탈중국 정책을 등에 업고 채굴부터 자석 제조까지 수직계열화된 유일한 국내 기업으로, DoD의 지분투자·가격보장계약과 Apple·항공우주방위 고객사와의 오프테이크 계약이 매출 성장(Q2 YoY +89%)을 뒷받침하고 있다. 다만 여전히 순손실 구간에 있고 대규모 설비투자가 이어지는 만큼, 현재 주가는 조정 EBITDA가 수억 달러 규모로 크게 확대되는 낙관적 시나리오를 상당 부분 선반영하고 있다는 지적도 만만치 않다. 애널리스트 목표주가가 $58~$100까지 넓게 분산돼 있다는 점은 이 종목에 대한 시각차가 크다는 방증이다. 이 종목은 미국의 공급망 안보·산업정책 테마에 장기적으로 베팅하면서도, 아직 이익을 내지 못하는 성장주 특유의 밸류에이션 변동성과 정책 리스크를 감내할 수 있는 투자자에게 적합하다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

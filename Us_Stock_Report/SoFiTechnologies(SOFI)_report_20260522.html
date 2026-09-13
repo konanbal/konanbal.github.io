@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoFi Technologies (SOFI) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0a2540;
+    --accent: #00c271;
+    --accent2: #0070f3;
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --text: #0a2540;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0a2540 0%, #0e4d8b 60%, #0070f3 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #00c271; color: #0a2540; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 4px; letter-spacing: 1.5px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 530px; line-height: 1.5; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 34px; font-weight: 700; margin-top: 4px; }
+  .price-down { color: #f87171; font-size: 14px; margin-top: 2px; }
+  .rating-row { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.09); }
+  .rating-pill-warn { padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; background: rgba(220,38,38,0.25); border: 1px solid rgba(248,113,113,0.5); }
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 21px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .alert-band { background: linear-gradient(135deg, #7f1d1d, #991b1b); color: white; border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 1rem; display: flex; gap: 12px; align-items: flex-start; }
+  .alert-text { font-size: 13px; line-height: 1.7; }
+  .seg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 0.75rem; }
+  .seg-box { border-radius: 10px; padding: 0.85rem 1rem; }
+  .news-item { padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #eff6ff; color: #1e40af; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid #059669; }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid #dc2626; }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 600; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 5px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .chg-down { font-size: 10px; color: #dc2626; font-weight: 700; }
+  .target-price { font-weight: 700; color: var(--text); }
+  .sec-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-right: 8px; }
+  .tag-8k { background: #fee2e2; color: #991b1b; }
+  .tag-10q { background: #d1fae5; color: #065f46; }
+  .tag-def14a { background: #fef9c3; color: #854d0e; }
+  .tag-form4 { background: #e0e7ff; color: #3730a3; }
+  .tag-inv { background: #fce7f3; color: #9d174d; }
+  .summary-box { background: linear-gradient(135deg, #f0fdf4, #eff6ff); border: 1px solid #bbf7d0; border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 16px; font-weight: 800; color: #0a2540; margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .seg-grid { grid-template-columns: 1fr 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">SOFI · NASDAQ</div>
+      <div class="company-name">SoFi Technologies, Inc.</div>
+      <div class="company-desc">미국 디지털 뱅킹·핀테크 플랫폼 — 대출·저축·투자·보험을 원스톱으로 제공. 핀테크 인프라 플랫폼 Galileo 운영사. 멤버 14.7M, 연간 매출 성장 40%+ 달성 중.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 22일</div>
+      <div class="price-display">$15.69</div>
+      <div class="price-down">▼ YTD -40% (52주 최고 $32.73 대비 -52%)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$206억</span>
+    <span class="rating-pill">🏢 섹터: 디지털 뱅킹 / 핀테크</span>
+    <span class="rating-pill">⭐ 컨센서스: Hold (매수 8 / 중립 12 / 매도 4)</span>
+    <span class="rating-pill-warn">⚠️ Muddy Waters 공매도 리포트 오버행 진행 중</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 조정 순수익</div>
+      <div class="kpi-value">$1.087B</div>
+      <div class="kpi-sub">YoY +41% · 컨센서스 +4.76% 초과</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 GAAP 순이익</div>
+      <div class="kpi-value" style="color:#059669;">$166.7M</div>
+      <div class="kpi-sub">YoY +134% · 10분기 연속 GAAP 흑자</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">컨센서스 목표주가</div>
+      <div class="kpi-value">$21.10</div>
+      <div class="kpi-sub">현재가 대비 +34.5% 상승여력</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value" style="font-size:16px;">$12.75~$32.73</div>
+      <div class="kpi-sub">현재가, 52주 최저가 근접</div>
+    </div>
+  </div>
+
+  <div class="alert-band">
+    <div style="font-size:20px;flex-shrink:0;">⚠️</div>
+    <div class="alert-text">
+      <strong>핵심 리스크 요인:</strong> 2026년 3월 17일 Muddy Waters Research가 SoFi의 대출 회계, 공정가치 평가, 오프밸런스시트 금융 구조에 의문을 제기하는 공매도 보고서를 발표했으며, 이후 법무법인 Block &amp; Leviton이 증권사기 조사를 개시(2026.04.29). 경영진은 혐의를 전면 부인하고 있으나, 이 오버행이 해소되기 전까지 주가 재평가에 제약으로 작용할 가능성이 높다. 10-K 및 10-Q 공시에서 추가 공시 여부를 지속 모니터링할 것.
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q1 2026 (2026.04.29 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:10px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Q1 총 순수익 (실제 vs 컨센서스)</div>
+        <div style="font-size:20px;font-weight:800;">$1.100B <span style="font-size:12px;color:#059669;">▲ 컨센서스 +4.76%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">YoY +43% · 사상 최고 분기 매출 달성</div>
+      </div>
+      <div style="background:#fefce8;border-radius:10px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Q1 희석 EPS (실제 vs 컨센서스)</div>
+        <div style="font-size:20px;font-weight:800;">$0.12 <span style="font-size:12px;color:#d97706;">= 컨센서스 부합 (어닝 서프라이즈 無)</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">YoY +100% · GAAP 기준</div>
+      </div>
+    </div>
+    <div class="seg-grid">
+      <div class="seg-box" style="background:#f0fdf4;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">대출(Lending)</div>
+        <div style="font-size:17px;font-weight:700;">$629M</div>
+        <div style="font-size:11px;color:#059669;">YoY +53% · 실행액 $12.2B(+68%)</div>
+      </div>
+      <div class="seg-box" style="background:#eff6ff;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">금융서비스(Fin. Svcs)</div>
+        <div style="font-size:17px;font-weight:700;">$429M</div>
+        <div style="font-size:11px;color:#2563eb;">YoY +41% · 중개수수료 2배+</div>
+      </div>
+      <div class="seg-box" style="background:#fff1f2;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">기술플랫폼(Tech Platform)</div>
+        <div style="font-size:17px;font-weight:700;">$75M</div>
+        <div style="font-size:11px;color:#dc2626;">YoY -27% ⚠️ 대형 고객 이탈</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:0.75rem;">
+        <div style="font-size:10px;color:var(--muted);">조정 EBITDA / 마진</div>
+        <div style="font-size:16px;font-weight:700;">$340M · 31%</div>
+        <div style="font-size:11px;color:var(--muted);">YoY +62%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:0.75rem;">
+        <div style="font-size:10px;color:var(--muted);">NII / NIM</div>
+        <div style="font-size:16px;font-weight:700;">$693M / 5.94%</div>
+        <div style="font-size:11px;color:var(--muted);">NII YoY +39%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:0.75rem;">
+        <div style="font-size:10px;color:var(--muted);">멤버 수 / 제품 수</div>
+        <div style="font-size:16px;font-weight:700;">14.7M / 22.2M</div>
+        <div style="font-size:11px;color:var(--muted);">YoY +35% / +39%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid #d97706;padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>Q1 실적 후 주가 -13~15% 급락 이유:</strong> 사상 최대 매출·순이익에도 ①EPS 어닝 서프라이즈 없음, ②2026년 연간 가이던스(조정 순수익 $4.655B, EPS $0.50) 동결. Q2 가이던스(EPS $0.10~$0.11)는 Q1 $0.12 대비 하락. CEO Noto는 "Rule of 40 점수 72%, 18분기 연속"을 강조했으나 가이던스 상향 미비로 시장 반응은 냉담. FY2026 가이던스: 조정 순수익 $4.655B, EBITDA $1.6B, 조정 순이익 $825M.
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 주요 내역</div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-tag tag-8k">8-K</span>
+        <span style="font-size:13px;font-weight:600;">Q1 2026 실적 발표 — 조정 순수익 $1.087B, GAAP 순이익 $167M 신기록</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.29</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-tag tag-10q">10-Q</span>
+        <span style="font-size:13px;font-weight:600;">Q1 2026 분기보고서 — 재무제표·대출 포트폴리오 세부 공시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.29</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-tag tag-def14a">DEF 14A</span>
+        <span style="font-size:13px;font-weight:600;">주주총회 위임장 제출 — 이사 선임·임원 보수 안건 포함</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.30</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-tag tag-form4">Form 4</span>
+        <span style="font-size:13px;font-weight:600;">CEO Anthony Noto 내부자 매수 15,878주 @$15.73 ($249,760) — 올해 3번째 자사주 매수</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.08</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-tag tag-inv">조사</span>
+        <span style="font-size:13px;font-weight:600;">Block &amp; Leviton, 증권사기 조사 개시 — Muddy Waters 보고서(03.17) 후속 법적 리스크</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.29</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 12px;background:#f0fdf4;border-radius:6px;">
+      📌 <strong>CEO 내부자 매수 패턴</strong>: 2026년 3월 56,000주(@$17.88, ~$1.1M) + 5월 31,423주(@$15.73~16) 추가 매수. 1년간 총 100,778주 매수, 단 한 주도 매도 없음. 직접 보유 11.93M주(~$215M). 경영진 확신도를 보여주는 가장 강력한 신호 중 하나.
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.03.17</span></div>
+      <div class="news-title">Muddy Waters, SOFI 공매도 리포트 — 대출 회계·공정가치·오프밸런스 구조 의혹</div>
+      <div class="news-summary">공매도 전문 기관 Muddy Waters Research가 SoFi의 대출 회계 처리, 공정가치 마킹, 순상각율 보고, LPB(대출 플랫폼 비즈니스) 구조에 의문을 제기하는 보고서를 공개. 경영진 전면 부인. 이후 Block & Leviton 증권사기 조사로 이어졌으며, 현재까지 주가에 지속적인 하락 압력 작용 중. 숏 인터레스트 약 13%로 여전히 높은 수준.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.11</span></div>
+      <div class="news-title">PrimaryBid 주요 자산 인수 합의 — 영국 핀테크 DSP 플랫폼 기술 흡수</div>
+      <div class="news-summary">SoFi가 영국 핀테크 PrimaryBid의 지분 매입 프로그램(DSP) 기술을 인수. PrimaryBid는 기관 수준의 공모주·증자 기회를 일반 투자자에게 개방하는 플랫폼으로, 2024년 10월 파트너십으로 구축한 DSP2.0 기술이 핵심. 인수 조건 미공개. 발표 당일 주가 +3% 반등, CEO Noto 당일 추가 자사주 매수 단행.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.03.23</span></div>
+      <div class="news-title">FTSE All-World 지수 편입 + UBS 21M주 기관 매수 (+136.9%)</div>
+      <div class="news-summary">SoFi가 FTSE All-World 지수에 편입되며 글로벌 패시브 펀드의 자동 매수 채널이 확보됐다. 이와 맞물려 Q1 2026에 UBS가 21M주(+136.9%)를 추가 매수하며 약 $334M을 집행. JPMorgan도 Q4 2025에 17.3M주(+37.1%)를 추가 보유 중으로, 기관 수급 관점에서는 긍정적 신호가 축적되고 있다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.08</span></div>
+      <div class="news-title">CEO Anthony Noto, 올해 3번째 자사주 매수 — 주가 저점 근방에서 $250K 추가 투입</div>
+      <div class="news-summary">주가가 52주 최저권($12.75)에 근접하자 CEO Noto가 15,878주를 @$15.73에 매수. 2026년 3월부터 시작해 세 번에 걸쳐 총 ~$1.75M 이상을 자사주에 투자. 현재 직접 보유량 11.93M주(~$215M). 1년간 단 한 주도 매도하지 않은 일관된 패턴은 경영진의 중장기 실적 자신감을 보여주는 가장 강력한 신호로 해석.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.05.12</span></div>
+      <div class="news-title">Truist, 목표주가 $20→$17 하향 · Hold 유지 — 테크플랫폼 매출 회복 불확실</div>
+      <div class="news-summary">Truist 애널리스트 Matthew Coad가 기술플랫폼 고객 이탈 영향 장기화와 Q2 마케팅 지출 증가를 반영해 목표주가를 하향. Hold 의견 유지. Muddy Waters 오버행이 해소되기 전까지 멀티플 확장이 제한적이라고 지적. 현재 분석 기관 중 Hold/Neutral 비중이 매수를 앞서고 있음.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.04.29</span></div>
+      <div class="news-title">Q1 실적 발표 후 가이던스 동결 → 주가 -13~15% 급락</div>
+      <div class="news-summary">사상 최대 매출·순이익 달성에도 2026년 연간 가이던스를 동결해 시장에 실망감을 줬다. Q2 EPS 가이던스($0.10~$0.11)는 Q1 $0.12보다 낮다. 마케팅 비용 증가와 계절적 급여세가 단기 이익을 압박. CEO Rule of 40 점수 72% 강조에도 시장 반응은 냉담했으며, 개인대출 순상각율 3.03%(-28bps YoY)는 긍정적이나 Tech Platform 회복이 관건.</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>10분기 연속 GAAP 흑자 & Rule of 40 점수 72%</strong><br>Q1 GAAP 순이익 $167M, 조정 EBITDA 마진 31%. Rule of 40을 72%로 달성한 것은 미국 핀테크 최상위 수준. 재무 건전성이 확립된 상태.</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>대출 실행 사상 최대 + 멤버 성장 가속</strong><br>대출 실행 $12.2B(+68%), 멤버 14.7M(+35%), 제품 22.2M(+39%). 예금 $40.2B의 낮은 자금조달 비용이 NIM 5.94%를 뒷받침. 교차판매율 43%로 원스톱 플랫폼 전략 유효.</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>CEO 공격적 내부자 매수 — "가장 강력한 신뢰 신호"</strong><br>CEO Noto가 올해만 ~$1.75M+ 자사주 매수, 1년간 100,778주 매수·단 한 주도 매도 없음. $215M 직접 보유는 경영진의 중장기 확신을 직접 증명.</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>FY2026 가이던스 & 중기 EPS CAGR 38~42%</strong><br>연간 조정 순수익 $4.655B(+30%), EBITDA $1.6B. 중기 EPS CAGR 38~42%는 금융주 기준 이례적 성장성. Forward P/E ~24x로 성장 대비 합리적 밸류에이션.</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>YTD -40% — 역사적 저점 근접, 기관 매수 축적</strong><br>52주 최고 대비 -52%로 악재를 충분히 반영한 수준. FTSE All-World 편입 + UBS $334M 기관 매수. 컨센서스 목표가 $21.10(현재가 대비 +34% 업사이드).</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>Muddy Waters 공매도 리포트 오버행 — 회계 신뢰도 의문</strong><br>회계 의혹 + 법무법인 증권사기 조사 진행 중. 숏 인터레스트 ~13% 유지. 10-K·10-Q 추가 공시가 나오기 전 기관 투자자의 전면 복귀 어려운 구조.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>기술플랫폼(Galileo) YoY -27% — 단일 고객 의존 리스크</strong><br>단 한 곳의 대형 고객 이탈만으로 테크플랫폼 매출이 -27% 급감. 고마진·반복수익 사업의 핵심인 Galileo 회복 없이는 전체 멀티플 재평가 어렵다.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>가이던스 동결 + Q2 EPS 하락 전망</strong><br>Q1 역대 최대 실적에도 연간 가이던스 미상향. Q2 EPS 가이던스 $0.10~$0.11로 Q1 $0.12 대비 하락. 단기 모멘텀 투자자 이탈 지속 가능성.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>고금리 지속 + 신용 리스크</strong><br>미국 금리 인하 지연 시 개인대출 차주 상환 부담 증가. 현재 순상각율 3.03%(개선 중)이나 경기 둔화 시 재악화 위험. 금리 인하 지연은 NIM 확장 속도를 제한.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>경쟁 심화 및 규제 리스크</strong><br>Chime·Robinhood·PayPal 등 디지털 금융 경쟁사 성장, OpenAI 등 AI 기반 금융 서비스 잠재 진입. CFPB 감독 강화, 대출 관행 규제 등 핀테크 특유의 규제 리스크 상존.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 최신 애널리스트 의견 (2026년 4~5월 기준)</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Stephens (Kyle Joseph)</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">대출 성장·멤버 확대의 수익화 구조 긍정적 평가</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">Buy</span>
+        <span class="target-price">$25</span>
+        <span style="font-size:11px;color:var(--muted);">2026.04.30</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Citizens</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">중기 EPS CAGR 38~42% 달성 가능성 높다고 평가</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">Outperform</span>
+        <span class="target-price">$30</span>
+        <span style="font-size:11px;color:var(--muted);">2026.02.09</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">UBS (Tim Chiodo)</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">테크플랫폼 회복 여부 관건, Q1 이후 $334M 기관 매수 실행</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">Neutral</span>
+        <span class="target-price">$21</span>
+        <span style="font-size:11px;color:var(--muted);">2026.04.30</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Goldman Sachs (Michael Ng)</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Muddy Waters 오버행 해소 전 멀티플 확장 제한적</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">Neutral</span>
+        <span class="target-price">$20</span>
+        <span style="font-size:11px;color:var(--muted);">2026.04.14</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">TD Cowen (Moshe Orenbuch)</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">테크플랫폼·대출 개선 속도 추가 확인 필요</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">Hold</span>
+        <span class="target-price">$18</span>
+        <span style="font-size:11px;color:var(--muted);">2026.04.30</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Truist (Matthew Coad)</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Tech Platform·대출 추정치 하향, 불확실성 지속</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">Hold</span>
+        <span class="target-price">$17</span>
+        <span class="chg-down">↓ from $20</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.12</span>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:10px 14px;background:#f8faff;border-radius:8px;font-size:12px;color:var(--text);">
+      📊 <strong>컨센서스 요약</strong>: Buy 8 / Hold 12 / Sell 4 → 전체 Hold(중립) 성향 | 평균 목표주가 $21.10 (현재가 $15.69 대비 +34.5%) | 목표주가 범위 $12~$31
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      SoFi Technologies는 멤버 14.7M(+35%)·대출 실행 $12.2B(+68%)·GAAP 순이익 $167M(+134%)이라는 사상 최대 Q1 2026 실적을 달성했음에도, Muddy Waters 공매도 리포트 오버행과 가이던스 동결의 이중 충격으로 YTD -40% 급락한 특수한 상황에 놓여 있다. 비즈니스 펀더멘털은 견고하다. 10분기 연속 GAAP 흑자, Rule of 40 점수 72%, Forward P/E ~24x는 40%+ 성장 핀테크로서 합리적인 밸류에이션을 시사하며, CEO Noto의 지속적 자사주 매수($1.75M+, 매도 전무)와 FTSE All-World 편입, UBS의 $334M 기관 매수는 긍정적 신호다. 그러나 Muddy Waters 회계 의혹이 공식적으로 해소되기 전까지는 기관 투자자의 전면 복귀가 어렵고, 기술플랫폼(-27% YoY) 회복 속도와 Q2 EPS 가이던스 하락이 단기 모멘텀에 부담이다. 이 종목은 고성장 핀테크의 턴어라운드 스토리와 그에 수반되는 법적·규제 불확실성을 함께 수용할 수 있는 중장기 투자자에게 적합하며, Muddy Waters 의혹의 공식 해소 여부가 2026년 하반기 주가 방향의 최대 분수령이다. 단기 투자자에게는 추가 리스크가 높은 구간이다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. 주식 투자에는 원금 손실 위험이 있으며, 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

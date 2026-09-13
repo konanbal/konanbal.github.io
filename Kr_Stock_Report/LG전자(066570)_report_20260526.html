@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LG전자(066570) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0a2342 0%, #1b4f72 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #c0392b; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: #c0392b; border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .price-alert { background: #fffbf0; border: 1px solid #fde68a; border-radius: 10px; padding: 0.875rem 1.25rem; margin-bottom: 1rem; font-size: 13px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">066570 · KOSPI</div>
+      <div class="company-name">LG전자</div>
+      <div class="company-desc">가전·전장(VS)·B2B(HVAC)·webOS 플랫폼 + 로봇·AI 데이터센터 냉각으로 전환 중인 가전 대표주</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 26일</div>
+      <div class="price-display">237,000원</div>
+      <div class="price-change up">▲ 기준가 (2026.05.22 종가) · 사상 최고가 266,500원 (5/15)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 38.6조원</span>
+    <span class="rating-pill">🏢 섹터: 가전·전장·B2B</span>
+    <span class="rating-pill">⭐ 컨센서스: 매수 (21명 전원)</span>
+    <span class="rating-pill">📅 2Q 실적 발표: 2026.07.23</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 가격 주의 박스 -->
+  <div class="price-alert">
+    ⚠️ <strong>주가 변동성 주목:</strong> 5월 15일 사상 최고가(266,500원) 달성 후 5월 19일 -11.89%(191,200원)로 급락. 외국인·기관 동반 차익실현 매물 출회. 5월 22일 237,000원으로 부분 회복. 단기 고점 부담 및 변동성 확대 구간 진입.
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 매출액</div>
+      <div class="kpi-value">23.7조</div>
+      <div class="kpi-sub">YoY +4.3% · 1Q 역대 최대</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익률</div>
+      <div class="kpi-value">7.1%</div>
+      <div class="kpi-sub">영업이익 1.67조 (YoY +32.9%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">애널리스트 목표주가 (최신)</div>
+      <div class="kpi-value">165~230만</div>
+      <div class="kpi-sub">하나 23만 · iM 16.5만 · 신한 17만</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 가격 범위</div>
+      <div class="kpi-value">6.83~26.65만</div>
+      <div class="kpi-sub">현재가: 52주 고점 대비 약 89%</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (발표일: 2026.04.29)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:17px;font-weight:700;">23조 7,330억 <span style="font-size:11px;color:var(--green);">▲ +1.8% 초과</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +4.4% · 1Q 역대 최대</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 컨센서스)</div>
+        <div style="font-size:17px;font-weight:700;">1조 6,737억 <span style="font-size:11px;color:var(--green);">▲ +21.1% 어닝 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 1.38조 · YoY +32.9%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">순이익</div>
+        <div style="font-size:17px;font-weight:700;">1조 51억</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +14.8% · OPM 7.1%</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">HS(가전)</div>
+        <div style="font-weight:700;font-size:14px;">OPM 8.2%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">MS(TV/미디어)</div>
+        <div style="font-weight:700;font-size:14px;">OPM 7.2%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">VS(전장)</div>
+        <div style="font-weight:700;font-size:14px;">OPM 6.9%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">ES(B2B·HVAC)</div>
+        <div style="font-weight:700;font-size:14px;">OPM 8.8%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>경영진 코멘트 (CFO 김창태 부사장):</strong> "관세·거시 불확실성에도 전장(VS)·가전(HS)·B2B 합산 첫 10조원 돌파. 홈로봇·액추에이터 상반기 양산, AI 데이터센터 냉각 수주 YoY 3배 성장. 엔비디아와 Physical AI·로봇·데이터센터·모빌리티 협업 강화 중."
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 DART 공시</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 분기보고서 (IFRS 연결 기준)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.15</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">사채발행</span>
+        <span style="font-size:13px;font-weight:500;">회사채 수요예측 — 2,500억 모집에 2조 2,500억 유효 주문 (9배 초과)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.19</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">신사업</span>
+        <span style="font-size:13px;font-weight:500;">주총 결의 — 휴머노이드 로봇용 액추에이터 양산체제 구축 + 클로이드 PoC 상반기 착수</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.25</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">협력</span>
+        <span style="font-size:13px;font-weight:500;">엔비디아 매디슨 황 방한 회동 — Physical AI·로봇·AI 데이터센터·모빌리티 협업 논의</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.28</span>
+    </div>
+    <div style="margin-top:0.75rem;font-size:12px;color:var(--amber);background:#fffbf0;padding:8px 12px;border-radius:6px;font-weight:500;">
+      📌 투자자 주목 공시: 회사채 9배 초과 청약은 기관투자자의 LG전자 신용 신뢰도를 보여주는 지표. 2Q 실적 발표 예정일(7.23) 전까지 신사업(로봇 액추에이터 초도 판매, 데이터센터 냉각 빅테크 수주) 공시 여부에 주목.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.29</span></div>
+      <div class="news-title">1Q26 어닝 서프라이즈 — 영업이익 컨센서스 21% 상회, TV도 흑자 전환</div>
+      <div class="news-summary">VS·가전 합산 매출 첫 10조원 돌파. 특히 비관론이 팽배했던 MS(TV)사업본부가 인력 효율화·webOS 플랫폼 성장으로 드라마틱하게 흑자 전환하며 시장을 놀라게 했다. 전사 영업이익 1.67조원으로 분기 역대 3위를 기록했다. (출처: LG전자 뉴스룸, 디일렉, 2026.04.29)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.28~29</span></div>
+      <div class="news-title">엔비디아 매디슨 황 방한 — "Physical AI·로봇·데이터센터서 환상적 논의"</div>
+      <div class="news-summary">젠슨 황 CEO의 장녀이자 엔비디아 옴니버스·로보틱스 마케팅 수석이사 매디슨 황이 LG트윈타워를 방문, 류재철 사장과 회동. 로봇 파운데이션 모델 협업, AI 데이터센터 냉각, 모빌리티 분야 전략 협업을 구체적으로 논의했다. (출처: 네이트, 2026.04.29)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.14</span></div>
+      <div class="news-title">하나증권 목표주가 16만→23만원 상향 — "로봇·AI 가속, 이익 체력 확보"</div>
+      <div class="news-summary">2026년 연간 영업이익 3.8조원(YoY +55%) 전망. 액추에이터 상반기 PoC 일정 단축이 가속화 신호로 해석됐다. 데이터센터 냉각 수주 급증, 엔비디아와 협업 모멘텀도 근거로 제시됐다. (출처: 한국경제, 하나증권, 2026.05.14)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.05.19</span></div>
+      <div class="news-title">회사채 수요예측 9배 초과 흥행 — 2,500억 모집에 2.25조 유효 주문</div>
+      <div class="news-summary">시장에서 LG전자의 신용도와 재무 건전성에 대한 기관투자자의 높은 신뢰가 확인됐다. 차입 비용 절감과 신사업 투자 재원 확보에 긍정적이다. (출처: 한국경제 시그널, 2026.05.19)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.05.15~19</span></div>
+      <div class="news-title">사상 최고가(26.65만) 달성 후 3거래일 만에 -28% 급락</div>
+      <div class="news-summary">5/15 사상 최고가를 기록한 후 단기 급등 피로감에 외국인·기관이 동반 대량 매도. 5/18 -9.8%, 5/19 -11.9%로 이틀간 -21% 급락. 5/22에 237,000원으로 일부 회복했으나 여전히 단기 변동성이 크다. (출처: 민심뉴스, 2026.05.19)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.29</span></div>
+      <div class="news-title">데이터센터 냉각 수주 YoY 3배 성장 — 칠러 2027년 매출 1조원 목표 조기 달성 전망</div>
+      <div class="news-summary">LG전자는 AI 데이터센터 액침냉각·칠러 등 냉각 솔루션 사업에서 가파른 수주 증가를 확인했다. 글로벌 빅테크 고객사 대상 핵심 제품 인증 절차가 순조롭고, 2027년 매출 1조원 목표를 앞당겨 달성할 것으로 예상된다고 밝혔다. (출처: 비즈워치, 2026.04.29)</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>MS(TV) 구조적 흑자 전환:</strong> webOS 플랫폼 광고·콘텐츠 수익 확대 + 인력 효율화로 만성 적자였던 TV 사업이 2026년 안정적 흑자 구조로 전환. OPM 7.2% 달성은 시장 기대를 크게 상회했다.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>로봇·액추에이터 사업 구체화:</strong> 2026년 상반기 액추에이터 초도 물량 판매, 협업 로봇 '엑시옴' 하반기 생산 개시, 홈로봇 '클로이드' PoC 착수. 2028년 양산 로드맵이 구체화되면 밸류에이션 리레이팅 가능.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>엔비디아 Physical AI 협업:</strong> 로봇 파운데이션 모델·AI 데이터센터·모빌리티 영역에서 전략적 협업 심화. 글로벌 AI 인프라 수요 확대의 직접 수혜주로 포지셔닝.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>AI 데이터센터 냉각 수주 폭증:</strong> 2025년 대비 3배 수주 성장. 칠러·액침냉각 등 HVAC 기술력 기반 AI 인프라 냉각 시장 진입 가속. 2027년 냉각 매출 1조원 목표 조기 달성 전망.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>연간 영업이익 YoY +55% 전망:</strong> 하나증권 2026년 전사 영업이익 3.8조원 전망(YoY +55%). 가전·전장·B2B·TV 4개 부문 동시 수익성 개선 국면. 2분기 실적 발표(7/23)에서 추가 서프라이즈 기대.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>단기 급등 후 고점 부담:</strong> 5/15 사상 최고가(26.65만) 달성 후 이틀 만에 -21% 급락. 현재 237,000원은 목표주가 상단(23만)을 이미 상회하는 수준. 단기 추가 조정 위험이 상존한다.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>미국 관세 + 소비 심리 둔화:</strong> 중동 전쟁 장기화·미국 인플레이션 우려로 글로벌 가전 소비 심리 회복 지연. 원자재 가격 상승과 관세 비용이 2분기 이후에도 수익성을 압박할 수 있다.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>VS(전장) 사업 글로벌 수요 불확실성:</strong> 글로벌 완성차 시장 수요 둔화 속 전장 수주 성장세가 유지될 수 있는지 확인 필요. 경쟁사(Bosch, Continental) 대비 OPM 개선 지속 여부 모니터링 필요.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>로봇·AI 신사업 성과 시간 지연:</strong> 로봇 사업의 실질적 매출 기여는 2027~2028년 이후 전망. 현재 주가는 상당 부분 기대감이 선반영됐으며, 일정 지연 시 주가 되돌림 위험.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>중국 가전 경쟁 심화:</strong> 하이얼·하이센스 등 중국 프리미엄 가전 공세. 신흥국 시장에서 가격 경쟁 심화가 HS사업본부 OPM에 지속적인 하방 압력을 가할 수 있다.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem;margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">하나증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">로봇 신사업 가속·엔비디아 협업, 연간 OI 3.8조 전망</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">230,000원 ↑</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">신한투자증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">VS 수익성 개선·밸류에이션 재평가 구간, 연간 OI 3.5조 전망</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">170,000원 ↑</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">미래에셋증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">로봇 사업 가시화, 엑시옴 하반기 생산 개시 기대</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">190,000원 ↑</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">iM증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">액추에이터 절대 강자 부재 속 히든 밸류 보유</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">165,000원 ↑</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">IBK투자증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">비용 구조 개선, 실적 대비 저평가 여전</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">목표가 상향</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">SK증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">HVAC·로봇·AI 가전·빅테크 협업 모멘텀 현실화 기대</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">목표가 상향</span></div>
+    </div>
+    <div style="margin-top:0.75rem;font-size:12px;color:var(--muted);background:#f8f9fc;padding:8px 12px;border-radius:6px;">
+      ※ 커버리지 21개 증권사 전원 매수 의견. 단, 최신 목표주가(165,000~230,000원)는 5월 22일 현재가(237,000원)를 하회하는 수준으로, 단기 주가가 컨센서스를 선행한 상태.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      LG전자는 2026년 1분기에 매출 23.7조원(역대 1Q 최대)·영업이익 1.67조원(컨센서스 +21% 상회)이라는 어닝 서프라이즈를 기록했다. 가전·전장·B2B 4개 사업부가 동시에 호실적을 낸 가운데, 비관론이 지배했던 TV(MS) 사업부마저 흑자 전환에 성공하며 시장에 강한 인상을 남겼다.
+
+      신성장 측면에서도 의미 있는 진전이 이어졌다. 엔비디아 매디슨 황의 방한 회동에서 Physical AI·로봇·AI 데이터센터 협업이 구체화됐고, AI 데이터센터 냉각 솔루션 수주는 전년 대비 3배 성장해 2027년 매출 1조원 목표의 조기 달성 가능성이 제기되고 있다. 2026년 상반기 로봇 액추에이터 초도 판매, 하반기 협업 로봇 '엑시옴' 생산 개시 일정이 예정돼 있어 하반기로 갈수록 신사업 성과 가시화 기대가 높아진다.
+
+      다만 현재 주가(237,000원)는 최신 애널리스트 목표주가(165,000~230,000원)를 이미 상회한 상태로, 단기 주가 선행이 뚜렷하다. 5월 15일 사상 최고가 달성 후 3거래일 만에 -21% 급락한 사례가 보여주듯, 로봇·AI 기대감 과열 구간에서는 변동성이 극단적으로 확대될 수 있다. 2026년 연간 영업이익 YoY +55% 전망은 매력적이지만, 이미 주가에 상당 부분 반영됐다는 점을 고려해 분할 매수 또는 모멘텀 확인 후 진입하는 접근이 필요하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

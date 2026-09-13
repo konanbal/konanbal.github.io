@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>매도의 기준, 그리고 보유의 용기 — 존 템플턴</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f9f9f7;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .blog-wrap {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #1a1a1a;
+      max-width: 680px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 3rem 3.5rem 4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    }
+
+    .category-tag {
+      font-size: 12px;
+      font-weight: 500;
+      background: #e8f0fb;
+      color: #1a56a0;
+      padding: 4px 12px;
+      border-radius: 8px;
+      letter-spacing: 0.04em;
+      display: inline-block;
+    }
+
+    .blog-title {
+      font-family: 'Noto Serif KR', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin: 1rem 0 0.5rem;
+      color: #1a1a1a;
+    }
+
+    .blog-subtitle {
+      font-size: 15px;
+      color: #666666;
+      margin: 0 0 1rem;
+      line-height: 1.6;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #999999;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-quote {
+      border-left: 3px solid #4a8fd4;
+      background: #f6f6f4;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .hero-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 16px;
+      line-height: 1.8;
+      color: #1a1a1a;
+      margin: 0 0 0.75rem;
+      font-weight: 600;
+    }
+
+    .hero-attr {
+      font-size: 13px;
+      color: #666666;
+      font-style: italic;
+    }
+
+    .section-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin: 2rem 0 0.75rem;
+      color: #1a1a1a;
+    }
+
+    .body-text {
+      font-size: 15px;
+      line-height: 1.85;
+      color: #1a1a1a;
+      margin: 0 0 1rem;
+    }
+
+    .info-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .info-card {
+      background: #f6f6f4;
+      border: 0.5px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .info-card .label {
+      font-size: 12px;
+      color: #999999;
+      margin-bottom: 4px;
+    }
+
+    .info-card .value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      line-height: 1.4;
+    }
+
+    .principle-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.5rem;
+    }
+
+    .principle-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 1rem 0;
+      border-bottom: 0.5px solid #e0e0e0;
+    }
+
+    .principle-item:last-child { border-bottom: none; }
+
+    .p-num {
+      min-width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #e8f0fb;
+      color: #1a56a0;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .p-content .p-title {
+      font-size: 15px;
+      font-weight: 500;
+      margin: 0 0 4px;
+      color: #1a1a1a;
+    }
+
+    .p-content .p-desc {
+      font-size: 14px;
+      color: #666666;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .closing-quote {
+      border-top: 0.5px solid #e0e0e0;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      text-align: center;
+    }
+
+    .closing-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 15px;
+      color: #666666;
+      font-style: italic;
+      line-height: 1.8;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 1.5rem;
+    }
+
+    .tag {
+      font-size: 12px;
+      padding: 4px 10px;
+      border: 0.5px solid #cccccc;
+      border-radius: 99px;
+      color: #666666;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+  <span class="category-tag">투자 철학</span>
+  <h1 class="blog-title">매도의 기준, 그리고 보유의 용기</h1>
+  <p class="blog-subtitle">존 템플턴이 말한 '팔아야 할 유일한 이유'에서 배우는 포트폴리오 관리의 본질</p>
+  <div class="meta">2026년 5월 10일 · 읽기 약 4분 · 투자 철학 / 가치투자</div>
+
+  <div class="hero-quote">
+    <p>"주식을 팔아야 하는 유일한 이유는 더 매력적인 다른 주식을 사기 위함이다. 더 매력적인 주식을 찾을 수 없다면 보유한 주식을 보유하라"</p>
+    <span class="hero-attr">— 존 템플턴 (John Templeton), 가치투자의 선구자</span>
+  </div>
+
+  <p class="section-title">공포와 욕심 사이에서</p>
+  <p class="body-text">시장이 흔들릴 때마다 투자자들의 손가락은 매도 버튼 위에 맴돈다. 뉴스는 공포를 자극하고, 주가는 요동치며, '지금 팔아야 하는 것 아닌가'라는 의심이 고개를 든다. 그 순간, 존 템플턴은 단호하게 묻는다. <strong style="font-weight:500">그래서, 더 나은 대안이 있는가?</strong></p>
+  <p class="body-text">20세기 글로벌 가치투자의 선구자인 그는 단순한 논리로 수십 년간 시장을 앞질렀다. 팔아야 할 이유는 딱 하나, '더 매력적인 대안'이 있을 때뿐이다. 그 외의 이유—가격 하락에 대한 두려움, 차익 실현의 유혹—는 투자자를 그릇된 결정으로 이끈다.</p>
+
+  <p class="section-title">존 템플턴</p>
+  <div class="info-card-grid">
+    <div class="info-card"><div class="label">생몰연도</div><div class="value">1912 – 2008</div></div>
+    <div class="info-card"><div class="label">별칭</div><div class="value">"20세기 최고의 주식 투자자"</div></div>
+    <div class="info-card"><div class="label">대표 업적</div><div class="value">템플턴 성장 펀드 창설</div></div>
+    <div class="info-card"><div class="label">투자 철학</div><div class="value">바텀피싱 글로벌 가치투자</div></div>
+  </div>
+
+  <p class="section-title">명언에서 도출한 3가지 원칙</p>
+  <ul class="principle-list">
+    <li class="principle-item">
+      <span class="p-num">1</span>
+      <div class="p-content">
+        <p class="p-title">매도는 '비교 우위'의 문제</p>
+        <p class="p-desc">어떤 주식을 팔기 전에 반드시 스스로에게 물어야 한다. 지금 사려는 대안이 현재 보유 종목보다 명백히 더 매력적인가? 막연한 불안감은 답이 될 수 없다.</p>
+      </div>
+    </li>
+    <li class="principle-item">
+      <span class="p-num">2</span>
+      <div class="p-content">
+        <p class="p-title">보유는 소극적 선택이 아닌 능동적 판단</p>
+        <p class="p-desc">아무것도 하지 않는 것처럼 보이는 보유 결정은 사실 가장 어려운 능동적 판단이다. 대안을 찾지 못했다는 것은 현재 포트폴리오가 여전히 최선임을 확인한 것이다.</p>
+      </div>
+    </li>
+    <li class="principle-item">
+      <span class="p-num">3</span>
+      <div class="p-content">
+        <p class="p-title">감정이 아닌 기준으로 움직이기</p>
+        <p class="p-desc">시장은 끊임없이 감정을 자극한다. 템플턴의 원칙은 그 자극에 흔들리지 않도록 의사결정의 기준점을 명확히 세운다. '더 나은 기회'라는 구체적인 조건이 그 기준이다.</p>
+      </div>
+    </li>
+  </ul>
+
+  <p class="section-title">지금 이 시대의 투자자에게</p>
+  <p class="body-text">알고리즘 트레이딩과 24시간 뉴스 피드로 가득한 오늘날, 매도 충동은 그 어느 때보다 강하다. 포트폴리오 앱은 실시간으로 수익률을 보여주고, SNS는 남들의 성공담을 쏟아낸다. 그 안에서 템플턴의 원칙은 더욱 빛난다.</p>
+  <p class="body-text">정보의 홍수 속에서 진짜 필요한 질문은 하나다. <strong style="font-weight:500">"지금 이 주식보다 더 매력적인 것이 있는가?"</strong> 없다면, 지금 해야 할 일은 버튼에서 손을 떼는 것이다.</p>
+
+  <div class="closing-quote">
+    <p>매도의 기준이 명확한 투자자는,<br>흔들리는 시장에서도 방향을 잃지 않는다.</p>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag">#존템플턴</span>
+    <span class="tag">#가치투자</span>
+    <span class="tag">#투자철학</span>
+    <span class="tag">#포트폴리오관리</span>
+    <span class="tag">#주식투자</span>
+    <span class="tag">#장기투자</span>
+    <span class="tag">#매도전략</span>
+    <span class="tag">#글로벌투자</span>
+  </div>
+</article>
+</body>
+</html>

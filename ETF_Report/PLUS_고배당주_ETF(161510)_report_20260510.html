@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLUS 고배당주 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0a2342 0%, #1a5276 55%, #0097a7 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.down { color: #fca5a5; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-sector { font-size: 11px; color: var(--muted); margin-left: 4px; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .div-history { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 0.5rem; }
+  .div-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; text-align: center; }
+  .div-date { font-size: 10px; color: var(--muted); }
+  .div-amount { font-size: 16px; font-weight: 700; color: var(--accent); }
+  .div-won { font-size: 11px; color: var(--muted); }
+
+  .growth-banner { background: linear-gradient(135deg, #e8f5e9, #e3f2fd); border: 1px solid #b3e5fc; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .growth-stat { text-align: center; }
+  .growth-val { font-size: 22px; font-weight: 800; color: var(--accent); }
+  .growth-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 600; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 161510 · KRX · 국내 배당형</div>
+      <div class="etf-name">PLUS 고배당주</div>
+      <div class="etf-index">추종 지수: FnGuide 고배당주 지수 | 운용사: 한화자산운용</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 10일</div>
+      <div class="nav-display">27,815원</div>
+      <div class="nav-change down">52주 범위: 13,650 ~ 30,380원</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산(AUM): 약 2.81조원</span>
+    <span class="pill">📋 총보수: 0.23%/년</span>
+    <span class="pill">📅 설정일: 2012.08.28</span>
+    <span class="pill">💵 예상 배당수익률: ~3.7% (연환산)</span>
+    <span class="pill">🔄 분배 주기: 월배당 (매월 말일)</span>
+    <span class="pill">🏦 투자위험등급: 2등급 (높은 위험)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== 성장 배너 ===== -->
+  <div class="growth-banner">
+    <div class="growth-stat">
+      <div class="growth-val">+381.7%</div>
+      <div class="growth-label">설정 이후 누적 수익률</div>
+    </div>
+    <div class="growth-stat">
+      <div class="growth-val">+10.5%</div>
+      <div class="growth-label">분배금 연평균 성장률 (2013~2025)</div>
+    </div>
+    <div class="growth-stat">
+      <div class="growth-val">+36.5%</div>
+      <div class="growth-label">순자산 연평균 성장률 (상장 이후)</div>
+    </div>
+    <div class="growth-stat">
+      <div class="growth-val">86원/月</div>
+      <div class="growth-label">현재 월 분배금 (2026년 기준)</div>
+    </div>
+    <div class="growth-stat">
+      <div class="growth-val">+104.9%</div>
+      <div class="growth-label">최근 1년 수익률 (2026.02 기준)</div>
+    </div>
+  </div>
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">기준가 (NAV, 2026.05.08)</div>
+      <div class="kpi-value">27,815원</div>
+      <div class="kpi-sub">전일 대비 +0.17%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순자산총액 (AUM)</div>
+      <div class="kpi-value">2.81조원</div>
+      <div class="kpi-sub">2025년 1년 새 4배 이상 성장</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수 (연)</div>
+      <div class="kpi-value">0.23%</div>
+      <div class="kpi-sub">업계 최저 수준 (동종 대비)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">예상 배당수익률</div>
+      <div class="kpi-value">~3.7%</div>
+      <div class="kpi-sub">86원 × 12개월 / 현재가 환산</div>
+    </div>
+  </div>
+
+  <!-- ===== 구성 종목 (TOP 10) ===== -->
+  <div class="card">
+    <div class="card-title">TOP 10 구성 종목 (2026.02.28 기준)</div>
+    <div class="badge-row">
+      <span class="badge badge-blue">총 30개 종목</span>
+      <span class="badge badge-blue">상위 10개 비중: 48.36%</span>
+      <span class="badge badge-green">동일비중 기반 (±2% 가중치 조정)</span>
+      <span class="badge badge-amber">연 2회 정기 교체 (6월·12월)</span>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">기업은행 / 우리금융지주 추정 <span class="holding-sector">(금융)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">8.30%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">KB금융 / 신한지주 추정 <span class="holding-sector">(금융)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">6.51%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:78%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">NH투자증권 <span class="holding-sector">(증권)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">5.62%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:68%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">DB손해보험 <span class="holding-sector">(보험)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">5.10%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:61%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">현대차 / SK텔레콤 추정 <span class="holding-sector">(자동차/통신)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.62%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:56%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">메리츠금융지주 / 하나금융 추정 <span class="holding-sector">(금융)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.57%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:55%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">7</div>
+      <div class="holding-name">KT&G / 한국가스공사 추정 <span class="holding-sector">(필수소비재/에너지)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.08%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:49%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">8</div>
+      <div class="holding-name">기아 / 삼성화재 추정 <span class="holding-sector">(자동차/보험)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">3.96%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:48%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">9</div>
+      <div class="holding-name">KT <span class="holding-sector">(통신)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">3.88%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:47%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">10</div>
+      <div class="holding-name">한국전력 / 현대제철 추정 <span class="holding-sector">(유틸리티/철강)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">3.59%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:43%"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      ※ 비중(%)만 확인됨. 1·2·5~8·10위 종목명은 FnGuide 고배당주 지수 구성 특성으로 추정. 3위(NH투자증권), 4위(DB손해보험), 9위(KT)는 운용보고서 확인.
+    </div>
+  </div>
+
+  <!-- ===== 섹터 배분 + 수익률 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">섹터 배분 (2026.02 기준)</div>
+      <div class="sector-item">
+        <div class="sector-name">💳 금융 (은행·증권·보험)</div>
+        <div class="sector-right">
+          <div class="sector-pct">48.4%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#ff9800;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">⚡ 에너지·유틸리티</div>
+        <div class="sector-right">
+          <div class="sector-pct">20.4%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:42%;background:#f44336;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">📡 통신서비스</div>
+        <div class="sector-right">
+          <div class="sector-pct">12.5%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:26%;background:#2196f3;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🚗 자동차·경기소비재</div>
+        <div class="sector-right">
+          <div class="sector-pct">8.2%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:17%;background:#e91e63;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🏭 산업재</div>
+        <div class="sector-right">
+          <div class="sector-pct">2.9%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:6%;background:#9c27b0;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🛒 필수소비재·기타</div>
+        <div class="sector-right">
+          <div class="sector-pct">7.6%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:16%;background:#607d8b;"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+        금융 섹터 편중 구조 — 은행주 주주환원 정책 수혜 직결
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기간별 수익률 비교 (2026.02.28 기준)</div>
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>기간</th>
+            <th>ETF</th>
+            <th>벤치마크</th>
+            <th>초과수익</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1개월</td><td class="positive">+18.70%</td><td class="positive">+17.25%</td><td class="positive">+1.45p</td></tr>
+          <tr><td>3개월</td><td class="positive">+39.00%</td><td class="positive">+36.92%</td><td class="positive">+2.08p</td></tr>
+          <tr><td>6개월</td><td class="positive">+51.37%</td><td class="positive">+48.72%</td><td class="positive">+2.64p</td></tr>
+          <tr><td>1년</td><td class="positive">+104.93%</td><td class="positive">+93.77%</td><td class="positive">+11.15p</td></tr>
+          <tr><td>3년(누적)</td><td class="positive">+188.76%</td><td class="positive">+146.43%</td><td class="positive">+42.33p</td></tr>
+          <tr><td>YTD ('26)</td><td class="positive">+35.61%</td><td class="positive">+34.09%</td><td class="positive">+1.53p</td></tr>
+          <tr><td>설정 이후</td><td class="positive">+381.68%</td><td class="positive">+162.25%</td><td class="positive">+219.43p</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+        연도별: 2025년 +55.46% / 2024년 +26.03% / 2023년 +14.30% — 3년 연속 두 자릿수 수익률
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 배당/분배금 ===== -->
+  <div class="card">
+    <div class="card-title">월별 분배금 현황 (최근 15개월)</div>
+    <div class="div-history">
+      <div class="div-item">
+        <div class="div-date">2026.02.27</div>
+        <div class="div-amount">86</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2026.01.30</div>
+        <div class="div-amount">86</div>
+        <div class="div-won">원 ↑+10%</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.12.30</div>
+        <div class="div-amount">78</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.11.28</div>
+        <div class="div-amount">78</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.10.31</div>
+        <div class="div-amount">78</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.09.30</div>
+        <div class="div-amount">78</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.08.29</div>
+        <div class="div-amount">78</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.07.31</div>
+        <div class="div-amount">78</div>
+        <div class="div-won">원 ↑</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.06.30</div>
+        <div class="div-amount">73</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.05.30</div>
+        <div class="div-amount">73</div>
+        <div class="div-won">원 ↑</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.04.30</div>
+        <div class="div-amount">63</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.03.31</div>
+        <div class="div-amount">63</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.02.28</div>
+        <div class="div-amount">63</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2025.01.31</div>
+        <div class="div-amount">63</div>
+        <div class="div-won">원</div>
+      </div>
+      <div class="div-item">
+        <div class="div-date">2024.12.30</div>
+        <div class="div-amount">63</div>
+        <div class="div-won">원</div>
+      </div>
+    </div>
+    <div style="margin-top:1rem; font-size:13px; color:var(--text); line-height:1.7;">
+      <strong>분배금 핵심 원칙</strong>: 주식 배당금(현금배당)만을 재원으로 분배. 매매차익·원금 활용 없음 → 분배금의 지속성·신뢰성 최상위권. 2025년 연간 분배금 총 <strong>866원</strong>. 2026년 현 추세(86원/月) 유지 시 연 약 <strong>1,032원</strong> 예상.
+    </div>
+  </div>
+
+  <!-- ===== 최근 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈 (2026년)</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.02.04</span>
+      </div>
+      <div class="news-title">PLUS 고배당주, 순자산 2조원 돌파 — 1조원 달성 후 7개월 만</div>
+      <div class="news-summary">한화자산운용은 2025년 6월 1조원 돌파 이후 불과 7개월 만에 2조원을 돌파했다고 발표. 2024년말 4,539억원에서 2025년말 1조8,748억원으로 연간 4배 성장. 외국납부세액 제도 개편으로 국내 배당 ETF 전반에 자금이 집중된 점이 주요 성장 배경.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.01</span>
+      </div>
+      <div class="news-title">월 분배금 63원→78원→86원 3단계 상향 — 배당성장률 연 10.5% 유지</div>
+      <div class="news-summary">2024년 5월 월배당 전환 이후 분배금을 두 차례 이상 상향. 2026년 1월 78원에서 86원으로 재인상(+10%). 경쟁사들의 매매차익 기반 고분배와 달리 순수 현금배당만으로 달성한 성장 — 지속 가능성 측면에서 차별화.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.03</span>
+      </div>
+      <div class="news-title">한화운용 PLUS ETF 전체 순자산 10조원 돌파 — "3년 내 100조" 목표 공시</div>
+      <div class="news-summary">한화자산운용이 PLUS ETF 전체 순자산 10조원 돌파 기념 간담회에서 3년 내 100조원 운용, 업계 톱3 달성 목표를 공시. PLUS 고배당주·K방산·PLUS 200이 핵심 성장 축. 운용사 규모 확대는 ETF 유동성·서비스 안정성에 긍정적.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.05</span>
+      </div>
+      <div class="news-title">52주 고점(30,380원) 대비 현재가 8.4% 하락 — 고점 이후 조정 국면</div>
+      <div class="news-summary">2026년 초 코스피 강세로 52주 최고가 30,380원까지 상승한 뒤, 5월 현재 27,815원으로 약 8.4% 조정. 한국 대선 이후 정책 불확실성·글로벌 무역 이슈 등으로 금융주가 부분 조정. 다만 배당수익률 자체는 하락 시 오히려 상승하는 구조.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04~05</span>
+      </div>
+      <div class="news-title">경쟁 고배당 ETF 라인업 확충 — TIGER·KODEX 등 동종 상품 자금 유입 경쟁</div>
+      <div class="news-summary">미래에셋·삼성자산운용 등이 월배당 고배당 ETF를 공격적으로 출시하며 시장 점유 경쟁 심화. 단기적으로 자금 분산 우려가 있으나, PLUS 고배당주는 2012년 설정 이후 13년 트랙레코드와 순수 배당 재원 원칙으로 차별화 유지.</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">📈</span>
+          <span><strong>순수 배당 재원 원칙</strong> — 매매차익·원금 사용 없이 기업 현금배당만으로 분배, 분배금 지속성 업계 최고 수준. 2013년 이후 연평균 10.5% 배당 성장 트랙레코드.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🏦</span>
+          <span><strong>코리아 밸류업·주주환원 수혜</strong> — 금융·은행 섹터 중심 구성(~48%). 정부 주도 밸류업 프로그램과 자사주 매입·소각 확대로 배당 증가 여력 강화. 대선 이후 금융권 주주환원 정책 지속 기대.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🔒</span>
+          <span><strong>연금 계좌 적합성 탁월</strong> — 퇴직연금(DC/IRP) 및 ISA 계좌에서 배당소득 분리과세 혜택 수혜. 고령화 사회 진입으로 인컴형 자산 수요 구조적 증가.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">💡</span>
+          <span><strong>저비용·고유동성</strong> — 총보수 0.23%, 시가총액 2.8조원급 메가 ETF. 일 거래대금 300억~1,000억원 수준으로 대규모 매매도 무리 없음.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🌟</span>
+          <span><strong>배당수익률 하방 지지</strong> — 주가 하락 시 배당수익률 자동 상승 → 가격 하방 지지력. 현 수준(~3.7%)에서 추가 하락 시 4~5%대 진입으로 배당 매력 급증.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">⚠️</span>
+          <span><strong>금융 섹터 편중 리스크 (48%)</strong> — 은행·증권·보험 비중이 절반에 달해, 금리 인하·신용 위기 발생 시 집중 충격 우려. 국내 가계부채 부실화 시나리오는 은행주 배당 삭감으로 직결.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">📉</span>
+          <span><strong>고점 대비 조정 + 변동성 위험</strong> — 2025년 +55% 급등 이후 현재 고점 대비 약 8% 하락. 투자위험등급 2등급(높은 위험) 상품으로, 단기 가격 변동성은 배당형 ETF임에도 상당히 높음.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">🔻</span>
+          <span><strong>30개 종목 집중 리스크</strong> — 총 보유 종목 30개는 코스피200 대비 극히 소수. 편입 종목 중 한 기업의 배당 삭감·실적 악화가 ETF 전체 분배금에 즉각 영향.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">⚠️</span>
+          <span><strong>경쟁 심화</strong> — TIGER·KODEX·RISE 등 대형 운용사들의 동종 월배당 ETF 공세로 자금 유입 경쟁 심화. 규모 성장세 둔화 가능성.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">🌐</span>
+          <span><strong>글로벌 매크로 역풍</strong> — 미국 관세·지정학 리스크로 코스피 전반 조정 시 동반 영향. 원화 약세 지속 시 외국인 투자자 배당수익 환산 가치 하락 → 수급 악화 가능성.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 유사 ETF 비교 ===== -->
+  <div class="card">
+    <div class="card-title">유사 국내 고배당 ETF 비교</div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>ETF명</th>
+          <th>운용사</th>
+          <th>총보수</th>
+          <th>분배 주기</th>
+          <th>분배금 특징</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>PLUS 고배당주 (161510)</strong></td>
+          <td>한화</td>
+          <td>0.23%</td>
+          <td>월배당</td>
+          <td>순수 현금배당만 재원</td>
+          <td>13년+ 트랙레코드</td>
+        </tr>
+        <tr>
+          <td>TIGER 코리아배당다우존스</td>
+          <td>미래에셋</td>
+          <td>0.15%</td>
+          <td>월배당</td>
+          <td>다우존스 배당지수 추종</td>
+          <td>저보수·신규 인기</td>
+        </tr>
+        <tr>
+          <td>RISE 대형고배당10TR</td>
+          <td>KB</td>
+          <td>0.09%</td>
+          <td>분기</td>
+          <td>상위 10개 대형 배당주</td>
+          <td>초저보수</td>
+        </tr>
+        <tr>
+          <td>KODEX 고배당</td>
+          <td>삼성</td>
+          <td>0.20%</td>
+          <td>반기</td>
+          <td>KRX 고배당 50 추종</td>
+          <td>오랜 역사</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      ※ 총보수만으로 단순 비교 시 TIGER·RISE가 저렴. 단, PLUS 고배당주의 순수 배당 재원 원칙과 장기 배당 성장 트랙레코드는 차별화 요소.
+    </div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      PLUS 고배당주(161510)는 한화자산운용이 2012년 8월 상장한 국내 대표 고배당 ETF로, FnGuide 고배당주 지수(코스피 시총 상위 200개 중 예상 배당수익률 상위 30개 종목)를 추종한다. 설정 이후 약 13년간 벤치마크 대비 219%p의 초과수익을 달성했으며, 최근 1년(2026.02 기준) 수익률은 +105%로 국내 배당형 ETF 가운데 최상위권 성과를 기록했다.<br><br>
+      가장 큰 차별점은 <strong>'순수 배당 재원' 원칙</strong>이다. 경쟁 ETF들이 매매차익이나 원금을 활용해 분배율을 높이는 반면, PLUS 고배당주는 오직 편입 기업의 현금배당만으로 분배금을 지급한다. 이 덕분에 2013년 이후 연평균 10.5%의 배당 성장률을 기록했고, 분배금은 63원→73원→78원→86원으로 꾸준히 상향됐다. 현재 월 86원 기준 연 환산 약 1,032원, 현재가 대비 약 3.7%의 배당수익률을 제공한다.<br><br>
+      포트폴리오 구성은 금융(은행·증권·보험) 섹터 약 48%, 에너지·유틸리티 20%, 통신 12% 등 방어적 고배당 섹터 중심이다. 코리아 밸류업 정책에 따른 금융주 주주환원 강화가 이 ETF의 핵심 수혜 포인트다. 연금(IRP·DC형 퇴직연금) 및 ISA 계좌에서 활용 시 배당소득 분리과세 혜택을 누릴 수 있어 장기 연금 투자자에게 특히 적합하다. 다만, 30개 종목의 고집중도와 금융 섹터 편중으로 인한 리스크, 총보수(0.23%) 측면에서 경쟁 ETF 대비 약간 높은 점, 그리고 고점 대비 현재 약 8% 조정 국면이라는 점은 진입 시 고려 변수다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다. 1·2·5~8·10위 종목명은 공개 운용보고서에서 명칭이 불명확하여 지수 구성 특성 기반 추정치입니다. 최신 구성종목은 plusetf.co.kr에서 직접 확인하시기 바랍니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

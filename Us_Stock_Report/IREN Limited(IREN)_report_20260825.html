@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IREN Limited 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">IREN · NASDAQ</div>
+      <div class="company-name">IREN Limited</div>
+      <div class="company-desc">비트코인 채굴 사업에서 출발해 AI 클라우드·데이터센터 인프라 기업으로 전환 중인 호주계 수직통합 데이터센터 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 08월 25일</div>
+      <div class="price-display">$40.82</div>
+      <div class="price-change down">최근 30일간 -30%대 조정 (일간 등락률은 자료마다 상이해 생략)</div>
+      <div class="data-asof">데이터 기준: 2026.08.24 종가 · 출처: Robinhood 시세 데이터</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $14.6B</span>
+    <span class="rating-pill">🏢 섹터: AI 데이터센터 / 비트코인 채굴</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (매수, 의견 분산 큼)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (Q3 FY26)</div>
+      <div class="kpi-value">$144.8M</div>
+      <div class="kpi-sub">QoQ -21.6% (Q2 $184.7M)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순이익률</div>
+      <div class="kpi-value">적자 전환</div>
+      <div class="kpi-sub">순손실 $(247.8)M</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$80.19</div>
+      <div class="kpi-sub">현재가 대비 +96.4%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$18.87~$76.87</div>
+      <div class="kpi-sub">현재가 위치: 약 38%</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: Robinhood 시세, stockanalysis.com(S&amp;P Global 컨센서스, 17개 증권사), IREN Q3 FY26 실적발표(2026.05.07) (기준일 2026.08.24)</div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (Q3 FY2026, 최근 발표 분기 — 2026.03월말 마감)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$144.8M <span style="font-size:12px;color:var(--red);">▼ 컨센서스 미달 -34.1%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $219.9M(Zacks 기준 $213M) · 전분기(Q2) 대비 -21.6%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$(0.30)~$(0.33) <span style="font-size:12px;color:var(--red);">▼ 어닝 쇼크 -36~-39%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $(0.22)~$(0.24)(매체별 상이) · 전년동기 EPS +$0.11에서 적자 전환</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      실적 발표일 2026.05.07. 매출·EPS 모두 컨센서스를 크게 하회했으나, 발표와 동시에 NVIDIA와 5년 $34억 규모 AI 클라우드 계약 및 최대 $21억 지분투자권 부여를 공개하며 2026년 연환산매출(ARR) 목표를 $37억로 상향. 다음 실적(Q4 FY26, 회계연도 마감)은 2026.08.27 발표 예정 — 컨센서스 EPS $(0.55).
+    </div>
+    <div class="source-note">※ 출처: IREN Q3 FY26 실적발표(GlobeNewswire, 2026.05.07) · Investing.com · Zacks(Yahoo Finance) · public.com — 컨센서스 수치는 데이터 제공처별로 상이하여 범위로 표기</div>
+  </div>
+
+  <!-- ④ 최근 공시 (SEC) -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요계약(8-K)</span>
+        <span style="font-size:13px;font-weight:500;">Microsoft와 $97억 규모 5개년 GPU 서비스 계약 체결 및 인수 완료 발표(8/13)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.13 · SEC EDGAR</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">M&amp;A(8-K)</span>
+        <span style="font-size:13px;font-weight:500;">Mirantis 인수 완료 — 보통주 약 1,260만주 + 현금·RSU 등 약 $40M 지급</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.04 · SEC EDGAR</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">Q3 FY2026 분기보고서 (2026.03.31 마감 3개월)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.07 · SEC EDGAR</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.13</span><span class="news-source">· SEC EDGAR / 회사 발표</span></div>
+      <div class="news-title">Microsoft에 Horizon 1 인도 완료·인수 확인, NVIDIA GB300 NVL72 "Exemplar Cloud" 지위 획득</div>
+      <div class="news-summary">$97억 규모 Microsoft 5개년 GPU 서비스 계약의 첫 단계(약 200MW IT 부하) 인도가 완료돼 매출 인식이 본격화될 전망이다. 텍사스 데이터센터 규제 이슈 속에서도 기존 계약 이행이 정상 진행 중임을 보여주는 신호다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.03~04</span><span class="news-source">· Bernstein / Tickeron</span></div>
+      <div class="news-title">텍사스 주지사, ERCOT 데이터센터 신규 접속 심사 일시 중단 지시 — 기존 접속 완료 사업자(IREN 포함) 경쟁 우위 부각</div>
+      <div class="news-summary">474GW에 달하는 접속 대기 물량 중 투기적 프로젝트를 걸러내는 조치로, 이미 전력망에 연결된 IREN·Riot 등은 신규 진입 장벽 완화 수혜를 받을 것이라는 분석이 나왔다. Bernstein은 이를 근거로 IREN 목표주가를 $100로 재확인(Outperform)했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.05.07</span><span class="news-source">· Investing.com</span></div>
+      <div class="news-title">Q3 FY26 매출·EPS 모두 컨센서스 대폭 하회, 발표 당일 주가 -6.8% 하락</div>
+      <div class="news-summary">매출은 전분기 대비 21.6% 감소한 $144.8M에 그쳤으나, 동시에 NVIDIA와의 대형 AI 클라우드 계약을 공개하며 5GW 규모의 장기 확장 계획을 제시했다. 단기 실적 부진과 장기 성장 스토리가 엇갈리는 전형적 전환기 국면으로 평가된다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.06</span><span class="news-source">· CryptoSlate</span></div>
+      <div class="news-title">Mirantis 인수 관련 구주주 보유 주식 약 1,190만주(약 $4.76억 규모) 매도 가능 등록 — 물량 출회 우려</div>
+      <div class="news-summary">인수 종결 하루 만에 재매도용 등록을 마치면서, 종전 Mirantis 주주 및 임직원들이 보유 물량을 시장에 내놓을 경우 주가에 추가 하방 압력을 줄 수 있다는 우려가 제기됐다. 아직 실제 매도 계획은 공개되지 않았다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.05.11</span><span class="news-source">· 24/7 Wall St. / JPMorgan</span></div>
+      <div class="news-title">JPMorgan, NVIDIA 계약의 "순환거래" 구조와 GPU 공급 보장 불확실성 지적 — 목표가 상향에도 Underweight 유지</div>
+      <div class="news-summary">NVIDIA 자금이 다시 하드웨어 구매로 순환되는 계약 구조와, 15만 개 GPU 배치 목표에 대한 확정적 물량 보장이 없다는 점을 리스크로 짚었다. 목표주가는 $39→$46로 올렸지만 투자의견은 비중축소를 유지했다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>Microsoft($97억, 5년), NVIDIA($34억, 5년) 등 대형 다년 계약으로 2026년 ARR 목표를 $40억 이상으로 상향, 계약분의 약 85%가 이미 확보된 상태</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>텍사스 주정부의 신규 데이터센터 접속 심사 중단 조치로, 이미 전력망에 연결된 IREN 등 기존 사업자의 경쟁 우위(진입장벽)가 강화됨</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>Mirantis 인수로 소프트웨어 오케스트레이션 계층을 내재화하며 "전력·데이터센터-GPU-소프트웨어"로 이어지는 수직통합 AI 클라우드 밸류체인을 구축 중</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>Q3 FY26 매출이 컨센서스를 34% 하회하고 순손실 $247.8M을 기록하는 등, 비트코인 채굴에서 AI 클라우드로의 전환 과정에서 실적 변동성이 매우 큼</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>JPMorgan은 NVIDIA 계약의 순환거래 구조와 GPU 공급 미확정을 이유로 목표가 상향에도 비중축소(Underweight) 의견을 유지 — 애널리스트 간 의견 극단적으로 분산(최고 $131 vs 최저 $41)</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>$37억 규모 전환사채 등 높은 부채 부담과 대규모 자본지출(capex) 소요, Mirantis 인수 관련 약 $4.76억 규모 잠재 매도물량 부담 존재</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Bernstein <span style="color:var(--muted);font-weight:400;">(2026.08.03~04)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Outperform)</span><span class="target-price">$100</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">JPMorgan <span style="color:var(--muted);font-weight:400;">(2026.05.11)</span></span>
+      <div class="analyst-right"><span class="opinion-badge sell">비중축소 (Underweight)</span><span class="target-price">$46</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 (S&amp;P Global, 17개 증권사) <span style="color:var(--muted);font-weight:400;">(2026.08 기준)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$80.19 (평균, $41~$131)</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">IREN은 비트코인 채굴 기업에서 AI 데이터센터 인프라 기업으로 빠르게 전환 중이다. 가장 최근 발표된 Q3 FY2026 실적은 매출 $144.8M로 컨센서스를 34% 하회하고 순손실 $247.8M을 기록하며 부진했지만, 같은 날 NVIDIA와의 대형 AI 클라우드 계약을 공개하며 2026년 ARR 목표를 $40억 이상으로 상향했다. 이후 Microsoft향 첫 단계 인도 완료, Mirantis 인수를 통한 소프트웨어 계층 내재화 등 사업 확장이 이어지고 있으며, 텍사스 주정부의 신규 데이터센터 접속 심사 중단 조치는 이미 전력망에 연결된 IREN에 상대적 우위로 작용할 수 있다. 다만 실적 변동성이 크고, JPMorgan 등 일부 애널리스트는 NVIDIA 계약의 순환거래 구조와 GPU 공급 불확실성을 이유로 비중축소 의견을 유지하고 있어 밸류에이션 논쟁이 첨예하다. 2026년 8월 27일 발표 예정인 다음 분기(Q4 FY26, 회계연도 마감) 실적에서 계약된 ARR이 실제 매출로 전환되는 속도가 확인되기 전까지는 주가 변동성이 클 수 있다. 이 종목은 AI 인프라 전환 스토리에 베팅하되 실적 미스와 급격한 주가 변동을 감내할 수 있는 고위험 고수익 성향의 투자자에게 적합합니다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>떨어지는 칼날을 잡지 마라 — 피터 린치</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f9f9f7; min-height: 100vh; display: flex; justify-content: center; padding: 3rem 1.5rem; font-family: 'Noto Sans KR', sans-serif; }
+    .blog-wrap { color: #1a1a1a; max-width: 680px; width: 100%; background: #ffffff; border-radius: 16px; padding: 3rem 3.5rem 4rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05); }
+    .bl-tag { display: inline-block; font-size: 11px; font-weight: 500; letter-spacing: .06em; color: #1a56a0; background: #e8f0fb; border-radius: 8px; padding: 3px 10px; text-transform: uppercase; margin-bottom: 1.2rem; }
+    .blog-title { font-family: 'Noto Serif KR', serif; font-size: 28px; font-weight: 700; line-height: 1.45; margin-bottom: .6rem; color: #1a1a1a; }
+    .bl-sub { font-size: 15px; color: #666666; line-height: 1.7; margin-bottom: 1rem; font-weight: 300; }
+    .bl-meta { font-size: 12px; color: #999999; margin-bottom: 1.8rem; display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-quote { border-left: 3px solid #4a8fd4; background: #f6f6f4; border-radius: 0 8px 8px 0; padding: 1.4rem 1.6rem; margin-bottom: 2rem; }
+    .hero-quote p { font-family: 'Noto Serif KR', serif; font-size: 19px; line-height: 1.85; font-weight: 600; color: #1a1a1a; margin-bottom: .6rem; }
+    .hero-quote .hero-attr { font-size: 13px; color: #666666; }
+    .section { margin-bottom: 1.8rem; }
+    .section-title { font-family: 'Noto Serif KR', serif; font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: .8rem; padding-bottom: .5rem; border-bottom: 1px solid #e0e0e0; }
+    .section p { font-size: 14.5px; line-height: 1.95; color: #1a1a1a; margin-bottom: .7rem; }
+    .section p strong { font-weight: 500; }
+    .person-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 2rem; }
+    .person-card { background: #f6f6f4; border-radius: 8px; padding: .85rem 1rem; text-align: center; border: 1px solid #e0e0e0; }
+    .person-card .pc-label { font-size: 11px; color: #999999; margin-bottom: 4px; }
+    .person-card .pc-val { font-size: 13px; font-weight: 500; color: #1a1a1a; }
+    .principle-list { list-style: none; padding: 0; margin-bottom: 2rem; }
+    .principle-list li { display: flex; align-items: flex-start; gap: 12px; padding: 1rem 0; border-bottom: 1px solid #e0e0e0; }
+    .principle-list li:last-child { border-bottom: none; }
+    .pl-badge { min-width: 28px; height: 28px; border-radius: 50%; background: #e8f0fb; color: #1a56a0; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .pl-content .pl-t { font-size: 14px; font-weight: 500; margin-bottom: 3px; color: #1a1a1a; }
+    .pl-content .pl-d { font-size: 13.5px; color: #666666; line-height: 1.8; }
+    .closing-wrap { border-top: 1px solid #e0e0e0; padding-top: 1.5rem; text-align: center; margin-bottom: 1.5rem; }
+    .closing-wrap p { font-family: 'Noto Serif KR', serif; font-size: 15px; color: #666666; line-height: 2; font-style: italic; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .tag-pill { font-size: 12px; color: #666666; border: 1px solid #cccccc; border-radius: 99px; padding: 3px 10px; }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 22px; }
+      .hero-quote p { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+  <span class="bl-tag">투자 철학</span>
+  <h1 class="blog-title">떨어지는 칼날을 잡지 마라</h1>
+  <p class="bl-sub">피터 린치가 경고한 '하락 추격 매수'의 위험성과 진짜 저점 매수의 차이</p>
+  <div class="bl-meta">
+    <span>2026년 5월 13일</span>
+    <span>읽기 4분</span>
+    <span>투자 원칙</span>
+  </div>
+
+  <div class="hero-quote">
+    <p>"급속하게 떨어지는 주식을 잡으려는 건<br>필연적으로 칼날 쪽을 잡게 된다."</p>
+    <span class="hero-attr">— 피터 린치 (Peter Lynch)</span>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">월가의 전설이 남긴 경고</h2>
+    <p>피터 린치는 1977년부터 1990년까지 피델리티 마젤란 펀드를 운용하며 연평균 약 29%의 수익률을 기록했습니다. 단순히 숫자만 잘 보는 펀드매니저가 아니라, 시장 참여자의 심리를 누구보다 예리하게 꿰뚫었던 인물입니다.</p>
+    <p>그가 남긴 "떨어지는 칼날" 비유는 오늘날 투자 세계에서도 가장 자주 인용되는 경고 중 하나입니다. 추락하는 주가를 향해 손을 뻗는 행위가 얼마나 위험한지를, 단 한 문장으로 압축해 냈습니다.</p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">칼날의 본질</h2>
+    <p>"많이 빠졌으니 이제 바닥이겠지"라는 생각은 투자자가 가장 자주 저지르는 인지 편향 중 하나입니다. 하락 자체가 매수 신호라는 착각입니다. 하지만 주가는 당신의 매수 단가를 전혀 모릅니다.</p>
+    <p>급락하는 종목에는 반드시 이유가 있습니다. 실적 악화, 구조적 경쟁력 상실, 혹은 시장이 아직 인식하지 못한 더 깊은 문제일 수 있습니다. <strong>저렴해 보이는 것과 실제로 저렴한 것은 전혀 다른 문제입니다.</strong></p>
+  </div>
+
+  <div class="person-cards">
+    <div class="person-card">
+      <div class="pc-label">생몰연도</div>
+      <div class="pc-val">1944년생</div>
+    </div>
+    <div class="person-card">
+      <div class="pc-label">운용 펀드</div>
+      <div class="pc-val">마젤란 펀드</div>
+    </div>
+    <div class="person-card">
+      <div class="pc-label">연평균 수익률</div>
+      <div class="pc-val">약 29%</div>
+    </div>
+    <div class="person-card">
+      <div class="pc-label">대표 저서</div>
+      <div class="pc-val">One Up on Wall Street</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">명언에서 도출한 3가지 원칙</h2>
+    <ul class="principle-list">
+      <li>
+        <div class="pl-badge">1</div>
+        <div class="pl-content">
+          <div class="pl-t">하락의 원인을 먼저 파악할 것</div>
+          <div class="pl-d">주가가 떨어지는 데는 이유가 있습니다. 단순 과매도인지, 펀더멘털 훼손인지를 먼저 구분하지 않고 매수에 나서는 것은 도박에 가깝습니다.</div>
+        </div>
+      </li>
+      <li>
+        <div class="pl-badge">2</div>
+        <div class="pl-content">
+          <div class="pl-t">속도가 빠를수록 더 위험하다</div>
+          <div class="pl-d">'급속하게'라는 단어에 주목하십시오. 완만한 하락과 급락은 완전히 다른 시그널입니다. 낙폭이 클수록 시장이 그 종목에 대해 강하게 거부 반응을 보이고 있다는 뜻입니다.</div>
+        </div>
+      </li>
+      <li>
+        <div class="pl-badge">3</div>
+        <div class="pl-content">
+          <div class="pl-t">바닥은 예측하지 말고 확인할 것</div>
+          <div class="pl-d">저점을 미리 예측하는 것은 불가능에 가깝습니다. 하락이 멈추고 회복 신호가 나타난 뒤 진입해도 충분한 수익 기회는 있습니다. 조금 늦더라도 안전한 진입이 낫습니다.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">지금 이 시대에 더욱 유효한 이유</h2>
+    <p>SNS와 실시간 알림이 넘쳐나는 시대, 투자자들은 하락 소식을 즉각 접하고 충동적으로 반응하기 쉬워졌습니다. "지금 사야 할 것 같은" 느낌은 대부분 조급함과 FOMO(기회 상실 두려움)에서 비롯됩니다.</p>
+    <p>린치가 말한 칼날은 단순한 손실만을 의미하지 않습니다. 잘못된 타이밍에 자본을 묶어두는 기회비용, 그리고 그 경험이 남기는 심리적 상처까지 포함합니다. 좋은 종목도 잘못된 타이밍에 사면 나쁜 투자가 됩니다.</p>
+  </div>
+
+  <div class="closing-wrap">
+    <p>저점 매수는 전략이 아닙니다.<br>하락을 이해한 다음에야, 비로소 전략이 될 수 있습니다.</p>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag-pill">#피터린치</span>
+    <span class="tag-pill">#투자원칙</span>
+    <span class="tag-pill">#하락추격금지</span>
+    <span class="tag-pill">#칼날잡기</span>
+    <span class="tag-pill">#저점매수</span>
+    <span class="tag-pill">#리스크관리</span>
+    <span class="tag-pill">#주식투자</span>
+    <span class="tag-pill">#마젤란펀드</span>
+  </div>
+</article>
+</body>
+</html>

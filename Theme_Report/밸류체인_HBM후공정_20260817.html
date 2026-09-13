@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM 후공정 밸류체인 해부 — 네이버 발행용</title>
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+        font-size: 16px; line-height: 1.9; color: #1c1c1c; background: #f0f2f5;
+    }
+    .page-wrapper { max-width: 860px; margin: 0 auto; padding: 0 16px 80px; }
+    .site-header {
+        background: linear-gradient(135deg, #0f4c47 0%, #0f766e 100%); color: white;
+        padding: 36px 40px 28px; border-radius: 0 0 12px 12px;
+    }
+    .site-header .series-label { font-size: 13px; font-weight: 500; letter-spacing: 0.08em; opacity: 0.85; margin-bottom: 8px; }
+    .site-header h1 { font-size: 1.4em; font-weight: 800; color: white; border: none; padding: 0; margin: 0; }
+    .site-header .report-date { font-size: 13px; opacity: 0.75; margin-top: 6px; }
+    .article-card {
+        background: #ffffff; border-radius: 12px; padding: 40px 48px 56px;
+        margin-top: 20px; box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    }
+    h1 { font-size: 1.75em; font-weight: 800; line-height: 1.35; color: #111; margin-bottom: 6px;
+         border-bottom: 3px solid #0f766e; padding-bottom: 12px; }
+    h2 { font-size: 1.35em; font-weight: 700; color: #111; margin-top: 2.4em; margin-bottom: 0.7em;
+         padding: 10px 14px; background: #f1f6f5; border-left: 4px solid #0f766e; border-radius: 0 6px 6px 0; }
+    h3 { font-size: 1.15em; font-weight: 700; color: #222; margin-top: 2em; margin-bottom: 0.5em;
+         border-bottom: 1px solid #e8eaed; padding-bottom: 6px; }
+    h4 { font-size: 1.05em; font-weight: 700; color: #333; margin-top: 1.6em; margin-bottom: 0.4em; }
+    p { margin-bottom: 1.1em; }
+    strong { font-weight: 700; }
+    em { font-style: normal; font-weight: 700; color: #0f766e; }
+    ul, ol { margin: 0.6em 0 1.1em 1.6em; }
+    li { margin-bottom: 0.45em; }
+    blockquote {
+        margin: 1.4em 0; padding: 14px 20px; border-left: 4px solid #0f766e;
+        background: #f0fdfa; color: #134e4a; border-radius: 0 6px 6px 0; font-size: 0.96em;
+    }
+    blockquote p { margin-bottom: 0; }
+    table {
+        width: 100%; border-collapse: collapse; margin: 1.4em 0; font-size: 0.93em;
+        overflow: hidden; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    }
+    thead tr { background: #0f766e; color: white; }
+    th { font-weight: 600; text-align: left; padding: 11px 14px; }
+    td { padding: 10px 14px; border-bottom: 1px solid #edf0f4; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) { background: #f7faf9; }
+    hr { border: none; border-top: 1px solid #e2e8f0; margin: 2.8em 0; }
+    .article-footer { margin-top: 3em; padding-top: 1.2em; border-top: 1px solid #e2e8f0; font-size: 0.85em; color: #8a9ab0; }
+    .tag-line { margin-top: 1.6em; font-size: 0.9em; color: #0f766e; line-height: 1.9; }
+    @media (max-width: 640px) {
+        body { font-size: 14px; }
+        .article-card { padding: 24px 20px 40px; }
+        .site-header { padding: 24px 20px 18px; }
+        h1 { font-size: 1.4em; }
+        h2 { font-size: 1.15em; }
+        table { font-size: 0.82em; }
+        th, td { padding: 8px 10px; }
+    }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+    <header class="site-header">
+        <div class="series-label">🔗 테마 밸류체인 해부 시리즈 | 2편</div>
+        <h1>HBM 후공정 밸류체인 해부</h1>
+        <div class="report-date">작성일: 2026년 8월 17일 | 주가는 2026.08.12~17 기준</div>
+    </header>
+    <main class="article-card">
+
+<h1>🔗 HBM 후공정 밸류체인 해부 — 이 판에서 진짜 돈 버는 곳은 어디인가</h1>
+
+<blockquote>
+<p>테마 밸류체인 해부 시리즈 2편입니다. 지난 1편(로봇 구동부)에서는 병목의 이익을 일본이 가져갔죠. 이번엔 정반대입니다. <strong>HBM 후공정은 병목의 이익을 국내 기업이 가져갑니다.</strong></p>
+</blockquote>
+
+<hr>
+
+<h2>🔍 왜 지금 HBM 후공정인가</h2>
+
+<p>AI 서버 투자가 HBM(고대역폭메모리) 수요를 끌어올리고 있습니다. 뱅크오브아메리카는 2026년 HBM 시장 규모를 전년 대비 58% 증가한 <em>546억 달러</em>로 추산합니다. 엔비디아 블랙웰 울트라뿐 아니라 구글·AWS가 자체 ASIC 기반 AI 칩을 늘리면서, ASIC향 HBM 수요만 82% 급증할 것이라는 전망도 나옵니다.</p>
+
+<p>그런데 HBM은 그냥 D램이 아닙니다. D램을 수직으로 쌓아 올려 <strong>TSV(실리콘관통전극)</strong>로 연결하는 구조라, 만드는 것 자체가 <strong>후공정 싸움</strong>입니다. 12단, 16단으로 층이 높아질수록 칩과 칩을 열과 압력으로 붙이는 공정 난도가 폭증하고, 여기서 수율이 갈립니다. 그래서 "HBM에 투자한다"는 말은 사실상 <strong>"HBM을 만드는 후공정 장비에 투자한다"</strong>에 가깝습니다.</p>
+
+<p>1편에서 로봇 구동부는 병목(정밀 감속기)의 이익을 일본 두 회사가 쥐고 있어, 국내 기업은 "뚫는 중"이라고 정리했습니다. HBM 후공정은 정반대입니다. 이 체인의 병목인 <strong>TC본더(열압착 본딩 장비)</strong> 시장을 국내 한미반도체가 71% 장악하고 있고, 그 이익을 실제로 가져가고 있습니다. 같은 "병목" 논리를 적용해도 결론이 반대로 나오는 이유 — 이게 이번 편의 핵심입니다.</p>
+
+<h3>📌 숫자로 보는 시장</h3>
+
+<table>
+    <thead><tr><th>항목</th><th>수치</th></tr></thead>
+    <tbody>
+        <tr><td>HBM 시장 규모</td><td><strong>546억 달러</strong> (2026E, 전년비 +58%)</td></tr>
+        <tr><td>HBM 시장 성장률</td><td><strong>연 46%</strong> (2022년 27억 → 2029년 377억 달러)</td></tr>
+        <tr><td>TC본더 시장 성장률</td><td><strong>연 13%</strong> (2026~2030)</td></tr>
+        <tr><td>한미반도체 TC본더 점유율</td><td><strong>71.2%</strong> (세계 1위)</td></tr>
+    </tbody>
+</table>
+
+<hr>
+
+<h2>🗺️ 밸류체인 한눈에 보기</h2>
+
+<table>
+    <thead><tr><th>단계</th><th>하는 일</th><th>국내 대표 종목</th></tr></thead>
+    <tbody>
+        <tr>
+            <td><strong>① 상류</strong><br>소재·전공정·검사</td>
+            <td>TSV 식각·세정, 검사·계측. 1024개 Via홀 잔류물 제거가 수율의 출발점</td>
+            <td>이오테크닉스, 오로스테크놀로지, 인텍플러스, 넥스틴, 고영</td>
+        </tr>
+        <tr>
+            <td><strong>② 중류</strong><br>적층·본딩 장비</td>
+            <td>D램을 쌓아 열·압력으로 붙이는 TC본더·하이브리드본더. <strong>이 테마의 병목이자 핵심</strong></td>
+            <td>한미반도체, 한화세미텍, 세메스</td>
+        </tr>
+        <tr>
+            <td><strong>③ 테스트</strong><br>검사·수율 관문</td>
+            <td>적층된 HBM의 불량 검출. 큐브프로버·번인테스터로 수율 확정</td>
+            <td>테크윙, 유니테스트, ISC, 리노공업, 디아이</td>
+        </tr>
+        <tr>
+            <td><strong>④ 하류·전방</strong><br>HBM 제조·수요</td>
+            <td>HBM을 만들어 AI 가속기에 공급. 이들의 CapEx가 후공정 발주로 직결</td>
+            <td>SK하이닉스, 삼성전자 / (수요) 엔비디아·구글·AWS</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>① 상류 — 소재·전공정 장비·검사계측</h3>
+
+<p>HBM 후공정은 TSV를 뚫는 데서 시작합니다. 칩에 수천 개의 미세 구멍(Via홀)을 뚫고, 그 안의 잔류물을 세정으로 제거해야 다음 단계로 넘어갈 수 있습니다. 층이 쌓일 때마다 검사·계측으로 불량을 걸러내야 해서, 이 단계 장비 수요는 HBM 생산량에 그대로 연동됩니다.</p>
+
+<ul>
+    <li><strong>이오테크닉스 (039030)</strong> — 레이저 응용 장비. TSV·마킹 등 레이저 공정 전반. 후공정 고도화의 대표 수혜주</li>
+    <li><strong>오로스테크놀로지 (322310)</strong> — 오버레이 계측. 적층 정렬 정밀도 검사</li>
+    <li><strong>인텍플러스 (064290)</strong> — 외관·3D 검사. 패키지 불량 검출</li>
+    <li><strong>넥스틴 (348210)</strong> — 웨이퍼 검사(패턴 결함)</li>
+    <li><strong>고영 (098460)</strong> — 3D 검사 장비. 납땜·본딩 품질 계측</li>
+</ul>
+
+<p>다만 TSV 식각 장비, 다이싱 장비 등 <strong>핵심 전공정 장비와 상당수 소재는 여전히 일본·미국 의존</strong>입니다. 이 단계에서 국내 기업은 검사·세정·레이저 쪽에 몰려 있습니다.</p>
+
+<h3>② 중류 — 적층·본딩 장비 (핵심 병목)</h3>
+
+<p>이 테마의 심장입니다. D램을 쌓아 열과 압력으로 붙이는 <strong>TC본더(Thermo-Compression Bonder)</strong>가 여기에 있습니다.</p>
+
+<ul>
+    <li><strong>한미반도체 (042700)</strong> — TC본더 세계 1위(점유율 71.2%). 2017년 세계 최초로 HBM용 TC본더 진출, 150여 건 특허. SK하이닉스의 '슈퍼 을'. 하이브리드본더도 개발 중</li>
+    <li><strong>한화세미텍</strong> (한화비전 자회사) — TC본더 후발주자(3.2%)이나 SK하이닉스에 한미와 비슷한 규모로 수주하며 추격. 2세대 하이브리드본더 개발 성공</li>
+    <li><strong>세메스</strong> (삼성전자 자회사·비상장) — TC본더 2위권(13.1%). 삼성 내부 공급</li>
+    <li><strong>프로텍 (053610)</strong> — 디스펜서 등 본딩 주변 장비</li>
+</ul>
+
+<h3>③ 테스트 — 수율의 최종 관문</h3>
+
+<p>다 쌓았어도 불량이면 버려야 합니다. HBM은 수율이 곧 원가라, 검사·테스트 장비의 중요도가 세대가 갈수록 커집니다.</p>
+
+<ul>
+    <li><strong>테크윙 (089030)</strong> — HBM 검사장비 '큐브 프로버'를 독점 개발. 개별 HBM 칩 불량을 고속 검출하는 유일 솔루션. 삼성 공급계약 + SK하이닉스 퀄 통과. 2026년 예상 매출 4,283억·영업이익 807억</li>
+    <li><strong>유니테스트 (086390)</strong> — HBM4용 번인테스터 개발. 2월 SK하이닉스 데모 납품, 6월 성능평가 통과</li>
+    <li><strong>ISC (095340) · 리노공업 (058470)</strong> — 반도체 테스트 소켓. HBM 출하 증가 직접 수혜</li>
+    <li><strong>디아이 (003160) · 와이아이케이 (232140)</strong> — 메모리 테스트 장비</li>
+</ul>
+
+<h3>④ 하류·전방 — HBM 제조 3사와 최종 수요</h3>
+
+<ul>
+    <li><strong>SK하이닉스 (000660)</strong> — D램 점유율 38%로 1위. HBM3E·HBM4 모두 안정 공급 가능한 유일 기업으로 평가. 후공정 발주의 최대 주체</li>
+    <li><strong>삼성전자 (005930)</strong> — D램 32%로 2위. HBM4 추격</li>
+    <li><strong>마이크론</strong> — 범용 D램 중단하고 HBM 특화 기업으로 전환. 전 세계 팹 증설 → TC본더 긴급 수요</li>
+    <li>전방 수요: <strong>엔비디아</strong>(블랙웰 울트라), <strong>구글·AWS</strong>(ASIC 기반 AI 칩) 등 하이퍼스케일러. 이들의 CapEx가 체인 전체를 움직입니다</li>
+</ul>
+
+<hr>
+
+<h2>💰 단계별 마진 구조 — 병목에 이익이 몰립니다</h2>
+
+<table>
+    <thead><tr><th>단계</th><th>수익성</th><th>왜 이 수준인가</th></tr></thead>
+    <tbody>
+        <tr><td>① 상류 검사·세정·레이저</td><td>중간 (10~20%대)</td><td>플레이어 다수, HBM 침투도에 따라 편차</td></tr>
+        <tr><td>② 중류 TC본더 (한미)</td><td><em>영업이익률 약 52%</em></td><td>독점적 점유율 + 세대 교체마다 고부가 신장비</td></tr>
+        <tr><td>③ 테스트 (큐브프로버 등)</td><td>개선 중 (10%대 후반)</td><td>독점 장비는 마진 높고, 소켓·핸들러는 경쟁</td></tr>
+        <tr><td>④ 하류 HBM 제조</td><td>HBM 고마진</td><td>SK하이닉스 HBM 사업 초고수익. 단 사이클 변수</td></tr>
+    </tbody>
+</table>
+
+<p>근거를 밝히면 이렇습니다. 한미반도체의 2026년 예상 매출은 <strong>1조 846억 원, 영업이익 5,645억 원</strong>(전년비 +64%, +52%)으로, 영업이익률이 약 52%에 이릅니다. TC본더 1대 가격이 30억 원 전후이고, SK하이닉스가 한 번에 200억 원 규모로 발주하는 구조라 규모의 경제가 강하게 작동합니다. 테크윙은 2026년 예상 영업이익률이 약 19%(매출 4,283억·영익 807억) 수준입니다.</p>
+
+<hr>
+
+<h2>🔑 병목 구간 — TC본더, 그리고 이번엔 이익이 국내에 있습니다</h2>
+
+<blockquote>
+<p>이 체인에서 대체 불가능한 자리는 TC본더입니다. <strong>그리고 로봇 편과 달리, 그 이익을 국내 기업(한미반도체)이 이미 가져가고 있습니다.</strong></p>
+</blockquote>
+
+<p>TC본더는 D램을 쌓아 올릴 때 열과 압력으로 칩을 접합하는 장비입니다. HBM 세대가 올라가고 적층 단수가 높아질수록 열 관리 난도가 급증해, 아무나 만들 수 없습니다. 시장조사업체 테크인사이트 기준 한미반도체 점유율은 <em>71.2%</em>, 국내 경쟁사 세메스가 13.1%, 한화세미텍이 3.2%입니다.</p>
+
+<p>한미반도체가 이 자리를 지키는 이유는 로봇 편의 일본 감속기 회사들과 구조가 똑같습니다.</p>
+
+<h4>병목이 유지되는 이유</h4>
+<ul>
+    <li><strong>기술 진입장벽</strong> — 2017년 세계 최초 HBM용 TC본더 진출, 150여 건 특허, 열 관리 노하우 축적</li>
+    <li><strong>고객 락인</strong> — SK하이닉스와 오랜 협력으로 '슈퍼 을' 지위. 마이크론으로도 공급 확대</li>
+</ul>
+
+<p>다른 점은 딱 하나, <strong>그 병목을 국내 기업이 이미 차지하고 있다</strong>는 것입니다. 그래서 로봇 감속기 업체가 "기대"를 파는 동안, 한미반도체는 영업이익률 50%대라는 <strong>실제 이익</strong>을 내고 있습니다. 같은 밸류체인 논리를 적용해도, 병목을 누가 쥐고 있느냐에 따라 투자 결론이 정반대가 됩니다.</p>
+
+<h4>단, 병목은 이동할 수 있습니다</h4>
+<p>차세대 적층 방식인 <strong>하이브리드 본딩</strong>(범프 없이 구리를 직접 접합, 16단 이후 필수)으로 넘어가면 게임이 다시 시작됩니다. 여기서는 한미반도체와 한화세미텍이 정면 경쟁 중이고, 승자가 다음 사이클의 병목을 가져갑니다. <strong>지금의 71% 점유율이 다음 세대에도 유지된다는 보장은 없습니다.</strong> 이게 이 테마에서 가장 중요한 관전 포인트입니다.</p>
+
+<h4>반대로 마진이 눌리는 구간</h4>
+<p>테스트 소켓·핸들러처럼 플레이어가 많은 하위 검사 영역, 그리고 아직 HBM에 본격 침투하지 못한 범용 후공정 장비입니다. 같은 "HBM 관련주"라도 독점 장비(큐브프로버)를 가진 곳과 범용 경쟁 구간은 마진이 전혀 다릅니다.</p>
+
+<hr>
+
+<h2>📊 핵심 종목 비교</h2>
+
+<table>
+    <thead><tr><th>종목</th><th>단계</th><th>주가<br>(8월 중순)</th><th>수익성·모멘텀</th><th>체인 내 위치</th></tr></thead>
+    <tbody>
+        <tr>
+            <td><strong>한미반도체</strong><br>042700</td><td>중류</td>
+            <td>217,500원<br>(8/12)</td><td>영익률 ~52%<br>2026E</td><td>TC본더 71% 병목</td>
+        </tr>
+        <tr>
+            <td><strong>테크윙</strong><br>089030</td><td>테스트</td>
+            <td>6만원대<br>(6월, 확인 필요)</td><td>영익 807억<br>2026E</td><td>큐브프로버 독점</td>
+        </tr>
+        <tr>
+            <td><strong>유니테스트</strong><br>086390</td><td>테스트</td>
+            <td>10,630원<br>(8월)</td><td>HBM4 번인<br>퀄 진행</td><td>번인테스터</td>
+        </tr>
+        <tr>
+            <td><strong>이오테크닉스</strong><br>039030</td><td>상류</td>
+            <td>404,000원<br>(8월)</td><td>확인 불가</td><td>레이저 공정</td>
+        </tr>
+        <tr>
+            <td><strong>SK하이닉스</strong><br>000660</td><td>하류</td>
+            <td>1,645,000원<br>(8월)</td><td>HBM 고마진</td><td>제조 1위 (D램 38%)</td>
+        </tr>
+        <tr>
+            <td><strong>삼성전자</strong><br>005930</td><td>하류</td>
+            <td>274,500원<br>(8월)</td><td>확인 불가</td><td>제조 2위 (D램 32%)</td>
+        </tr>
+        <tr>
+            <td><strong>한화비전</strong><br>(한화세미텍 모회사)</td><td>중류</td>
+            <td>확인 필요</td><td>확인 불가</td><td>TC본더 추격·하이브리드</td>
+        </tr>
+        <tr>
+            <td><strong>ISC</strong><br>095340</td><td>테스트</td>
+            <td>확인 필요</td><td>YTD +55%</td><td>테스트 소켓</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>주가는 8월 12~17일 기준입니다(한미반도체 8/12, SK하이닉스·삼성·유니테스트·이오테크닉스 8월 중순). 한미반도체는 5차례 액면분할이 있었고 연초 대비 100%가 넘게 올랐다가 조정을 받아, 절대 주가만 보면 오해하기 쉽습니다. 테크윙·한화비전·ISC는 8월 정확한 종가가 확인되지 않아 표기를 보류했습니다.</p>
+
+<blockquote>
+<p>여기서 꼭 보셔야 할 건 <strong>"독점이냐 경쟁이냐"</strong>입니다. 한미반도체(TC본더)와 테크윙(큐브프로버)은 독점적 지위로 높은 마진을 내지만, 테스트 소켓·범용 검사 구간은 플레이어가 많아 같은 HBM 수혜라도 이익의 질이 다릅니다.</p>
+</blockquote>
+
+<hr>
+
+<h2>👀 이 지표만 보고 계시면 됩니다</h2>
+
+<p>주가는 결과고, 아래가 원인입니다.</p>
+
+<table>
+    <thead><tr><th>#</th><th>지표</th><th>왜 중요한가</th><th>확인처</th></tr></thead>
+    <tbody>
+        <tr><td>1</td><td><strong>TC·하이브리드본더 발주 공시</strong></td><td>SK하이닉스·삼성·마이크론의 장비 발주(대당 30억)가 곧 후공정사 매출</td><td>DART 단일판매·공급계약 공시</td></tr>
+        <tr><td>2</td><td><strong>HBM4 양산 시점</strong></td><td>SK하이닉스가 아직 구체 시점 미발표. 이연되면 본더 매출도 밀림</td><td>SK하이닉스 실적발표·IR</td></tr>
+        <tr><td>3</td><td><strong>하이브리드본딩 전환 시점</strong></td><td>16단 이후 필수. 한미 vs 한화 승자가 다음 병목을 가져감</td><td>업계 로드맵·장비 수주 뉴스</td></tr>
+        <tr><td>4</td><td><strong>큐브프로버 탑재율</strong></td><td>테크윙 실적의 핵심. HBM4 수율 안정 시 도입 본격화</td><td>테크윙 실적발표</td></tr>
+        <tr><td>5</td><td><strong>엔비디아·ASIC HBM 수요</strong></td><td>하이퍼스케일러 CapEx가 체인 전체의 상단 수요</td><td>엔비디아·빅테크 실적발표</td></tr>
+    </tbody>
+</table>
+
+<p>특히 <strong>2번과 3번</strong>이 핵심입니다. HBM4 발주 타이밍이 후공정사들의 분기 실적을 좌우하고, 하이브리드본딩 전환은 병목의 주인을 바꿀 수 있는 변수입니다.</p>
+
+<hr>
+
+<h2>⚠️ 리스크 — 이 신호가 나오면 재점검</h2>
+
+<h4>① HBM4 발주 이연 (이미 한 차례 발생)</h4>
+<p>고객사의 HBM4 본격 투자가 밀리면 후공정 발주도 밀립니다. 실제로 한미반도체의 1분기 본더 매출은 40억 원에 그쳤는데, HBM4 투자가 2분기 이후로 이연된 영향이었습니다. 이런 분기 공백은 언제든 재발할 수 있습니다.</p>
+<ul><li>⚠ 현실화 신호: SK하이닉스가 HBM4 양산·발주 시점을 계속 미룰 때</li></ul>
+
+<h4>② 한화세미텍의 추격과 소송전</h4>
+<p>후발주자 한화세미텍이 SK하이닉스에 한미와 비슷한 규모로 수주하며 올라오고 있고, 하이브리드본더 개발에도 성공했습니다. 두 회사 간 특허 소송도 진행 중이라, 결과에 따라 점유율 구도가 흔들릴 수 있습니다.</p>
+<ul><li>⚠ 현실화 신호: 한화세미텍의 대형 신규 수주, 소송 결과, 하이브리드본더 채택 발표</li></ul>
+
+<h4>③ 밸류에이션 부담</h4>
+<p>한미반도체는 연초 대비 100%가 넘게 올랐다가 고점(42.6만 원대)에서 21만 원대로 조정받았습니다. 좋은 회사인 것과 지금 주가가 싼 것은 별개입니다. 애널리스트 의견도 매수·매도가 갈립니다.</p>
+<ul><li>⚠ 현실화 신호: 호실적에도 주가가 빠지는 패턴, 목표주가 하향</li></ul>
+
+<h4>④ 메모리 사이클</h4>
+<p>HBM은 고성장이지만 메모리 전체는 사이클 산업입니다. AI 투자 속도가 꺾이거나 범용 D램이 공급과잉으로 돌아서면, HBM 발주 심리도 함께 위축될 수 있습니다.</p>
+<ul><li>⚠ 현실화 신호: 하이퍼스케일러 CapEx 가이던스 하향, D램 현물가 급락</li></ul>
+
+<hr>
+
+<h2>✅ 투자 전 체크리스트</h2>
+
+<ul>
+    <li>이 회사가 <strong>독점 장비</strong>를 가졌는가, <strong>경쟁 구간</strong>에 있는가 (마진의 질이 다름)</li>
+    <li>HBM 매출이 <strong>실제 실적</strong>으로 잡히고 있는가, 아직 <strong>기대</strong> 단계인가</li>
+    <li>차세대 <strong>하이브리드본딩</strong>에서도 경쟁력이 있는가 (병목 이동 대비)</li>
+    <li>발표된 게 <strong>수주(공급계약)</strong>인가, <strong>퀄 통과·데모</strong> 단계인가</li>
+    <li>지금 주가가 <strong>분할·급등을 거친 뒤 가격</strong>인지 확인했는가 (한미반도체 5회 분할)</li>
+</ul>
+
+<hr>
+
+<h2>📋 한 장 요약</h2>
+
+<p>HBM은 D램을 쌓아 TSV로 연결하는 구조라, 결국 후공정 장비 싸움입니다. 2026년 HBM 시장은 546억 달러(+58%)로 커지고, 그 성장은 후공정 발주로 직결됩니다.</p>
+
+<p>이 체인의 병목은 TC본더이고, 한미반도체가 71%를 쥐고 있습니다. 1편 로봇 구동부와 논리는 똑같은데 결론은 정반대입니다 — <strong>병목의 이익을 이번엔 국내 기업이 가져갑니다.</strong> 한미반도체 2026년 예상 영업이익률은 약 52%입니다.</p>
+
+<p>테스트 단계에서는 테크윙의 큐브프로버가 또 다른 독점 지점입니다. 반대로 테스트 소켓·범용 검사는 경쟁이 심해 마진이 눌립니다. 같은 HBM 수혜라도 <strong>독점이냐 경쟁이냐</strong>가 이익의 질을 가릅니다.</p>
+
+<p>확인할 건 세 가지입니다. HBM4 발주 타이밍, 하이브리드본딩 전환 시점(병목의 주인이 바뀔 수 있음), 그리고 하이퍼스케일러 CapEx.</p>
+
+<p>이 테마는 <strong>독점적 병목 기업을 사이클 관점에서 길게 볼 수 있는 투자자</strong>에게 맞습니다. 반대로 이미 많이 오른 대표주를 단기에 따라가려는 분에게는, 지금 구간은 밸류에이션 부담과 발주 공백 리스크가 함께 있습니다.</p>
+
+<hr>
+
+<h2>📚 테마 밸류체인 해부 시리즈</h2>
+
+<ul>
+    <li><strong>이전 편</strong> — 1편: 로봇 구동부 (감속기·액추에이터). 병목의 이익이 일본에 있던 사례</li>
+    <li><strong>다음 편 예고</strong> — 3편: 전력기기·초고압 변압기 (예정)</li>
+</ul>
+
+<div class="tag-line">
+#HBM #후공정 #TC본더 #한미반도체 #하이브리드본딩 #밸류체인 #반도체소부장 #테크윙 #유니테스트 #이오테크닉스 #SK하이닉스 #HBM4 #AI반도체
+</div>
+
+<div class="article-footer">
+⚠️ 본 글은 산업 구조 이해를 돕기 위한 개인 리서치 기록이며, 특정 종목의 매수·매도를 권유하는 글이 아닙니다. 수치는 작성 시점(2026년 8월 17일)의 공개 자료 기준이고, 주가는 2026년 8월 12~17일 기준입니다. 한미반도체는 액면분할이 반영된 값입니다. 투자 판단과 그 결과에 대한 책임은 투자자 본인에게 있습니다.
+</div>
+
+    </main>
+</div>
+</body>
+</html>

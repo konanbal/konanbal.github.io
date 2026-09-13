@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broadcom (AVGO) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .alert-box { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 0.875rem 1.25rem; margin-bottom: 1rem; font-size: 13px; color: #92400e; line-height: 1.6; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">AVGO · NASDAQ</div>
+      <div class="company-name">Broadcom Inc.</div>
+      <div class="company-desc">AI 커스텀 칩(XPU) · AI 네트워킹 · VMware 인프라 소프트웨어 글로벌 리더</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 6월 3일</div>
+      <div class="price-display">$486.90</div>
+      <div class="price-change up">▲ YTD +29% | 시총 ~$2.18T</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$2.18T</span>
+    <span class="rating-pill">🏢 반도체 / 인프라 SW</span>
+    <span class="rating-pill">⭐ Strong Buy (44/47 기관)</span>
+    <span class="rating-pill">🔔 오늘 Q2 FY26 실적 발표 (장 마감 후)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="alert-box">
+    &#9889; <strong>긴급 주목</strong>: Broadcom은 오늘(2026.06.03) 장 마감 후 Q2 FY2026 실적을 발표합니다. 회사 가이던스 기준 매출 $22.0B(+47% YoY), AI 반도체 매출 $10.7B(+140% YoY)이 핵심 체크포인트. 옵션 시장은 ±10.65% 주가 변동을 예상합니다.
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 FY26 총 매출</div>
+      <div class="kpi-value">$19.3B</div>
+      <div class="kpi-sub">YoY +29% (사상 최고)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Adj. EBITDA 마진</div>
+      <div class="kpi-value">68%</div>
+      <div class="kpi-sub">EBITDA $13.1B / FCF $8.0B</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">컨센서스 목표주가</div>
+      <div class="kpi-value">$482</div>
+      <div class="kpi-sub">47개 기관 평균 / 최고 $582</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">AI 반도체 매출 Q1</div>
+      <div class="kpi-value">$8.4B</div>
+      <div class="kpi-sub">YoY +106% / Q2 가이던스 $10.7B</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">&#128227; 실적 속보 — Q1 FY2026 최신 공개 실적</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$19.31B <span style="font-size:12px;color:var(--green);">&#9650; 컨센서스 초과 +$171M</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $19.14B · YoY +29%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Non-GAAP EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$2.05 <span style="font-size:12px;color:var(--green);">&#9650; 어닝 서프라이즈 +1.5%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $2.02 · YoY +27%</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);">AI 반도체 매출</div>
+        <div style="font-size:16px;font-weight:700;color:var(--green);">$8.4B</div>
+        <div style="font-size:11px;color:var(--muted);">YoY +106%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);">총 반도체 매출</div>
+        <div style="font-size:16px;font-weight:700;">$12.5B</div>
+        <div style="font-size:11px;color:var(--muted);">YoY +52%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);">인프라 SW (VMware)</div>
+        <div style="font-size:16px;font-weight:700;">$6.8B</div>
+        <div style="font-size:11px;color:var(--muted);">YoY +1% / 운영마진 78%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>실적 발표일: 2026.03.04</strong> | CEO Hock Tan: "AI 매출 성장이 가속화되고 있으며 Q2 AI 반도체 매출 $10.7B을 예상한다." CFO Kirsten Spears: "Q2 가이던스 — 매출 ~$22.0B(+47% YoY), Adj. EBITDA ~68%." 동시에 $100억 규모 신규 자사주 매입 프로그램 승인 및 연간 배당 $2.60/주(15년 연속 증가) 확정.
+    </div>
+    <div style="margin-top:0.75rem;padding:0.75rem;background:#f8f9fc;border-radius:8px;">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;">Q2 FY2026 가이던스 (오늘 장 마감 후 실적 발표)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:12px;">
+        <div><span style="color:var(--muted);">총 매출</span><br><strong>~$22.0B</strong> (+47% YoY)</div>
+        <div><span style="color:var(--muted);">AI 반도체</span><br><strong>~$10.7B</strong> (+140% YoY)</div>
+        <div><span style="color:var(--muted);">Adj. EBITDA</span><br><strong>~68%</strong> of revenue</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">&#128202; 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Q1 FY2026 실적 발표 — 매출 $19.31B, Non-GAAP EPS $2.05, AI 매출 $8.4B</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.04</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">$100억 규모 신규 자사주 매입 프로그램 이사회 승인</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.04</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">DEF 14A</span>
+        <span style="font-size:13px;font-weight:500;">2026 주주총회 위임장 — 이사 선임, PwC 감사인 재선임, 임원 보상 결의</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.20</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef3c7;color:#92400e;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">시니어 노트 $3.25B 발행 (4.3%~4.95%, 2031~2056년 만기 채권 재융자)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.01.13</span>
+    </div>
+    <div style="font-size:12px;color:var(--blue);background:#eff6ff;padding:8px 12px;border-radius:6px;margin-top:0.5rem;">
+      &#128204; <strong>투자자 주목</strong>: Q1과 동시 발표된 $100억 바이백 프로그램은 경영진의 주가 자신감 표명. Q1에만 자사주 $7.8B + 배당 $3.1B = 총 주주환원 $10.9B 집행. 채권 재융자는 금리 환경 대응 및 VMware 인수 관련 부채 구조 최적화 목적.
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">&#128240; 최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.06.01~02</span>
+      </div>
+      <div class="news-title">Morgan Stanley·HSBC·Jefferies 등 Q2 실적 앞두고 일제히 목표가 상향</div>
+      <div class="news-summary">Morgan Stanley $485(Overweight 유지), Jefferies $500(Buy·Q3 가이던스 $29B 기대), HSBC는 하반기 AI 매출 $17B 전망 제시. 47개 커버 기관 중 44곳 Buy, 0 Sell. 월가 "가장 안전한 AI 플레이" 지위 재확인.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.03.04</span>
+      </div>
+      <div class="news-title">OpenAI 6번째 XPU 고객 합류 — AI 매출 $100B 로드맵 구체화</div>
+      <div class="news-summary">Google·Meta·Anthropic·ByteDance·Fujitsu에 이어 OpenAI가 추가됨. 2027년 OpenAI용 1GW 이상 XPU 양산 예정. FY26 AI 관련 수주잔고 $73B. Anthropic은 2026년 1GW에서 2027년 3GW+ 규모로 수요 급증 예상.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.08</span>
+      </div>
+      <div class="news-title">VMware Cloud Foundation 9.1 출시 — 프로덕션 AI 추론 최적화</div>
+      <div class="news-summary">최신 VCF 9.1은 XPU·TPU 기반 AI 추론을 더 쉽고 비용 효율적으로 지원. Google Cloud와 파트너십 연장 포함. 소프트웨어 ARR +19% YoY 성장 지속. 반도체 성장을 고마진 소프트웨어 현금흐름이 안정적으로 뒷받침.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.06.03</span>
+      </div>
+      <div class="news-title">Q2 FY2026 실적 — 오늘 장 마감 후 Q3 가이던스가 진짜 관전 포인트</div>
+      <div class="news-summary">컨센서스 매출 $22.04B, EPS $2.40. 7분기 연속 어닝 비트 기록 중. 바이사이드는 실적보다 Q3 가이던스($29B 기대, Jefferies)와 하반기 AI 매출 방향성에 더 집중. 옵션 시장 ±10.65% 이동 예상.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">상시</span>
+      </div>
+      <div class="news-title">밸류에이션 부담 — P/E ~90배, 내부자 매도 $3.56억 지속</div>
+      <div class="news-summary">GF Value $290 대비 현재가 $487로 약 53% 고평가 경고. 임원진 지속적 매도. 7분기 연속 비트 이후 기대치 높아져 Q2에서 가이던스 이하 발표 시 급격한 실망 매물 가능.</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">&#128200; 상승 기대 요인 Bull Case</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">&#10003;</span><div><strong>AI XPU 독과점적 해자</strong> — Google·Meta·Anthropic·OpenAI 등 6개 하이퍼스케일러, 3~5년 장기 XPU 계약. 경쟁자가 단기간에 복제 불가. 2027년 AI 매출 $100B+ 목표는 고객 파이프라인으로 가시화.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">&#10003;</span><div><strong>AI 네트워킹 주도권</strong> — Tomahawk 6(102Tbps 세계 최고), 200G SerDes 업계 1위. AI 스위치 수주잔고 $10B+. Q2 AI 네트워킹 비중 40%로 확대(Q1 33%). 1.6T 이더넷 수요 선점.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">&#10003;</span><div><strong>VMware 고마진 현금흐름 방어</strong> — 운영마진 78%, ARR +19% YoY, 분기 FCF $8B(매출의 41%). 고마진 소프트웨어가 AI 반도체 투자를 재무 부담 없이 지원하는 이중 엔진.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">&#10003;</span><div><strong>주주환원 극대화</strong> — Q1에만 $10.9B 환원(바이백 $7.8B + 배당 $3.1B). 신규 $100억 바이백 승인. 15년 연속 배당 증가. 2026 연간 배당 $2.60/주(사상 최고).</div></div>
+        <div class="factor-item bull"><span class="factor-icon">&#10003;</span><div><strong>Anthropic 단독 3GW 확장</strong> — 2026년 1GW에서 2027년 3GW+ 수요 폭증. Google Ironwood 7세대, Meta 첫 1GW 양산, OpenAI 1GW 신규 추가. 2027 AI 매출 $100B~$124B 전망(애널리스트).</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#128202; 리스크 요인 Bear Case</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>밸류에이션 부담 극심</strong> — P/E ~90배, EV/EBITDA ~29배. 7분기 연속 비트 이후 '8번째 서프라이즈' 기대가 이미 반영. 가이던스 실망 시 8~10% 급락 시나리오 오픈.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>고객 집중 리스크</strong> — Google 단독으로 AI 매출의 대부분을 차지 추정. 구글이 자체 칩 내재화 가속 시 계약 규모·조건 변화 우려. 단일 고객 의존 구조적 취약점.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>비AI 반도체 정체</strong> — 무선·광대역 등 비AI 반도체 $4.1B로 YoY 플랫(+4%에 불과). 전체 성장이 AI 단일 모멘텀에 의존. AI 사이클 둔화 시 성장 동력 부재.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>경쟁 심화</strong> — Marvell이 Celestial AI 인수로 커스텀 AI 칩 공략 강화. 인텔·AMD의 커스텀 실리콘 진출도 중장기 경쟁 압력. 하이퍼스케일러 자체 칩 설계팀 확장.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>세율 상승·재고 증가</strong> — 글로벌 최저법인세(Pillar Two) 적용으로 실효세율 상승(~16.5%). Q1 재고일수 68일로 증가 추세. 내부자 매도 약 $3.56억 지속 관찰.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">&#127970; 애널리스트 의견 (2026년 5~6월)</div>
+    <div class="analyst-row"><span class="analyst-firm">Morgan Stanley (Joseph Moore)</span><div class="analyst-right"><span class="opinion-badge buy">Overweight</span><span class="target-price">$485</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">Jefferies</span><div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$500</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">Bernstein SocGen (Stacy Rasgon)</span><div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price">$475</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">Susquehanna</span><div class="analyst-right"><span class="opinion-badge buy">Positive</span><span class="target-price">$490</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">Evercore ISI</span><div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price">$582</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">HSBC Global Investment Research</span><div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">목표가 상향 중</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">D.A. Davidson</span><div class="analyst-right"><span class="opinion-badge hold">Neutral</span><span class="target-price">$335</span></div></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);">
+      S&amp;P Global 기준: 47개 기관 커버리지 | Buy 44 · Hold 3 · Sell 0 | 컨센서스 목표가 <strong>$482.31</strong> | 3~5년 연평균 EPS 성장률 전망 <strong>+41%</strong>
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">&#128203; 종합 투자 요약</div>
+    <div class="summary-text">
+      Broadcom은 AI 인프라 시대의 '신경망'으로 자리잡은 반도체·소프트웨어 복합 기업이다. Nvidia GPU가 AI의 두뇌라면, Broadcom의 XPU와 AI 네트워킹 스위치는 하이퍼스케일러 데이터센터를 연결하는 결합조직에 해당한다. Q1 FY2026에서 AI 반도체 매출 $8.4B(+106% YoY)을 달성했고, 오늘(6/3 장마감 후) 발표될 Q2에서 AI 매출 $10.7B(+140% YoY)를 가이던스로 제시한 상태다. Google·Meta·Anthropic·OpenAI 등 6개 하이퍼스케일러와의 3~5년 XPU 장기 계약, $73B AI 수주잔고, VMware의 78% 운영마진이 결합하며 경쟁자가 단기간에 복제하기 어려운 해자(Moat)를 형성한다. 2027년 AI 매출 $100B+ 목표는 Anthropic 3GW 확장(200%+ 증가), OpenAI 1GW 신규, Google Ironwood 7세대라는 구체적 파이프라인에 의해 뒷받침된다. 단기 리스크로는 P/E ~90배 밸류에이션 부담, Google 의존 고객 집중, 재고 증가(68일), 내부자 매도 지속이 있으며, 오늘 Q2 실적과 Q3 가이던스의 비트앤레이즈 여부가 단기 주가 방향성을 결정할 최대 이벤트다. <strong>중장기 AI 인프라 사이클을 내다보는 투자자, 고배당 성장주 선호자, Nvidia 대비 커스텀 실리콘 분산 투자를 원하는 포트폴리오에 적합한 핵심 AI 인프라 종목이다.</strong>
+    </div>
+    <div class="disclaimer">&#9888;&#65039; 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

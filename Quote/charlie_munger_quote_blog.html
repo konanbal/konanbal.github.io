@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>바보가 되지 않는 것만으로 충분하다 — 찰리 멍거</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f9f9f7; min-height: 100vh; display: flex; justify-content: center; padding: 3rem 1.5rem; }
+    .blog-wrap {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #1a1a1a;
+      max-width: 680px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 3rem 3.5rem 4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    }
+    .category-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #1a56a0;
+      background: #e8f0fb;
+      border-radius: 20px;
+      padding: 4px 14px;
+      margin-bottom: 1.2rem;
+      letter-spacing: 0.03em;
+    }
+    .blog-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 0.7rem;
+      color: #1a1a1a;
+    }
+    .blog-subtitle {
+      font-size: 16px;
+      color: #555555;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .meta {
+      font-size: 12px;
+      color: #999999;
+      margin-bottom: 2.2rem;
+    }
+    .hero-quote {
+      border-left: 3px solid #4a8fd4;
+      background: #f6f6f4;
+      border-radius: 0 8px 8px 0;
+      padding: 1.6rem 2rem;
+      margin-bottom: 2.2rem;
+    }
+    .hero-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 19px;
+      font-weight: 600;
+      line-height: 1.8;
+      color: #1a1a1a;
+      margin-bottom: 0.8rem;
+    }
+    .hero-attr {
+      font-size: 13px;
+      color: #1a56a0;
+      font-weight: 500;
+    }
+    .section-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 17px;
+      font-weight: 700;
+      margin: 2.2rem 0 0.9rem;
+      color: #1a1a1a;
+    }
+    .body-text {
+      font-size: 15px;
+      line-height: 1.9;
+      color: #444444;
+      margin-bottom: 1rem;
+    }
+    .person-card {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 1.5rem 0 2rem;
+    }
+    .person-item {
+      background: #f6f6f4;
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      border: 1px solid #e0e0e0;
+    }
+    .person-label {
+      font-size: 11px;
+      color: #999999;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .person-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+    .principle-list { list-style: none; padding: 0; margin: 0 0 2rem; }
+    .principle-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 1rem 0;
+      border-bottom: 1px solid #f0f0ee;
+    }
+    .principle-list li:last-child { border-bottom: none; }
+    .p-num {
+      min-width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #e8f0fb;
+      color: #1a56a0;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .p-title { font-size: 15px; font-weight: 500; color: #1a1a1a; margin-bottom: 5px; }
+    .p-desc { font-size: 14px; color: #555555; line-height: 1.75; }
+    .closing-quote {
+      border-top: 1px solid #e0e0e0;
+      padding-top: 1.8rem;
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .closing-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 16px;
+      font-style: italic;
+      color: #666666;
+      line-height: 1.9;
+    }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.8rem; }
+    .tag {
+      font-size: 12px;
+      color: #666666;
+      border: 1px solid #cccccc;
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 22px; }
+      .hero-quote p { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+  <span class="category-tag">투자 철학</span>
+  <h1 class="blog-title">바보가 되지 않는 것만으로 충분하다</h1>
+  <p class="blog-subtitle">더 영리해지려는 욕망보다, 실수를 피하는 겸손함이 더 강한 무기다</p>
+  <div class="meta">2025년 6월 · 읽기 약 4분 · 가치투자 · 역발상</div>
+
+  <div class="hero-quote">
+    <p>"다른 이들은 더 똑똑하게 행동하려고 애쓰고 있지만, 나는 단지 바보가 되지 않으려고 노력할 뿐이다."</p>
+    <span class="hero-attr">— 찰리 멍거 (Charlie Munger)</span>
+  </div>
+
+  <p class="section-title">겸손함이라는 날선 무기</p>
+  <p class="body-text">찰리 멍거는 버크셔 해서웨이의 부회장으로 워런 버핏과 함께 수십 년을 동행한 인물이다. 그러나 그는 스스로를 "영리한 투자자"라 부른 적이 없다. 그가 반복해서 강조한 것은 단 하나, <strong style="font-weight:500">어리석음을 피하는 것</strong>이었다.</p>
+  <p class="body-text">이 명언은 역설처럼 들리지만 실은 깊은 전략적 통찰을 담고 있다. 투자 세계에서 대부분의 큰 손실은 지나치게 영리하려다 발생한다. 더 빠른 정보, 더 복잡한 전략, 더 과감한 베팅. 멍거는 이 모든 유혹을 한 문장으로 잘라낸다.</p>
+
+  <p class="section-title">찰리 멍거 인물 카드</p>
+  <div class="person-card">
+    <div class="person-item">
+      <div class="person-label">생몰연도</div>
+      <div class="person-value">1924 – 2023</div>
+    </div>
+    <div class="person-item">
+      <div class="person-label">역할</div>
+      <div class="person-value">버크셔 해서웨이 부회장</div>
+    </div>
+    <div class="person-item">
+      <div class="person-label">투자 철학</div>
+      <div class="person-value">역발상 + 다학제적 사고</div>
+    </div>
+    <div class="person-item">
+      <div class="person-label">별칭</div>
+      <div class="person-value">버핏의 오른팔</div>
+    </div>
+  </div>
+
+  <p class="section-title">명언에서 도출한 3가지 원칙</p>
+  <ul class="principle-list">
+    <li>
+      <span class="p-num">1</span>
+      <div>
+        <div class="p-title">역전의 사고 — "실패부터 설계하라"</div>
+        <div class="p-desc">멍거는 "어떻게 성공할까"보다 "어떻게 실패하는가"를 먼저 물었다. 실수의 경로를 파악하면 자연스럽게 그 반대편에 서게 된다.</div>
+      </div>
+    </li>
+    <li>
+      <span class="p-num">2</span>
+      <div>
+        <div class="p-title">능력 범위 고수 — "모르면 모른다고 하라"</div>
+        <div class="p-desc">자신의 이해 범위를 벗어난 곳에서 영리한 척 행동하는 것이 가장 위험한 바보짓이다. 멍거의 "아니오"는 그 자체로 수익이었다.</div>
+      </div>
+    </li>
+    <li>
+      <span class="p-num">3</span>
+      <div>
+        <div class="p-title">단순함의 힘 — "복잡성은 위험을 숨긴다"</div>
+        <div class="p-desc">이해하기 어려운 상품, 설명하기 복잡한 전략은 피했다. 단순하고 명쾌한 논리만이 오랜 시간을 견딘다.</div>
+      </div>
+    </li>
+  </ul>
+
+  <p class="section-title">지금 이 시대의 의미</p>
+  <p class="body-text">AI, 퀀트, 초단기 매매… 지금 시장은 더 빠르고 더 복잡해졌다. 모두가 남보다 한발 앞서려 한다. 그럴수록 이 명언은 더 선명해진다. 경쟁에서 이기려면 먼저 자기 자신을 이겨야 하고, 자기 자신을 이긴다는 것은 어리석은 판단을 줄이는 일에서 시작된다.</p>
+  <p class="body-text">손실을 키우는 것은 대부분 외부 악재가 아니라 내부의 욕심과 공포다. 바보가 되지 않는 것, 그것이 99%의 투자자가 실제로 통제할 수 있는 유일한 변수다.</p>
+
+  <div class="closing-quote">
+    <p>영리함을 추구하는 것은 선택이지만,<br>바보가 되지 않는 것은 의무다.</p>
+  </div>
+  <div class="tag-row">
+    <span class="tag">#찰리멍거</span>
+    <span class="tag">#가치투자</span>
+    <span class="tag">#투자철학</span>
+    <span class="tag">#역발상</span>
+    <span class="tag">#리스크관리</span>
+    <span class="tag">#멘탈모델</span>
+    <span class="tag">#버크셔해서웨이</span>
+  </div>
+</article>
+</body>
+</html>

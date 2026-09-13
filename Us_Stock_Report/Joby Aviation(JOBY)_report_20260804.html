@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joby Aviation 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">JOBY · NYSE</div>
+      <div class="company-name">Joby Aviation, Inc.</div>
+      <div class="company-desc">전기 수직이착륙(eVTOL) 에어택시를 개발·운항하는 캘리포니아 기반 항공 모빌리티 기업. FAA 형식인증 절차에서 업계 최선두를 달리고 있다.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 8월 4일</div>
+      <div class="price-display">$7.15</div>
+      <div class="price-change down">▼ 1.24% (7월 31일 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: $7.03B (약 7,033백만 달러)</span>
+    <span class="rating-pill">🏢 섹터: 산업재 · 항공/UAM(도심항공모빌리티)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Hold (보유)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (2026 Q1)</div>
+      <div class="kpi-value">$24.25M</div>
+      <div class="kpi-sub">전년 동기 사실상 무매출 → 신규 발생</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">약 -963%</div>
+      <div class="kpi-sub">Q1 영업손실 $233.6M 기준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$13.90</div>
+      <div class="kpi-sub">현재가 대비 약 +94% (TipRanks 6인)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$6.63~$20.95</div>
+      <div class="kpi-sub">현재가 위치: 약 3.6% (하단 근접)</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 — 2026년 1분기)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$24.25M <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +20%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $20.17M · 전년 동기 $0.0M</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">-$0.12 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 (손실 축소)</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 -$0.21 · 조정 기준 EPS는 -$0.21로 컨센서스 부합</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>발표일 2026년 5월 5일 (장 마감 후).</strong> 순손실 $110.0M, 조정 EBITDA -$178.5M. 현금·현금성자산·단기투자 $2.5B 확보. 매출의 대부분($21.8M)은 인수한 Blade의 여객 서비스에서 발생했다. 경영진은 <strong>2026년 연간 매출 가이던스 $105M~$115M</strong>을 제시했고, 상반기 현금 소진은 $340M~$370M을 예상했다.
+      <br><span style="color:var(--red);font-weight:600;">⚠️ 2026년 2분기 실적은 8월 5일(수) 장 마감 후 발표 예정</span> — 컨센서스는 EPS -$0.23, 매출 약 $30.2M.
+    </div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 분기보고서 — 매출 $24.2M, 순손실 $110.0M, 총자산 $2.93B</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">토요타와 합작법인 'Joby Toyota Aero Manufacturing Preparation Company' 설립 (초기 출자 $2M)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.30</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">Form 144</span>
+        <span style="font-size:13px;font-weight:500;">창업자 겸 CEO JoeBen Bevirt, 향후 90일 내 59.7만 주 매도 의향 신고</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.15</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">자금조달</span>
+        <span style="font-size:13px;font-weight:500;">보통주 공모 $600M + 0.75% 전환사채(2032년 만기) $690M 발행 — 장기차입금 $701.1M로 증가</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026 Q1</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.16</span></div>
+      <div class="news-title">버진 애틀랜틱과 구속력 있는 다년 상업 계약 체결 — 영국 독점 항공사 파트너 확보</div>
+      <div class="news-summary">판버러 에어쇼에서 2025년의 예비 파트너십을 정식 계약으로 전환했다. 버진 애틀랜틱이 영국 내 에어택시 서비스의 독점 항공사 파트너가 되며, 승객은 버진의 웹/앱에서 장거리 항공편과 함께 에어택시를 예약할 수 있다. 히스로·맨체스터 허브에서 먼저 운항한다. <strong>왜 중요한가:</strong> "탐색적 MOU"가 아닌 구속력 있는 계약이라는 점에서 상업화 경로가 구체화됐다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.06.30</span></div>
+      <div class="news-title">토요타와 제조 합작법인 설립 — 2차 $250M 투자 4분기 클로징 기대</div>
+      <div class="news-summary">토요타가 과반을 보유하는 JV를 설립해 S4 기체의 상업 양산 기반을 마련한다. 생산성·품질·원가 개선이 초기 과제다. 회사는 2025년 자금조달 계약에 따른 <strong>2차 $250M 투자가 4분기에 클로징될 것</strong>으로 기대한다고 밝혔다(제조공급계약 최종 승인 조건부). <strong>왜 중요한가:</strong> eVTOL의 최대 난관인 '양산'을 토요타 생산방식으로 푸는 시도다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026 Q1</span></div>
+      <div class="news-title">백악관 주도 eVTOL 통합 시범프로그램(eIPP) 선정 — 최대 11개 주에서 조기 운항</div>
+      <div class="news-summary">FAA 형식인증 이전에 뉴욕·뉴저지·텍사스·플로리다·유타 등에서 조기 운항 기회를 확보했다. 뉴욕·뉴저지 항만청과는 맨해튼 헬리포트 여객 운항을 포함한 다수 운영 컨셉을 협업한다. 자율비행 플랫폼 'Superpilot'도 함께 선정됐다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.07.22</span></div>
+      <div class="news-title">2026년 2분기 실적 발표 예고 — 8월 5일 장 마감 후</div>
+      <div class="news-summary">컨센서스는 EPS -$0.23, 매출 약 $30.2M(전년 대비 100% 이상 증가)이다. Zacks는 Earnings ESP -12.57%에 Rank #4(매도)를 부여하며 서프라이즈 가능성을 낮게 봤다. 시장의 관심은 EPS보다 <strong>두바이 상업 운항 일정, FAA 인증 진도, 하반기 현금 소진</strong>에 쏠려 있다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.07.29</span></div>
+      <div class="news-title">52주 신저가 $6.63 경신 — 연초 대비 40%대 하락</div>
+      <div class="news-summary">운영 지표는 사상 최고 수준으로 개선됐는데 주가는 52주 고점 대비 약 54~66% 낮은 수준까지 밀렸다. 6월 러셀 리밸런싱으로 유통 주식의 상당 부분이 손바뀜했고 공매도 잔고도 여름 들어 증가했다. 베타는 2.76으로 시장 대비 변동성이 매우 크다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.06~07</span></div>
+      <div class="news-title">경영진·이사진의 지속적인 지분 매도</div>
+      <div class="news-summary">CEO Bevirt가 6월 15일 32.2만 주를 주당 $10.38에 매도했고, 7월 15일에는 추가로 59.7만 주 매도 의향을 신고했다. 이사 Paul Sciarra도 50만 주를 약 $12에 매도했다. 다수가 10b5-1 사전계획에 따른 것이고 Sciarra는 여전히 5,610만 주를 보유 중이지만, 최근 12개월 내부자 순매도 규모는 약 $13M이다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>인증 레이스 최선두</strong> — FAA 형식인증 5단계 진입, 4대 주요 심사 중 3번째인 SR3 감사 완료, TIA 시험용 FAA 적합 기체(N547JX) 첫 비행 성공. 미국 eVTOL 신청자 중 가장 앞서 있다는 평가.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>현금 $2.5B의 두터운 활주로</strong> — 2월 약 $12억 조달로 총 유동성 $26억 수준. 상반기 소진 $340~370M을 감안해도 당장 자금 압박 없이 인증·양산 준비를 밀어붙일 수 있다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>파트너 진영의 두께</strong> — 토요타(제조 JV+추가 $250M), 델타, 우버(두바이 앱 예약 통합), 버진 애틀랜틱(영국 독점), 두바이 교통당국과 6년 독점. 사우디·카자흐스탄·일본에서 10억 달러 이상 규모의 구매의향서 확보.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>이미 매출이 발생하는 eVTOL</strong> — Blade 인수로 여객 서비스 매출이 실제로 계상된다. FY26 가이던스 $105~115M은 인증 이전에도 손익계산서에 숫자가 찍힌다는 뜻으로, 순수 개발 단계 경쟁사와의 차별점.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>밸류에이션 앵커 부재</strong> — 시총 $7.0B에 TTM 매출 $77.7M로 PSR이 약 90배. 이익 배수도, FCF 수익률도 성립하지 않아 주가를 지지할 전통적 기준선이 없다. 기업가치는 아처(ACHR) 대비 약 2.5배 프리미엄.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>희석 가능성</strong> — 2025년 영업현금 약 $510M을 소진했고 26년 상반기 $340~370M이 추가된다. 일부 애널리스트는 FY27까지 약 $15억의 추가 자기자본 조달이 필요할 것으로 본다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>일정 슬리피지가 최대 변수</strong> — 두바이 상업 운항은 아직 시작되지 않았고 규제 인증과 버티포트가 남아 있다. FAA는 확정 인증 일자를 제시한 적이 없다. 신규 항공기 카테고리 특성상 일정 예측이 본질적으로 어렵다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>양산 능력 미검증 + 내부자 매도</strong> — 1분기에 8대분 부품을 생산했을 뿐 상업 규모 생산은 입증 전이며, 2027년 월 4대 인도가 목표다. 여기에 CEO·이사진의 반복적 지분 매도가 심리에 부담을 준다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Needham (Chris Pierce) <span style="font-size:11px;color:var(--muted);">— 커버리지 내 최고 목표가</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$18.00</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">H.C. Wainwright <span style="font-size:11px;color:var(--muted);">— 중립→매수 상향 (2026.02, FAA 인증 모멘텀)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$18.00</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Goldman Sachs <span style="font-size:11px;color:var(--muted);">— 커버리지 내 최저 목표가, 인증 지연 리스크 반영</span></span>
+      <div class="analyst-right"><span class="opinion-badge sell">매도</span><span class="target-price">$6.00</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 (TipRanks, 최근 3개월 6인)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">보유</span><span class="target-price">$13.90</span></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:0.75rem;line-height:1.6;">
+      ※ 집계 기관별로 컨센서스 목표가가 $11~14로 갈린다(24/7 Wall St. $11.01·$11.50, Simply Wall St $11.12, TipRanks $13.90). 목표가 범위 자체가 $6~$18로 3배 차이가 나며, 이는 FAA 인증 시점이라는 이분법적(binary) 변수에 대한 견해차가 그대로 반영된 결과다. 등급 분포도 매수·보유·매도가 고르게 섞여 있다.
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Joby는 지금 <strong>"사업은 사상 최고로 잘 풀리는데 주가는 신저가"</strong>라는 뚜렷한 괴리 구간에 있습니다. 2026년 들어 뉴욕시 최초의 지점 간 eVTOL 비행, 백악관 eIPP 선정(최대 11개 주), 토요타 제조 합작법인 설립, FAA 적합 기체 첫 비행, 버진 애틀랜틱과의 구속력 있는 영국 독점 계약까지 마일스톤을 연달아 달성했습니다. 그럼에도 주가는 연초 대비 40%대, 52주 고점 대비 60% 넘게 하락해 7월 29일 $6.63로 신저가를 찍었습니다.<br><br>
+      시장이 의심하는 것은 기술이 아니라 <strong>시점과 자금</strong>입니다. 두바이 상업 운항은 여전히 "2026년 내"라는 목표만 있을 뿐 개시되지 않았고, FAA는 확정 인증일을 제시한 적이 없습니다. 그 사이 2025년에만 영업현금 $510M을 태웠고 올 상반기에 $340~370M이 더 나갑니다. 현금 $2.5B이라는 두터운 방어막이 있지만, FY27까지 추가 자본이 필요하다는 관측이 나오는 이유입니다. 시총 $7.0B에 TTM 매출 $77.7M(PSR 약 90배)이라는 구조에서는 밸류에이션을 지지할 전통적 기준선이 존재하지 않습니다.<br><br>
+      <strong>당장의 분수령은 8월 5일 2분기 실적</strong>입니다. 다만 EPS(-$0.23 예상)보다 중요한 것은 세 가지입니다 — ① Blade 여객 매출이 여름 성수기에 연간 가이던스 $105~115M 궤도에 올라 있는가, ② 두바이 운항 개시 일정이 구체화되는가, ③ 하반기 현금 소진 계획과 토요타 2차 $250M 투자의 4분기 클로징 확인 여부. 이 중 하나라도 뒤로 밀리면 주가는 다시 신저가를 시험할 가능성이 큽니다.<br><br>
+      <strong>이 종목은 3~5년의 시계로 UAM 산업의 태동에 베팅할 수 있고, 인증 일정 지연 시 -30~50%의 추가 하락과 지분 희석을 감내할 수 있는 고위험 성향의 투자자에게 적합합니다.</strong> 반대로 실적·현금흐름 기반의 밸류에이션 앵커를 원하거나 단기 변동성을 감당하기 어려운 투자자라면, 최소한 두바이 유상 운항 개시와 FAA 인증 진도가 확인된 이후를 기다리는 편이 합리적입니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

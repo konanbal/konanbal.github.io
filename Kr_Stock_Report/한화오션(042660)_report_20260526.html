@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한화오션(042660) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0b2545;
+    --accent: #e63946;
+    --accent2: #1d3557;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --navy: #1d3557;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0b2545 0%, #1d3557 60%, #457b9d 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change.up { font-size: 14px; margin-top: 2px; color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-hot { background: #fde68a; color: #92400e; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #e8f4fd 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .today-alert { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #f59e0b; border-radius: 10px; padding: 0.875rem 1.25rem; margin-bottom: 1rem; font-size: 13px; font-weight: 500; }
+  .pipeline-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 0.875rem 1.25rem; margin-top: 0.75rem; font-size: 12px; }
+  .pipeline-item { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; border-bottom: 1px solid #e0f2fe; }
+  .pipeline-item:last-child { border-bottom: none; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">042660 · KOSPI</div>
+      <div class="company-name">한화오션</div>
+      <div class="company-desc">LNG운반선·VLCC 상선 + 방산 특수선 + 미 해군 MRO + 캐나다 잠수함 수주전 — 상선·방산 이중 성장 조선사</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 26일</div>
+      <div class="price-display">~136,800원</div>
+      <div class="price-change up">▲ +11.95% 장중 (2026.05.26 · VI 두 차례 발동)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 40.8조원 (장중 기준)</span>
+    <span class="rating-pill">🚢 섹터: 조선·방산</span>
+    <span class="rating-pill">⭐ 컨센서스: 적극매수 (19매수·1매도)</span>
+    <span class="rating-pill">🎯 컨센서스 목표주가: 164,750원</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 오늘 급등 알림 -->
+  <div class="today-alert">
+    🔥 <strong>오늘(5/26) 급등 배경:</strong> ① 2026년 누적 신조선 발주량 <strong>1,024척</strong> (전년 대비 2배 폭증, 신조선가지수 8주 연속 상승) ② 미·이란 종전 기대감에 위험선호 심리 회복 ③ 캐나다 CPSP(60조원 잠수함) 6월 말 우선협상자 발표 임박 재부각. 외국인 76.4만주 순매수, VI 2회 발동.
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익</div>
+      <div class="kpi-value">4,411억</div>
+      <div class="kpi-sub">YoY +70.6% · QoQ +78.2%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익률</div>
+      <div class="kpi-value">13.7%</div>
+      <div class="kpi-sub">매출 3.2조 (YoY +2.1%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">컨센서스 목표주가</div>
+      <div class="kpi-value">164,750원</div>
+      <div class="kpi-sub">현재가 대비 약 +20% 업사이드</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 가격 범위</div>
+      <div class="kpi-value">7.15~15.48만</div>
+      <div class="kpi-sub">1년 수익률 +120%</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (발표일: 2026.04.27)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출액</div>
+        <div style="font-size:17px;font-weight:700;">3조 2,099억 <span style="font-size:11px;color:var(--red);">▼ -4.4% 하회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +2.1% · 조업일수 감소 영향</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (EPS 서프라이즈)</div>
+        <div style="font-size:17px;font-weight:700;">4,411억 <span style="font-size:11px;color:var(--green);">▲ EPS +99.5% 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년 2,586억 → YoY +70.6%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">법인세전이익</div>
+        <div style="font-size:17px;font-weight:700;">5,064억</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +133.1% · QoQ +150.8%</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:6px;padding:10px 14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">사업부별 매출 구성</div>
+        <div style="font-size:12px;line-height:1.7;">📦 상선(LNG·VLCC): 2조 7,927억 (82.9%)<br>🔧 EP·특수선: 5,293억 (16.5%)<br>🌊 LNG운반선 비중: <strong>약 70%</strong></div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:10px 14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">1Q26 수주 실적</div>
+        <div style="font-size:12px;line-height:1.7;">⛽ LNG선 4척 | VLCC 7척 | WTIV 1척<br>💰 총 수주 규모: <strong>24.5억 달러</strong><br>📈 환율 효과: 평균 1,464원 (수주 시 1,330원)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>경영진 코멘트:</strong> "고선가 LNG선·VLCC 매출 인식 본격화로 수익성 개선 가속. 2026년 상선 부문 실적 중심으로 타 사업부 고정비 보전 기조 유지. 특수선·해양플랜트는 중기적 점진적 개선 기대."  <span style="font-size:11px;color:var(--muted);">(2026.04.27 컨퍼런스콜)</span>
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 DART 공시</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 분기보고서 (IFRS 연결 기준)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.15</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">수주공시</span>
+        <span style="font-size:13px;font-weight:500;">아프리카 선주 VLAC 3척 수주 — 5,074억원 계약 체결</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.04</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">방산MRO</span>
+        <span style="font-size:13px;font-weight:500;">미 해군 윌리 쉬라함 정비 완료 인도 — MRO 계약 총 4척 수주 달성</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">방산전략</span>
+        <span style="font-size:13px;font-weight:500;">도산안창호함 캐나다 에스퀴몰트 입항 — 5/23~6/2 연합 대잠훈련 (CPSP 수주전 포석)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.23</span>
+    </div>
+    <div style="margin-top:0.75rem;font-size:12px;color:var(--amber);background:#fffbf0;padding:8px 12px;border-radius:6px;font-weight:500;">
+      📌 투자자 주목: 캐나다 60조원 잠수함(CPSP) 우선협상자 발표가 <strong>6월 말</strong>로 예정. 도산안창호함 연합훈련이 발표 시한과 정확히 맞물려 한화오션의 수주 가능성을 높이는 신호로 해석됨. 수주 확정 시 2026~2043년 장기 실적 가시성 확보.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-hot">🔥 오늘</span><span class="news-date">2026.05.26</span></div>
+      <div class="news-title">신조선 발주 1,024척 돌파 (전년 대비 2배) + 미·이란 종전 기대 → 조선주 전반 급등</div>
+      <div class="news-summary">신영증권 분석: 2026년 21주차 기준 누적 발주량 1,024척으로 전년 동기(483척)의 두 배 이상. 신조선가지수 8주 연속 상승. 미·이란 종전 기대감까지 맞물리며 한화오션 외국인 76만주 순매수, 장중 +11.95% 급등, VI 2회 발동. (출처: 뉴스핌, 2026.05.26)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.22</span></div>
+      <div class="news-title">캐나다 60조원 CPSP 잠수함 수주전 — 도산안창호함 연합훈련, 6월 말 우선협상자 발표 임박</div>
+      <div class="news-summary">도산안창호함이 캐나다 에스퀴몰트 기지에 입항해 5월 23일~6월 2일 연합 대잠훈련을 진행 중. CPSP 우선협상자 발표 일정과 정확히 겹쳐 수주 가능성 시그널로 해석된다. 파이브 아이즈(Five Eyes) 동맹국이 한국 잠수함을 작전 표준으로 인정하느냐의 시험대다. (출처: 글로벌이코노믹, 2026.04.27)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.18</span></div>
+      <div class="news-title">미 해군 MRO 4척 완료 + MASGA 구조적 수혜 — 한미 조선협력 1,500억 달러</div>
+      <div class="news-summary">한화오션이 미 해군으로부터 MRO 계약 4척을 수주해 부산·진해에서 정비 작업 진행 중. 트럼프 행정부의 MASGA(Making American Shipbuilding Great Again) 정책이 공식화되며 한화오션의 필리조선소(미국 거점)가 핵심 수혜 주체로 부상했다. 한미 조선협력 투자 규모는 1,500억 달러에 달한다. (출처: EBN, 글로벌이코노믹, 2026.05)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.27</span></div>
+      <div class="news-title">1Q26 영업이익 YoY +70.6% — LNG선 고선가 매출 인식 본격화, EPS 컨센서스 약 2배 상회</div>
+      <div class="news-summary">LNG운반선 중심 고수익 구조 유지 속 환율 효과(수주 1,330원 vs 인식 1,464원)까지 더해져 분기 최대 수준 영업이익 달성. 법인세전이익 5,064억원(YoY +133%)으로 수익성 개선이 가속화됐다. (출처: 아주경제, CBC뉴스, 2026.04.27)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.05.20</span></div>
+      <div class="news-title">한화 필리조선소, 2027년 흑자 전환 시동</div>
+      <div class="news-summary">'돈 먹는 하마'로 평가됐던 미국 필리조선소(PHILLY SHIPYARD)가 2027년부터 본격 수익성 개선 국면에 진입할 전망이다. MASGA와 미국 내 조선 수요 증가가 맞물려 적자 해소 일정이 앞당겨질 수 있다는 분석이 나온다. (출처: EBN, 2026.05.20)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.05.19</span></div>
+      <div class="news-title">국내 조선사 사내하청 교섭권 판결 — 노사 분쟁 리스크 부상</div>
+      <div class="news-summary">대법원 전원합의체가 HD현대중공업 사내하청 교섭권을 불인정했으나, 한화오션 등 조선사에도 노사 분쟁 파급 가능성이 있다. 인력 확충과 CAPA 확장 과정에서 고정비 부담 증가가 단기 마진을 압박할 수 있다. (출처: 알파경제, 2026.05.21)</div>
+    </div>
+  </div>
+
+  <!-- 방산 파이프라인 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🎯 특수선 방산 수주 파이프라인 (2026~2027년)</div>
+    <div class="pipeline-box">
+      <div class="pipeline-item">
+        <span style="font-size:12px;background:#dbeafe;color:#1e40af;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;">6월 말</span>
+        <span style="font-size:13px;"><strong>캐나다 CPSP</strong> — 차세대 잠수함 우선협상자 발표 (~60조원, 12척, 2026~2043년). 파이브 아이즈 NATO 진입 시험대</span>
+      </div>
+      <div class="pipeline-item">
+        <span style="font-size:12px;background:#d1fae5;color:#065f46;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;">2026年</span>
+        <span style="font-size:13px;"><strong>에스토니아 OPV</strong> 연안경비함·순찰선 / <strong>태국 호위함</strong> / <strong>중동 잠수함</strong> RFP 접수 예상 (사우디, 이집트, 그리스, 칠레, 필리핀)</span>
+      </div>
+      <div class="pipeline-item">
+        <span style="font-size:12px;background:#fce7f3;color:#9d174d;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;">진행 중</span>
+        <span style="font-size:13px;"><strong>미 해군 MRO</strong> 4척 수주 완료·진행 중. MASGA 기반 미국 내 신조함 수주 기회 확대. 한국 SSN(핵추진잠수함) 건조 착공 시점도 주요 변수</span>
+      </div>
+      <div class="pipeline-item">
+        <span style="font-size:12px;background:#fef9c3;color:#854d0e;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;">英·加MRO</span>
+        <span style="font-size:13px;"><strong>영국·캐나다 해군 MRO</strong> 추가 수주 — 글로벌 방산 MRO 시장 진입 다각화</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>캐나다 CPSP 60조원 수주 기대:</strong> 6월 말 우선협상자 발표. 12척 디젤잠수함 계약으로 2026~2043년 장기 실적 가시성 확보. 도산안창호함 현지 연합훈련이 수주 가능성의 긍정적 신호로 해석된다.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>신조선 발주 폭증 + 고선가 LNG선 매출 인식:</strong> 2026년 발주량 전년 대비 2배 돌파. 2024~2025년 수주한 고선가 선박의 매출 인식 비중이 70%로 확대되며 수익성 개선 가속.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>MASGA 구조적 수혜 — 미국 유일 조선거점:</strong> 한화오션은 미국 내 유일한 K-조선 거점(필리조선소)을 보유. 1,500억 달러 한미 조선협력 투자 계획의 핵심 수혜 주체. 미 해군 MRO·신조함 수주 확대 지속 예상.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>환율 레버리지 효과:</strong> 수주 당시 환율(1,330원) 대비 실제 매출 인식 환율(1,464원)이 높아 원화 환산 매출·이익 증폭. 달러 강세 유지 시 추가 수혜.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>LNG·에너지 선종 구조적 수요 지속:</strong> 글로벌 에너지 공급망 재편·탄소중립 전환으로 LNG운반선 장기 수요 견고. 미·이란 종전 협상 타결 시 원유 공급 확대로 VLCC 발주도 증가 기대.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>캐나다 CPSP 수주 실패 리스크:</strong> 독일 TKMS와의 치열한 경쟁. 캐나다 측이 자국 경제 파급 효과(자동차 공장 투자 등)까지 복합적으로 평가 중. 실패 시 주가 급락 가능성이 가장 큰 단기 리스크.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>조업일수 감소로 외형 성장 제한:</strong> 1Q26 QoQ 매출 감소(-3.4%)는 조업일수 단축 영향. 특수선 CAPA 확장에 따른 고정비 부담 증가로 단기 마진 성장이 정체될 가능성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>필리 조선소 적자 지속:</strong> 2027년 흑자 전환 목표이나 그때까지 연간 수백억 원 손실 지속. 미국 노조 리스크·인력 확보 난항이 변수로 작용.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>노사 분쟁 리스크:</strong> 사내하청 교섭권 대법원 판결 여파가 한화오션에도 파급될 가능성. 특수선 CAPA 확장 과정에서 인력 갈등 발생 시 생산 차질 우려.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>유가 급락 시 VLCC 발주 감소:</strong> VLCC는 유가와 연동된 발주 사이클. 미·이란 협상 타결로 유가가 과도하게 하락할 경우 대형 원유 운반선 발주가 감소할 수 있음.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem;margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">키움증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">방산 파이프라인 가장 공격적 반영</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">179,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">현대차증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">LNG선 고선가 매출 인식 가속 전망</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">172,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">LS증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">특수선 CAPA 확장, 방산 수주 모멘텀</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">170,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">KB증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">상선 사이클 고점 인식, 보수적 접근</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">160,000원</span></div>
+    </div>
+    <div style="margin-top:0.75rem;font-size:12px;color:var(--muted);background:#f8f9fc;padding:8px 12px;border-radius:6px;">
+      ※ 커버리지 20개사 중 19개 매수·1개 매도. 컨센서스 평균 목표주가 164,750원 (최고 18만원·최저 7.5만원). 오늘 장중가(13.68만) 기준 목표주가까지 약 +20% 업사이드 잔존.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      한화오션은 2026년 1분기에 영업이익 4,411억원(YoY +70.6%)을 달성하며 LNG운반선 중심 고수익 구조의 본격화를 증명했다. 2024~2025년 수주한 고선가 선박들의 매출 인식 비중이 70%까지 확대되고, 수주 시점 대비 원·달러 환율 상승이 원화 이익을 증폭시키는 구조가 당분간 지속될 전망이다.
+
+      더 큰 주목 포인트는 <strong>'상선 조선사'에서 '글로벌 방산·해양안보 기업'으로의 재평가</strong>다. 6월 말 캐나다 60조원 잠수함(CPSP) 우선협상자 발표를 앞두고 도산안창호함의 현지 연합훈련이 진행 중이며, 미 해군 MRO 4척 완료·MASGA 구조적 수혜·에스토니아·태국·중동 해군 수주 파이프라인이 줄줄이 대기하고 있다. 오늘(5/26) 장중에는 신조선 발주 1,024척 돌파(전년 2배)와 미·이란 종전 기대감이 더해져 외국인이 76만주를 순매수하며 주가가 +12% 급등했다.
+
+      컨센서스 목표주가(164,750원)까지 약 +20% 업사이드가 잔존하며, 캐나다 수주 확정 시 목표주가의 추가 상향이 기대된다. 단, 수주 실패 시 단기 급락 가능성도 병존하므로, <strong>캐나다 CPSP 우선협상자 발표(6월 말)와 한미 핵잠수함 협정 의회 처리 일정</strong>을 핵심 모니터링 지표로 삼는 것이 중요하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

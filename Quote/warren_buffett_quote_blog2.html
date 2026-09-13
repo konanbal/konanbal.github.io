@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>절대 잃지 마라 — 버핏이 60년 동안 지켜온 단 두 가지 원칙</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f9f9f7; min-height: 100vh; display: flex; justify-content: center; padding: 3rem 1.5rem; }
+    .blog-wrap {
+      font-family: 'Noto Sans KR', sans-serif; color: #1a1a1a;
+      max-width: 680px; width: 100%; background: #ffffff;
+      border-radius: 16px; padding: 3rem 3.5rem 4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    }
+    .category-tag {
+      display: inline-block; font-size: 11px; font-weight: 500;
+      letter-spacing: 0.06em; padding: 3px 10px; border-radius: 20px;
+      background: #e8f0fb; color: #1a56a0;
+      border: 0.5px solid #4a8fd4; margin-bottom: 18px;
+    }
+    .blog-title {
+      font-family: 'Noto Serif KR', serif; font-size: 24px;
+      font-weight: 700; line-height: 1.4; margin-bottom: 10px; color: #1a1a1a;
+    }
+    .blog-subtitle { font-size: 15px; color: #666666; margin-bottom: 14px; line-height: 1.7; }
+    .meta {
+      font-size: 12px; color: #999999;
+      border-top: 0.5px solid #e0e0e0; border-bottom: 0.5px solid #e0e0e0;
+      padding: 8px 0; margin-bottom: 32px;
+      display: flex; gap: 14px; flex-wrap: wrap;
+    }
+    .hero-quote {
+      background: #f6f6f4; border-left: 3px solid #4a8fd4;
+      border-radius: 0 8px 8px 0; padding: 22px 26px; margin-bottom: 36px;
+    }
+    .hero-rule {
+      font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 600;
+      color: #1a1a1a; margin-bottom: 7px; line-height: 1.75;
+    }
+    .hero-rule:last-of-type { margin-bottom: 16px; }
+    .hero-attr { font-size: 13px; color: #1a56a0; font-weight: 500; }
+    .section-title {
+      font-family: 'Noto Serif KR', serif; font-size: 17px; font-weight: 700;
+      color: #1a1a1a; margin: 36px 0 14px;
+    }
+    p { font-size: 15px; line-height: 1.95; color: #1a1a1a; margin-bottom: 14px; }
+    strong { font-weight: 500; }
+    .cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px; margin: 18px 0 36px;
+    }
+    .card {
+      background: #f6f6f4; border: 0.5px solid #e0e0e0;
+      border-radius: 8px; padding: 14px 16px;
+    }
+    .card-label { font-size: 11px; color: #999999; margin-bottom: 5px; }
+    .card-value { font-size: 14px; font-weight: 500; color: #1a1a1a; line-height: 1.4; }
+    .principles { list-style: none; padding: 0; margin: 16px 0 36px; }
+    .principles li {
+      display: flex; gap: 16px; align-items: flex-start;
+      padding: 16px 0; border-bottom: 0.5px solid #e0e0e0;
+      font-size: 15px; line-height: 1.8; color: #1a1a1a;
+    }
+    .principles li:last-child { border-bottom: none; }
+    .badge {
+      min-width: 26px; height: 26px; border-radius: 50%;
+      background: #e8f0fb; color: #1a56a0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 3px;
+    }
+    .closing {
+      border-top: 0.5px solid #e0e0e0; margin-top: 40px;
+      padding-top: 28px; text-align: center;
+    }
+    .closing p {
+      font-family: 'Noto Serif KR', serif; font-size: 15px;
+      color: #666666; line-height: 1.9; margin: 0;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 32px; }
+    .hashtag {
+      font-size: 12px; padding: 4px 11px; border-radius: 20px;
+      border: 0.5px solid #cccccc; color: #666666;
+    }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 20px; }
+      .cards { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+
+  <span class="category-tag">투자 철학</span>
+  <h1 class="blog-title">절대 잃지 마라 — 버핏이 60년 동안 지켜온 단 두 가지 원칙</h1>
+  <p class="blog-subtitle">복잡한 시대에 투자자가 가장 먼저 새겨야 할 것은, 놀랍도록 단순한 이 두 문장이다</p>
+  <div class="meta">
+    <span>2025년 5월</span>
+    <span>읽기 약 4분</span>
+    <span>투자 철학 · 리스크 관리</span>
+  </div>
+
+  <div class="hero-quote">
+    <p class="hero-rule">투자의 제1원칙 — "절대로 돈을 잃지 마라."</p>
+    <p class="hero-rule">투자의 제2원칙 — "제1원칙을 절대 잊지 마라."</p>
+    <span class="hero-attr">— Warren Buffett, 오마하의 현인</span>
+  </div>
+
+  <h2 class="section-title">단순함 뒤에 숨은 무게감</h2>
+  <p>처음 이 말을 들으면 누구나 피식 웃는다. "그걸 누가 모르나?" 싶기 때문이다. 그러나 버핏이 이 문장을 처음 꺼낸 건 1960년대 초, 파트너십을 운영하던 시절이다. 이후 60년이 넘도록 그는 이 원칙을 바꾸지 않았다.</p>
+  <p>버핏의 원칙은 "수익을 극대화하라"가 아니다. <strong>잃지 않는 것</strong>이 먼저다. 수익은 그다음이다. 제2원칙이 제1원칙을 반복하는 이유가 여기에 있다. 망각 자체가 가장 위험한 투자 실수이기 때문이다.</p>
+
+  <h2 class="section-title">버핏이 말하는 '잃음'의 정의</h2>
+  <p>버핏에게 손실은 단순히 주가 하락이 아니다. 그는 주가 변동을 '소음'으로 봤고, 진짜 손실은 <strong>기업의 본질 가치가 훼손되거나, 자신이 이해하지 못하는 자산에 베팅할 때</strong> 발생한다고 봤다. 닷컴 버블에서 그가 기술주를 외면한 이유, IT 버블 붕괴 이후에도 버크셔가 건재했던 이유가 바로 여기에 있다.</p>
+
+  <h2 class="section-title">버핏 카드</h2>
+  <div class="cards">
+    <div class="card"><div class="card-label">출생</div><div class="card-value">1930년 8월, 네브래스카 오마하</div></div>
+    <div class="card"><div class="card-label">별칭</div><div class="card-value">오마하의 현인</div></div>
+    <div class="card"><div class="card-label">연평균 수익률</div><div class="card-value">약 19.8% (1965–2023)</div></div>
+    <div class="card"><div class="card-label">철학의 뿌리</div><div class="card-value">벤저민 그레이엄 가치투자</div></div>
+  </div>
+
+  <h2 class="section-title">이 명언에서 도출한 세 가지 행동 원칙</h2>
+  <ul class="principles">
+    <li>
+      <span class="badge">1</span>
+      <div><strong>이해하지 못하는 것에는 투자하지 않는다.</strong><br>버핏은 자신의 '능력 범위(Circle of Competence)' 안에서만 움직였다. 화려한 테마와 낯선 구조의 상품일수록, 한 걸음 뒤로 물러서는 것이 원칙이다.</div>
+    </li>
+    <li>
+      <span class="badge">2</span>
+      <div><strong>안전마진을 반드시 확보한다.</strong><br>내재가치 대비 충분히 낮은 가격에 살 때만 비로소 '절대 잃지 않을' 여지가 생긴다. 좋은 기업도 비싸게 사면 나쁜 투자가 된다.</div>
+    </li>
+    <li>
+      <span class="badge">3</span>
+      <div><strong>감정이 규칙을 이기도록 내버려 두지 않는다.</strong><br>제2원칙의 핵심은 '잊지 마라'이다. 시장이 흥분하거나 공포에 휩싸일 때, 원칙은 가장 먼저 망각된다. 버핏은 그걸 알고 있었다.</div>
+    </li>
+  </ul>
+
+  <h2 class="section-title">지금 이 시대에 이 원칙이 더 무거운 이유</h2>
+  <p>정보가 넘쳐나고 매매 속도가 빨라진 시대일수록, 원칙을 잊는 속도도 빨라진다. SNS 한 줄에 포트폴리오가 흔들리고, 하루에도 수십 번 뉴스가 쏟아진다. 버핏의 두 원칙은 속도가 아닌 방향의 문제다. 얼마나 빠르게 투자하느냐가 아니라, 무엇을 피해야 하는지를 먼저 묻는 것이다.</p>
+  <p>역설적이게도, 잃지 않는 것에 집중한 포트폴리오는 장기적으로 가장 많이 번다. 복리의 힘은 마이너스가 없어야 제대로 작동하기 때문이다.</p>
+
+  <div class="closing">
+    <p>투자에서 '지키는 것'은 '버는 것'보다 먼저다.<br>버핏이 평생을 두 문장으로 요약한 이유가 바로 그것이다.</p>
+  </div>
+
+  <div class="tags">
+    <span class="hashtag">#워렌버핏</span>
+    <span class="hashtag">#투자철학</span>
+    <span class="hashtag">#가치투자</span>
+    <span class="hashtag">#리스크관리</span>
+    <span class="hashtag">#버핏원칙</span>
+    <span class="hashtag">#안전마진</span>
+    <span class="hashtag">#장기투자</span>
+    <span class="hashtag">#복리</span>
+  </div>
+
+</article>
+</body>
+</html>

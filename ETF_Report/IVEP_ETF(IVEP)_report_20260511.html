@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IVEP ETF 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0d1f3c 0%, #1a3a5c 45%, #0e7490 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .new-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(90deg, #f59e0b, #ef4444);
+    color: white; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px; margin-left: 8px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.75} }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-ticker { font-size: 11px; color: var(--muted); margin-left: 4px; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+  .na { color: var(--muted); font-size: 12px; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* 4 segments */
+  .segments { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .seg-card { background: linear-gradient(135deg, #e8f4fd, #e0f2fe); border: 1px solid #bae6fd; border-radius: 10px; padding: 14px 16px; }
+  .seg-icon { font-size: 22px; margin-bottom: 6px; }
+  .seg-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+  .seg-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  .competitor-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .competitor-row:last-child { border-bottom: none; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid, .segments { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · IVEP · NYSE Arca</div>
+      <div class="etf-name">
+        Dan IVES Wedbush AI Power & Infrastructure ETF
+        <span class="new-badge">🔥 2026 신규</span>
+      </div>
+      <div class="etf-index">추종 지수: Solactive Wedbush AI Power &amp; Infrastructure Index &nbsp;|&nbsp; 운용사: Wedbush Fund Advisers</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 11일</div>
+      <div class="nav-display">$28.13</div>
+      <div class="nav-change up">▲ 설정 이후 +14.67% (NAV 기준)</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산(AUM): ~$12.4M</span>
+    <span class="pill">📋 총보수: 0.75%</span>
+    <span class="pill">📅 설정일: 2026.04.08</span>
+    <span class="pill">💵 배당수익률: N/A (신규)</span>
+    <span class="pill">🔄 분배 주기: 연 1회</span>
+    <span class="pill">📦 보유 종목: 31개</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">순자산가치(NAV)</div>
+      <div class="kpi-value">$28.13</div>
+      <div class="kpi-sub">괴리율: +0.07% (소폭 프리미엄)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">설정 이후 수익률</div>
+      <div class="kpi-value" style="color:var(--green)">+14.67%</div>
+      <div class="kpi-sub">2026.04.08 ~ 04.30 기준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수(Expense Ratio)</div>
+      <div class="kpi-value">0.75%</div>
+      <div class="kpi-sub">카테고리 평균: ~0.55% 대비 높음</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">AUM / 상장주식수</div>
+      <div class="kpi-value">$12.4M</div>
+      <div class="kpi-sub">440,001주 · 초기 단계 펀드</div>
+    </div>
+  </div>
+
+  <!-- ===== 투자 전략 4 세그먼트 ===== -->
+  <div class="card">
+    <div class="card-title">IVES Power 30 — 4대 투자 세그먼트</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:1rem;">IVEP는 Wedbush의 독점 리서치 보고서 "IVES Power 30"을 기반으로, AI 전력 수요의 수혜를 받는 4개 핵심 분야에 집중 투자한다.</p>
+    <div class="segments">
+      <div class="seg-card">
+        <div class="seg-icon">⚡</div>
+        <div class="seg-title">발전 & 연료 공급</div>
+        <div class="seg-desc">천연가스·원자력·재생에너지 발전 기업. AI 데이터센터의 24시간 베이스로드 전력 공급자</div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-icon">🏗️</div>
+        <div class="seg-title">송배전망 & 데이터센터</div>
+        <div class="seg-desc">전력망 현대화, 전선·변압기, 하이퍼스케일 데이터센터 REIT 및 운영사</div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-icon">🔧</div>
+        <div class="seg-title">설비 & 전력 관리</div>
+        <div class="seg-desc">UPS, 냉각 시스템, 전력변환 장비, 서버랙 열관리. AI GPU 발열 문제 직접 해결</div>
+      </div>
+      <div class="seg-card">
+        <div class="seg-icon">🔬</div>
+        <div class="seg-title">소재 & 핵심 기술</div>
+        <div class="seg-desc">구리·알루미늄 등 전력 인프라 원자재, 전력 반도체(SiC, GaN) 전문 기업</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 상위 보유 종목 ===== -->
+  <div class="card">
+    <div class="card-title">상위 보유 종목 TOP 10 (2026.04.30 기준)</div>
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">Bloom Energy <span class="holding-ticker">BE</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.97%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">GE Vernova <span class="holding-ticker">GEV</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.54%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:91%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">Siemens Energy AG ADR <span class="holding-ticker">SMERY</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.40%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:88%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">Monolithic Power Systems <span class="holding-ticker">MPWR</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.26%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:86%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">Schneider Electric SE ADR <span class="holding-ticker">SBGSY</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.21%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:85%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">Vertiv Holdings <span class="holding-ticker">VRT</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.18%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:84%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">7</div>
+      <div class="holding-name">Eaton Corp. <span class="holding-ticker">ETN</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.12%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:83%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">8</div>
+      <div class="holding-name">Coherent Corp. <span class="holding-ticker">COHR</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.00%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:80%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">9</div>
+      <div class="holding-name">NextEra Energy <span class="holding-ticker">NEE</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">3.93%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:79%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">10</div>
+      <div class="holding-name">Constellation Energy <span class="holding-ticker">CEG</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">3.88%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:78%"></div></div>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      상위 10개 합산 비중: 41.3% &nbsp;|&nbsp; 총 보유 종목 수: 31개 &nbsp;|&nbsp; Quanta Services(PWR), Equinix(EQIX) 등 포함
+    </div>
+  </div>
+
+  <!-- ===== 섹터 배분 + 수익률 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">섹터 배분 (2026.04.30 기준)</div>
+      <div class="sector-item">
+        <div class="sector-name">⚙️ 산업재 (Industrials)</div>
+        <div class="sector-right">
+          <div class="sector-pct">43.7%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#9c27b0;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">⚡ 유틸리티 (Utilities)</div>
+        <div class="sector-right">
+          <div class="sector-pct">22.9%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:52%;background:#2196f3;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🛢️ 에너지 (Energy)</div>
+        <div class="sector-right">
+          <div class="sector-pct">13.6%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:31%;background:#f44336;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🏢 부동산 REIT (Real Estate)</div>
+        <div class="sector-right">
+          <div class="sector-pct">10.7%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:24%;background:#ff9800;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">💻 기술 (Technology)</div>
+        <div class="sector-right">
+          <div class="sector-pct">7.1%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:16%;background:#00bcd4;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">⛏️ 원자재 (Basic Materials)</div>
+        <div class="sector-right">
+          <div class="sector-pct">2.0%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:5%;background:#607d8b;"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:0.75rem;font-size:12px;color:var(--muted);">
+        ⚡ AI 전력 인프라 특성상 산업재·유틸리티 집중 구조. 전통적인 기술 ETF와 포트폴리오 보완 관계
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기간별 수익률 비교</div>
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>기간</th>
+            <th>IVEP</th>
+            <th>벤치마크</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1개월</td><td class="na">N/A</td><td class="na">N/A</td><td class="na">설정 미만</td></tr>
+          <tr><td>3개월</td><td class="na">N/A</td><td class="na">N/A</td><td class="na">설정 미만</td></tr>
+          <tr><td>YTD</td><td class="na">N/A</td><td class="na">N/A</td><td class="na">설정 미만</td></tr>
+          <tr><td>설정이후</td><td class="positive">+14.67%</td><td class="positive">+14.88%</td><td style="font-size:11px;color:var(--muted);">~3주</td></tr>
+          <tr><td colspan="4" style="font-size:11px;color:var(--muted);text-align:left;padding:8px 12px;">
+            비교 ETF 참고 | AIPO(Defiance): 2026 Best New Thematic ETF 수상<br>
+            형제 펀드 IVES(AI Revolution ETF): 설정이후 +16% (2025.06 ~)
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== 핵심 투자 thesis ===== -->
+  <div class="card">
+    <div class="card-title">핵심 투자 Thesis — AI, 전력을 먹는다</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;">📊 Wedbush 전력 수요 전망</div>
+        <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;line-height:1.8;">
+          미국 데이터센터 전력 소비량<br>
+          <strong style="font-size:18px;color:var(--accent);">470 TWh</strong> (2030년 목표)<br>
+          <span style="color:var(--muted);font-size:12px;">현재 컨센서스 대비 +23% 높은 추정</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;">💡 투자 논리 핵심</div>
+        <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;line-height:1.8;">
+          AI 지출 $1 → 전력 인프라 수요 직결<br>
+          AI 칩 → <strong>전력 → 냉각 → 송전망</strong><br>
+          <span style="color:var(--muted);font-size:12px;">효율 개선만으로는 수요 증가를 상쇄 불가</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.08</span>
+      </div>
+      <div class="news-title">IVEP 정식 출시 — AI 전력 인프라 최초 전문 ETF</div>
+      <div class="news-summary">Wedbush Fund Advisers가 NYSE Arca에 IVEP를 상장. Dan Ives의 독점 리서치 "IVES Power 30"을 기반으로 AI 전력 인프라에 집중하는 최초 전문 ETF로 시장에 진입. 설정 후 약 3주간 +14.67% 수익률 기록.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04~05</span>
+      </div>
+      <div class="news-title">2026년 AI 자본지출 $7,250억 전망 — 전력 인프라 슈퍼사이클 가속</div>
+      <div class="news-summary">J.P. Morgan Asset Management에 따르면 2026년 AI 관련 자본 지출 규모가 $7,250억에 달할 전망. 데이터센터 확장에 따른 전력 수요 급증이 IVEP 포트폴리오 전반에 구조적 순풍으로 작용.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.03</span>
+      </div>
+      <div class="news-title">경쟁 ETF AIPO, "2026 Best New Thematic ETF" 수상</div>
+      <div class="news-summary">Defiance AI & Power Infrastructure ETF(AIPO)가 ETF.com Awards 2026에서 최우수 신규 테마 ETF를 수상. IVEP와 동일 테마를 경쟁하는 AIPO는 미국 상장 기업에 시가총액 50% 이상 요건으로 집중. IVEP는 글로벌 기업(Siemens, Schneider)도 포함해 차별화.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.03~04</span>
+      </div>
+      <div class="news-title">에너지 섹터, 2026년 1분기 ETF 섹터 유입 1위로 급부상</div>
+      <div class="news-summary">BlackRock 데이터에 따르면 Q1 2026 에너지 섹터가 6년 만에 ETF 섹터 유입 1위를 기록. 중동 지정학 리스크와 AI 전력 수요가 복합적으로 작용. IVEP 핵심 투자 테마와 직결된 흐름.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04~05</span>
+      </div>
+      <div class="news-title">AUM $12.4M — 유동성 및 규모 리스크 현존</div>
+      <div class="news-summary">설정 한 달여 만에 AUM이 $12.4M 수준으로, 대형 ETF 대비 유동성이 제한적. 괴리율 확대 위험과 호가 스프레드 비용 주의 필요. 총보수 0.75%는 동종 인덱스 ETF 대비 높은 수준.</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">📈</span>
+          <span><strong>AI 전력 수요 구조적 슈퍼사이클:</strong> AI 워크로드는 기존 클라우드 대비 훨씬 많은 전력 필요. 수요 증가를 효율 개선이 상쇄할 수 없는 구조로, IVEP 포트폴리오 기업들의 장기 수요 가시성 높음.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🔮</span>
+          <span><strong>AI 2차 수혜 — 기술주 과열 회피:</strong> NVDA·MSFT 등 AI 소프트웨어·칩 ETF가 이미 고평가 논란인 반면, IVEP는 발전·유틸리티·산업재 중심으로 상대적으로 밸류에이션 부담이 낮음. 포트폴리오 분산 효과.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🌟</span>
+          <span><strong>Dan Ives 브랜드 파워 & 선점 효과:</strong> 형제 펀드 IVES(AI Revolution ETF)가 출시 이후 +16% 기록. 월가 최고의 AI 분석가로 꼽히는 Dan Ives의 리서치 기반으로 기관 투자자 신뢰도 높음.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🌍</span>
+          <span><strong>글로벌 다각화:</strong> Siemens Energy(독일), Schneider Electric(프랑스) 등 유럽 인프라 강자 포함으로 미국 집중 ETF 대비 지역 분산 효과 제공.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">⚠️</span>
+          <span><strong>AUM 소규모 & 유동성 리스크:</strong> AUM $12.4M은 ETF 운영 지속성 기준인 $50M에 크게 못 미침. 청산 위험은 낮으나 호가 스프레드 비용 및 대량 매도 시 괴리율 확대 가능.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">📉</span>
+          <span><strong>높은 총보수 0.75%:</strong> 동종 인프라 ETF 평균(0.4~0.5%) 대비 높음. 장기 보유 시 수익률 마찰 비용 누적. VOO(0.03%), QQQ(0.20%)와 비교 시 비용 부담 명확.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">🔻</span>
+          <span><strong>테마 집중 리스크:</strong> AI 투자 둔화, 금리 상승, 규제 강화, 또는 AI 에너지 효율 기술 돌파 시 섹터 전반 타격. 31개 종목이 동일 매크로 테마에 노출되어 분산 효과 제한적.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">⚡</span>
+          <span><strong>경쟁 심화:</strong> AIPO(Defiance), 기타 AI 인프라 ETF와의 경쟁 심화로 자금 유입 분산 가능. 신규 ETF로 트랙레코드 부재도 기관 채택의 걸림돌.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 경쟁 ETF 비교 ===== -->
+  <div class="card">
+    <div class="card-title">유사 ETF 비교</div>
+    <div class="competitor-row" style="font-weight:700;font-size:11px;color:var(--muted);">
+      <span style="width:80px">티커</span>
+      <span style="flex:1">ETF명</span>
+      <span style="width:80px;text-align:right">AUM</span>
+      <span style="width:70px;text-align:right">총보수</span>
+      <span style="width:100px;text-align:right">특징</span>
+    </div>
+    <div class="competitor-row" style="background:#fffbeb;">
+      <span style="width:80px;font-weight:700;color:var(--accent)">⭐ IVEP</span>
+      <span style="flex:1">Dan IVES Wedbush AI Power & Infra</span>
+      <span style="width:80px;text-align:right;font-size:12px">$12.4M</span>
+      <span style="width:70px;text-align:right;color:var(--red);font-size:12px">0.75%</span>
+      <span style="width:100px;text-align:right;font-size:11px;color:var(--muted)">글로벌·능동형</span>
+    </div>
+    <div class="competitor-row">
+      <span style="width:80px;font-weight:700">AIPO</span>
+      <span style="flex:1">Defiance AI & Power Infrastructure</span>
+      <span style="width:80px;text-align:right;font-size:12px">~$500M+</span>
+      <span style="width:70px;text-align:right;font-size:12px">0.45%</span>
+      <span style="width:100px;text-align:right;font-size:11px;color:var(--muted)">미국 집중</span>
+    </div>
+    <div class="competitor-row">
+      <span style="width:80px;font-weight:700">GRID</span>
+      <span style="flex:1">First Trust NASDAQ Clean Edge Smart Grid</span>
+      <span style="width:80px;text-align:right;font-size:12px">~$2B</span>
+      <span style="width:70px;text-align:right;font-size:12px">0.70%</span>
+      <span style="width:100px;text-align:right;font-size:11px;color:var(--muted)">클린에너지·그리드</span>
+    </div>
+    <div class="competitor-row">
+      <span style="width:80px;font-weight:700">VRT(주식)</span>
+      <span style="flex:1">Vertiv Holdings (개별 주식 직접 투자)</span>
+      <span style="width:80px;text-align:right;font-size:12px">—</span>
+      <span style="width:70px;text-align:right;font-size:12px">0%</span>
+      <span style="width:100px;text-align:right;font-size:11px;color:var(--muted)">단일 종목</span>
+    </div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      IVEP는 2026년 4월 출시된 따끈따끈한 신생 ETF로, AI 혁명의 '숨겨진 수혜자'인 전력·인프라 섹터에 집중 투자한다. 핵심 thesis는 간단하다 — AI에 쓰이는 모든 돈은 결국 전기를 필요로 하며, Wedbush는 2030년 미국 데이터센터 전력 소비가 470TWh에 달해 현재 컨센서스를 23% 상회할 것으로 전망한다.
+      <br><br>
+      포트폴리오 구성은 Bloom Energy·GE Vernova(발전), Vertiv·Eaton·Schneider Electric(전력 장비), NextEra·Constellation(유틸리티), Equinix(데이터센터 REIT) 등 산업재 44%·유틸리티 23%·에너지 14% 배분으로, NVDA·MSFT 중심의 AI 기술 ETF와 포트폴리오 보완 관계를 형성한다. 특히 독일 Siemens Energy, 프랑스 Schneider Electric ADR 편입으로 글로벌 전력 인프라 기업까지 아우르는 점이 경쟁 ETF와의 차별점이다.
+      <br><br>
+      설정 후 약 3주 만에 +14.67%를 기록했으나, AUM이 $12.4M에 불과해 아직 초기 단계임을 분명히 인식해야 한다. 총보수 0.75%는 비용 부담이 있으며, 트랙레코드 미비, 유동성 제한이 단기 단점이다. 중장기(2~5년) 관점에서 AI 전력 수요 성장을 믿는 투자자라면 QQQ·IVES 등 기술 중심 ETF의 헤지 수단 또는 포트폴리오 위성 자산(10% 이내)으로 소액 분산 편입을 고려할 만하다.
+    </div>
+    <div style="margin-top:1rem;padding:12px;background:rgba(255,255,255,0.6);border-radius:8px;font-size:13px;">
+      <strong>한국 투자자 참고:</strong> 미국 주식 계좌를 통해 NYSE Arca에서 직접 매매 가능. 환율(원/달러) 리스크 및 해외 금융투자소득 양도소득세(22%) 적용. 소규모 ETF 특성상 국내 증권사 HTS/MTS에서 실시간 호가 확인 후 지정가 주문 권장.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. ETF 투자는 원금 손실 가능성이 있으며, 신생 ETF는 청산 위험을 포함한 추가 리스크가 존재합니다. 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다.
+      <br>데이터 출처: Wedbush Funds, Robinhood, TradingView, ETF Trends, InvestmentNews, Morningstar (2026.05.11 기준)
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

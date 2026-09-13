@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>따분한 주식이 선물하는 조용한 수익 — 랄프 웬저</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f9f9f7; min-height: 100vh; display: flex; justify-content: center; padding: 3rem 1.5rem; }
+    .blog-wrap { font-family: 'Noto Sans KR', sans-serif; color: #1a1a1a; max-width: 680px; width: 100%;
+      background: #ffffff; border-radius: 16px; padding: 3rem 3.5rem 4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05); }
+    .qb-cat { display: inline-block; font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #1a56a0; background: #e8f0fb; border-radius: 20px;
+      padding: 4px 14px; margin-bottom: 1.2rem; }
+    .blog-title { font-family: 'Noto Serif KR', serif; font-size: 28px; font-weight: 700; line-height: 1.4;
+      color: #1a1a1a; margin-bottom: 0.6rem; }
+    .qb-subtitle { font-size: 15px; color: #666666; line-height: 1.6; margin-bottom: 1rem; }
+    .qb-meta { font-size: 12px; color: #999999; margin-bottom: 1.8rem; }
+    .qb-meta span { margin-right: 12px; }
+    .qb-hero { border-left: 3px solid #4a8fd4; background: #f6f6f4; border-radius: 0 8px 8px 0;
+      padding: 1.2rem 1.5rem; margin-bottom: 2rem; }
+    .qb-hero p { font-family: 'Noto Serif KR', serif; font-size: 17px; line-height: 1.8;
+      color: #1a1a1a; margin-bottom: 0.6rem; font-weight: 400; }
+    .hero-attr { font-size: 13px; color: #666666; font-weight: 500; }
+    .qb-section-title { font-family: 'Noto Serif KR', serif; font-size: 17px; font-weight: 600;
+      color: #1a1a1a; margin: 2rem 0 0.8rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem; }
+    .qb-body { font-size: 14.5px; line-height: 1.9; color: #1a1a1a; margin-bottom: 1rem; }
+    .qb-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 1.2rem 0 2rem; }
+    .qb-card { background: #f6f6f4; border-radius: 8px; padding: 0.8rem 1rem; border: 1px solid #e0e0e0; }
+    .qb-card-label { font-size: 11px; color: #999999; margin-bottom: 4px; }
+    .qb-card-val { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+    .qb-principles { list-style: none; padding: 0; margin: 0.5rem 0 2rem; }
+    .qb-principles li { display: flex; align-items: flex-start; gap: 12px; padding: 0.9rem 0; border-bottom: 1px solid #e0e0e0; }
+    .qb-principles li:last-child { border-bottom: none; }
+    .qb-num { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; background: #e8f0fb;
+      color: #1a56a0; font-size: 13px; font-weight: 500; display: flex; align-items: center;
+      justify-content: center; margin-top: 1px; }
+    .qb-prin-text { font-size: 14.5px; line-height: 1.8; color: #1a1a1a; }
+    .qb-prin-title { font-weight: 500; display: block; margin-bottom: 2px; }
+    .qb-closing { border-top: 1px solid #e0e0e0; margin-top: 2rem; padding-top: 1.4rem; text-align: center; }
+    .qb-closing p { font-family: 'Noto Serif KR', serif; font-size: 15px; font-style: italic;
+      color: #666666; line-height: 1.8; }
+    .qb-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.5rem; }
+    .qb-tag { font-size: 12px; color: #666666; border: 1px solid #cccccc; border-radius: 20px; padding: 3px 12px; }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+  <span class="qb-cat">투자 철학</span>
+  <h1 class="blog-title">따분한 주식이 선물하는<br>조용한 수익</h1>
+  <p class="qb-subtitle">군중이 외면한 자리에서 랄프 웬저가 발견한 것</p>
+  <div class="qb-meta">
+    <span>2025년 5월</span>
+    <span>읽기 약 4분</span>
+    <span>소형주 · 역발상 투자</span>
+  </div>
+
+  <div class="qb-hero">
+    <p>"주식시장에서는 모두가 흥분해서 달려드는 주식에 오락세와 같은 프리미엄을 붙인다. 반면 인기 없는 따분한 주식은 할인을 해준다. 이럴 때 할인된 주식을 많이 사둬라."</p>
+    <span class="hero-attr">— 랄프 웬저 (Ralph Wanger), 에이콘 펀드 창립자</span>
+  </div>
+
+  <p class="qb-section-title">오락세의 정체</p>
+  <p class="qb-body">주식시장에도 입장료가 있습니다. 뉴스에 자주 오르고, 유튜브 영상 제목을 장식하며, 지인 사이에서 화제가 되는 종목에는 눈에 보이지 않는 '인기세'가 붙습니다. 웬저는 이를 오락세(entertainment premium)라 불렀습니다. 투자자가 흥분의 대가를 지불하는 것이죠.</p>
+  <p class="qb-body">반대편에는 아무도 관심 갖지 않는 주식들이 있습니다. 사업은 탄탄하지만 뉴스거리가 없고, 이름도 생소하며, 설명하기도 번거로운 종목들. 그 따분함이 바로 할인의 이유입니다.</p>
+
+  <p class="qb-section-title">월가를 이긴 30년</p>
+  <div class="qb-card-grid">
+    <div class="qb-card">
+      <div class="qb-card-label">에이콘 펀드 연평균 수익률</div>
+      <div class="qb-card-val">17.2% (1970~1998)</div>
+    </div>
+    <div class="qb-card">
+      <div class="qb-card-label">같은 기간 S&P 500</div>
+      <div class="qb-card-val">14.4%</div>
+    </div>
+    <div class="qb-card">
+      <div class="qb-card-label">33년 누적 수익</div>
+      <div class="qb-card-val">원금의 130배</div>
+    </div>
+    <div class="qb-card">
+      <div class="qb-card-label">USA 투데이 선정 1위</div>
+      <div class="qb-card-val">워렌 버핏을 제치고</div>
+    </div>
+  </div>
+  <p class="qb-body">웬저는 1970년대 초 모든 시선이 '니프티 피프티(Nifty Fifty)' 대형 우량주에 쏠렸던 시기에 역방향을 선택했습니다. 초기 6년간 수익률은 0%. 그러나 그는 원칙을 지켰고, 결국 시장을 꾸준히 앞서는 성과를 기록했습니다.</p>
+
+  <p class="qb-section-title">명언에서 도출한 세 가지 원칙</p>
+  <ul class="qb-principles">
+    <li>
+      <div class="qb-num">1</div>
+      <div class="qb-prin-text">
+        <span class="qb-prin-title">흥분이 붙인 가격표를 경계하라</span>
+        모두가 '이번엔 다르다'고 외칠 때, 그 열기 자체가 프리미엄의 증거입니다. 주가가 아닌 사업의 가치를 먼저 보는 습관이 필요합니다.
+      </div>
+    </li>
+    <li>
+      <div class="qb-num">2</div>
+      <div class="qb-prin-text">
+        <span class="qb-prin-title">따분함을 무기로 삼아라</span>
+        인기 없다는 것은 경쟁이 적다는 뜻입니다. 남들이 분석하지 않는 곳에 미발굴 정보가 쌓입니다. 소형주 투자자의 가장 큰 자산은 아무도 보지 않는 곳을 보는 눈입니다.
+      </div>
+    </li>
+    <li>
+      <div class="qb-num">3</div>
+      <div class="qb-prin-text">
+        <span class="qb-prin-title">할인이 클수록 인내의 보상도 크다</span>
+        싸게 산 주식은 시간을 아군으로 만듭니다. 주가가 제자리여도 시간이 지나면 사업 가치가 주가를 끌어올립니다. 웬저가 30년을 버틸 수 있었던 이유입니다.
+      </div>
+    </li>
+  </ul>
+
+  <p class="qb-section-title">지금 이 시대에 던지는 질문</p>
+  <p class="qb-body">AI, 반도체, 2차전지... 시장은 늘 새로운 테마를 만들고, 투자자들은 열차에 올라타려 줄을 섭니다. 웬저의 말은 오늘도 유효합니다. 당신의 포트폴리오에서 가장 따분한 종목은 무엇인가요? 어쩌면 그것이 가장 정직한 할인을 담고 있을지 모릅니다.</p>
+  <p class="qb-body">군중이 외면한 주식에는 두 가지가 없습니다. 오락세도 없고, 따라서 당신이 지불해야 할 흥분의 대가도 없습니다.</p>
+
+  <div class="qb-closing">
+    <p>시장이 가장 지루하다고 말하는 날,<br>웬저는 가장 열심히 쇼핑을 했다.</p>
+  </div>
+
+  <div class="qb-tags">
+    <span class="qb-tag">#랄프웬저</span>
+    <span class="qb-tag">#소형주투자</span>
+    <span class="qb-tag">#역발상투자</span>
+    <span class="qb-tag">#에이콘펀드</span>
+    <span class="qb-tag">#가치투자</span>
+    <span class="qb-tag">#투자철학</span>
+    <span class="qb-tag">#오락세</span>
+    <span class="qb-tag">#저평가주</span>
+  </div>
+</article>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>개별 종목 리포트 — 주식 리서치 허브</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1a56db;--primary-dark:#1239a0;--primary-light:#3b82f6;
+  --navy:#0f2244;--navy-mid:#1e3a5f;--accent:#60a5fa;
+  --bg:#f0f5fb;--card:#fff;--border:#dbe8f8;
+  --text:#1e293b;--muted:#64748b;--light:#94a3b8;
+  --shadow-md:0 4px 20px rgba(26,86,219,.12);
+  --radius:12px;--radius-sm:8px;--t:.22s cubic-bezier(.4,0,.2,1);
+}
+html,body{height:100%;scroll-behavior:smooth}
+body{font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+      background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
+a{text-decoration:none;color:inherit}
+
+/* ── 네비바 ── */
+.navbar{position:sticky;top:0;z-index:200;background:var(--navy);box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.nb{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:8px;height:60px}
+.logo{display:flex;align-items:center;gap:10px;color:#fff;font-size:1.05rem;font-weight:700;margin-right:12px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--primary-light),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-links{display:flex;align-items:center;gap:2px;list-style:none;flex:1}
+.nav-links a{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;color:rgba(255,255,255,.75);font-size:.88rem;font-weight:500;transition:var(--t)}
+.nav-links a:hover,.nav-links a.active{background:rgba(255,255,255,.12);color:#fff}
+.nav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+#ts{color:rgba(255,255,255,.45);font-size:.75rem}
+
+/* ── 리포트 툴바 ── */
+.report-bar{background:var(--card);border-bottom:1px solid var(--border);
+             padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+             position:sticky;top:60px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.rb-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.rb-title{font-size:.9rem;font-weight:700;color:var(--text);
+           white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:480px}
+.rb-date{font-size:.78rem;font-weight:600;color:var(--primary);
+          background:#eff6ff;border:1px solid #bfdbfe;padding:3px 10px;border-radius:6px;white-space:nowrap}
+.rb-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.nav-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--radius-sm);
+          font-size:.82rem;font-weight:600;border:1px solid;transition:var(--t);white-space:nowrap;cursor:pointer}
+.nav-btn.back{background:#f8faff;color:var(--primary);border-color:var(--border)}
+.nav-btn.back:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.nav-btn.prev{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}
+.nav-btn.prev:hover{background:#15803d;color:#fff;border-color:#15803d}
+.nav-btn.next{background:#fef3c7;color:#92400e;border-color:#fde68a}
+.nav-btn.next:hover{background:#92400e;color:#fff;border-color:#92400e}
+.nav-btn.disabled{opacity:.35;pointer-events:none}
+.sep{color:var(--border);font-size:1.2rem;user-select:none}
+.pos-badge{font-size:.75rem;color:var(--muted);white-space:nowrap}
+
+/* ── iframe 래퍼 ── */
+.viewer-wrap{flex:1;display:flex;flex-direction:column;background:#fff}
+#reportFrame{width:100%;border:none;flex:1;min-height:600px;display:block}
+
+/* ── 하단 네비 ── */
+.bottom-nav{background:var(--card);border-top:1px solid var(--border);padding:14px 24px;
+             display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.bn-btn{display:flex;flex-direction:column;padding:12px 20px;border-radius:var(--radius);
+         border:1px solid var(--border);background:var(--card);transition:var(--t);
+         max-width:320px;flex:1;cursor:pointer}
+.bn-btn:hover{border-color:var(--primary-light);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.bn-btn.disabled{opacity:.3;pointer-events:none}
+.bn-label{font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:4px}
+.bn-title{font-size:.88rem;font-weight:700;color:var(--text);
+           white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bn-date{font-size:.75rem;color:var(--primary);margin-top:2px}
+.bn-center{display:flex;align-items:center;gap:8px}
+.list-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;
+           border-radius:var(--radius-sm);background:var(--primary);color:#fff;
+           font-size:.85rem;font-weight:700;border:none;cursor:pointer;transition:var(--t)}
+.list-btn:hover{background:var(--primary-dark)}
+
+/* ── 로딩 오버레이 ── */
+#loading{position:fixed;inset:0;background:rgba(240,245,251,.85);
+          display:flex;align-items:center;justify-content:center;z-index:999;
+          flex-direction:column;gap:12px}
+.spinner{width:40px;height:40px;border:3px solid var(--border);
+          border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:var(--muted);font-size:.9rem}
+
+/* ── 반응형 ── */
+@media(max-width:800px){
+  .nav-links{display:none}
+  .rb-title{max-width:200px}
+  .report-bar{gap:6px}
+}
+</style>
+<script src="../navbar.js"></script>
+<script src="../manifest.js"></script>
+</head>
+<body>
+
+<!-- 네비바 -->
+<nav class="navbar">
+  <div class="nb">
+    <a href="../index.html" class="logo">
+      <div class="logo-icon">📈</div>주식 리서치 허브
+    </a>
+    <ul class="nav-links"></ul>
+    <div class="nav-right"><span id="ts"></span></div>
+  </div>
+</nav>
+
+<!-- 리포트 툴바 -->
+<div class="report-bar" id="reportBar">
+  <div class="rb-left">
+    <span id="rbDate" class="rb-date"></span>
+    <span id="rbTitle" class="rb-title"></span>
+  </div>
+  <div class="rb-right">
+    <a href="etf_list.html" class="nav-btn back">📋 목록으로</a>
+    <span class="sep">|</span>
+    <span class="pos-badge" id="posBadge"></span>
+    <button id="btnPrev" class="nav-btn prev" onclick="goPrev()">◀ 이전</button>
+    <button id="btnNext" class="nav-btn next" onclick="goNext()">이후 ▶</button>
+  </div>
+</div>
+
+<!-- 로딩 -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p>리포트를 불러오는 중...</p>
+</div>
+
+<!-- iframe -->
+<div class="viewer-wrap">
+  <iframe id="reportFrame" src="" title="리포트" onload="onFrameLoad()"></iframe>
+</div>
+
+<!-- 하단 네비 -->
+<div class="bottom-nav" id="bottomNav" style="display:none">
+  <div id="btnPrevBottom" class="bn-btn disabled" onclick="goPrev()">
+    <div class="bn-label">◀ 이전 게시물</div>
+    <div id="prevTitle" class="bn-title">—</div>
+    <div id="prevDate"  class="bn-date">—</div>
+  </div>
+  <div class="bn-center">
+    <a href="etf_list.html" class="list-btn">📋 목록으로 돌아가기</a>
+  </div>
+  <div id="btnNextBottom" class="bn-btn disabled" onclick="goNext()" style="text-align:right">
+    <div class="bn-label">이후 게시물 ▶</div>
+    <div id="nextTitle" class="bn-title">—</div>
+    <div id="nextDate"  class="bn-date">—</div>
+  </div>
+</div>
+
+<script>
+// ── 데이터 ───────────────────────────────────────────────────
+var DATA = (window.SITE_MANIFEST && window.SITE_MANIFEST["ETF_Report"]) || [];
+
+// ── 유틸 ─────────────────────────────────────────────────────
+function fmt(s){
+  if(!s) return '';
+  var p = s.split('-');
+  return p.length===3 ? p[0]+'.'+p[1]+'.'+p[2] : s;
+}
+function getParam(key){
+  var p = new URLSearchParams(window.location.search);
+  return p.get(key)||'';
+}
+function setParam(key, val){
+  var p = new URLSearchParams(window.location.search);
+  p.set(key, val);
+  return '?'+p.toString();
+}
+
+// ── 현재 인덱스 계산 ─────────────────────────────────────────
+var currentFile = '';
+var currentIdx  = -1;
+
+function findIdx(file){
+  for(var i=0;i<DATA.length;i++){
+    var f = DATA[i].file || DATA[i].dashboard || '';
+    if(f === file) return i;
+  }
+  return -1;
+}
+
+// ── iframe 로드 ──────────────────────────────────────────────
+function onFrameLoad(){
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('bottomNav').style.display = '';
+  var frame = document.getElementById('reportFrame');
+  // 높이 자동 조정
+  try{
+    var h = frame.contentWindow.document.documentElement.scrollHeight
+          || frame.contentWindow.document.body.scrollHeight;
+    if(h > 400) frame.style.height = h + 'px';
+  } catch(e){
+    frame.style.height = '90vh';
+  }
+}
+
+// ── 리포트 로드 ──────────────────────────────────────────────
+function loadReport(file){
+  if(!file){ showError(); return; }
+  currentFile = file;
+  currentIdx  = findIdx(file);
+  var item    = currentIdx >= 0 ? DATA[currentIdx] : null;
+  var title   = item ? (item.title||item.name||file) : file;
+  var date    = item ? fmt(item.date) : '';
+
+  // 툴바 업데이트
+  document.getElementById('rbTitle').textContent = title;
+  document.getElementById('rbDate').textContent  = date;
+  document.title = title + ' — 주식 리서치 허브';
+
+  // 위치 배지
+  var total = DATA.length;
+  document.getElementById('posBadge').textContent =
+    currentIdx >= 0 ? (currentIdx+1)+'/'+total : '';
+
+  // 이전 / 다음 계산 (최신순이므로 idx+1 = 이전, idx-1 = 이후)
+  var hasPrev = currentIdx < DATA.length - 1;
+  var hasNext = currentIdx > 0;
+  var prevItem = hasPrev ? DATA[currentIdx+1] : null;
+  var nextItem = hasNext ? DATA[currentIdx-1] : null;
+
+  // 툴바 버튼
+  var btnP = document.getElementById('btnPrev');
+  var btnN = document.getElementById('btnNext');
+  btnP.classList.toggle('disabled', !hasPrev);
+  btnN.classList.toggle('disabled', !hasNext);
+
+  // 하단 카드
+  var bpB = document.getElementById('btnPrevBottom');
+  var bnB = document.getElementById('btnNextBottom');
+  bpB.classList.toggle('disabled', !hasPrev);
+  bnB.classList.toggle('disabled', !hasNext);
+  document.getElementById('prevTitle').textContent = prevItem ? (prevItem.title||prevItem.name||'') : '첫 번째 게시물입니다';
+  document.getElementById('prevDate').textContent  = prevItem ? fmt(prevItem.date) : '';
+  document.getElementById('nextTitle').textContent = nextItem ? (nextItem.title||nextItem.name||'') : '마지막 게시물입니다';
+  document.getElementById('nextDate').textContent  = nextItem ? fmt(nextItem.date) : '';
+
+  // iframe 로드
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('bottomNav').style.display = 'none';
+  var frame = document.getElementById('reportFrame');
+  frame.style.height = '80vh';
+  frame.src = encodeURIComponent(file);
+
+  // URL 업데이트
+  history.replaceState(null,'', setParam('file', file));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function goPrev(){
+  if(currentIdx < DATA.length-1){
+    var f = DATA[currentIdx+1].file || DATA[currentIdx+1].dashboard || '';
+    if(f) loadReport(f);
+  }
+}
+function goNext(){
+  if(currentIdx > 0){
+    var f = DATA[currentIdx-1].file || DATA[currentIdx-1].dashboard || '';
+    if(f) loadReport(f);
+  }
+}
+
+function showError(){
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('reportFrame').srcdoc =
+    '<div style="padding:60px;text-align:center;font-family:sans-serif;color:#64748b">'
+    +'<div style="font-size:48px;margin-bottom:16px">📭</div>'
+    +'<p>파일을 찾을 수 없습니다.</p></div>';
+}
+
+// ── 초기화 ──────────────────────────────────────────────────
+(function(){
+  var file = getParam('file');
+  if(!file && DATA.length > 0){
+    // 파라미터 없으면 최신 파일 로드
+    file = DATA[0].file || DATA[0].dashboard || '';
+  }
+  if(file) loadReport(file);
+  else showError();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACE 글로벌반도체TOP4 Plus 투자보고서</title>
+<style>
+  :root {
+    --primary: #050d1a;
+    --accent: #0a2472;
+    --accent2: #0d47a1;
+    --accent3: #1976d2;
+    --cyan: #00bcd4;
+    --bg: #eef4fb;
+    --card: #ffffff;
+    --text: #0d1b2a;
+    --muted: #546e7a;
+    --border: #cfe2f3;
+    --green: #00796b;
+    --red: #c62828;
+    --amber: #e65100;
+    --gold: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #050d1a 0%, #0a2472 55%, #0288d1 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '💡';
+    position: absolute;
+    right: 2rem;
+    bottom: 0.5rem;
+    font-size: 120px;
+    opacity: 0.05;
+    letter-spacing: -20px;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.15); color: #b3e5fc; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.25); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.75; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; color: #80deea; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent3); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* TOP4 카드 */
+  .top4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .top4-card { border-radius: 12px; padding: 1rem 1.1rem; text-align: center; position: relative; overflow: hidden; }
+  .t4-memory { background: linear-gradient(135deg, #e3f2fd, #bbdefb); border: 1.5px solid #90caf9; }
+  .t4-logic { background: linear-gradient(135deg, #e8eaf6, #c5cae9); border: 1.5px solid #9fa8da; }
+  .t4-foundry { background: linear-gradient(135deg, #e0f2f1, #b2dfdb); border: 1.5px solid #80cbc4; }
+  .t4-equip { background: linear-gradient(135deg, #fff8e1, #ffe082); border: 1.5px solid #ffd54f; }
+  .top4-category { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 5px; }
+  .top4-company { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 3px; }
+  .top4-desc { font-size: 11px; color: var(--muted); margin-bottom: 8px; line-height: 1.3; }
+  .top4-pct { font-size: 24px; font-weight: 900; color: var(--accent2); }
+  .top4-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; margin-top: 5px; display: inline-block; }
+  .tag-hbm { background: #bbdefb; color: #0d47a1; }
+  .tag-ai { background: #c5cae9; color: #1a237e; }
+  .tag-fab { background: #b2dfdb; color: #004d40; }
+  .tag-euv { background: #ffe082; color: #e65100; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, var(--accent), var(--accent3)); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 600; }
+  .holding-sub { font-size: 11px; color: var(--muted); font-weight: 400; display: block; margin-top: 1px; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 800; color: var(--accent2); font-size: 15px; min-width: 52px; text-align: right; }
+  .holding-bar-wrap { width: 90px; height: 7px; background: var(--border); border-radius: 4px; }
+  .holding-bar { height: 7px; background: linear-gradient(90deg, var(--accent2), var(--cyan)); border-radius: 4px; }
+  .holding-flag { font-size: 14px; margin-left: 4px; }
+
+  .perf-banner { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+  .perf-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; text-align: center; }
+  .perf-card .label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .perf-card .val { font-size: 20px; font-weight: 800; }
+  .val-mega { color: #7b1fa2; }
+  .val-up { color: var(--green); }
+  .val-hot { color: var(--accent2); }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f0f7ff; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+
+  .news-item { padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .ai-chain { background: linear-gradient(135deg, #e3f2fd, #e8eaf6); border: 1px solid #90caf9; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .chain-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 0.9rem; }
+  .chain-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; }
+  .chain-node { background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 14px; text-align: center; min-width: 110px; }
+  .chain-arrow { font-size: 20px; color: var(--accent3); padding: 0 6px; }
+  .chain-company { font-size: 14px; font-weight: 800; color: var(--accent2); }
+  .chain-role { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .chain-pct { font-size: 12px; font-weight: 700; color: var(--accent); margin-top: 3px; }
+
+  .div-history { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 0.5rem; }
+  .div-item { background: #f0f7ff; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; text-align: center; }
+  .div-date { font-size: 10px; color: var(--muted); }
+  .div-amount { font-size: 15px; font-weight: 700; color: var(--accent2); }
+  .div-note { font-size: 10px; color: var(--muted); }
+
+  .summary-box { background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%); border: 1px solid #90caf9; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 600; }
+  .badge-blue { background: #bbdefb; color: #0d47a1; }
+  .badge-green { background: #c8e6c9; color: #1b5e20; }
+  .badge-amber { background: #ffe082; color: #e65100; }
+  .badge-purple { background: #e1bee7; color: #4a148c; }
+
+  .highlight-row td { background: #e3f2fd !important; font-weight: 600; }
+
+  .rival-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rival-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .rival-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .rival-table tr:nth-child(even) td { background: #f0f7ff; }
+  .rival-table tr:last-child td { border-bottom: none; }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .top4-grid, .perf-banner { grid-template-columns: 1fr 1fr; }
+    .chain-flow { flex-direction: column; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 446770 · KOSPI · 글로벌 반도체 테마 · AI 공급망</div>
+      <div class="etf-name">ACE 글로벌반도체TOP4 Plus</div>
+      <div class="etf-index">추종 지수: Solactive Global Semiconductor TOP4 Plus PR Index (Solactive AG, 독일) | 운용사: 한국투자신탁운용(ACE)</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 10일</div>
+      <div class="nav-display">78,745원</div>
+      <div class="nav-change">+1.10% (+855원) · 52주 최고가 신기록 달성!</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산: 1조2,029억원</span>
+    <span class="pill">📋 실부담비율: 0.60%/년</span>
+    <span class="pill">📅 상장일: 2022.11.15</span>
+    <span class="pill">💵 배당수익률: 0.48% (분기 분배)</span>
+    <span class="pill">🌏 4개국 반도체 챔피언 투자</span>
+    <span class="pill">🚀 상장 후 누적 수익률: +596%</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">현재가 (2026.05.08)</div>
+      <div class="kpi-value" style="color:var(--accent2);">78,745원</div>
+      <div class="kpi-sub">52주 고점 신기록 갱신 중</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순자산총액 (AUM)</div>
+      <div class="kpi-value">1.20조원</div>
+      <div class="kpi-sub">2026.02 1조원 → 4월 1.2조 돌파</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">상장 이후 누적 수익률</div>
+      <div class="kpi-value" style="color:#7b1fa2;">+596%</div>
+      <div class="kpi-sub">2022.11.15 상장 (약 2.5년)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 저점 대비 상승</div>
+      <div class="kpi-value" style="color:var(--green);">+244%</div>
+      <div class="kpi-sub">22,900 → 78,745원</div>
+    </div>
+  </div>
+
+  <!-- ===== 수익률 배너 ===== -->
+  <div class="perf-banner">
+    <div class="perf-card">
+      <div class="label">상장 후 누적</div>
+      <div class="val val-mega">+596%</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">52주 최저 대비</div>
+      <div class="val val-up">+244%</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">2026 YTD 추정</div>
+      <div class="val val-hot">+50%↑</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">순자산 성장 (연초)</div>
+      <div class="val val-up">+20%</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">개인 순매수 (YTD)</div>
+      <div class="val val-hot">1,308억</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">현재가 52주 고/저</div>
+      <div class="val" style="color:var(--amber);">역대 최고</div>
+    </div>
+  </div>
+
+  <!-- ===== AI 공급망 플로우 ===== -->
+  <div class="ai-chain">
+    <div class="chain-title">🔗 AI 반도체 공급망 4대 독점기업 — 각 카테고리 글로벌 1위만 편입</div>
+    <div class="chain-flow">
+      <div class="chain-node">
+        <div class="chain-company">ASML 🇳🇱</div>
+        <div class="chain-role">EUV 노광장비<br>글로벌 독점</div>
+        <div class="chain-pct">~21%</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node">
+        <div class="chain-company">TSMC 🇹🇼</div>
+        <div class="chain-role">파운드리<br>AI칩 수탁생산</div>
+        <div class="chain-pct">~20%</div>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node">
+        <div class="chain-company">Nvidia 🇺🇸</div>
+        <div class="chain-role">AI GPU<br>시스템반도체</div>
+        <div class="chain-pct">~18%</div>
+      </div>
+      <div class="chain-arrow">+</div>
+      <div class="chain-node">
+        <div class="chain-company">SK하이닉스 🇰🇷</div>
+        <div class="chain-role">HBM 메모리<br>AI 서버 필수</div>
+        <div class="chain-pct">~22%</div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      4개사 합산 약 81% 집중 → AI 데이터센터 하나를 만들기 위한 필수 부품 공급사 전부를 담은 구조
+    </div>
+  </div>
+
+  <!-- ===== TOP4 카드 ===== -->
+  <div class="top4-grid">
+    <div class="top4-card t4-memory">
+      <div class="top4-category">① 메모리 반도체</div>
+      <div class="top4-company">SK하이닉스</div>
+      <div class="top4-desc">HBM3E 독점 공급<br>엔비디아 H100/H200/B200<br>1Q26 영업이익 37.6조 (역대 최대)</div>
+      <div class="top4-pct">21.56%</div>
+      <span class="top4-tag tag-hbm">HBM 시장점유율 1위</span>
+    </div>
+    <div class="top4-card t4-logic">
+      <div class="top4-category">② 비메모리(시스템) 반도체</div>
+      <div class="top4-company">Nvidia</div>
+      <div class="top4-desc">AI GPU 시장 90%+ 점유<br>Blackwell B200·GB200 수요 폭증<br>데이터센터 매출 YoY 급성장</div>
+      <div class="top4-pct">18.17%</div>
+      <span class="top4-tag tag-ai">AI GPU 독점</span>
+    </div>
+    <div class="top4-card t4-foundry">
+      <div class="top4-category">③ 파운드리</div>
+      <div class="top4-company">TSMC</div>
+      <div class="top4-desc">고객: NVDA·AMD·Apple·Qualcomm<br>2nm 공정 양산 준비<br>1Q26 순이익 YoY +58%</div>
+      <div class="top4-pct">20.16%</div>
+      <span class="top4-tag tag-fab">파운드리 점유율 60%+</span>
+    </div>
+    <div class="top4-card t4-equip">
+      <div class="top4-category">④ 반도체 장비</div>
+      <div class="top4-company">ASML</div>
+      <div class="top4-desc">EUV 노광장비 전 세계 독점<br>TSMC·삼성·하이닉스 고객<br>2nm 이하 공정 = ASML 필수</div>
+      <div class="top4-pct">21.01%</div>
+      <span class="top4-tag tag-euv">EUV 글로벌 독점</span>
+    </div>
+  </div>
+
+  <!-- ===== 전체 구성종목 ===== -->
+  <div class="card">
+    <div class="card-title">전체 구성 종목 10개 (2026.02.09 GoInsider 기준)</div>
+    <div class="badge-row">
+      <span class="badge badge-blue">총 10개 종목 집중</span>
+      <span class="badge badge-purple">TOP4 합산 80.9%</span>
+      <span class="badge badge-green">나머지 6개: ~20% 동일 가중</span>
+      <span class="badge badge-amber">4개국 글로벌 분산</span>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">SK하이닉스 <span class="holding-flag">🇰🇷</span>
+        <span class="holding-sub">HBM3E · D램 · NAND · 1Q26 영업이익 37.6조 (사상 최대) · 목표주가 130만원 제시</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">21.56%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">ASML Holding <span class="holding-flag">🇳🇱</span>
+        <span class="holding-sub">EUV·DUV 노광장비 전 세계 유일 공급사 · 선단 공정 필수 · 주문 잔고 급증</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">21.01%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:97%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">TSMC (ADR) <span class="holding-flag">🇹🇼</span>
+        <span class="holding-sub">파운드리 1위 · 1Q26 순이익 YoY +58% · 2nm 공정 준비 · 미국 팹 확장</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">20.16%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:93%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">Nvidia <span class="holding-flag">🇺🇸</span>
+        <span class="holding-sub">AI GPU 시장 90%+ · Blackwell B200 · 데이터센터 폭발적 수요 · 시총 글로벌 1위</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">18.17%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:84%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">삼성전자 <span class="holding-flag">🇰🇷</span>
+        <span class="holding-sub">메모리 2위 (HBM 격차) · 파운드리 2위 · 반도체 중장기 회복 기대 · 소수 비중</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">3.55%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:16%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">Texas Instruments <span class="holding-flag">🇺🇸</span>
+        <span class="holding-sub">아날로그 반도체 1위 · 산업·자동차용 · 레거시 공정 강점</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">3.54%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:16%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">7</div>
+      <div class="holding-name">Applied Materials (AMAT) <span class="holding-flag">🇺🇸</span>
+        <span class="holding-sub">증착·식각 장비 · 반도체 장비 분야 2위 · ASML 보완재</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">3.41%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:16%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">8</div>
+      <div class="holding-name">AMD <span class="holding-flag">🇺🇸</span>
+        <span class="holding-sub">AI GPU MI300X · 데이터센터 CPU · Nvidia 대안 수요 부상</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">3.10%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:14%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">9</div>
+      <div class="holding-name">Broadcom <span class="holding-flag">🇺🇸</span>
+        <span class="holding-sub">AI 네트워킹 칩 · 맞춤형 AI ASIC · Google·Meta 협업</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">3.01%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:14%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">10</div>
+      <div class="holding-name">Qualcomm <span class="holding-flag">🇺🇸</span>
+        <span class="holding-sub">모바일 AP 1위 · 엣지 AI 부상 · 온디바이스 AI 수혜</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">~2.5%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:12%"></div></div>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      ※ 비중 출처: GoInsider 2026.02.09 기준. 분기별 리밸런싱으로 비중 변동. 삼성전자 대신 SK하이닉스를 메모리 대표로 편입 — HBM 시장 지배력 반영한 의도적 설계.
+    </div>
+  </div>
+
+  <!-- ===== 수익률 + 분배금 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">기간별 수익률 성과</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>기간</th><th>ACE 반도체TOP4</th><th>코스피200 비교</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>상장 이후(~2.5년)</td><td class="positive">+596%</td><td>압도적 초과</td></tr>
+          <tr><td>52주 저점 대비</td><td class="positive">+243.9%</td><td>22,900→78,745</td></tr>
+          <tr><td>2026 YTD (추정)</td><td class="positive">+50%↑ 추정</td><td>대폭 초과</td></tr>
+          <tr><td>순자산 성장 (YTD)</td><td class="positive">+19.96%</td><td>1조→1.2조</td></tr>
+          <tr><td>현재가 (2026.05.08)</td><td>78,745원</td><td>52주 최고 신기록</td></tr>
+          <tr><td>실부담비율</td><td>0.60%/년</td><td>글로벌 ETF 수준</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">분기 분배금 현황 (과거)</div>
+      <div style="font-size:13px; color:var(--muted); margin-bottom:0.75rem;">
+        연간 분배율 약 0.48%. 성장형 ETF이므로 분배금보다 주가 상승이 핵심 수익원. 분기별 소액 분배 정책 유지.
+      </div>
+      <div style="background:#f0f7ff; border-radius:8px; padding:0.9rem; font-size:13px; line-height:1.8;">
+        <strong>분배 구조 요약</strong><br>
+        · 주기: 분기 1회 (3월·6월·9월·12월)<br>
+        · 연간 분배율: ~0.48%<br>
+        · 현재가(78,745원) 기준 연 분배금 추정: 약 380원 내외<br>
+        · 과세: 배당소득세 15.4% 적용 (보유기간 과세)<br>
+        · 성격: <strong>자본 이득(주가 상승)이 주요 수익원</strong><br>
+        · 분배금은 ETF 총 수익률의 극히 일부에 불과
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 유사 반도체 ETF 비교 ===== -->
+  <div class="card">
+    <div class="card-title">국내 상장 글로벌 반도체 ETF 비교</div>
+    <table class="rival-table">
+      <thead>
+        <tr><th>ETF명</th><th>운용사</th><th>핵심 특징</th><th>편입 구조</th><th>비고</th></tr>
+      </thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td><strong>ACE 글로벌반도체TOP4 Plus</strong></td>
+          <td>한국투자</td>
+          <td>4대 카테고리 챔피언</td>
+          <td>SK하닉/NVDA/TSMC/ASML ~80%</td>
+          <td>설정 후 +596%</td>
+        </tr>
+        <tr>
+          <td>TIGER 반도체TOP10</td>
+          <td>미래에셋</td>
+          <td>국내 반도체 집중</td>
+          <td>삼성전자·SK하이닉스 중심</td>
+          <td>국내 특화</td>
+        </tr>
+        <tr>
+          <td>KODEX 반도체</td>
+          <td>삼성</td>
+          <td>SOXX 지수 추종</td>
+          <td>미국 반도체 30종목</td>
+          <td>광범위 분산</td>
+        </tr>
+        <tr>
+          <td>KBSTAR AI반도체솔루션</td>
+          <td>KB</td>
+          <td>AI 반도체 밸류체인</td>
+          <td>글로벌 AI칩 공급망</td>
+          <td>유사 콘셉트</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      ※ ACE TOP4의 차별점: ① 메모리 1위를 삼성전자가 아닌 SK하이닉스로 선정 (HBM 선도) ② 글로벌 4개국 분산 (한국·미국·네덜란드·대만) ③ 각 카테고리 단 1개사만 집중 편입
+    </div>
+  </div>
+
+  <!-- ===== 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈 (2026)</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.24</span>
+      </div>
+      <div class="news-title">순자산 1조2천억 돌파 + 상장 후 수익률 596% — 역대 최고 신기록 행진</div>
+      <div class="news-summary">2026.04.22 기준 순자산 1조2,029억원 집계. 2월 1조원 달성 후 단 2개월 만에 20% 추가 성장. 연초 이후 개인 순매수만 1,308억원. 한국투자신탁운용 ETF본부장 "AI 메가트렌드가 지속되는 한 밸류체인 정점의 4개 기업 지위는 쉽게 흔들리지 않을 것".</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04</span>
+      </div>
+      <div class="news-title">SK하이닉스 1분기 영업이익 37.6조원 — 사상 최대 실적 경신</div>
+      <div class="news-summary">ETF 최대 편입 종목 SK하이닉스가 1분기 영업이익 37.6조원으로 역대 최대치 달성. D램 이익률 76%. 목표주가 97만원→130만원 상향. 2026년 영업이익 211조원, 2027년 282조원 전망. HBM 가격 상승 사이클 연말까지 지속 전망.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04</span>
+      </div>
+      <div class="news-title">TSMC 1분기 순이익 YoY +58% — 2nm 준비·미국 팹 확장 가속</div>
+      <div class="news-summary">TSMC 1분기 순이익 전년동기 대비 58% 급증. AI 가속기(NVDA·AMD·Broadcom용) 수요 폭증이 주된 요인. 미국 애리조나 팹 증설, 일본 구마모토 2공장 착공, 독일 팹 검토 등 글로벌 생산 확대 가속.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.02</span>
+      </div>
+      <div class="news-title">ACE 브랜드 최초 ETF로 순자산 1조원 돌파 — ACE 전체 합산 30조 달성</div>
+      <div class="news-summary">ACE 글로벌반도체TOP4 Plus가 ACE 브랜드 출범 후 첫 번째 1조 클럽 진입 상품. 한국투자신탁운용 ACE ETF 전체 합산 순자산 30조원 돌파. 반도체 ETF 중 2022년 상장 이후 최장기 성과를 보유한 상품.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04~05</span>
+      </div>
+      <div class="news-title">미·중 반도체 수출 통제 강화 — ASML·TSMC 중국 납품 제한</div>
+      <div class="news-summary">미국의 대중 반도체 장비 수출 통제 강화로 ASML의 중국 DUV 장비 신규 출하 제한 우려. 단기 실적 영향은 제한적이나, 지정학 리스크가 포트폴리오 전체(ASML 21%, TSMC 20% 편입)에 잠재적 리스크로 상존.</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">🤖</span>
+          <span><strong>AI 인프라 투자 슈퍼사이클</strong> — 마이크로소프트·구글·메타·아마존 AI 데이터센터 투자가 연간 수백조원 규모로 확장 중. 이 모든 투자는 Nvidia GPU + SK하이닉스 HBM + TSMC 파운드리 + ASML 장비 없이 불가능 → 4개사 수요 구조적 성장.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🏆</span>
+          <span><strong>카테고리별 독점 기업 → 가격 결정력</strong> — 4개 기업 모두 각 분야에서 대체 불가능한 독점적 지위. HBM은 SK하이닉스가 NVDA 독점 공급, EUV는 ASML 전 세계 유일. 독점 기업은 경기 하락 시에도 상대적 경쟁력 유지.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🎯</span>
+          <span><strong>삼성전자 대신 SK하이닉스 — 탁월한 종목 선택</strong> — 메모리 카테고리에서 삼성전자가 아닌 SK하이닉스를 선택한 것이 HBM 수요 폭증과 맞물려 압도적 성과 견인. SK하이닉스 HBM 시장 점유율 50%+, 1Q26 영업이익 역대 최대.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🌏</span>
+          <span><strong>4개국 글로벌 분산 — 단일 지역 리스크 분산</strong> — 한국(SK하이닉스) + 미국(NVDA) + 네덜란드(ASML) + 대만(TSMC). 단일 국가 정치·규제 리스크를 분산하면서도 AI 공급망을 집중 포착하는 구조.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">📈</span>
+          <span><strong>역대 최고가 행진 — 기관 자금 유입 가속</strong> — 52주 고점 신기록 달성 중. 2026 YTD 약 +50%+ 추정. 개인 순매수 YTD 1,308억원, 최근 1년 1,990억원. 모멘텀 강세 구간.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">🌐</span>
+          <span><strong>미·중 지정학 리스크 — 수출 통제 직격</strong> — ASML 대중 장비 수출 금지 확대 가능성. TSMC의 대만 지정학 리스크(양안 긴장). 미국의 중국 반도체 제재 강화 시 중국 매출 비중이 있는 편입 종목 모두 영향.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">💰</span>
+          <span><strong>환율 리스크 — 원·달러 변동 직접 노출</strong> — 구성 종목의 NVDA·TSMC·ASML·AMD·Broadcom 등이 해외 주식. 원화 강세(달러 약세) 시 ETF 기준가가 하락하는 구조. 실부담비율 0.60% + 환헤지 없음.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">📉</span>
+          <span><strong>극단적 고평가 + 집중도</strong> — 상장 후 +596% 상승으로 밸류에이션이 크게 오른 상태. 4개 핵심 종목이 81% 집중. AI 수요 기대 실망 또는 NVDA 실적 쇼크 시 ETF 전체 급락 위험.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">⚠️</span>
+          <span><strong>반도체 사이클 하강 리스크</strong> — 메모리(SK하이닉스) 업황은 사이클 특성이 강함. HBM 공급 증가(삼성·마이크론 추격), AI 투자 둔화 시 가격 하락 가능. DRAM 스팟가격 하락 = 하이닉스 실적 직격.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">🔻</span>
+          <span><strong>총보수 0.60% — 국내 ETF 대비 높음</strong> — 글로벌 ETF 투자 특성상 총보수 0.60%는 국내 지수형(0.10~0.20%) 대비 높음. 장기 보유 시 복리 비용 효과 무시 불가. 배당수익률 0.48%가 총보수를 겨우 상쇄.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      ACE 글로벌반도체TOP4 Plus(446770)는 한국투자신탁운용이 2022년 11월 15일 ACE 브랜드로 출시한 첫 번째 ETF다. 독일 Solactive AG가 산출하는 Solactive Global Semiconductor TOP4 Plus 지수를 추종하며, 반도체 산업을 ① 메모리, ② 비메모리(시스템), ③ 파운드리, ④ 반도체 장비 4개 카테고리로 나눠 각 분야 글로벌 1위 기업(SK하이닉스·엔비디아·TSMC·ASML)에 각각 약 20%씩 집중 투자한다. 나머지 6개 종목(삼성전자·TI·AMAT·AMD·Broadcom·Qualcomm)은 잔여 20% 내에서 동일 가중으로 편입된다.<br><br>
+      이 ETF의 가장 중요한 투자 결정은 <strong>메모리 대표 기업으로 삼성전자 대신 SK하이닉스를 선택</strong>한 것이다. 이 선택이 HBM(고대역폭 메모리) 수요 폭증과 맞물려 상장 후 약 2.5년 만에 +596%라는 폭발적 수익률을 가능케 했다. 2026년 5월 8일 현재 78,745원으로 52주 최고가를 갱신 중이며, 52주 저점(22,900원) 대비 +244%를 기록 중이다. 순자산도 1조2천억원을 돌파해 한국투자신탁운용 ACE ETF 라인업의 기함(flagship) 상품으로 자리잡았다.<br><br>
+      투자 논거는 명확하다: <strong>AI 데이터센터를 만들기 위해 필요한 4가지 핵심 부품(GPU+HBM+파운드리+EUV장비)을 공급하는 전 세계 유일한 기업들에 한꺼번에 투자하는 구조</strong>다. TSMC 1Q26 순이익 +58% YoY, SK하이닉스 영업이익 역대 최대(37.6조원)가 보여주듯 AI 사이클의 실적 가시성은 높다. 리스크 요인은 미·중 반도체 수출 통제 확대, 원·달러 환율 변동(무헤지), 고집중 포트폴리오의 개별 종목 쇼크, 그리고 메모리 사이클 하강 가능성이다. 총보수 0.60%는 국내 기준 다소 높지만 글로벌 분산 투자 비용으로 감안할 수 있다. AI 인프라 슈퍼사이클을 믿는 중장기 투자자에게 최적의 글로벌 반도체 원스톱 솔루션이다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 해외 주식 투자 ETF 특성상 환율 리스크에 노출됩니다. ETF 투자는 원금 손실 가능성이 있으며, 과거 수익률이 미래 수익을 보장하지 않습니다. 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다. 최신 구성종목·순자산은 한국투자신탁운용 ACE ETF 공식 홈페이지에서 확인하세요.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

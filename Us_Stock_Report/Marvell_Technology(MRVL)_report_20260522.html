@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marvell Technology (MRVL) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0d1b2a;
+    --accent: #00c2ff;
+    --accent2: #0056b3;
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Header */
+  .report-header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #0d3b6e 60%, #0056b3 100%);
+    color: white; padding: 2.5rem 2rem 2rem; position: relative; overflow: hidden;
+  }
+  .report-header::after {
+    content: 'AI'; position: absolute; right: -20px; top: -30px;
+    font-size: 200px; font-weight: 900; opacity: 0.04; color: white; pointer-events: none;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: #0d1b2a; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 4px; letter-spacing: 1.5px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 36px; font-weight: 700; margin-top: 4px; color: #4ade80; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); }
+
+  /* Layout */
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 21px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* News */
+  .news-item { padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #eff6ff; color: #1e40af; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  /* Factor */
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Analyst */
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 600; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 5px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 700; color: var(--text); }
+  .upgrade-arrow { font-size: 10px; color: var(--green); font-weight: 700; margin-left: 2px; }
+
+  /* Summary */
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1px solid #bfdbfe; border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 16px; font-weight: 800; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  /* SEC tag */
+  .sec-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-right: 8px; }
+  .tag-8k { background: #fee2e2; color: #991b1b; }
+  .tag-def14a { background: #fef9c3; color: #854d0e; }
+  .tag-form4 { background: #e0e7ff; color: #3730a3; }
+  .tag-10q { background: #d1fae5; color: #065f46; }
+
+  /* Highlight band */
+  .highlight-band { background: linear-gradient(135deg, #0d3b6e 0%, #0056b3 100%); color: white; padding: 1.25rem 1.5rem; border-radius: 12px; margin-bottom: 1rem; }
+  .highlight-band .hl-title { font-size: 13px; font-weight: 700; opacity: 0.8; margin-bottom: 6px; }
+  .highlight-band .hl-stats { display: flex; gap: 2rem; flex-wrap: wrap; }
+  .highlight-band .hl-item { }
+  .highlight-band .hl-val { font-size: 22px; font-weight: 800; }
+  .highlight-band .hl-label { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr 1fr; } .header-meta { text-align: left; } }
+  @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">MRVL · NASDAQ</div>
+      <div class="company-name">Marvell Technology, Inc.</div>
+      <div class="company-desc">AI 데이터 인프라 반도체 선도 기업 — 커스텀 XPU, 광 연결(Optical DSP), 네트워킹 스위치로 하이퍼스케일러 AI 클러스터의 핵심 플랫폼 공급.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 22일</div>
+      <div class="price-display">$190.69</div>
+      <div class="price-change up">▲ +2.08% (2026.05.21 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$1,670억 (S&P 500 상위)</span>
+    <span class="rating-pill">🏢 섹터: AI 반도체 / 데이터 인프라</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy (36 Buy / 1 Sell)</span>
+    <span class="rating-pill">📅 다음 실적 발표: 2026.05.27 (Q1 FY2027)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI 그리드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">FY2026 연간 매출 (사상 최대)</div>
+      <div class="kpi-value">$8.195B</div>
+      <div class="kpi-sub">YoY +42% · 사상 최고치 경신</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Q4 FY2026 Non-GAAP EPS</div>
+      <div class="kpi-value" style="color:var(--green);">$0.80</div>
+      <div class="kpi-sub">컨센서스 $0.79 상회 · YoY +33%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">컨센서스 목표주가 (최근)</div>
+      <div class="kpi-value">$200~220</div>
+      <div class="kpi-sub">Citi $215 / BofA $200 / Melius $220</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value" style="font-size:16px;">$58.61~$193.32</div>
+      <div class="kpi-sub">현재가, 52주 최고가 근접</div>
+    </div>
+  </div>
+
+  <!-- Highlight Band -->
+  <div class="highlight-band">
+    <div class="hl-title">💡 FY2027~FY2028 경영진 가이던스 — 역대 최강 성장 시나리오 제시</div>
+    <div class="hl-stats">
+      <div class="hl-item">
+        <div class="hl-val">$11B+</div>
+        <div class="hl-label">FY2027 전체 매출 (>+30% YoY)</div>
+      </div>
+      <div class="hl-item">
+        <div class="hl-val">$15B</div>
+        <div class="hl-label">FY2028 전체 매출 (~+40% YoY)</div>
+      </div>
+      <div class="hl-item">
+        <div class="hl-val">+40% YoY</div>
+        <div class="hl-label">FY2027 데이터센터 매출 성장 전망</div>
+      </div>
+      <div class="hl-item">
+        <div class="hl-val">+50% YoY</div>
+        <div class="hl-label">FY2028 데이터센터 매출 성장 전망</div>
+      </div>
+      <div class="hl-item">
+        <div class="hl-val">$2.4B</div>
+        <div class="hl-label">Q1 FY2027 가이던스 (±5%)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q4 FY2026 최신 (2026.03.05 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:10px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Q4 매출 (실제 vs 컨센서스)</div>
+        <div style="font-size:20px;font-weight:800;">$2.219B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 +0.86% 초과</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">컨센서스 $2.20B · YoY +22% · 사상 최대 분기 매출</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Q4 Non-GAAP EPS (실제 vs 컨센서스)</div>
+        <div style="font-size:20px;font-weight:800;">$0.80 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +1.3%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">컨센서스 $0.79 · YoY +33%</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:0.75rem;">
+        <div style="font-size:10px;color:var(--muted);">데이터센터 매출 (Q4)</div>
+        <div style="font-size:16px;font-weight:700;">$1.65B</div>
+        <div style="font-size:11px;color:var(--muted);">전체의 74.4% · YoY +21%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:0.75rem;">
+        <div style="font-size:10px;color:var(--muted);">Non-GAAP 영업이익률 (Q4)</div>
+        <div style="font-size:16px;font-weight:700;">35.7%</div>
+        <div style="font-size:11px;color:var(--muted);">FY2026 전체 35.3% (+640bps YoY)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:0.75rem;">
+        <div style="font-size:10px;color:var(--muted);">커스텀 XPU 사업 (FY2026)</div>
+        <div style="font-size:16px;font-weight:700;">$1.5B</div>
+        <div style="font-size:11px;color:var(--muted);">제로에서 시작 → 2년 만에 $1.5B</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>CEO Matt Murphy 발언 (Q4 실적 컨퍼런스콜):</strong> "FY2027 매출은 분기마다 YoY 성장이 가속될 것이며, 북클로 주문이 사상 최대 속도로 증가 중이다. 데이터센터 비즈니스에서 강력한 모멘텀이 지속되고 있다." Q1 FY2027 가이던스 $2.4B(±5%)는 당시 컨센서스($2.27~2.28B)를 5.2% 상회해 주가 +15% 급등(애프터마켓).
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 주요 내역</div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-tag tag-8k">8-K</span>
+        <span style="font-size:13px;font-weight:600;">Polariton Technologies 인수 발표 — 차세대 광 연결 3.2T+ 로드맵 강화</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.22</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-tag tag-def14a">DEF 14A</span>
+        <span style="font-size:13px;font-weight:600;">주주총회 위임장 명세서(Proxy) 제출 — 이사 선임·보수 안건 포함</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.13</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-tag tag-form4">Form 4 / 144</span>
+        <span style="font-size:13px;font-weight:600;">CEO Matt Murphy 내부자 매도 37,500주 (성과급 수령 22,500주 포함 · 10b5-1 플랜)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04~05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-tag tag-form4">Form 4</span>
+        <span style="font-size:13px;font-weight:600;">CFO Willem Meintjes 4,000주 매도 (@$175.24 가중평균 · 10b5-1 플랜)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.15</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-tag tag-8k">8-K</span>
+        <span style="font-size:13px;font-weight:600;">Q4 FY2026 실적 발표 — 매출 $8.195B 사상 최대, FY2027 가이던스 대폭 상향</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.05</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 12px;background:#fefce8;border-radius:6px;">
+      ⚠️ <strong>투자자 주목</strong>: CEO·CFO의 내부자 매도는 모두 사전 수립된 10b5-1 플랜에 의한 정기적 처분으로, 통상적 수준이나 주가 급등 구간에서 집중된 점은 모니터링 필요. 내부자 3개월 누적 매도 ~$29.9M.
+    </div>
+  </div>
+
+  <!-- 주요 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.21</span>
+      </div>
+      <div class="news-title">Citi, 목표주가 $118→$215 (+82%) 상향 — Amazon Trainium 2 핵심 파트너십 재조명</div>
+      <div class="news-summary">Citi 애널리스트 Atif Malik은 Q1 FY2027 실적 발표를 앞두고 목표주가를 82% 상향. Amazon Web Services의 Trainium 2 AI 가속기를 Marvell이 공동 설계한 사실을 핵심 근거로 제시. AWS는 AI 컴퓨팅 지출이 가장 빠르게 증가하는 하이퍼스케일러 중 하나로, 이 파트너십이 단기 실적 드라이버로 직결된다고 분석.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.18~20</span>
+      </div>
+      <div class="news-title">월가 애널리스트 줄줄이 목표주가 대폭 상향 — Melius $220, BofA $200, Wells Fargo $195, RBC $200</div>
+      <div class="news-summary">Melius Research는 Marvell을 AI "병목 칩" 종목으로 분류하며 $220 목표주가를 제시. BofA 애널리스트 Vivek Arya는 2027년 AI 데이터센터 TAM을 $1.7조로 상향하며 $200 목표를 제시하고 Nvidia·Broadcom과 함께 반도체 탑픽으로 선정. RBC는 Nvidia의 MRVL 광 연결 사업 $2B 투자를 "광 인프라 지배력의 강력한 보증"으로 해석.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.22</span>
+      </div>
+      <div class="news-title">Polariton Technologies 인수 — 실리콘 포토닉스·플라스모닉스 기반 3.2T 광 연결 기술 확보</div>
+      <div class="news-summary">Marvell이 고속·저전력 플라스모닉 기반 실리콘 포토닉스 디바이스 개발사 Polariton Technologies를 인수 완료. 이 기술은 1.6T를 넘어 3.2T 이상의 광 연결을 가능하게 하는 핵심 기술로, AI 데이터센터의 초고속 인터커넥트 수요를 정조준한 전략적 M&A. Celestial AI·XConn에 이은 AI 생태계 포트폴리오 강화의 연속선.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.18</span>
+      </div>
+      <div class="news-title">AMD, MRVL 지분 취득 공시 ($650만) — AI 인터커넥트 생태계 전략적 연대 시사</div>
+      <div class="news-summary">AMD가 최신 13F 공시를 통해 Marvell 주식 약 $650만 규모 신규 보유를 공개. 금액은 소규모이나 GPU 아키텍처 기업이 광 연결 칩 선도기업에 지분 투자한 것은 "AI 성공은 순수 컴퓨팅이 아닌 클러스터 전체를 연결하는 패브릭 기술에 달렸다"는 전략적 신호로 해석. 이에 앞서 Nvidia도 MRVL 광학 사업에 $2B 투자를 집행.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.03.17</span>
+      </div>
+      <div class="news-title">차세대 CXL 스위치 · 업계 최초 PCIe 6.0 260-lane 스위치 동시 발표</div>
+      <div class="news-summary">Marvell이 AI "메모리 벽(Memory Wall)" 문제를 해결하는 차세대 CXL 스위치와 AI 데이터센터 스케일업을 위한 업계 최초 PCIe 6.0 260-lane 스위치를 동시 출시. 이는 커스텀 XPU와 광 연결에 이어 CXL·PCIe 스위칭까지 AI 인프라 전 레이어를 장악하려는 플랫폼 전략의 일환.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.15</span>
+      </div>
+      <div class="news-title">CEO·CFO 10b5-1 플랜 내부자 매도 지속 — 주가 급등 구간 집중</div>
+      <div class="news-summary">CEO Matt Murphy는 3~4월에 37,500주 처분(성과급 22,500주 포함), CFO Willem Meintjes는 5월 15일 4,000주를 $175.24에 매도. 모두 사전 수립 10b5-1 플랜에 의한 정기 처분이나, 주가가 52주 최고가권인 시점에 집중된 내부자 매도는 단기 오버행 리스크로 해석될 수 있음.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>커스텀 XPU — AWS Trainium 2의 숨은 진짜 주인공</strong><br>Marvell이 Amazon Trainium 2를 공동 설계. 커스텀 비즈니스는 FY2026에 $1.5B(제로에서 2년 만에), FY2027 +20% YoY, FY2028엔 최소 2배 이상 성장이 예상. CXL·NIC용도 포함 FY2029까지 $2B+ 경로 확보.</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>광 연결 1.6T→3.2T 세대 전환의 유일한 풀스택 공급자</strong><br>1.6T 제품 양산 중, 2nm 코히런트 DSP·800G DSP 발표, Polariton 인수로 3.2T+ 로드맵 완성. Nvidia·RBC가 MRVL 광학 사업에 $2B 투자할 만큼 시장 내 지배력 인정. AI 클러스터 대역폭 요구가 기하급수적으로 증가하는 한 수요는 지속.</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>FY2027~2028 가이던스 — 반도체 사상 가장 강한 성장 청사진</strong><br>FY2027 $11B+, FY2028 $15B 목표는 각각 +30%, +40%의 복리 성장을 의미. 데이터센터만 FY2028 +50% YoY. 책잡 주문이 사상 최대 속도로 증가 중이라는 CEO 발언이 가이던스 신뢰성 뒷받침.</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>영업 레버리지 구조 — 매출 성장이 이익으로 직결</strong><br>FY2026 Non-GAAP 영업이익률 35.3%(+640bps YoY). 매출이 $15B으로 확대되면 이익률은 40%대로 상승 가능. EPS는 이미 FY2026에 +81% YoY 성장(Non-GAAP $2.84).</div>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <div><strong>YTD +120% 이후에도 애널리스트는 여전히 추가 상승 전망</strong><br>연초 대비 주가가 두 배 이상 올랐음에도 Citi $215, Melius $220, BofA $200 등 현재가(~$191) 대비 5~15% 추가 상승여력 제시. Morningstar 적정가 $266로 현재가 대비 40% 이상 저평가 의견도 존재.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>밸류에이션 부담 — P/E 57~65x, P/S 18~19x</strong><br>현재 주가는 FY2027 이후 강한 성장을 상당 부분 선반영한 수준. 성장 둔화나 가이던스 미달 시 멀티플 축소(디레이팅)가 빠르게 발생할 수 있음. GF Score 기준 현재가는 적정가 $103.22 대비 82.8% 고평가로 표시.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>고객 집중 리스크 — AWS·Google·Microsoft 의존도</strong><br>하이퍼스케일러 몇 곳의 AI 설비 투자 계획이 조정되거나 커스텀 XPU를 내재화할 경우 매출에 직격탄. 특히 AWS Trainium이 성과를 내지 못하면 커스텀 비즈니스 성장 전망 전체가 흔들릴 수 있음.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>Nvidia·Broadcom과의 AI 인프라 경쟁 심화</strong><br>Broadcom은 커스텀 AI 가속기와 광 연결 양쪽에서 Marvell의 직접 경쟁자. Nvidia는 AI 클러스터 전체를 수직 통합하려는 전략을 가속 중. 규모와 R&D 예산에서 열위인 Marvell이 장기적으로 차별화를 유지할 수 있는지가 관건.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>내부자 매도 및 공급망 이슈</strong><br>CEO·CFO의 10b5-1 플랜 내부자 매도가 주가 최고가권에서 집중. 또한 2nm 웨이퍼 공급이 TSMC 선단 공정 의존으로 제한될 수 있어 하반기 생산 차질 가능성도 잠재 리스크.</div>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <div><strong>거시 및 규제 리스크 — 미중 무역 갈등, 반도체 수출 통제</strong><br>중국은 Marvell 매출의 일부를 차지하는 시장. 미국의 반도체 수출 통제 강화나 미중 무역 갈등 악화는 매출 감소와 공급망 재편 비용으로 이어질 수 있음.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 최신 애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Citi (Atif Malik)</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">AWS Trainium 2 공동 설계 → AI 가속기 직접 수익화 구조 부각</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">Buy</span>
+        <span class="target-price">$215</span>
+        <span class="upgrade-arrow">↑ from $118</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.21</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Melius Research</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">AI "병목 칩" 포지셔닝 — 전통 소프트웨어·메가캡 시총 잠식 예상</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">Buy</span>
+        <span class="target-price">$220</span>
+        <span class="upgrade-arrow">↑ from $140</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.18</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Bank of America (Vivek Arya)</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">2027 AI 데이터센터 TAM $1.7조 상향 · 반도체 탑픽 선정</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">Buy</span>
+        <span class="target-price">$200</span>
+        <span class="upgrade-arrow">↑ from $125</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Wells Fargo (Aaron Rakers)</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">AWS Trainium 확장에 따른 중기 수익 가시성 높아져</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">Overweight</span>
+        <span class="target-price">$195</span>
+        <span class="upgrade-arrow">↑ from $135</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.20</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">RBC Capital (Srini Pajjuri)</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">광학 모멘텀 지속 · Nvidia $2B 투자를 광 연결 지배력의 증거로 해석</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">Buy</span>
+        <span class="target-price">$200</span>
+        <span class="upgrade-arrow">↑ from $170</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">B. Riley</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">AI 지출 가속 · 하이퍼스케일러·네오클라우드 캐팩스 2026-2028 상향</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">Buy</span>
+        <span class="target-price">$205</span>
+        <span class="upgrade-arrow">↑ from $156</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.19</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">TD Cowen</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">목표주가 대비 소폭 업사이드 · 보수적 관점 유지</div>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">Hold</span>
+        <span class="target-price">$190</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.15</span>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:10px 14px;background:#f0f9ff;border-radius:8px;font-size:12px;color:var(--text);">
+      📊 <strong>컨센서스 요약</strong>: 36 Buy / 1 Sell (Strong Buy) · 최근 업그레이드 집중된 목표주가 범위 $195~$220 · 현재가 $190.69 대비 평균 +5~15% 업사이드 (단, 주가 급등 전 수립된 구형 타깃은 제외)
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Marvell Technology는 AI 데이터센터 인프라의 세 가지 핵심 레이어 — 커스텀 XPU 실리콘, 1.6T→3.2T 광 연결 DSP, CXL·PCIe 스위치 — 를 동시에 공략하는 '풀스택 AI 인프라 반도체' 기업으로 포지셔닝했다. FY2026 연간 매출 $8.195B(+42% YoY), Non-GAAP EPS $2.84(+81% YoY)라는 사상 최대 실적을 달성했고, Q1 FY2027 가이던스 $2.4B은 당시 월가 컨센서스를 5% 이상 초과했다. 경영진은 FY2027 $11B+, FY2028 $15B이라는 매우 공격적인 성장 청사진을 제시했으며, Amazon Trainium 2 공동 설계, Nvidia·AMD의 지분 투자, Polariton 인수 등이 그 신뢰성을 뒷받침한다. 다만 YTD 120% 이상 상승한 현 주가는 P/E 60x대로 이미 강한 기대치를 반영한 수준이며, 하이퍼스케일러 고객 집중도와 Broadcom·Nvidia와의 경쟁, 내부자 매도 오버행이 주요 단기 리스크로 존재한다. 이 종목은 AI 인프라 투자 사이클을 중장기 테마로 삼고 반도체 섹터 내 고성장·고밸류에이션 종목을 감내할 수 있는 투자자에게 적합하다. 5월 27일(현지시간) Q1 FY2027 실적 발표가 단기 주가 방향을 결정할 핵심 이벤트다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. 주식 투자에는 원금 손실 위험이 있으며, 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

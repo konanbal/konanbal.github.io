@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BigBear.ai Holdings (BBAI) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0d1b2a;
+    --accent: #1b6ca8;
+    --accent2: #0a3d62;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0d1b2a 0%, #1b4f72 60%, #1b6ca8 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #e94560; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change.down { color: #f87171; font-size: 14px; margin-top: 2px; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .warning-banner { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #92400e; display: flex; gap: 8px; align-items: flex-start; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">BBAI · NYSE</div>
+      <div class="company-name">BigBear.ai Holdings, Inc.</div>
+      <div class="company-desc">국방·국가안보·무역·여행 분야 AI 기반 의사결정 인텔리전스 솔루션 — 미 정부 전용 생성 AI 플랫폼 'Ask Sage' 보유</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 14일</div>
+      <div class="price-display">$4.19</div>
+      <div class="price-change down">▼ YTD -19% · 52주 고점 $9.39 대비 -55%</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$2.0B</span>
+    <span class="rating-pill">🏢 섹터: 방산 AI · 국가안보 기술</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (소수 커버)</span>
+    <span class="rating-pill">📅 다음 이벤트: 2026.06.09 IR</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="warning-banner">
+    ⚠️ <span><strong>투자 주의 요망:</strong> BBAI는 아직 영업 적자 기업입니다. Q1 2026 EPS -$0.12로 컨센서스를 50% 하회하고, 매출도 전년 대비 flat/소폭 하락. 고위험·고변동성(β=3.05) 종목입니다. 아래 내용은 투자 참고용 분석이며 투자 권유가 아닙니다.</span>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 매출</div>
+      <div class="kpi-value">$34.4M</div>
+      <div class="kpi-sub">YoY -1% (flat)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총이익률 (Q1)</div>
+      <div class="kpi-value">34.0%</div>
+      <div class="kpi-sub">+1,278bp YoY</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">애널리스트 평균 목표가</div>
+      <div class="kpi-value">$5.50</div>
+      <div class="kpi-sub">현재 대비 +31% 업사이드</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$3.01~$9.39</div>
+      <div class="kpi-sub">현재 하단 40% 위치</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q1 FY2026 (2026.05.05 발표, 최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#fff1f2;border-radius:8px;padding:1rem;border:1px solid #fecaca;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$34.4M <span style="font-size:12px;color:var(--red);">▼ 컨센서스 하회 -2.5%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $35.28M · YoY -1% (flat)</div>
+      </div>
+      <div style="background:#fff1f2;border-radius:8px;padding:1rem;border:1px solid #fecaca;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">-$0.12 <span style="font-size:12px;color:var(--red);">▼ 어닝 쇼크 -50%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 -$0.08 · 순손실 $56.8M</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">총이익률 (실적 하이라이트)</div>
+        <div style="font-size:18px;font-weight:700;">34.0% <span style="font-size:12px;color:var(--green);">▲ YoY +1,278bp</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Ask Sage 고마진 GenAI 플랫폼 기여 효과</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">현금 및 투자 자산</div>
+        <div style="font-size:18px;font-weight:700;">$431M <span style="font-size:12px;color:var(--green);">▲ 사상 최고</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">부채 $16.6M · 순현금 $414M</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>수주 잔고:</strong> $281.9M(QoQ +14%, Q4 $248.1M). 펀딩 잔고 $79.1M(QoQ +44%). Q1 신규 수주 ~$75M (국가안보 +$60M 포함, 기밀 정보기관 단독 수주 $53M). <strong>FY2026 매출 가이던스 $135M~$165M 유지.</strong> CEO 케빈 맥알리넌: "회사 역사상 가장 강한 재무 기반 — 국가안보·무역여행 두 시장에 집중."
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC — Form 8-K)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">Q1 FY2026 실적 — 매출 $34.4M, 총마진 34%, 잔고 $282M, 가이던스 유지</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2029년 전환사채 전액 상환 완료 — 부채 $142M→$17M으로 90% 감축, 재무구조 대전환</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.01.16</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Ask Sage 인수 완료 ($250M) — 100,000명+ 사용자, 16,000개 정부팀, GenAI 플랫폼 $25M ARR 편입</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2025.12.31</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">주주총회</span>
+        <span style="font-size:13px;font-weight:500;">보통주 발행 한도 5억 주→10억 주로 증가 승인 — 추가 M&A·희석 가능성 존재</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.01</span>
+    </div>
+  </div>
+
+  <!-- 뉴스 & 이슈 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.01.16</span>
+      </div>
+      <div class="news-title">부채 90% 감축 완료 — $142M→$17M, 사상 최강 재무 기반 구축</div>
+      <div class="news-summary">2029년 전환사채 전액 상환으로 이자비용이 대폭 줄고 재무 유연성 확보. Q1 기준 현금 $431M, 순레버리지 사실상 제로. CEO는 "역사상 가장 강한 재무 포지션"이라고 강조. 추가 M&A 여력도 풍부.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.05</span>
+      </div>
+      <div class="news-title">기밀 정보기관 단독 수주 $53M + 국가안보 수주 $60M+ — 잔고 +14% QoQ</div>
+      <div class="news-summary">Q1 총 수주 약 $75M. 그 중 기밀 정보기관 단독 수주 $53M이 핵심. 총 잔고 $281.9M, 펀딩 잔고는 $79.1M(+44% QoQ). 방산 AI 수주 파이프라인 강화가 확인됨.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2025.12.31</span>
+      </div>
+      <div class="news-title">Ask Sage 인수 완료($250M) — 100,000명 사용자, $25M ARR, 연방정부 GenAI 플랫폼</div>
+      <div class="news-summary">보안 AI 배포·오케스트레이션·에이전트 기능 특화 플랫폼. 16,000개 정부팀이 현재 사용 중. Q1 총마진을 21% → 34%로 끌어올린 핵심 동인. ARR은 전년 대비 6배 성장 중.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.08</span>
+      </div>
+      <div class="news-title">이사회 임원 BBAI 주식 $61,575 매도 — 이익 실현 및 수익성 우려 부각</div>
+      <div class="news-summary">사외이사 Dorothy D. Hayes가 주당 $4.105에 15,000주 매도. 잔여 보유 204,150주로 완전한 이탈은 아니나, Q1 실적 미스 직후 내부자 매도로 시장 불안감 자극. 6개월 주가 -27% 배경.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.상반기</span>
+      </div>
+      <div class="news-title">'One Big Beautiful Bill' — DHS $170B + DoD $150B 방산 AI 예산 통과 여부 핵심 변수</div>
+      <div class="news-summary">미 행정부의 방위 예산 대폭 증액 법안이 통과될 경우 BBAI가 직접 수혜를 받는 국가안보·무역여행·방산 AI 시장이 수십 배 커진다. 미 공군 $900M 계약 차량(contract vehicle) 수주 가능성도 모니터링 필요.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>Ask Sage = 마진 개선 엔진</strong> — 총마진 21%→34%로 급등. ARR $25M, 정부 16,000팀 보유. Palantir의 축소판 가능성 (현재 P/S 16x vs Palantir 97x).</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>사상 최강 재무 기반</strong> — 현금 $431M, 부채 $16.6M. 순현금 $414M으로 추가 M&A·운영 런웨이 5년 이상 확보.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>방산 AI 정책 순풍</strong> — DoD $150B + DHS $170B 방산기술 예산 증액 논의. BBAI 핵심 고객군(국가안보, 국경통제, 군)이 직접 수혜.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>잔고 가속</strong> — 수주 잔고 $282M(+14% QoQ). 분기 매출의 8배 수준. 미 공군 $900M 계약 차량 수주 시 게임체인저.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>밸류에이션 상대 매력</strong> — P/S 13~16x로 Palantir(97x) 대비 대폭 할인. Ask Sage 성공 시 재평가 여지 충분.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>지속 적자 & 매출 정체</strong> — Q1 매출 YoY -1%, 순손실 $56.8M. 수익성 전환 시점(EBITDA 흑자 2028년 목표) 불확실. 매출 $34M에 손실 $57M은 비율상 부담.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>실적 미스 패턴</strong> — Q1 EPS 컨센서스를 50% 하회. 매출도 하회. 실적 일관성 부재가 신뢰 회복의 최대 장애물.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>DOGE·정부 예산 삭감 리스크</strong> — 매출 87%가 미 연방정부. 계약 취소·DOGE 개혁 이니셔티브가 직접 위협. 2025년에도 Army 프로그램 축소가 매출 하락 원인.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>희석 리스크</strong> — 발행 주식 한도 5억→10억 주로 증가. ATM 시설을 통해 이미 $693M 조달. 추가 M&A 시 주주 희석 가능성.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>법적 리스크 & 이사 매도</strong> — 증권 집단소송 조사 진행 중. Q1 직후 이사 주식 매도. 소수 커버리지(애널리스트 2~3명)로 기관 관심도 낮음.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">H.C. Wainwright (Scott Buck)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">목표가 $6.00</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Cantor Fitzgerald (Jonathan Ruykhaver)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립 (Neutral)</span><span class="target-price">목표가 $5.00</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 평균 (MarketBeat 2개사)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">평균 $5.50 (+31% 업사이드)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">SimplyWallSt 공정가치 추정</span>
+      <div class="analyst-right"><span class="opinion-badge hold">참고</span><span class="target-price">$5.33 (현재 대비 +27%)</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+      ※ 커버리지 애널리스트가 2~3개사로 매우 적음. 기관 투자자 관심도가 낮으며, 분석 신뢰도에 한계 있음. FY2026 컨센서스 매출 전망: $142M (가이던스 중간값 $150M).
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      빅베어 AI(BBAI)는 미 정부 전용 방산 AI·의사결정 인텔리전스의 소형 순수 플레이다. 2025년 말 Ask Sage($250M) 인수와 부채 90% 감축으로 재무 기반을 대전환했고, Q1 2026에서 총마진이 21%→34%로 급등한 것은 고무적이다. Q1 수주 ~$75M(기밀 정보기관 $53M 포함), 잔고 $282M(+14% QoQ), 현금 $431M이라는 강점도 명확하다. 그러나 매출은 전년 대비 flat/-1%이고 EPS는 컨센서스를 50% 하회하는 어닝 쇼크를 기록했다. 순손실 $56.8M이 분기 매출의 1.65배라는 적자 구조와, 87% 정부 의존·DOGE 리스크·증권 소송·이사 매도는 투자자가 반드시 소화해야 할 부담이다. DoD·DHS 예산 증액 법안 통과, 미 공군 $900M 계약 수주, Ask Sage ARR 2배 달성 같은 촉매가 실현되면 상당한 멀티플 재평가가 가능하지만, 이는 고위험·이진법적(binary) 시나리오다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. BBAI는 적자 소형주로 고위험 종목입니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

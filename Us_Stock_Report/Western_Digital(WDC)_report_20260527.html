@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Western Digital (WDC) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1c1917;
+    --accent: #dc2626;
+    --accent2: #7f1d1d;
+    --bg: #fff7f5;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --teal: #0d9488;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #1c1917 0%, #44403c 50%, #78716c 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 540px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 36px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .summary-box { background: linear-gradient(135deg, #fff7f5 0%, #fef2f2 100%); border: 1px solid #fecaca; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .context-banner { background: linear-gradient(90deg, #fef2f2 0%, #fff7ed 100%); border: 1px solid #fed7aa; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #9a3412; display: flex; align-items: center; gap: 8px; }
+  .roadmap-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .roadmap-grid { grid-template-columns: 1fr 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">WDC · NASDAQ</div>
+      <div class="company-name">Western Digital Corporation</div>
+      <div class="company-desc">SanDisk 분사 후 HDD(하드디스크) 순수 전문기업으로 재탄생 — AI 데이터센터용 대용량 니어라인 HDD 세계 1~2위. ePMR·HAMR 이중 기술 로드맵으로 100TB까지 확장 계획. 클라우드 고객 매출 비중 89%.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 27일</div>
+      <div class="price-display">$524.65</div>
+      <div class="price-change up">▲ 52주 저점 $50.62 대비 +936% · YTD ~+170%</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$180B</span>
+    <span class="rating-pill">🏢 섹터: HDD 데이터 스토리지</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy</span>
+    <span class="rating-pill">📅 다음 실적: 2026.08.05 (Q4 FY2026)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 포지셔닝 배너 -->
+  <div class="context-banner">
+    🖥️ <strong>WDC의 포지션:</strong> SanDisk(NAND·SSD)를 분사한 후 WDC는 세계 최대 HDD 전문 기업으로 변신. AI 데이터센터의 '콜드 스토리지·니어라인 HDD' 수요 폭증의 최대 수혜주. Seagate와 HDD 과점 구조 형성.
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q3 FY2026 매출 (최신)</div>
+      <div class="kpi-value">$3.34B</div>
+      <div class="kpi-sub" style="color:var(--green);">YoY +45% · QoQ +11%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Non-GAAP 총이익률</div>
+      <div class="kpi-value">50.5%</div>
+      <div class="kpi-sub" style="color:var(--green);">역대 첫 50% 돌파 · YoY +1,040bps</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 컨센서스</div>
+      <div class="kpi-value">$510.87</div>
+      <div class="kpi-sub">25개사 평균 · 최고 $660 · Strong Buy</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$50.62~$536</div>
+      <div class="kpi-sub">현재 $524.65 · 52주 최고권 근접</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q3 FY2026 (최신 실적, 2026.04.30 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$3.34B <span style="font-size:12px;color:var(--green);">▲ 가이던스 상단 초과</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">가이던스 $3.1~3.3B · YoY +45% · QoQ +11%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Non-GAAP EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$2.72 <span style="font-size:12px;color:var(--green);">▲ +13.8% 어닝 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $2.39 · GAAP EPS $8.20 · YoY +97%</div>
+      </div>
+    </div>
+    <!-- 세그먼트 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:0.75rem;">
+      <div style="background:#eff6ff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">클라우드 매출</div>
+        <div style="font-weight:700;color:#1d4ed8;">$3.0B</div>
+        <div style="font-size:10px;color:var(--muted);">89% 비중 · +48% YoY</div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">소비자 매출</div>
+        <div style="font-weight:700;">$186M</div>
+        <div style="font-size:10px;color:var(--muted);">6% 비중 · +24% YoY</div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">클라이언트 매출</div>
+        <div style="font-weight:700;">$179M</div>
+        <div style="font-size:10px;color:var(--muted);">5% 비중 · +31% YoY</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">잉여현금흐름</div>
+        <div style="font-weight:700;color:#15803d;">$978M</div>
+        <div style="font-size:10px;color:var(--muted);">영업CF $1.12B</div>
+      </div>
+    </div>
+    <!-- 운영 지표 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0.75rem;">
+      <div style="background:#fafafa;border-radius:6px;padding:8px 12px;font-size:12px;">
+        <span style="color:var(--muted);">엑사바이트 출하: </span><span style="font-weight:700;">222EB</span><span style="color:var(--green);"> +34% YoY</span> · 4.1M ePMR 드라이브(118EB, 최대 32TB)
+      </div>
+      <div style="background:#fafafa;border-radius:6px;padding:8px 12px;font-size:12px;">
+        <span style="color:var(--muted);">엑사바이트당 비용: </span><span style="font-weight:700;">-10% YoY</span> · UltraSMR·면밀도 향상으로 원가 절감 지속
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fef9f0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;margin-bottom:0.75rem;">
+      <strong>CEO 어빙 탄</strong>: "WD는 2026년 캘린더 연도를 훌륭한 실행으로 시작했다. 모든 최종 시장에서 순차·전년 대비 매출 성장을 달성하고 총이익률을 50%로 확대했다. 이는 지속적인 기술 혁신 제공과 점점 더 많은 고객들에게 가치를 전달한 결과다." 분기 배당금 20% 인상($0.125→$0.15, 2026년 6월 5일 기준일).
+    </div>
+    <!-- Q4 가이던스 -->
+    <div style="background:#ecfdf5;border-radius:8px;padding:12px;border:1px solid #6ee7b7;">
+      <div style="font-size:11px;font-weight:600;color:#065f46;margin-bottom:8px;">🔭 Q4 FY2026 가이던스 (다음 실적 발표 2026.08.05)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:12px;">
+        <div><div style="font-size:10px;color:var(--muted);">매출 가이던스</div><div style="font-weight:700;color:#065f46;">$3.65B ±$100M</div><div style="font-size:10px;color:var(--green);">YoY +36~44% 예상</div></div>
+        <div><div style="font-size:10px;color:var(--muted);">Non-GAAP EPS</div><div style="font-weight:700;color:#065f46;">$3.25 ±$0.15</div></div>
+        <div><div style="font-size:10px;color:var(--muted);">Non-GAAP 총이익률</div><div style="font-weight:700;color:#065f46;">51%~52%</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">※ Q4 가이던스도 컨센서스를 상회하는 강력한 수준. 17개 애널리스트가 향후 실적 추정치를 상향 조정. 엑사바이트 성장 25% CAGR 이상 전망.</div>
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 & 주요 이벤트</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K 실적</span>
+        <span style="font-size:13px;font-weight:500;">Q3 FY2026 역대 최고 총이익률 발표 — 배당 20% 인상, Q4 가이던스 컨센서스 상회</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.30</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">내부자 거래</span>
+        <span style="font-size:13px;font-weight:500;">CEO + 글로벌운영 최고책임자, 합산 $1,020만 달러 주식 매도 (3개월간 총 $2,460만)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">교환계약</span>
+        <span style="font-size:13px;font-weight:500;">기관투자자 대상 WDC주식 ↔ SNDK주식 교환 계약 체결 — 잔여 SNDK 지분 정리</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#166534;margin-right:8px;">제품 출시</span>
+        <span style="font-size:13px;font-weight:500;">포스트 퀀텀 암호화(PQC) 내장 Ultrastar HDD 출시 — 미래 양자컴퓨터 위협 대비</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">Innovation Day</span>
+        <span style="font-size:13px;font-weight:500;">WD Innovation Day — 40TB ePMR H2 2026 양산, HAMR 2027 램프, 100TB by 2029 로드맵 공개</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.04</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#fef2f2;border-radius:6px;padding:8px 12px;color:#7f1d1d;">
+      📌 <strong>투자자 주목</strong>: CEO 및 주요 임원의 $1,020만 내부자 매도는 YTD +170% 상승 이후 정례 베스팅 물량일 가능성 높으나, 3개월 합산 $2,460만 규모는 주의 모니터링 필요. 반면 주요 하이퍼스케일러 고객들은 52주 선행 구매 주문을 배치 중 — 수요 가시성 매우 강력.
+    </div>
+  </div>
+
+  <!-- 기술 로드맵 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🔬 HDD 기술 로드맵 — ePMR + HAMR 이중 경로 전략</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:12px;">
+      WDC는 단일 기술 전환 강요 없이 <strong>ePMR(에너지지원 수직자기기록)과 HAMR(열지원 자기기록)</strong> 두 기술을 공통 아키텍처 위에서 병행 개발한다. 고객이 자신의 일정에 맞게 기술을 선택하고 예측 가능한 용량 계획이 가능한 유일한 HDD 벤더 포지션.
+    </div>
+    <div class="roadmap-grid">
+      <div style="background:#eff6ff;border-radius:8px;padding:12px;text-align:center;border:1px solid #bfdbfe;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">현재 양산</div>
+        <div style="font-size:20px;font-weight:700;color:#1d4ed8;">32TB</div>
+        <div style="font-size:11px;color:var(--muted);">ePMR UltraSMR</div>
+        <div style="font-size:10px;color:var(--green);margin-top:4px;">3대 고객 모두 채택</div>
+      </div>
+      <div style="background:#faf5ff;border-radius:8px;padding:12px;text-align:center;border:1px solid #ddd6fe;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">H2 2026 양산 예정</div>
+        <div style="font-size:20px;font-weight:700;color:#6d28d9;">40TB</div>
+        <div style="font-size:11px;color:var(--muted);">ePMR UltraSMR</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">2~3 고객 자격 심사 중</div>
+      </div>
+      <div style="background:#fff7ed;border-radius:8px;padding:12px;text-align:center;border:1px solid #fed7aa;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">2027년 램프 예정</div>
+        <div style="font-size:20px;font-weight:700;color:#c2410c;">44TB+</div>
+        <div style="font-size:11px;color:var(--muted);">HAMR 기술</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">4고객 자격 심사 진행 중</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:12px;text-align:center;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">2029년 목표</div>
+        <div style="font-size:20px;font-weight:700;color:#15803d;">100TB</div>
+        <div style="font-size:11px;color:var(--muted);">HAMR 확장</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">60TB ePMR 경유</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#f9fafb;border-radius:6px;padding:8px 12px;color:var(--muted);">
+      UltraSMR(Ultra Shingled Magnetic Recording): 전통 SMR 대비 쓰기 성능 대폭 개선. 3대 주요 하이퍼스케일러 고객 중 2곳이 거의 모든 엑사바이트 수요를 UltraSMR로 충족 중. HAMR은 기존 PMR 한계(물리적 기록 밀도)를 열에너지로 극복. 10년 개발 끝에 상용화 단계 진입.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.30</span>
+      </div>
+      <div class="news-title">Q3 FY2026 역대 최고 이익률 — 총이익률 50% 사상 첫 돌파, 가이던스 전 항목 상회</div>
+      <div class="news-summary">HDD 단일 전문 기업으로 재정비된 후 최고 실적. 클라우드 매출 89% 비중에 +48% YoY 성장. 총이익률 50.5%는 하드웨어 기업으로서는 이례적으로 높은 수준으로, AI 데이터센터의 고용량·고마진 제품 믹스 전환을 반영. 발표 다음날 주가 +6.98% 급등. 17개 애널리스트 실적 추정치 즉각 상향.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.21</span>
+      </div>
+      <div class="news-title">Evercore ISI, 목표주가 $575로 상향 — 하이퍼스케일러 로드맵 실행력 평가</div>
+      <div class="news-summary">Evercore ISI 애널리스트 아미트 달야나니가 투자자 미팅 후 목표주가를 $500에서 $575로 상향. "WDC가 AI 데이터 경제의 스토리지 인프라 파트너로서 위상을 공고히 하고 있다"고 평가. Mizuho($550), Baird($450) 등도 Q3 실적 발표 후 일제히 목표가 인상. 총 14개 이상 증권사가 목표가 상향.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05월</span>
+      </div>
+      <div class="news-title">세계 최초 포스트 퀀텀 암호화 HDD 출시 — 미래 양자컴퓨터 위협 대비 솔루션</div>
+      <div class="news-summary">WD Ultrastar 시리즈에 포스트 퀀텀 암호화(PQC) 기술을 내장해 미래 양자컴퓨터의 복호화 위협에 대비. 금융·의료·방산 등 규제 산업 데이터센터에서 즉각 수요 기대. 기능 차별화를 통한 가격 프리미엄 전략과 동시에 AI 보안 인프라 파트너로서 포지셔닝 강화.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.05.05</span>
+      </div>
+      <div class="news-title">WDC-SNDK 주식 교환 계약 — 잔여 SNDK 지분 최종 정리, 분사 마무리</div>
+      <div class="news-summary">기관투자자와의 교환 계약을 통해 WDC가 보유한 잔여 SNDK 주식(186만여 주)을 WDC 자사주로 교환. SanDisk 분사 이후 남아 있던 지분 관계를 완전 정리. 양사가 완전 독립된 별개 기업으로 자리잡음. 교환 계약 발표 당일 WDC와 SNDK 주가 모두 소폭 하락.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.05</span>
+      </div>
+      <div class="news-title">CEO·글로벌운영 최고책임자 $1,020만 주식 매도 — 3개월 합산 $2,460만</div>
+      <div class="news-summary">YTD +170% 급등 이후 경영진의 베스팅 물량 정리로 해석 가능하지만, 규모가 큰 만큼 시장의 주의를 끌었다. 내부자 지분 비율이 0.56%에 불과한 점과 기관 보유 비중 92%+를 감안하면 구조적 매도 우려보다는 세금 최적화 목적 가능성 높음. 단, YTD 고점 근처에서 이루어진 타이밍은 투자자들이 모니터링할 필요.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>AI 데이터센터 니어라인 HDD 독점적 수혜</strong> — AI 학습·추론 데이터의 90%+는 HDD에 저장(비용 효율). 하이퍼스케일러 자본지출 5,000억 달러+ 중 스토리지 레이어가 직접 수혜. 엑사바이트 CAGR 25%+ 전망 — WDC+Seagate 과점 구조에서 공급 타이트 유지</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>총이익률 50%+ 구조적 확대</strong> — HDD 전문화 이후 고용량·고마진 제품 믹스 집중. Q4 가이던스 51~52%로 추가 확대 예정. 엑사바이트당 원가 -10% YoY 절감이 이익률 개선을 가속. 2028년 EPS $19~$32 전망(Cantor Fitzgerald)</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>하이퍼스케일러 52주 선행 주문</strong> — 주요 클라우드 고객들이 1년 앞선 구매 주문을 배치. 2028~2029년까지 장기 공급 계약 체결. 수익 예측 가능성이 전통 HDD 사이클과 질적으로 다른 수준. Seagate 대비 기술 로드맵(ePMR+HAMR 이중 경로)이 명확한 차별점</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>100TB 로드맵의 멀티플 확장 여지</strong> — 40TB(H2 2026), HAMR 44TB+(2027), 100TB(2029)로 이어지는 명확한 기술 로드맵이 '성장주 프레임' 정당화. 현재 P/E ~29배는 Seagate 대비 프리미엄이지만 성장률 차이를 감안 시 합리적 수준</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>포스트 퀀텀 보안 차별화</strong> — PQC 내장 HDD는 규제 산업 데이터센터에 프리미엄 포지셔닝. Open Quantum Design과의 협력으로 장기 기술 헤징. 순수 HDD 플레이로서 NAND·D램 노이즈 없이 투명한 펀더멘털 평가 가능</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>단일 기술(HDD) 집중 리스크</strong> — NAND SSD는 성능·전력 효율에서 HDD를 지속 추격. 하이퍼스케일러가 핫 스토리지를 SSD로 전환하는 속도가 빨라질 경우 HDD 수요 둔화. SNDK·MU와의 기술 경쟁 심화 시 시장 점유율 압박</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>HAMR 양산 신뢰성 리스크</strong> — HAMR은 10년 이상 개발이 진행 중으로 아직 자격 심사 단계. 2027년 램프 타임라인 지연 시 기술 로드맵 신뢰 손상. 초기 수율 문제나 현장 고장률 이슈 발생 시 고객 이탈 위험</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>경영진 내부자 매도 신호</strong> — CEO 포함 주요 임원들이 3개월간 $2,460만 매도. YTD +170% 이후 정상적 베스팅 가능성 높으나, 규모와 타이밍(고점권)이 우려 신호. 내부자 지분 비중 0.56%로 극히 낮은 점도 주목</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>씨게이트(STX) 경쟁과 가격 압박</strong> — STX도 유사한 AI 니어라인 HDD 사이클 수혜 중. 양사 모두 확장 투자 시 수급 균형 무너질 수 있음. 역사적으로 HDD 가격은 치열한 경쟁 시 급격히 하락. UltraSMR 단가 하락 속도가 원가 절감 속도를 초과할 리스크</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>클라우드 집중 리스크 (89% 비중)</strong> — 소비자(6%) + 클라이언트(5%) 매출이 극히 미미. 하이퍼스케일러 투자 사이클 전환 또는 내재화(인하우스 HDD 개발) 시 매출 충격 직격. AWS·구글·메타·마이크로소프트 중 한 곳의 전략 변화가 전사 매출에 즉각 반영</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (Q3 실적 이후 최신)</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Evercore ISI (Amit Daryanani)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.21 — 투자자 미팅 후 상향</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price" style="color:#7c3aed;">$575 🔺</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Mizuho (Vijay Rakesh)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05월 — 수급 타이트 지속 전망</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price">$550</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Cantor Fitzgerald</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.02 Innovation Day 후 상향</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Overweight</span><span class="target-price">$420→</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Baird</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.01 — Q3 실적 후</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$450</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Goldman Sachs</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.02 — CY2026~2028 EPS +22% 상향</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$250→</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">S&amp;P Global 컨센서스 (25개사)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">최고 $660 · 최저 $360 · 매도 0개</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy</span><span class="target-price">평균 $510.87</span></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);background:#f9fafb;border-radius:6px;padding:8px;">
+      ※ 컨센서스 평균 $510.87이 현재가 $524.65에 소폭 미달 — 분석가 목표가 업데이트 시차 반영 결과로 보임. 실제 최근 목표가는 $550~$575 구간에 집중. 다음 실적(Q4, 2026.08.05)이 밸류에이션 정당화의 다음 테스트. 배당 ex-date 2026.06.05 주의.
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Western Digital은 SanDisk(NAND) 분사 후 순수 HDD 전문 기업으로 재탄생하며, AI 데이터센터의 '니어라인 스토리지' 수혜를 가장 집중적으로 받는 포지션을 확보했다. Q3 FY2026에서 매출 +45%, 총이익률 50.5%(역대 첫 돌파), EPS +97% YoY를 기록했으며 Q4 가이던스($3.65B, 마진 51~52%)도 컨센서스를 상회한다. ePMR(32TB→40TB)과 HAMR(44TB→100TB)의 이중 기술 로드맵은 씨게이트가 갖지 못한 차별화 요소로, 주요 하이퍼스케일러가 52주 선행 주문을 배치하며 수요 가시성도 확보됐다. 리스크로는 HAMR 양산 신뢰성(10년 개발, 아직 자격심사 단계), 클라우드 매출 89% 집중, HDD 단일 기술 의존, CEO 포함 경영진 $2,460만 내부자 매도가 있다. <strong>WDC는 AI 인프라 데이터 저장 인프라에 HDD를 통해 장기 베팅하고 싶은 투자자에게 MU·SNDK보다 상대적으로 안정적인 스토리지 레이어 플레이다. 다만 순수 HDD 집중으로 SSD 대체 위험과 HAMR 실행 리스크는 지속 모니터링이 필요하다.</strong>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주식 투자에는 원금 손실 위험이 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

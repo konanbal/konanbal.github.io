@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>현대로템(064350) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0f172a;
+    --accent: #3b82f6;
+    --accent2: #1e40af;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --defense: #7c3aed;
+    --rail: #0d9488;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #3b82f6; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 540px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: #3b82f6; border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .seg-bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin: 8px 0; }
+  .seg-def { background: var(--defense); }
+  .seg-rail { background: var(--rail); }
+  .seg-eco { background: #f59e0b; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-warning { background: #fef3c7; color: #92400e; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .pipeline-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 0.5rem; }
+  .pipeline-table th { background: #f1f5f9; padding: 6px 10px; text-align: left; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .pipeline-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  .pipeline-table tr:last-child td { border-bottom: none; }
+  .badge-blue { background: #dbeafe; color: #1e40af; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px; }
+  .badge-green { background: #d1fae5; color: #065f46; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px; }
+  .badge-amber { background: #fef3c7; color: #92400e; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">064350 · KOSPI</div>
+      <div class="company-name">현대로템</div>
+      <div class="company-desc">K2 전차·방산 + KTX·GTX 철도 복합 기업 | 현대차그룹 계열 | 2025년 창사 이래 최대 실적 · 영업이익 첫 1조 돌파</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 21일</div>
+      <div class="price-display">약 262,000원</div>
+      <div class="price-change up">▲ 1Q 실적 발표 후 +12% 급등 · 52주 고점 274,000원 근접</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 28~29조원</span>
+    <span class="rating-pill">🏢 섹터: 방산·철도</span>
+    <span class="rating-pill">⭐ 컨센서스: 적극 매수 (매도 0건)</span>
+    <span class="rating-pill">🎯 컨센서스 목표가: 304,316원</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI 카드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025년 연간 매출 (연결)</div>
+      <div class="kpi-value">5조 8,390억원</div>
+      <div class="kpi-sub">YoY +33.4% (창사 최대)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025년 영업이익</div>
+      <div class="kpi-value" style="color:var(--green)">1조 56억원</div>
+      <div class="kpi-sub">YoY +120.3% / OPM 17.2% (첫 1조)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익</div>
+      <div class="kpi-value" style="color:var(--green)">2,242억원</div>
+      <div class="kpi-sub">YoY +10.5% / OPM 15.4% (분기 최대)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">수주 잔고 (2026 1Q)</div>
+      <div class="kpi-value">29조 8,000억원</div>
+      <div class="kpi-sub">디펜스 10.1조 + 레일 19조</div>
+    </div>
+  </div>
+
+  <!-- 사업구조 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏗️ 사업 포트폴리오 — 3개 부문</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+      <div style="background:#f5f3ff;border-radius:8px;padding:0.875rem;border-left:3px solid var(--defense);">
+        <div style="font-size:12px;font-weight:700;color:var(--defense);margin-bottom:4px;">🟣 디펜스솔루션 55%</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">K2 전차·우주발사체·무인체계. 방산 수출 비중 72%(수출 비중 최고). 폴란드 EC1·EC2 계약 9조원+. 수주잔고 10.1조원.</div>
+      </div>
+      <div style="background:#f0fdfa;border-radius:8px;padding:0.875rem;border-left:3px solid var(--rail);">
+        <div style="font-size:12px;font-weight:700;color:var(--rail);margin-bottom:4px;">🟢 레일솔루션 36%</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">KTX-청룡·GTX·고속철 제조. GTX-C·B 수주. 우즈베키스탄 고속철. 수소전기트램 상용화. 수주잔고 19조원.</div>
+      </div>
+      <div style="background:#fffbeb;border-radius:8px;padding:0.875rem;border-left:3px solid var(--amber);">
+        <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:4px;">🟡 에코플랜트 9%</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">수소 추출기·충전소. 현대차그룹 스마트 물류. 무인항만로봇. 친환경 에너지 솔루션.</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">2025년 매출 비중 (추정)</div>
+      <div class="seg-bar"><div class="seg-def" style="width:55%"></div><div class="seg-rail" style="width:36%"></div><div class="seg-eco" style="width:9%"></div></div>
+      <div style="display:flex;gap:12px;font-size:11px;color:var(--muted);margin-top:4px;"><span>🟣 디펜스 55%</span><span>🟢 레일 36%</span><span>🟡 에코 9%</span></div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (2026.04.23 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">1Q26 매출액 (실제 vs 컨센서스)</div>
+        <div style="font-size:18px;font-weight:700;">1조 4,575억원 <span style="font-size:12px;color:var(--green);">▲ YoY +23.9%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">역대 1분기 최대 / 컨센서스 부합</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">1Q26 영업이익 (실제 vs 컨센서스)</div>
+        <div style="font-size:18px;font-weight:700;">2,242억원 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 2,206억원 상회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">OPM 15.4% / YoY +10.5% / 분기 최대</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#f0fdf4;border-left:3px solid var(--green);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>실적 어닝 서프라이즈(소폭) — 당일 주가 +12%:</strong> 폴란드 K2 전차 1차 이행계약(EC1) 잔여 매출(약 2,400억원)과 2차 이행계약(EC2) 초도 물량(약 3,100억원)이 동시 인식되며 방산 매출 급증. 레일솔루션 도시철도 납품도 동반. 디펜스솔루션 OPM 27.2%(전년 29.5%에서 EC2 초기 비용 선반영으로 소폭 하락, 일시적). 수출 비중 75%까지 확대.
+    </div>
+  </div>
+
+  <!-- 방산 수주 파이프라인 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🎯 방산 수주 파이프라인 (K2 전차 중심)</div>
+    <table class="pipeline-table">
+      <thead>
+        <tr><th>국가</th><th>사업명</th><th>규모·대수</th><th>예상 시기</th><th>현황</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>🇵🇱 폴란드</strong></td>
+          <td>K2 전차 2차 EC</td>
+          <td>9조원 / K2GF 116대+계열 81대</td>
+          <td>2025년 계약 완료 → 2026~2028 납품</td>
+          <td><span class="badge-green">계약완료</span></td>
+        </tr>
+        <tr>
+          <td><strong>🇵🇱 폴란드</strong></td>
+          <td>K2PL 3차 EC</td>
+          <td>미확정 (잔여 640대 중 일부)</td>
+          <td>2027년 계약 체결 예상</td>
+          <td><span class="badge-amber">협상 예정</span></td>
+        </tr>
+        <tr>
+          <td><strong>🇮🇶 이라크</strong></td>
+          <td>K2 전차 수출</td>
+          <td>대규모 (수조원급)</td>
+          <td>정치 안정화 후 2026 하반기</td>
+          <td><span class="badge-amber">진행 중</span></td>
+        </tr>
+        <tr>
+          <td><strong>🇷🇴 루마니아</strong></td>
+          <td>차세대 전차</td>
+          <td>미확정</td>
+          <td>2026년 말 RFP → 2027년 계약 예상</td>
+          <td><span class="badge-blue">준비 중</span></td>
+        </tr>
+        <tr>
+          <td><strong>🇵🇪 페루</strong></td>
+          <td>K2 전차 수출</td>
+          <td>미확정</td>
+          <td>정치 안정화 후 2026 하반기</td>
+          <td><span class="badge-amber">진행 중</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:12px;color:var(--blue);background:#eff6ff;border-radius:6px;padding:8px 12px;border-left:3px solid var(--blue);">
+      📌 이라크·루마니아·페루 3개국에서 신규 수주가 성사될 경우 수주 잔고가 현재 29.8조원에서 40조원+으로 대폭 확대 가능. 하반기 수주 이벤트가 주가 상승 최대 촉매.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시·이슈 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">1Q26 매출 1.4조·영업이익 2,242억원 잠정 공시 (분기 최대)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.23</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">업무협약</span>
+        <span style="font-size:13px;font-weight:500;">안두릴(미국)과 AI 기반 유·무인복합 지휘통제체계 MOU 체결</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.07</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef3c7;color:#92400e;margin-right:8px;">M&A 검토</span>
+        <span style="font-size:13px;font-weight:500;">현대위아 방산부문(K9 포신·K2 주포) 인수 추진 검토 (연내 마무리 목표)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04~05월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">주주환원</span>
+        <span style="font-size:13px;font-weight:500;">배당 성향 4.3% → 8.5% 상향 · DPS 최대 300원 기대</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.01.20</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">수주공시</span>
+        <span style="font-size:13px;font-weight:500;">폴란드 K2PL 현지생산 협력 계약 체결 → 2029년 부마르 공장 현지 조립 시작</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04월</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--amber);background:#fffbf0;border-radius:6px;padding:8px 12px;border-left:3px solid var(--amber);">
+      📌 <strong>투자자 주목</strong>: 현대위아 방산부문(K9 포신·K2 주포 전문, 추정가치 3,400억~5,200억원) 인수 성사 시 화포 제조 내재화로 무기체계 일원화. 방산 시너지 및 그룹 내 방산 중복투자 해소 기대. 안두릴 MOU는 AI 무인체계 미래 성장성 부각 의미.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.23</span></div>
+      <div class="news-title">1Q26 분기 최대 실적 — 영업이익 2,242억원 +10.5%, 주가 +12% 급등</div>
+      <div class="news-summary">매출 1조 4,575억원(+24% YoY), 영업이익 2,242억원(+10.5% YoY)으로 분기 최대 실적 경신. 컨센서스 부합 이상으로 실적 발표 당일 주가 +12% 급등. 폴란드 EC1 잔여 매출(2,400억)과 EC2 초도 물량(3,100억) 동시 인식. 수출 비중 75%로 역대 최고 수준.
+      </div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.07</span></div>
+      <div class="news-title">안두릴(미국 방산 테크)과 AI 유·무인복합 지휘통제체계 MOU 체결</div>
+      <div class="news-summary">미국 AI 방산 기술기업 안두릴과 업무협약 체결로 AI 기반 무인체계 시장 진출 가시화. 글로벌 방산 테크 트렌드(드론·로봇·AI 전장)와 K2 전차 플랫폼의 융합 방향 제시. 아직 MOU 단계로 매출 연결까지는 시간이 필요하나 미래 성장성 부각 효과.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04~05월</span></div>
+      <div class="news-title">현대위아 방산부문 인수 추진 — 화포 내재화로 방산 수직계열화 완성</div>
+      <div class="news-summary">현대위아의 K9 자주포 포신·K2 전차 주포 제조 방산부문을 현대로템이 인수하는 방안을 실무 검토 중(연내 마무리 목표). 인수 성사 시 화포 생산 내재화 및 그룹 내 방산 중복투자 해소. 추정 인수가 3,400억~5,200억원 수준. 현대위아는 방산 철수 후 로보틱스 집중 전략.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2025.08 (계약)</span></div>
+      <div class="news-title">폴란드 K2 전차 2차 이행계약 65억 달러(9조원) 체결 확정 — 2026~2028년 납품</div>
+      <div class="news-summary">폴란드 군비청과 K2GF 116대 및 구난·교량·개척 전차 81대 포함 총 65억 달러(약 9조원) 규모 2차 실행계약 체결. 2026년부터 창원 생산 물량 인도 시작, 2029년 폴란드 현지 조립 개시 예정. 하반기로 갈수록 EC2 물량 비중 확대로 수익성 회복 기대.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-warning">주의</span><span class="news-date">2026년 지속</span></div>
+      <div class="news-title">방산 OPM 29.5%→27.2% 하락 — EC2 초기 비용 선반영 영향, 일시적 평가</div>
+      <div class="news-summary">1분기 디펜스솔루션 영업이익률이 전년 동기 29.5%에서 27.2%로 2.3%p 하락. EC2 초기 투입원가 및 비용 선제적 반영으로 일시적 현상으로 증권가는 평가. EC2 매출 본격화(하반기) 이후 고수익성 회복 예상되나, 폴란드 1차 '황금기'(직수출 고마진) 단계 종료라는 구조적 전환 시각도 있음.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>수주 잔고 29.8조원 — 5년치 일감 확보</strong> — 디펜스 10.1조 + 레일 19조 = 29.8조원. 안정적 매출 가시성. 하반기 이라크·페루·루마니아 신규 수주 성사 시 40조원+ 돌파 가능.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>K2 수출 지역 다변화 — 이라크·루마니아·페루 가시화</strong> — 폴란드 편중에서 벗어나 3개국 동시 신규 수주 파이프라인. 성사 시 2027~2028년 실적 레벨업 촉매.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>레일솔루션 본격 턴어라운드 — GTX·수소트램</strong> — 2026년부터 철도 부문 OPM 5~7% 회복 전망. GTX-A·C·B·D 수주, 수소전기트램 상용화, 우즈베키스탄 고속철 등. 중장기 목표 OPM 10%대.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>현대위아 방산부문 인수 — 수직계열화 완성</strong> — 화포 제조 내재화로 K9·K2 무기체계 일원화. 방산 기업 가치 재산정 및 그룹 시너지 창출.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>PER 23배 — 국내 방산주 평균(39배) 대비 저평가</strong> — 글로벌 방산 피어 대비 40% 할인. 배당 성향 8.5% 상향 등 주주환원 강화. 시장 친화적 IR 소통.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>폴란드 직수출 '황금기' 종료 — OPM 구조적 하락 우려</strong> — EC1 고마진 직수출 사이클 종료, EC2 현지생산 비중 확대 시 마진 압축 구조적 심화. 방산 OPM 20%대 유지 여부가 핵심 체크포인트.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>이라크·페루 수주 지연 — 정치 리스크</strong> — 이라크는 이란과의 긴장 및 내각 구성 지연, 페루는 연이은 정치 환경 변화로 수주 일정 불확실성. 하반기 인도일정 차질 시 실적 변동폭 확대.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>EU SAFE 및 현지화 요건 강화 — 한국산 직수출 제약</strong> — 유럽 방산 자급도 강화 정책(EU SAFE, EDIP)이 한국산 무기 수출에 구조적 장벽. 현지 생산 확대는 마진 압축을 의미.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>레일솔루션 수익성 회복 속도 지연</strong> — 입찰 준비·출장비 증가로 단기 OPM 부담. 해외 수주 비용 증가. 1~2%대에서 5~7%대로 회복이 예상보다 더딜 가능성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>높은 밸류에이션 부담 (PER 28배, PBR 6.5배)</strong> — 창사 최대 실적에도 성장 기대가 상당 부분 주가에 반영. 수주 인식 지연 시 밸류에이션 부담이 급속히 확대될 수 있음.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026년 5월 기준 최신)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">DB금융투자·일부 증권사</span>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 350,000원 <span style="font-size:11px;color:var(--green)">(최고 목표가)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유진투자증권 (양승윤)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 316,000원 <span style="font-size:11px;color:var(--green)">(300,000→316,000 상향)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">키움증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 — <span style="font-size:11px;color:var(--muted);">2026년 매출 7.1조·영업이익 1.2조 전망</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">미래에셋·한국투자·신한증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 270,000~300,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 평균 (19개사)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">적극매수</span><span class="target-price">목표가 304,316원 <span style="font-size:11px;color:var(--green)">(매도 0건)</span></span></div>
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      현대로템은 2025년 창사 이래 첫 영업이익 1조원 돌파(1조 56억원, +120%)를 달성하며 K-방산 수출 구조가 실적으로 완전히 전환됨을 입증한 기업이다. 2026년 1분기에도 분기 최대 영업이익(2,242억원)을 기록하며 성장 기조를 이어가고 있다. 폴란드 K2 전차 2차 이행계약(9조원) 본격 납품, GTX·수소트램 등 레일솔루션 턴어라운드, 안두릴 MOU를 통한 AI 무인체계 진출, 현대위아 방산부문 인수 추진 등 방산·철도·미래 모빌리티 전방위 성장 스토리가 동시에 진행 중이다.
+
+      가장 큰 투자 포인트는 이라크·루마니아·페루 신규 K2 수주 가능성으로, 성사 시 수주 잔고가 현재 29.8조원에서 40조원+으로 확대되며 2027~2028년 실적이 레벨업된다. 다만 폴란드 직수출 고마진 사이클 종료에 따른 OPM 구조적 하락 우려, EU의 현지화 요건 강화, 이라크·페루 수주 지연 리스크는 실질적인 체크포인트다. PER 23배는 국내 방산주 평균(39배) 대비 저평가 매력이 있으나 PBR 6.5배는 이익 성장이 지속됨을 전제로 한다. <strong>수주 잔고 30조원 기반의 실적 가시성과 K2 수출 다변화 모멘텀을 중장기 성장 스토리로 믿는 투자자에게 적합한 종목</strong>이다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

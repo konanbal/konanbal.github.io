@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>테슬라(Tesla) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">TSLA · NASDAQ</div>
+      <div class="company-name">테슬라 (Tesla, Inc.)</div>
+      <div class="company-desc">전기차·에너지저장장치를 수직계열화 생산하며, 자율주행(FSD·로보택시)과 휴머노이드 로봇(옵티머스)으로 사업 축을 이동 중인 실물 AI 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 7월 23일</div>
+      <div class="price-display">$343.59</div>
+      <div class="price-change down">▼ -8.1% (전일 종가 $374.01 대비)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $1.40조 (7/22 기준)</span>
+    <span class="rating-pill">🏢 섹터: 자동차 / 자율주행·AI</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Hold (중립)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출</div>
+      <div class="kpi-value">$282.4억</div>
+      <div class="kpi-sub">YoY +26% · 분기 사상 최대</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">1.4%</div>
+      <div class="kpi-sub">전분기 대비 -2.8%p (4.2% → 1.4%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$407.41</div>
+      <div class="kpi-sub">현재가 대비 +18.6% · 33인 평균</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$297.82~$498.83</div>
+      <div class="kpi-sub">현재가 위치: 약 23%</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (2026년 2분기 · 최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$282.4억 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +9.9%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $257억 (일부 집계 $264억) · YoY +26%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상, non-GAAP)</div>
+        <div style="font-size:18px;font-weight:700;">$0.33 <span style="font-size:12px;color:var(--red);">▼ 어닝 쇼크 -34%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $0.50~0.53 · YoY -18%</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (GAAP)</div>
+        <div style="font-size:18px;font-weight:700;">$3.98억 <span style="font-size:12px;color:var(--red);">▼ YoY -57%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년 동기 $9.23억 · 영업이익률 4.1% → 1.4%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">잉여현금흐름 (FCF)</div>
+        <div style="font-size:18px;font-weight:700;">-$11억 <span style="font-size:12px;color:var(--red);">▼ 적자 전환</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년 동기 +$1.46억 · 전분기 +$14.4억</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>발표일 2026.07.22 (미 증시 마감 후)</strong> — 인도량 480,126대(YoY +25%)로 분기 사상 최대, 에너지저장 13.5GWh 배치(전분기 8.8GWh), TTM 매출 첫 1,000억 달러 돌파. 그러나 규제 크레딧 감소·판매가 인하·에너지 보증 관련 비용으로 총이익률이 16.8%로 후퇴. 머스크는 2026년을 <em>"대규모 캐펙스의 해"</em>로 규정했고, 타네자 CFO는 연간 캐펙스를 <strong>250억 달러 이상</strong>으로 확정하며 <strong>향후 2~3년간 추가 증가</strong>를 예고. 별도의 분기 실적 가이던스는 제시하지 않음.
+    </div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Item 2.02 실적 발표 — Q2 2026 Update (Exhibit 99.1) 전체 재무제표 첨부</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.22</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Q2 2026 생산·인도·에너지 배치 실적 보도자료 (생산 451,758대 / 인도 480,126대 / 13.5GWh)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.02</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 분기보고서 — 제출 예정 (제출일 확인 불가)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">N/A</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);">
+      📌 <strong>투자자 주목 공시</strong>: 7/22 8-K에 첨부된 Q2 Update가 이번 주가 급락의 실질적 원인입니다. 손익계산서상 영업비용이 43.5억 달러(+47%)로 매출 증가율(+26%)을 크게 앞질렀고, 현금흐름표에서 영업현금흐름 47억 달러에도 불구하고 캐펙스 확대로 FCF가 마이너스로 전환된 점을 직접 확인할 수 있습니다.
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.07.23</span></div>
+      <div class="news-title">2분기 어닝 쇼크에 주가 8% 급락, $343선까지 후퇴</div>
+      <div class="news-summary">조정 EPS $0.33이 컨센서스 $0.50을 크게 밑돌며 개장 직후 급락. 실적 발표 전 이미 연초 대비 17% 하락한 상태였고, 리비안·루시드 등 EV 종목도 동반 약세를 보였습니다. 매출이 아닌 마진이 주가를 결정한 전형적 사례입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.22</span></div>
+      <div class="news-title">분기 매출 사상 최대 $282.4억, TTM 매출 첫 1,000억 달러 돌파</div>
+      <div class="news-summary">인도량 480,126대(+25%)와 서비스 매출 +50% 성장이 견인. 1년 넘게 정체됐던 매출이 실질 성장으로 돌아섰다는 점에서 수요 측면 우려는 상당 부분 해소됐습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.07.22</span></div>
+      <div class="news-title">잉여현금흐름 -11억 달러 적자 전환, 연간 캐펙스 250억 달러 이상 확정</div>
+      <div class="news-summary">옵티머스 양산 라인, AI 데이터센터, 사이버캡 램프업이 동시에 현금을 소모. CFO는 캐펙스가 향후 2~3년 더 늘어난다고 밝혀, 현금흐름 적자가 일회성이 아님을 시사했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.07.22</span></div>
+      <div class="news-title">로보택시 미국 7개 시장으로 확대, 사이버캡 양산 개시</div>
+      <div class="news-summary">7월 플로리다 3개 도시에서 로보택시를 새로 론칭했고 사이버캡은 '생산 중' 단계로 격상. 다만 일부 지역은 여전히 감독 운전자가 탑승하며, 뉴저지주 규제 법안 등 지역별 허가가 확장 속도의 변수입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.22</span></div>
+      <div class="news-title">FSD 활성 구독 148만 건, 전년 대비 56% 증가</div>
+      <div class="news-summary">전분기 128만 건에서 추가 증가. 소프트웨어 구독은 하드웨어 대비 마진이 높아, 차량 판매 마진 압박을 상쇄할 수 있는 유일한 구조적 레버입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.07.23</span></div>
+      <div class="news-title">증권가, 목표주가는 일제히 하향하되 투자의견은 유지</div>
+      <div class="news-summary">캐너코드 $450→$410, 캔터피츠제럴드 $510→$485로 조정. 등급을 낮추지 않은 것은 AI·로보틱스 전환을 인정하되 "증명해 보이라"는 관망 스탠스로 읽힙니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>매출 성장 재점화</strong> — 1년 넘게 정체됐던 매출이 YoY +26%로 반등. 중국·유럽 수요 회복과 저가형 Model 3/Y 전환이 물량을 만들어냈고, CFO는 2023년 이후 최대 수주잔고를 언급했습니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>자율주행의 실제 수익화 단계 진입</strong> — 로보택시 7개 시장 운영, FSD 활성 구독 148만 건(+56%). 서사가 아닌 반복 매출로 전환되기 시작한 첫 분기입니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>에너지저장 사업의 구조적 수요</strong> — 배치량이 전분기 8.8GWh에서 13.5GWh로 급반등. 메가팩이 AI 데이터센터 전력 안정화에 투입되며 전기차 사이클과 무관한 성장축이 생겼습니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>서비스 부문 수익성 개선</strong> — 매출 +50%, 서비스 마진 사상 최고 14.1%. 차량 판매 마진 하락을 부분적으로 방어하는 역할입니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>수익성 붕괴 수준의 마진 압축</strong> — 영업이익률 4.1% → 1.4%, 영업이익 -57%. 규제 크레딧 감소와 판매가 인하가 겹치며 규제 크레딧 제외 자동차 총이익률은 19%대에서 16%대로 하락했습니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>현금흐름 적자 전환과 장기 캐펙스 부담</strong> — FCF -11억 달러, 연간 캐펙스 250억 달러 이상이며 향후 2~3년 추가 증가 예고. 투자 회수 시점이 불투명한 상태에서 현금이 먼저 나갑니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>극단적 밸류에이션</strong> — 후행 P/E 335배 수준, 2026년 컨센서스 EPS 기준으로도 선행 175~180배. 미래 성과가 이미 주가에 상당 부분 반영돼 실행 지연에 매우 취약합니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>실행·규제 리스크</strong> — 사이버캡 양산 램프 일정, 옵티머스 생산 난이도(머스크 본인이 "much work" 언급), 뉴저지주 로보택시 규제 법안 등 주별 허가 변수가 남아 있습니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wedbush <span style="font-size:11px;color:var(--muted);">(최고 목표가 · 2026.04.23)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$600</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Robert W. Baird <span style="font-size:11px;color:var(--muted);">(Ben Kallo)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$522</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Cantor Fitzgerald <span style="font-size:11px;color:var(--muted);">($510 → 하향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">비중확대</span><span class="target-price">$485</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">JP Morgan <span style="font-size:11px;color:var(--muted);">(2026.06.05 상향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$475</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Canaccord <span style="font-size:11px;color:var(--muted);">($450 → 하향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$410</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Jefferies <span style="font-size:11px;color:var(--muted);">(Philippe Houchois)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$400</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wells Fargo <span style="font-size:11px;color:var(--muted);">(Colin Langan)</span></span>
+      <div class="analyst-right"><span class="opinion-badge sell">매도</span><span class="target-price">$130</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">GLJ Research <span style="font-size:11px;color:var(--muted);">(최저 목표가 · 2026.07.21)</span></span>
+      <div class="analyst-right"><span class="opinion-badge sell">매도</span><span class="target-price">$24.86</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);">
+      📊 <strong>컨센서스</strong>: 33인 평균 목표주가 $407.41, 종합 등급 <strong>Hold(중립)</strong>. 최근 3개월 기준 매수 10 · 중립 16 · 매도 3. 목표가 최고 $600, 최저 $24.86으로 <strong>월가 내 시각차가 24배</strong>에 달하는 극단적 분산 상태입니다.
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      테슬라의 2026년 2분기는 <strong>"매출은 서프라이즈, 이익은 쇼크"</strong>라는 한 문장으로 요약됩니다. 인도량 48만대와 매출 282억 달러는 모두 사상 최대치였고 TTM 매출은 처음으로 1,000억 달러를 넘었지만, 영업이익은 오히려 57% 줄어 영업이익률이 1.4%까지 내려앉았습니다. 규제 크레딧 축소와 판매가 인하가 마진을 갉아먹는 사이, 옵티머스·사이버캡·AI 데이터센터에 대한 선행 투자가 영업비용을 47% 끌어올린 결과입니다.<br><br>
+      핵심은 <strong>이것이 사업 실패가 아니라 의도적인 전환 비용</strong>이라는 점입니다. 머스크는 2026년을 "대규모 캐펙스의 해"로 규정했고 CFO는 250억 달러 이상의 지출이 향후 2~3년 더 늘어난다고 못박았습니다. 즉 회사는 자동차 제조업의 이익률을 자율주행·로보틱스라는 옵션 가치와 맞바꾸는 중이며, 시장은 이제 그 옵션에 대해 "약속" 대신 "숫자"를 요구하기 시작했습니다. 목표주가가 일제히 하향됐음에도 투자의견은 유지된 것이 정확히 이 심리를 반영합니다.<br><br>
+      단기적으로는 주가 하방 압력이 이어질 가능성이 큽니다. 후행 P/E 335배, 선행 175~180배라는 밸류에이션은 실행 지연을 거의 용납하지 않으며, 현금흐름 적자가 몇 분기 더 지속될 경우 멀티플 축소 압력이 커집니다. 중기적으로 확인해야 할 변수는 세 가지입니다 — ① 규제 크레딧 제외 자동차 총이익률의 반등 여부, ② 로보택시 시장 확대 속도와 감독 운전자 제거 시점, ③ 사이버캡·옵티머스의 실제 양산 일정 준수 여부입니다.<br><br>
+      <strong>이 종목은 3~5년 이상의 시계로 자율주행·로보틱스 전환에 베팅할 수 있고, 그 과정의 이익률 훼손과 두 자릿수 변동성을 감내할 수 있는 투자자에게 적합합니다.</strong> 반대로 현금흐름과 밸류에이션을 기준으로 판단하는 투자자, 또는 단기 실적 모멘텀을 찾는 투자자에게는 현 구간이 매력적이라고 보기 어렵습니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

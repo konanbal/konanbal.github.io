@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스노우플레이크 (SNOW) 분석 보고서</title>
+<style>
+  :root {
+    --accent: #1d4e89;
+    --accent2: #29b5e8;
+    --bg: #f0f7ff;
+    --card: #ffffff;
+    --text: #0f1c2e;
+    --muted: #6b7280;
+    --border: #bfdbfe;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --snow: #29b5e8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0d1b3e 0%, #1d4e89 55%, #29b5e8 100%);
+    color: white; padding: 2.5rem 2rem 2rem; position: relative; overflow: hidden;
+  }
+  .report-header::before {
+    content: '❄️';
+    position: absolute; right: 2.5rem; top: 50%;
+    transform: translateY(-50%);
+    font-size: 120px; opacity: 0.07; pointer-events: none;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #29b5e8; color: #0d1b3e; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.75; max-width: 530px; line-height: 1.6; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.55; }
+  .price-display { font-size: 34px; font-weight: 700; margin-top: 4px; letter-spacing: -1px; }
+  .price-change { font-size: 14px; margin-top: 2px; color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); }
+  .rating-pill.urgent { background: #ef4444; border-color: #ef4444; }
+  .rating-pill.buy-pill { background: #29b5e8; color: #0d1b3e; border-color: #29b5e8; }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--snow); border-radius: 2px; }
+
+  /* 실적 D-4 알림 */
+  .earnings-alert {
+    background: linear-gradient(90deg, #7f1d1d 0%, #991b1b 100%);
+    color: white; padding: 12px 18px; border-radius: 12px;
+    font-size: 13px; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 12px; line-height: 1.5;
+  }
+
+  /* 52주 고점 대비 하락 경고 */
+  .pullback-banner {
+    background: linear-gradient(90deg, #1e3a5f 0%, #1d4e89 100%);
+    color: white; padding: 10px 18px; border-radius: 10px;
+    font-size: 13px; margin-bottom: 1rem;
+    display: flex; align-items: flex-start; gap: 10px; line-height: 1.7;
+  }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-ai { background: #ede9fe; color: #4c1d95; }
+  .tag-acq { background: #dbeafe; color: #1e40af; }
+  .tag-warn { background: #fef3c7; color: #78350f; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); color: #1a3a2e; }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); color: #3a1a1a; }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; color: var(--text); }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .target-up { color: var(--green); font-size: 11px; }
+  .target-down { color: var(--red); font-size: 11px; }
+
+  .earnings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; }
+  .earnings-box { background: #f0f7ff; border-radius: 10px; padding: 1rem 1.1rem; border: 1px solid var(--border); }
+  .earnings-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .earnings-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .earnings-beat { font-size: 11px; color: var(--green); font-weight: 600; margin-left: 6px; }
+  .earnings-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* AI 제품 현황 그리드 */
+  .ai-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 0.75rem; }
+  .ai-box { border-radius: 10px; padding: 1rem; border: 1px solid; text-align: center; }
+
+  .filing-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .filing-row:last-child { border-bottom: none; }
+  .filing-type { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-right: 8px; white-space: nowrap; }
+  .ft-8k { background: #fce7f3; color: #9d174d; }
+  .ft-8k-pos { background: #d1fae5; color: #065f46; }
+  .ft-8k-warn { background: #fef3c7; color: #78350f; }
+  .ft-def14a { background: #e0e7ff; color: #3730a3; }
+  .ft-upcoming { background: #dcfce7; color: #14532d; }
+
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); line-height: 1.6; }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .earnings-grid, .ai-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+    .price-display { font-size: 26px; }
+    .company-name { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">SNOW · NYSE · 클라우드 데이터 / AI</div>
+      <div class="company-name">스노우플레이크 (Snowflake Inc.)</div>
+      <div class="company-desc">엔터프라이즈 AI 데이터 클라우드 플랫폼. 멀티클라우드(AWS·Azure·GCP) 환경에서 데이터 통합·분석·공유·AI 워크로드를 단일 플랫폼에서 처리. Cortex AI·Snowflake Intelligence·Cortex Code로 에이전틱(Agentic) AI 인프라 전환 중. CEO 스리다르 라마스와미(전 구글 부사장, 2024년 취임).</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 23일</div>
+      <div class="price-display">$172.28</div>
+      <div class="price-change">▼ 52주 고점($280.67) 대비 -39%</div>
+      <div style="font-size:11px;opacity:0.55;margin-top:4px;">기준: NYSE 종가 5/22/2026</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시총: ~$62B</span>
+    <span class="rating-pill">🏢 섹터: 클라우드 SaaS / AI 인프라</span>
+    <span class="rating-pill buy-pill">⭐ 컨센서스: Strong Buy (44/46 매수)</span>
+    <span class="rating-pill">🎯 평균 목표가: $229.66 (+33%↑)</span>
+    <span class="rating-pill urgent">🚨 Q1 FY2027 실적: 5/27 (D-4)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 실적 D-4 알림 -->
+  <div class="earnings-alert">
+    <span style="font-size:22px;">⚡</span>
+    <span><strong>Q1 FY2027 실적 발표 D-4 (5월 27일 장 마감 후)</strong> — 가이던스: 제품 매출 $1.262~1.267B(+27% YoY). 컨센서스 EPS $0.32, 매출 $1.32B. RBC Capital "Cortex Code 채택 가속으로 Q1 업사이드 가능성 높다" 전망. 시장은 주가 ±12% 움직임을 예상 중. Snowflake Summit 2026(6/1 샌프란시스코)과 연계한 AI 전략 발표도 주목.</span>
+  </div>
+
+  <!-- 52주 하락 맥락 -->
+  <div class="pullback-banner">
+    <span style="font-size:18px;">📉</span>
+    <span><strong>2026년 YTD -39% 하락의 맥락:</strong> 실적 악화가 아닌 ① 금리 상승에 따른 성장주 멀티플 압축 ② 신임 CRO 교체(3/31) 실행 불확실성 ③ Observe 인수 통합 비용. Q4 FY2026 제품 매출은 <strong>+30% YoY</strong>, RPO는 <strong>+42% YoY $9.77B</strong>으로 비즈니스 펀더멘털은 오히려 강화됐다. 애널리스트 44명 중 44명 매수, 평균 목표가 $229.66.</span>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q4 FY2026 제품 매출</div>
+      <div class="kpi-value">$1.23B</div>
+      <div class="kpi-sub">YoY +30% · 컨센서스 +4.1% 초과</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">잔여 이행 의무(RPO)</div>
+      <div class="kpi-value" style="color:var(--green);">$9.77B</div>
+      <div class="kpi-sub">YoY +42% — 미래 매출 가시성 탁월</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순수익 유지율(NRR)</div>
+      <div class="kpi-value" style="color:var(--green);">125%</div>
+      <div class="kpi-sub">기존 고객 확장 강도 업계 최고수준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">FY2027 제품 매출 가이던스</div>
+      <div class="kpi-value" style="font-size:16px;">~$5.66B</div>
+      <div class="kpi-sub">+27% YoY · 컨센서스 $5.50B 상회</div>
+    </div>
+  </div>
+
+  <!-- ── FY2026 연간 성과 + Q1 FY2027 프리뷰 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 FY2026 연간 실적 (2026.02.25) + Q1 FY2027 프리뷰 (5/27)</div>
+    <div class="earnings-grid">
+      <div class="earnings-box">
+        <div class="earnings-label">FY2026 총 매출 (연간)</div>
+        <div class="earnings-value">$4.68B <span class="earnings-beat">▲ YoY +29%</span></div>
+        <div class="earnings-sub">제품 매출 $4.47B(+30%) · 영업현금흐름 $1.22B</div>
+      </div>
+      <div class="earnings-box">
+        <div class="earnings-label">Non-GAAP 잉여현금흐름(FCF)</div>
+        <div class="earnings-value">$1.12B <span class="earnings-beat">▲ FCF마진 24%</span></div>
+        <div class="earnings-sub">Non-GAAP 운영마진 10.5% (+400bps) · GAAP 순손실 -$1.33B</div>
+      </div>
+    </div>
+    <!-- Q1 FY2027 프리뷰 -->
+    <div style="background:#fff1f2;border:1.5px solid #fca5a5;border-radius:10px;padding:1rem;margin-bottom:0.75rem;">
+      <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:8px;">🔴 Q1 FY2027 프리뷰 (5/27 발표 예정) — 컨센서스 vs 가이던스</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;font-size:12px;">
+        <div style="background:#fff;border-radius:6px;padding:0.75rem;border:1px solid #fca5a5;">
+          <div style="color:var(--muted);">가이던스 (제품매출)</div>
+          <div style="font-size:18px;font-weight:700;">$1.262~1.267B</div>
+          <div style="color:var(--muted);font-size:11px;">+27% YoY</div>
+        </div>
+        <div style="background:#fff;border-radius:6px;padding:0.75rem;border:1px solid #fca5a5;">
+          <div style="color:var(--muted);">컨센서스 총매출</div>
+          <div style="font-size:18px;font-weight:700;">$1.32B</div>
+          <div style="color:var(--muted);font-size:11px;">EPS 컨센서스 $0.32</div>
+        </div>
+        <div style="background:#f0fdf4;border-radius:6px;padding:0.75rem;border:1px solid #bbf7d0;">
+          <div style="color:var(--muted);">RBC Capital 전망</div>
+          <div style="font-size:15px;font-weight:700;color:var(--green);">"Q1 업사이드"</div>
+          <div style="color:#065f46;font-size:11px;">Cortex Code 채택 가속</div>
+        </div>
+      </div>
+    </div>
+    <!-- AI 현황 -->
+    <div class="ai-grid">
+      <div class="ai-box" style="background:#ede9fe;border-color:#c4b5fd;">
+        <div style="font-size:11px;color:#4c1d95;font-weight:600;">Cortex AI</div>
+        <div style="font-size:20px;font-weight:700;color:#7c3aed;">9,100+</div>
+        <div style="font-size:11px;color:#4c1d95;">주간 활성 계정</div>
+      </div>
+      <div class="ai-box" style="background:#dbeafe;border-color:#93c5fd;">
+        <div style="font-size:11px;color:#1e40af;font-weight:600;">Snowflake Intelligence</div>
+        <div style="font-size:20px;font-weight:700;color:#2563eb;">2,500+</div>
+        <div style="font-size:11px;color:#1e40af;">Q4 말 계정 수</div>
+      </div>
+      <div class="ai-box" style="background:#f0fdf4;border-color:#bbf7d0;">
+        <div style="font-size:11px;color:#065f46;font-weight:600;">$1M+ 고객</div>
+        <div style="font-size:20px;font-weight:700;color:#059669;">733개</div>
+        <div style="font-size:11px;color:#065f46;">YoY +27%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.8;background:#f0f7ff;border-left:3px solid var(--snow);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:4px;">
+      <strong>CEO 스리다르 라마스와미 (Q4 FY2026):</strong> "AI가 현실이 된 변혁의 한 해였다. Snowflake는 기업 AI 혁명의 중심에 있다. 10년 이상 구축한 '단일 진실 소스', 크로스클라우드 상호운용성, 엔터프라이즈급 거버넌스가 이제 AI를 안전하고 확장 가능하게 만드는 기반이다. 이제 에이전틱 AI 역량을 그 위에 활성화하고 있다." FY2026 최대 계약: $4억 달러 이상 단일 계약 1건 + $1억 달러 이상 계약 7건(전년 2건 대비).
+    </div>
+  </div>
+
+  <!-- ── SEC 공시 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 및 주요 이벤트</div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-upcoming">예정</span><span style="font-weight:600;color:#14532d;">Q1 FY2027 실적 발표 (2026.04.30 종료 분기) — 5/27 장 마감 후</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.27</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k">8-K</span><span style="font-weight:500;">Q4 FY2026 + 연간 실적 발표 — 제품매출 $1.23B (+30%), RPO $9.77B (+42%)</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.25</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-pos">8-K 인수</span><span style="font-weight:500;">Observe Inc. 인수 완료 — 옵저버빌리티(로그·트레이스·메트릭) 역량 추가, 178명 편입</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.Q1</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-warn">8-K 인사</span><span style="font-weight:500;">신임 CRO Jonathan Beaulier 취임 (Mike Gannon 교체) — 3/31부터 영업 총책임</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.31</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-pos">8-K</span><span style="font-weight:500;">AI 플랫폼 대규모 업데이트 — Snowflake Intelligence·Cortex Code 확장</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.21</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-def14a">DEF 14A</span><span style="font-weight:500;">주주총회 자료 — FY2026 FCF $1.12B, 비GAAP EPS $1.25(+50% YoY) 기재</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.18</span>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#1e3a5f;background:#eff6ff;border-left:3px solid var(--snow);padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.7;">
+      📌 <strong>투자자 주목:</strong> 전 CEO Frank Slootman이 2026.05.19 주가 ~$142 수준에서 144,650주($2,050만 달러) 매도. 내부자 매도는 주가 방향에 대한 우려 신호로 해석될 수 있으나, Slootman은 은퇴 후 분산 목적 매도가 일반적. Snowflake Summit 2026(6월 1일)에서 에이전틱 AI 전략 발표 예정 — 연간 최대 제품 발표 이벤트.
+    </div>
+  </div>
+
+  <!-- ── 주요 뉴스 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.02.25</span></div>
+      <div class="news-title">Q4 FY2026 강력한 어닝 — $4억+ 최대 계약 + $1억+ 7건으로 엔터프라이즈 신뢰 입증</div>
+      <div class="news-summary">제품 매출 $1.23B(+30%)로 컨센서스를 상회했고, 사상 최대 단일 계약 $4억+을 포함해 $1억 이상 계약이 7건(전년 2건)으로 급증했다. RPO $9.77B(+42%)은 향후 2~3년 매출을 이미 확보했음을 의미한다. FY2027 가이던스 $5.66B은 컨센서스 $5.50B을 넘어서 시장 기대를 상회했다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-ai">AI</span><span class="news-date">2026.04.21</span></div>
+      <div class="news-title">Snowflake Intelligence + Cortex Code 대규모 업데이트 — 에이전틱 엔터프라이즈 구현</div>
+      <div class="news-summary">Snowflake Intelligence(비즈니스 인텔리전스 에이전트)와 Cortex Code(코드 자동 생성·분석)가 대규모 업데이트됐다. 9,100개 이상 계정이 Cortex AI를 주간 기준으로 활용 중이며, AI 워크로드가 단순 실험을 넘어 실제 비즈니스 운영에 통합되는 단계에 진입하고 있다. 6개 주요 산업의 AI·에이전틱 미래 구축 사례 발표도 이어졌다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-acq">인수</span><span class="news-date">2026.Q1</span></div>
+      <div class="news-title">Observe Inc. 인수 완료 — 옵저버빌리티 역량 추가, FY2027 매출 +1%p 기여 전망</div>
+      <div class="news-summary">로그·트레이스·메트릭 등 옵저버빌리티(IT 운영 모니터링) 전문 기업 Observe를 인수해 AI 데이터 클라우드 플랫폼 역량을 확장했다. 178명이 FY2027 Q1에 합류하며 단기 비용 증가(FCF 마진 -150bp 영향)가 있지만, 연간 제품 매출 성장에 +1%p 기여가 예상된다. Datadog·Dynatrace 등 경쟁 옵저버빌리티 시장 진입.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-warn">리스크</span><span class="news-date">2026.03.31</span></div>
+      <div class="news-title">CRO 교체 (Mike Gannon → Jonathan Beaulier) — FY2027 영업 최대 시험 구간</div>
+      <div class="news-summary">최고수익책임자(CRO) 교체는 영업 조직 재편과 고객 관계 변화를 수반한다. Beaulier는 첫 풀 영업 사이클을 아직 완료하지 않았으며, 이 시점이 AI 워크로드 확장 확인이 가장 필요한 구간과 겹친다. 일부 애널리스트는 CRO 전환 기간 동안 대형 계약 체결 속도가 일시 둔화될 수 있다고 우려한다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-warn">리스크</span><span class="news-date">2026.05.19</span></div>
+      <div class="news-title">전 CEO Frank Slootman $2,050만 달러어치 주식 매도</div>
+      <div class="news-summary">현재 이사로 재직 중인 Slootman이 5월 19일 144,650주를 주가 ~$142 수준에서 매도했다. 은퇴 후 분산 매도는 일반적이지만 내부자 대규모 매도는 심리적으로 부정적 신호로 작용한다. 다만 매도 후에도 Slootman의 지분 보유가 이어지고 있다.</div>
+    </div>
+  </div>
+
+  <!-- ── 투자 포인트 ── -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>RPO $9.77B(+42%) — 향후 2~3년 매출이 이미 예약됨</strong> — 잔여 이행 의무는 고객이 계약한 미래 매출의 선행지표다. $9.77B은 현재 연 매출의 약 2.1배로, 급격한 성장 둔화 가능성이 구조적으로 낮음을 시사한다. FY2027 가이던스 $5.66B도 컨센서스 $5.50B을 상회한다.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>NRR 125% — 기존 고객이 매년 25% 더 쓴다</strong> — 125%의 순수익 유지율은 신규 고객 없이도 기존 고객만으로 연 25% 성장 가능한 구조. 클라우드 SaaS 업계에서 120% 이상은 최우수 등급. "데이터 봉황"처럼 데이터가 쌓일수록 이탈 비용이 높아지는 자연적 락인 효과.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>AI 워크로드 수익화 가속 — Cortex가 소비 증폭기</strong> — 9,100개+ 계정이 AI 제품을 주간 사용 중. AI 쿼리는 일반 분석 쿼리 대비 단위당 소비량이 훨씬 크다. Cortex Code가 개발자에게 침투하면 IT 조직 전체로 Snowflake 소비가 확대되는 신규 플라이휠이 작동한다.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>마진 개선 궤도 — FY2027 Non-GAAP 운영마진 12.5% 목표</strong> — FY2026 10.5% → FY2027 12.5%로 200bp 상승 목표. FCF 마진 23% 가이던스는 현금 창출 능력이 본격화됨을 의미. 규모의 경제 실현 단계로 진입하며 EPS 흑자 전환 기대감이 높아지고 있다.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>52주 고점 대비 -39% — 진입 타이밍 매력도 상승</strong> — 비즈니스 펀더멘털 악화 없이 멀티플 압축으로 하락. 애널리스트 44명 중 44명 매수 의견, 평균 목표 $229.66은 현재 대비 +33% 업사이드. 모델 기반 공정가치 추정 $202~$233 구간으로 현재 저평가 상태.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>GAAP 순손실 지속 — FY2026 -$1.33B, 손실 3.6% 확대</strong> — Non-GAAP 기준은 개선 중이지만, 주식보상(SBC) 포함 GAAP 기준 순손실이 확대 중. FY2026 GAAP EPS -$3.95. 실질 수익화 시점이 멀다는 인식이 금리 상승 환경에서 할인율을 높인다.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>Databricks·AWS·Microsoft와의 경쟁 격화</strong> — Databricks(IPO 준비)가 Snowflake의 핵심 고객층을 공격적으로 공략 중. AWS Redshift·Azure Synapse도 가격 경쟁력 무기로 추격. 고객들이 멀티 클라우드 전략에서 Snowflake 소비를 줄이는 "디버시피케이션 리스크".</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>신임 CRO 교체 → FY2027 영업 실행 불확실성</strong> — Beaulier가 첫 풀 영업 사이클을 완료하지 않은 상태에서 FY2027 대형 계약 체결이 필요하다. FY2026처럼 $4억+ 계약과 $1억+ 계약 7건을 반복해야 하지만 영업 총책임자 교체 직후라 실행 위험이 있다.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>NRR 하락 추세 — 126% → 125% → 124% → 125%</strong> — Q1 FY2026에서 124%까지 하락 후 Q4 FY2026에서 125%로 회복했지만, 2023년 고점 대비 둔화 추세. AI 워크로드가 NRR을 다시 130%+ 수준으로 끌어올릴 수 있는지가 핵심 관전 포인트.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>클래스 액션 소송 진행 중 (2023.06~2024.02 기간 주장)</strong> — 특정 진술에 대한 허위 기재 주장 집단소송이 진행 중이다. 결과에 따라 법적 비용 및 경영진 집중력 분산 가능성이 있다. 소송 리스크는 현 주가에 일부 반영된 것으로 보이나 판결 전까지 불확실성 상존.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 애널리스트 의견 ── -->
+  <div class="card" style="margin-top:1rem;margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <div style="background:#f0fdf4;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">컨센서스 (46개 기관)</div>
+        <div style="font-size:18px;font-weight:700;color:#065f46;">Strong Buy</div>
+        <div style="font-size:11px;color:var(--muted);">44매수 / 1중립 / 1매도</div>
+      </div>
+      <div style="background:#f0f7ff;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">평균 목표주가</div>
+        <div style="font-size:18px;font-weight:700;">$229.66</div>
+        <div style="font-size:11px;color:var(--green);">현재가 대비 +33%</div>
+      </div>
+      <div style="background:#f0f7ff;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">목표가 범위</div>
+        <div style="font-size:16px;font-weight:700;">$110 ~ $500</div>
+        <div style="font-size:11px;color:var(--muted);">중앙값 ~$233</div>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">TD Cowen</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$255</span><span style="font-size:11px;color:var(--muted);">재확인 (5월)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">RBC Capital (Q1 프리뷰)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Outperform)</span><span class="target-price">$220</span><span style="font-size:11px;color:var(--muted);">↓ from $245 · Q1 업사이드 전망</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Benchmark</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$200</span><span style="font-size:11px;color:var(--muted);">↑ from $190 (5월)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">UBS</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$210</span><span style="font-size:11px;color:var(--muted);">↓ from $235 (4월)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Simply Wall St 공정가치</span>
+      <div class="analyst-right"><span class="opinion-badge buy">저평가</span><span class="target-price">$232.74~$236.61</span><span class="target-up">+35%</span></div>
+    </div>
+    <div style="margin-top:12px;padding:10px 14px;background:#f0f7ff;border-radius:8px;font-size:12px;color:#1d4e89;line-height:1.7;border:1px solid var(--border);">
+      📊 <strong>5/27 Q1 결과 후 목표가 재조정 예상.</strong> 52개 기관 중 45개가 강력 매수(45/52 = 87%). 목표가 $110(약세)~$500(강세) 의 극단적 분산은 "소비 기반 과금 모델에서 AI 워크로드 수익화 속도"에 대한 확신 차이를 반영. 5/27 실적과 가이던스가 컨센서스 목표가 방향을 결정할 것이다.
+    </div>
+  </div>
+
+  <!-- ── 종합 요약 ── -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      스노우플레이크(SNOW)는 기업 AI 인프라의 "데이터 계층" 독점을 구축하고 있다. FY2026에서 RPO $9.77B(+42%), NRR 125%, 사상 최대 $4억+ 계약 등 비즈니스 지표는 역대 최강이었다. CEO 라마스와미가 주도하는 Cortex AI·Snowflake Intelligence·Cortex Code 플랫폼은 단순 데이터 창고를 넘어 "에이전틱 AI 운영 플랫폼"으로의 전환을 구체화하고 있으며, 9,100개+ 계정이 AI 제품을 주간 기준으로 활용하고 있다. FY2027 가이던스 $5.66B(+27%)은 컨센서스를 상회한다.
+      <br><br>
+      현재 주가 하락(-39% from ATH)은 펀더멘털이 아닌 금리 압박·CRO 교체·Observe 통합 비용이 겹친 결과다. 애널리스트 46명 중 44명 강력 매수, 평균 목표가 $229.66은 현재 대비 +33% 업사이드를 제시한다.
+      <br><br>
+      <strong>결론:</strong> SNOW는 엔터프라이즈 AI 인프라 시장에서 확실한 포지션을 가진 고품질 성장주다. 가장 가까운 단기 카탈리스트는 <strong>5월 27일 Q1 FY2027 실적 발표</strong>와 <strong>6월 1일 Snowflake Summit 2026</strong>이다. Q1에서 Cortex Code 채택 가속과 AI 워크로드 소비 성장이 확인되면 상당한 주가 반등이 가능하다. GAAP 기준 계속되는 순손실과 CRO 교체 실행 리스크는 단기 변동 요인이나, RPO·NRR·FCF의 구조적 강화가 장기 투자 논거를 뒷받침한다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. Snowflake의 회계연도는 1월 31일 종료 기준으로 FY2027 = 2026.02~2027.01. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 데이터 기준일: 2026년 5월 23일.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

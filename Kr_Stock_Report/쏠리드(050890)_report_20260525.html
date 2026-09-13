@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쏠리드(050890) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0a2540;
+    --accent: #2563eb;
+    --accent2: #1e40af;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #0a2540;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0a2540 0%, #1e3a5f 60%, #1a56a0 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #2563eb; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .price-change.up { font-size: 14px; margin-top: 2px; color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: #2563eb; border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.amber { color: var(--amber); }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .est-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 0.75rem; }
+  .est-col { padding: 0.75rem 1rem; border-right: 1px solid var(--border); background: var(--card); }
+  .est-col:last-child { border-right: none; }
+  .est-year { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+  .est-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
+  .est-label { color: var(--muted); }
+  .est-val { font-weight: 500; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .est-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">050890 · KOSDAQ</div>
+      <div class="company-name">쏠리드</div>
+      <div class="company-desc">글로벌 DAS(광중계기) 시장 톱3 — Open RAN·5G SA·미국 주파수 경매 최대 수혜 통신장비 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 25일</div>
+      <div class="price-display">~16,000~18,000원대</div>
+      <div class="price-change up">▲ 52주 범위: 5,980원 ~ 18,470원 (신고가 경신 중)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 1,100~1,200억원대</span>
+    <span class="rating-pill">🌐 수출 비중: 약 84%</span>
+    <span class="rating-pill">⭐ 컨센서스: Buy (목표가 25,000~30,000원)</span>
+    <span class="rating-pill">🏆 글로벌 DAS 시장 3위</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025 연간 매출 (추정)</div>
+      <div class="kpi-value amber">2,948억원</div>
+      <div class="kpi-sub">YoY 약 -11% (자회사 역기저)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025 영업이익 (추정)</div>
+      <div class="kpi-value amber">334억원</div>
+      <div class="kpi-sub">영업이익률 약 11.3%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026 매출 전망 (컨센)</div>
+      <div class="kpi-value green">3,088~3,798억원</div>
+      <div class="kpi-sub">YoY +5~29% 회복 전망</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 주가 등락</div>
+      <div class="kpi-value green">+209%</div>
+      <div class="kpi-sub">저점 5,980원 → 최고 18,470원</div>
+    </div>
+  </div>
+
+  <!-- 실적 추이 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2025년 3분기 (최근 공시) + 연간 추정</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">2025 3Q 매출 (개별)</div>
+        <div style="font-size:18px;font-weight:700;">617억원 <span style="font-size:12px;color:#d97706;">▼ YoY -5%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">QoQ +45% — 계절적 4Q 쏠림 전 회복세</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">2025 3Q 영업이익 (개별)</div>
+        <div style="font-size:18px;font-weight:700;">71억원 <span style="font-size:12px;color:#d97706;">▼ YoY -9%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">QoQ 흑자 전환 — 수익성 회복 시그널</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#eff6ff;border-left:3px solid #2563eb;padding:10px 14px;border-radius:0 6px 6px 0;">
+      <b>2025년 실적 부진 핵심 원인</b>: 자회사 윈텍 매출 급감에 따른 역기저 효과 + 미국 대형 DAS 프로젝트 사이클 종료 시기 공백. 개별 기준(본사) 영업이익률은 약 11%대로 견조하게 유지됨.<br>
+      <b>2026년 회복 근거</b>: 미국 FCC 주파수 경매(6월) → 통신사 5G 인빌딩 투자 재개 + 국내 5G SA 전환 DAS 수요 + 윈텍 역기저 해소 + 다윈프릭션 연결 편입(연 200억원 추가)
+    </div>
+    <div style="margin-top:0.75rem;">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px;">하나증권 연간 실적 추정 (십억원 기준)</div>
+      <div class="est-grid">
+        <div class="est-col"><div class="est-year">2023 실적</div><div class="est-row"><span class="est-label">매출</span><span class="est-val">3,311억</span></div><div class="est-row"><span class="est-label">영업이익</span><span class="est-val">351억</span></div><div class="est-row"><span class="est-label">EPS</span><span class="est-val">754원</span></div></div>
+        <div class="est-col" style="background:#f8f9fc;"><div class="est-year">2025P (추정)</div><div class="est-row"><span class="est-label">매출</span><span class="est-val">2,948억</span></div><div class="est-row"><span class="est-label">영업이익</span><span class="est-val">334억</span></div><div class="est-row"><span class="est-label">EPS</span><span class="est-val">605원</span></div></div>
+        <div class="est-col"><div class="est-year">2026F (기존)</div><div class="est-row"><span class="est-label">매출</span><span class="est-val">3,088억</span></div><div class="est-row"><span class="est-label">영업이익</span><span class="est-val">359억</span></div><div class="est-row"><span class="est-label">EPS</span><span class="est-val">524원</span></div></div>
+        <div class="est-col" style="background:#eff6ff;"><div class="est-year">2026F (Bull — 4월 상향)</div><div class="est-row"><span class="est-label">매출</span><span class="est-val">3,798억</span></div><div class="est-row"><span class="est-label">영업이익</span><span class="est-val">454억</span></div><div class="est-row"><span class="est-label">EPS</span><span class="est-val">670원</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 DART 공시</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">자사주취득</span>
+        <span style="font-size:13px;font-weight:500;">자기주식취득 신탁계약 체결 — 17.64억원, 14.2만주 (신한투자증권, 소각 시까지 보유)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.13</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2025년 3분기 분기보고서 — 개별 매출 617억, 영업이익 71억 (QoQ 흑자전환)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2025.11.13</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0f2fe;color:#075985;margin-right:8px;">수주/계약</span>
+        <span style="font-size:13px;font-weight:500;">미국 자회사 쏠리드 기어 — NTIA WIF Open RAN 기술 개발 프로젝트 선정 (약 400억원 규모 재정 지원)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2024.12</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#f0fdf4;padding:10px 14px;border-radius:8px;color:#065f46;line-height:1.7;">
+      📌 <b>투자자 주목 공시</b>: 자사주 취득 신탁계약(소각 목적)은 주주가치 제고 의지의 직접적 표현. NTIA WIF O-RAN 프로젝트는 직접 매출은 아니나 연구비 대리 지불 + 향후 미국 통신사·공공기관 매출처 확대의 발판.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.06</span></div>
+      <div class="news-title">한국투자증권 신규 커버 — 목표주가 25,000원, 매수 "개방형 생태계의 중심에 서다"</div>
+      <div class="news-summary">김정찬 애널리스트 "DAS는 확실한 방향성. Open RAN 개방형 생태계가 주는 기회"라며 신규 커버 개시. 발표 당일 52주 신고가 경신, 외국인 3일 연속 286.9만주 순매수.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.17</span></div>
+      <div class="news-title">하나증권 목표주가 30,000원으로 대폭 상향 — "기업가치로 보면 극심한 저평가"</div>
+      <div class="news-summary">국내외 통신장비 업체 Multiple 상승 반영, Target PBR 5배 적용. "미국 FCC 주파수 경매(6월) 개시로 DAS 수혜 본격화 + 글로벌 DAS 탑3 기술력" 강조. 이전 목표가 20,000원에서 50% 상향.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.03.12~</span></div>
+      <div class="news-title">하나증권 목표가 20,000원 상향 — 2025 4Q 어닝 서프라이즈, "시총 1조원은 되어야 정상"</div>
+      <div class="news-summary">2025년 4분기 어닝 서프라이즈 시현으로 이익 전망치 상향. 5G SA 전환 국내 인빌딩 수요 + 유럽/미주 관공서 매출 증가 예상. PBR 역사적 저점 수준에서 매수 기회 강조.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.06</span></div>
+      <div class="news-title">쏠리드, 실내망으로 버티고 오픈랜으로 외연 확장 — 하이브리드 DAS 개발 추진</div>
+      <div class="news-summary">DAS 안에 O-RAN RU를 결합한 하이브리드 DAS 개발 중. AT&T가 2026년까지 트래픽 70%를 Open RAN으로 전환 계획, 쏠리드는 2022년부터 AT&T 상용화 매출 보유. AI-RAN 시대 활용 범위 확대 전망.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.03.13</span></div>
+      <div class="news-title">자사주 취득 신탁계약 체결 — 17.64억원, 소각 목적</div>
+      <div class="news-summary">주주가치 제고 목적으로 자사주 취득 신탁 결정. 소각 시까지 보유 예정으로 주식 수 감소 효과 기대. 이사회 전원 참석 결의.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.04~</span></div>
+      <div class="news-title">투자경고종목 지정 예고 — 단기 급등에 따른 수급 변동성 주의</div>
+      <div class="news-summary">52주 저점 대비 3배 이상 급등으로 투자경고종목 지정 예고. 단기 투기 수요 유입과 차익실현 매물 간 수급 충돌 구간. 트럼프 관세 확대 시 글로벌 통신 인프라 투자 지연 가능성도 일부 우려.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>미국 FCC 주파수 경매(6월) — 통신장비 빅사이클 진입</b> — 글로벌 DAS 시장의 1/3을 차지하는 미국에서 6월 경매 개시. AT&T·T-Mobile 5G SA 전환용 인빌딩 DAS 대규모 발주 기대. 2022년 미국 매출 비중 31%를 기록한 전례.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>Open RAN 개방형 생태계 수혜 — NTIA WIF 400억원 지원</b> — 미국 상무부 산하 NTIA의 와이어리스 이노베이션 펀드 2차 O-RAN 프로젝트 선정. AT&T 2026년 트래픽 70% O-RAN 전환 계획 직접 수혜 기업.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>국내 5G SA 전환 인빌딩 수요 급증</b> — 2026년 5G SA 상용화에 따른 실내 네트워크 재투자 사이클. 기지국 SA 전환 시 DAS 업그레이드 필수. 국내 통신 3사 인빌딩 CAPEX 증가.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>자회사 역기저 해소 + 다윈프릭션 신규 편입</b> — 2025년 윈텍 매출 급감 역기저가 2026년 사라지고, 다윈프릭션 연결 편입으로 연 200억원 매출 추가. 연결 외형 동시 개선.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>자사주 소각 + 저평가 밸류에이션</b> — 자사주 신탁(소각 목적)으로 주주가치 제고. 글로벌 동종 업체 대비 PBR·PER 저평가 구간. 하나증권 "최소 시총 1조원은 되어야 정상" 발언.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>미국 FCC 경매 지연·관세 리스크</b> — 트럼프 행정부 보편관세 확대로 글로벌 통신 인프라 투자 지연 가능성. FCC 경매가 정치적 이유로 연기되면 Bull 시나리오 핵심 모멘텀 소멸.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>단기 급등 후 투자경고 지정 리스크</b> — 52주 저점 대비 +209% 급등으로 투자경고종목 예고. RSI 과열 구간에서 차익실현 매물 출회 시 급격한 조정 가능.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>2025년 연결 매출 역성장(-11%) 미확정</b> — 자회사 윈텍·연결 부문 부진이 연간 확정 실적에도 반영될 가능성. 기대치보다 영업이익 더 낮을 경우 실망 매물 출회.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>중국 화웨이·엠페놀과의 글로벌 경쟁</b> — 미국 내 탈중국 통신장비 기조가 쏠리드에 유리하지만, 엠페놀 등 기존 강자와의 가격·기술 경쟁 지속. 수주 지연 또는 단가 하락 압력.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>고정비 부담 + 4Q 계절적 쏠림 구조</b> — 매출의 4분기 집중 현상 심해, 1~3Q 실적 상대적 부진으로 반복적 실망감 유발 가능. 연결 기준 영업이익률이 개별보다 낮은 구조.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견</div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">한국투자증권 (김정찬)</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">신규 커버 (2026.05.06)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 25,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">하나증권 (김홍식)</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">목표가 3차 상향 (2026.04.17)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 30,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">하나증권 (김홍식)</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">목표가 2차 상향 (2026.03.12)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 20,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">알파증류소</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">(2026.04)</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 20,000원</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);padding:10px 0 0;">
+      ※ 전 증권사 만장일치 '매수'. 목표주가 밴드: 20,000~30,000원. 5/25 현재 주가 기준 상승 여력 약 +25~+60% 수준.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      쏠리드(050890)는 DAS(분산 안테나 시스템) 광중계기 분야 글로벌 시장 3위 기업으로, 수출 비중 84%를 기반으로 미국·유럽·아시아 전역에 통신 인프라를 공급한다. 2025년은 자회사 윈텍 역기저와 미국 대형 프로젝트 사이클 공백으로 연결 매출이 약 -11% 역성장하는 일시적 부진을 겪었으나, 개별 기준 영업이익률은 11%대로 견조했다. 2026년에는 미국 FCC 주파수 경매(6월) 개시로 통신사 5G SA 인빌딩 투자가 재개되고, 국내 5G SA 전환에 따른 DAS 수요 증가, 자회사 역기저 해소, 다윈프릭션 연결 편입(+200억원) 등이 동시에 작동하면서 실적 턴어라운드가 예상된다. 한국투자증권·하나증권 전 증권사가 매수 의견을 유지하며 목표주가를 20,000~30,000원으로 제시하고 있고, AT&T Open RAN 수혜·NTIA WIF 400억원 지원 등 미국발 모멘텀도 강하다. 다만 FCC 경매 지연이나 관세 확대에 따른 글로벌 투자 위축, 단기 급등에 따른 투자경고 지정 리스크는 유의가 필요하다. <b>이 종목은 글로벌 5G 통신 인프라 투자 사이클 회복에 베팅하면서 미국 주파수 경매와 국내 5G SA 전환이라는 이중 촉매가 동시에 작동하기를 기다리는 중장기 투자자에게 적합하다.</b>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

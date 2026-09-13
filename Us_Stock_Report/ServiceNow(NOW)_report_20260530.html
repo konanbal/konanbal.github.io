@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServiceNow(NOW) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0d1b2a;
+    --accent: #81b4ea;
+    --accent2: #0c3d6e;
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --teal: #0891b2;
+    --now: #293e6a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header { background: linear-gradient(135deg, #0d1b2a 0%, #1a3a6e 55%, #0c3d6e 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #3b82f6; color: white; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .hot-pill { display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(90deg, #f59e0b, #ef4444); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-left: 10px; }
+  .company-name { font-size: 30px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.5px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 560px; line-height: 1.6; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 34px; font-weight: 700; margin-top: 6px; }
+  .price-change.up { font-size: 14px; margin-top: 2px; color: #4ade80; }
+  .price-change.down { font-size: 14px; margin-top: 2px; color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; position: relative; overflow: hidden; }
+  .kpi::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; margin-top: 3px; }
+  .kpi-sub.up { color: var(--green); font-weight: 600; }
+  .kpi-sub.down { color: var(--red); font-weight: 600; }
+  .kpi-sub.neutral { color: var(--muted); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: linear-gradient(180deg, #3b82f6, #8b5cf6); border-radius: 2px; }
+
+  .seg-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .seg-table th { padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--muted); background: #f9fafb; text-transform: uppercase; letter-spacing: 0.05em; }
+  .seg-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  .seg-table tr:last-child td { border-bottom: none; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+  .news-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #e0e7ff; color: #3730a3; }
+  .tag-hot { background: linear-gradient(90deg,#fef3c7,#fde68a); color: #92400e; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 600; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .buy { background: #dbeafe; color: #1e40af; }
+  .strong-buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 700; font-size: 14px; }
+
+  .sec-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; gap: 12px; }
+  .sec-row:last-child { border-bottom: none; }
+  .sec-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .sb-blue { background: #e0e7ff; color: #3730a3; }
+  .sb-green { background: #dcfce7; color: #166534; }
+  .sb-pink { background: #fce7f3; color: #9d174d; }
+  .sb-amber { background: #fef9c3; color: #854d0e; }
+  .sec-title { font-size: 13px; font-weight: 500; flex: 1; }
+  .sec-date { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+  /* Rally callout */
+  .rally-box { background: linear-gradient(135deg, #1e3a5f 0%, #0f2d4a 100%); color: white; border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+  .rally-stat { text-align: center; min-width: 90px; }
+  .rally-stat-val { font-size: 28px; font-weight: 800; color: #4ade80; }
+  .rally-stat-label { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+  .rally-divider { width: 1px; height: 48px; background: rgba(255,255,255,0.2); }
+  .rally-text { font-size: 13px; opacity: 0.9; line-height: 1.7; flex: 1; min-width: 200px; }
+
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #f0f4ff 50%, #f5f3ff 100%); border: 1px solid #bfdbfe; border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 16px; font-weight: 700; color: var(--accent2); margin-bottom: 0.875rem; display: flex; align-items: center; gap: 8px; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #bfdbfe; }
+
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } .rally-divider { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">NOW · NYSE · Enterprise Software</div>
+      <div class="company-name">ServiceNow <span class="hot-pill">🔥 주간 +18.5%</span></div>
+      <div class="company-desc">기업용 AI 워크플로우 자동화 플랫폼 글로벌 1위. "AI 컨트롤 타워"를 표방하며 IT·HR·보안·운영 등 전 기업 업무에 에이전틱 AI를 접목. 2030년 구독매출 $30B 목표.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 30일</div>
+      <div class="price-display">$128.81</div>
+      <div class="price-change up">▲ +12.7% (5/29일 단일 세션) · 52주 저점 $81.24에서 +58.6%</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: $128.3B</span>
+    <span class="rating-pill">🏢 NYSE · S&P100 편입</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (49명)</span>
+    <span class="rating-pill">📉 52주 범위: $81.24 ~ $211.48</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 최근 급등 라이브 박스 -->
+  <div class="rally-box">
+    <div class="rally-stat">
+      <div class="rally-stat-val">+18.5%</div>
+      <div class="rally-stat-label">주간 상승률 (5/25~30)</div>
+    </div>
+    <div class="rally-divider"></div>
+    <div class="rally-stat">
+      <div class="rally-stat-val">+14%</div>
+      <div class="rally-stat-label">5/29 단일일 급등</div>
+    </div>
+    <div class="rally-divider"></div>
+    <div class="rally-stat">
+      <div class="rally-stat-val">+58.6%</div>
+      <div class="rally-stat-label">4월 저점 대비 반등</div>
+    </div>
+    <div class="rally-divider"></div>
+    <div class="rally-text">
+      <strong>왜 급등했나?</strong> Snowflake(+36%), Dell(AI 서버 매출 +757%) 실적이 "AI는 소프트웨어를 죽이지 않는다"는 서사를 확인. 'SaaSpocalypse(AI가 SaaS를 대체)'라는 공포 내러티브가 붕괴되며 소프트웨어 섹터 대규모 재평가. NOW가 섹터 대장주로 랠리를 주도. BofA 매수 복귀 + 5월 소프트웨어 ETF(IGV) 2001년 이후 최대 월간 상승.
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 총 매출</div>
+      <div class="kpi-value">$3.77B</div>
+      <div class="kpi-sub up">YoY +22% · 컨센서스 +0.65% 초과</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 구독 매출</div>
+      <div class="kpi-value">$3.67B</div>
+      <div class="kpi-sub up">YoY +22% · cRPO $12.64B (+22.5%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">애널리스트 평균 목표가</div>
+      <div class="kpi-value">$142.93</div>
+      <div class="kpi-sub up">현재가 대비 +11.0% · 최고 $240</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">FY2026E 구독 매출 가이던스</div>
+      <div class="kpi-value">$15.75B</div>
+      <div class="kpi-sub up">YoY +22~22.5% · 1분기 후 상향</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (2026.04.22 발표, 최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div style="background:#f0f9ff;border-radius:10px;padding:1rem;border:1px solid #bae6fd;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">총 매출 (실제 vs 예상)</div>
+        <div style="font-size:20px;font-weight:700;">$3.77B <span style="font-size:11px;color:var(--green);">▲ +0.65% 초과</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">컨센서스 $3.75B · YoY +22%</div>
+      </div>
+      <div style="background:#f0f9ff;border-radius:10px;padding:1rem;border:1px solid #bae6fd;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">GAAP EPS (실제 vs 예상)</div>
+        <div style="font-size:20px;font-weight:700;">$0.97 <span style="font-size:11px;color:var(--amber);">= 컨센서스 부합</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Non-GAAP EPS: 컨센서스 $0.80 대비 +21.25% 서프라이즈</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:1rem;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">cRPO (향후 12개월 매출 잔고)</div>
+        <div style="font-size:20px;font-weight:700;">$12.64B <span style="font-size:11px;color:var(--green);">▲ +22.5% YoY</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">RPO 전체 $27.7B (+25% YoY) — 강력한 수익 가시성</div>
+      </div>
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">AI 제품 Now Assist 성장 지표</div>
+      <table class="seg-table">
+        <thead><tr><th>지표</th><th>1Q26 실적</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600;">Now Assist $1M+ ACV 고객 수</td>
+            <td style="color:var(--green);font-weight:700;">YoY +130%</td>
+            <td>AI 제품 급속 도입 확인</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Moveworks 통합 성장률</td>
+            <td style="color:var(--green);font-weight:700;">YoY ~5x</td>
+            <td>7자리 딜(1Q 전년 전체보다 많음)</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">AI Control Tower 평균 딜 사이즈</td>
+            <td style="color:var(--green);font-weight:700;">QoQ 2배 이상</td>
+            <td>에이전틱 AI 거버넌스 수요 급증</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">자사주 매입(1Q)</td>
+            <td style="font-weight:700;">~2,010만주</td>
+            <td>$2B ASR + 공개시장 $225M, 잔여 $4.2B</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.75;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 8px 8px 0;">
+      <strong>Bill McDermott CEO:</strong> "ServiceNow는 기업 혁신을 위한 AI 컨트롤 타워. 어떤 AI 모델, 클라우드, 인터페이스, 데이터, 시스템과도 통합이 가능하다." — 발표 직후 주가 -17.7% 급락(가이던스 보수적 해석)했으나 이후 반등. <strong>2Q26 가이던스:</strong> 구독 매출 $3,815M~$3,820M. <strong>다음 실적 발표: 2026.07.22</strong>
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (SEC)</div>
+    <div class="sec-row">
+      <span class="sec-badge sb-blue">10-Q</span>
+      <span class="sec-title">Q1 2026 분기보고서 — 매출 $3.77B, RPO $27.7B, 자사주 매입 $2.25B</span>
+      <span class="sec-date">2026.04.22</span>
+    </div>
+    <div class="sec-row">
+      <span class="sec-badge sb-pink">8-K (M&A)</span>
+      <span class="sec-title">Armis 인수 완료 ($7.75B 현금) — 사이버 익스포저 관리 1위 기업, IT/OT/IoT 통합 보안</span>
+      <span class="sec-date">2026.04.20</span>
+    </div>
+    <div class="sec-row">
+      <span class="sec-badge sb-amber">DEF 14A</span>
+      <span class="sec-title">주주총회 위임장 공시 — 확대 주식보상계획 승인 (2026.05.11)</span>
+      <span class="sec-date">2026.05.11</span>
+    </div>
+    <div class="sec-row">
+      <span class="sec-badge sb-pink">8-K (M&A)</span>
+      <span class="sec-title">Veza 인수 완료 (~$1B) — AI 네이티브 아이덴티티 인텔리전스, 비인간 ID 보안</span>
+      <span class="sec-date">2026.Q1</span>
+    </div>
+    <div class="sec-row">
+      <span class="sec-badge sb-green">8-K (자사주)</span>
+      <span class="sec-title">$2B 가속화 자사주 매입 프로그램 + 공개시장 $225M 추가 — 잔여 $4.2B 승인</span>
+      <span class="sec-date">2026.Q1</span>
+    </div>
+    <div style="font-size:12px;color:#1e40af;background:#eff6ff;padding:8px 12px;border-radius:8px;margin-top:0.75rem;border:1px solid #bfdbfe;">
+      📌 <strong>투자자 주목 공시:</strong> Armis($7.75B) + Veza($1B) + Moveworks($2.85B) 3개 인수를 연속 완료하며 12개월 내 총 ~$11.6B의 M&A를 집행. ServiceNow의 AI 보안·아이덴티티·에이전트 생태계 구축이 가속화. 단기 FCF 마진 약 200bp 압박 예상(2027년 정상화 전망).
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-hot">🔥 즉각 모멘텀</span>
+        <span class="news-date">2026.05.28~29</span>
+      </div>
+      <div class="news-title">Snowflake +36% + Dell AI서버 +757% — 'SaaSpocalypse' 내러티브 붕괴, NOW +14% 섹터 대장주로</div>
+      <div class="news-summary">Snowflake의 Q1 깜짝 실적이 "AI가 SaaS를 대체한다"는 공포를 정면 반박. Dell의 AI 서버 매출이 YoY +757% 급증하며 기업들이 AI를 실제로 대규모 배포 중임을 확인. SNOW와 NOW는 Zero Copy 통합 파트너 관계로, SNOW의 AI 계정 급증이 NOW 플랫폼의 실질적 수혜로 직결된다. 소프트웨어 섹터(IGV)는 5월 한 달간 2001년 이후 최대 상승을 기록했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.18</span>
+      </div>
+      <div class="news-title">Knowledge 2026 컨퍼런스 — AI 오케스트레이터 'Otto' 공개, $30B 2030년 목표 제시 후 +8.9%</div>
+      <div class="news-summary">연례 Knowledge 2026 컨퍼런스에서 새 AI 에이전트 오케스트레이션 플랫폼 'Otto'를 공개, 2030년까지 구독 매출 $30B 달성 목표(보수적 시나리오 기준)를 제시했다. Now Assist AI 제품이 2030년까지 연간 계약가치의 30% 이상을 차지할 것으로 전망. BofA가 Knowledge 2026 이후 매수 등급과 $130 목표가로 커버리지를 복귀했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.20</span>
+      </div>
+      <div class="news-title">Armis 인수 완료 ($7.75B) — 에이전틱 AI 시대 보안 시장 3배 확대 노린다</div>
+      <div class="news-summary">사이버 익스포저 관리 1위인 Armis를 $7.75B에 인수 완료. IT/OT/IoT/의료기기를 아우르는 통합 보안 플랫폼 완성. ServiceNow의 역대 최대 단일 인수이자 최근 1년간 4번째 사이버보안 M&A. Colgate-Palmolive, JPMorgan Chase, Merck 등 주요 고객 공통 보유로 시너지 기대. 보안 및 리스크 TAM이 3배 이상 확대될 전망.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.22</span>
+      </div>
+      <div class="news-title">1Q26 가이던스 초과 달성, FY2026 구독 매출 가이던스 $205M 상향</div>
+      <div class="news-summary">모든 1분기 가이던스 상단을 초과했으며 연간 구독 매출 전망치를 $205M 상향했다. 교통·물류 순 신규 ACV가 YoY +280%, 금융서비스 +65%, 에너지·유틸리티 +45% 성장하며 수직 확장이 본격화. 고객 갱신율 97% 유지(Moveworks 포함). Rule of 55+ 프로파일 유지 중.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04.22~</span>
+      </div>
+      <div class="news-title">실적 발표 직후 -17.7% 폭락 — "가이던스 보수적·마진 압박·밸류에이션" 우려</div>
+      <div class="news-summary">GAAP EPS 컨센서스 정확히 부합(서프라이즈 0)에 Armis 인수 비용(FCF 마진 ~200bp 압박), 중동 정부 계약 지연, AI 파운데이션 모델 경쟁 우려가 복합 작용해 실적 발표 후 단일 세션 -17.7% 폭락. 애널리스트들이 목표가를 일제히 하향 조정($166→$142 컨센서스 평균). 4월 저점 $81.24까지 밀린 뒤 현재 반등 국면 진입.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2025.12</span>
+      </div>
+      <div class="news-title">Moveworks 인수 완료 ($2.85B) + Veza 인수 (~$1B) — 에이전틱 AI 프론트도어 완성</div>
+      <div class="news-summary">아젠틱 AI 제공사 Moveworks를 2025년 12월에, 비인간 아이덴티티(NHI) 보안 전문기업 Veza를 2026년 초에 각각 인수 완료. Moveworks는 Employee Works에 통합돼 YoY ~5배 성장 중. 에이전틱 AI 워크플로우가 생성하는 비인간 ID 보안을 Veza가 커버하는 구조로 플랫폼 완결성 확보.</div>
+    </div>
+  </div>
+
+  <!-- Bull / Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">🤖</span>
+          <span><strong>에이전틱 AI 시대의 '컨트롤 타워' 독점적 위치</strong> — AI 에이전트가 확산될수록 이를 오케스트레이션하고 거버넌스하는 플랫폼 수요가 급증. ServiceNow는 정확히 이 계층을 장악. Now Assist $1M+ ACV 고객 +130% YoY가 AI 수익화 증거.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">📦</span>
+          <span><strong>RPO $27.7B = 강력한 1.7년치 수익 가시성</strong> — 잔여 이행 의무 $27.7B(YoY +25%)와 cRPO $12.64B이 향후 12~24개월 매출을 사실상 확정. 22% 이상 성장 지속 가능성 높음.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🔐</span>
+          <span><strong>Armis + Veza + Moveworks — 보안·AI 생태계 완성</strong> — $11.6B M&A로 IT서비스관리(ITSM)를 넘어 사이버보안·아이덴티티·직원 AI 어시스턴트까지 원스톱화. TAM이 기존의 3배 이상으로 확대.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🌍</span>
+          <span><strong>업종 수직 확장 + 고객 당 매출 심화</strong> — 교통·물류 ACV +280%, 금융서비스 +65%, 에너지 +45%. 2025년 신규 ACV의 91%가 5개 이상 제품 구매 고객에서 발생, 크로스셀 여력 막대.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🎯</span>
+          <span><strong>$30B 2030년 목표 · Rule of 55+ 프로파일</strong> — FY2026 영업이익률 32%, FCF 마진 36% 가이던스. 매출 성장 22% + 이익률 33%의 합산이 55를 초과하는 고효율 성장. SaaS 공포 해소 이후 프리미엄 멀티플 정당화.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>밸류에이션 부담 — P/E 74배, P/S 8배</strong> — 소프트웨어 업종 평균 P/E 16배의 4.6배. 실행 미스 하나에도 20%+ 하락 가능(4월 실적 발표 -17.7% 사례). 현재 주가에서 성장 기대가 상당 부분 선반영된 상태.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>대규모 M&A 통합 리스크</strong> — 12개월간 $11.6B의 현금 M&A 집행. Armis FCF 마진 200bp 압박 + 중동 정부 계약 지연 + 3개 기업 동시 통합. 실행 오류 또는 시너지 지연 시 단기 실적 충격 가능.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>AI 파운데이션 모델 경쟁 심화</strong> — Salesforce, Oracle, Freshworks 등이 동일한 "AI 워크플로우" 영역을 공략 중. OpenAI, Anthropic 등 AI 레이어가 직접 엔터프라이즈 자동화 시장에 진입할 경우 플랫폼 우위 희석 우려.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>GAAP 서프라이즈 없음 + 4월 어닝 폭락 선례</strong> — Q1 GAAP EPS가 컨센서스와 동일. 성장 기대가 높은 주식에서 '컨센서스 부합'은 시장 실망을 유발. 다음 Q2 실적(7/22)에서도 유사 패턴 반복 위험.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>AI 규제·거버넌스 강화</strong> — 에이전틱 AI에 대한 규제 불확실성이 기업 채택 속도를 늦출 수 있음. 특히 공공부문(정부) 계약에서 중동 지연과 같은 케이스가 반복될 경우 대형 딜 타이밍 리스크.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem;margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (최근순)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Bank of America (재개)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">Buy</span>
+        <span class="target-price">목표가 $130 (+1.0%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.19</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Oppenheimer</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">Outperform</span>
+        <span class="target-price">목표가 확인 중</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.24</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 평균 (49명)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge strong-buy">Buy</span>
+        <span class="target-price">평균 $142.93 (+11.0%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05 기준</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 최고</span>
+      <div class="analyst-right">
+        <span class="opinion-badge strong-buy">Strong Buy</span>
+        <span class="target-price">최고 $240 (+86.3%)</span>
+        <span style="font-size:11px;color:var(--muted);">—</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">KeyBanc (Bear)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">Sector Weight</span>
+        <span class="target-price">$30B 목표 달성에 회의적</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05</span>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem;padding:10px 12px;background:#f8f9fc;border-radius:8px;font-size:12px;color:var(--muted);">
+      ※ 49명 애널리스트 Buy 컨센서스 · 평균 목표가 $142.93 · 4월 어닝 이후 목표가 일제 하향($166→$142)됐으나 매수 의견은 대부분 유지 · Simply Wall St 공정가치 $145.27
+    </div>
+  </div>
+
+  <!-- 재무 추정 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📊 주요 재무 실적 & 컨센서스 추정</div>
+    <div style="overflow-x:auto;">
+      <table class="seg-table">
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>FY2025 실적</th>
+            <th style="color:var(--blue);">FY2026E (컨센서스)</th>
+            <th>FY2027E (컨센서스)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600;">구독 매출</td>
+            <td>$12.9B</td>
+            <td style="font-weight:700;color:var(--blue);">$15.75B (+22%E)</td>
+            <td>~$18.9B (+20%E)</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">총 매출</td>
+            <td>$13.28B</td>
+            <td style="font-weight:700;color:var(--blue);">~$16.2B</td>
+            <td>$19.16B</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Non-GAAP 영업이익률</td>
+            <td>~30%</td>
+            <td style="font-weight:700;color:var(--blue);">32% (가이던스)</td>
+            <td>~33%+</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Non-GAAP FCF 마진</td>
+            <td>~35%</td>
+            <td style="font-weight:700;color:var(--blue);">36% (가이던스)</td>
+            <td>~37%+</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">EPS (컨센서스)</td>
+            <td>$1.75 (GAAP)</td>
+            <td style="font-weight:700;color:var(--blue);">$1.96 (GAAP)</td>
+            <td>$5.04 (Non-GAAP 추정)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;">* FY2026E는 회사 가이던스 및 컨센서스 혼합 추정치. Armis 통합 비용이 2026 GAAP EPS를 일시 압박하나 Non-GAAP 기준은 확장적.</div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      ServiceNow는 2026년 5월 말 기준 소프트웨어 섹터 최대 랠리의 주인공이다. 연초 이후 'AI가 SaaS를 대체한다(SaaSpocalypse)'는 공포로 52주 최고가에서 61% 급락해 $81.24까지 밀렸으나, Snowflake와 Dell의 어닝 서프라이즈가 이 내러티브를 정면으로 반박하면서 불과 수 주 만에 58% 이상 반등했다. 펀더멘털 측면에서 ServiceNow는 매출 성장률 22% + FCF 마진 36% = Rule of 55+ 프로파일을 유지하는 고효율 성장주다. cRPO $12.64B과 RPO $27.7B은 향후 2년치 매출을 사실상 확정하며, Now Assist AI 고객($1M+ ACV)이 YoY +130% 급증해 AI 수익화가 가시화되고 있다. Armis·Veza·Moveworks 3개 인수($11.6B)로 에이전틱 AI 시대의 보안·아이덴티티·직원 자동화를 아우르는 완결된 플랫폼을 구축했다. 단기 리스크는 74배 P/E의 높은 밸류에이션과 M&A 통합 비용에 따른 FCF 마진 압박이다. 하지만 애널리스트 49명 전원이 매수 의견을 유지하고 컨센서스 목표가($142.93)는 현재가 대비 11% 추가 상승 여력을 제시한다. <strong>이 종목은 에이전틱 AI 인프라의 '운영체제(OS)' 계층에 투자하려는 중장기 성장형 투자자, 그리고 AI 수혜 소프트웨어 대장주를 52주 고점 대비 39% 할인된 구간에서 접근하고 싶은 투자자에게 적합하다. 다음 실적(7/22) 발표 전후 변동성에 유의하며 분할 접근이 권고된다.</strong>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SKC(011790) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --teal: #0d9488;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #1a1a2e 0%, #1e3a5f 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-warning { background: #fef3c7; color: #92400e; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .warn-banner { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 10px 14px; margin-bottom: 1rem; font-size: 13px; color: #9a3412; }
+  .seg-bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin: 8px 0; }
+  .seg-glass { background: var(--purple); }
+  .seg-copper { background: var(--blue); }
+  .seg-chem { background: var(--amber); }
+  .seg-isc { background: var(--teal); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">011790 · KOSPI</div>
+      <div class="company-name">SKC</div>
+      <div class="company-desc">SK그룹 첨단 소재 본진 | 유리기판(앱솔릭스) + 동박(SK넥실리스) + 화학 + ISC | 2026년 4년 연속 영업적자 예상 속 EBITDA 흑전 터닝포인트</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 21일</div>
+      <div class="price-display">약 122,900원</div>
+      <div class="price-change down">▼ 52주 고점 184,400원 대비 조정 / 5/6 상한가(+30%) 이후 유증 희석 우려로 하락</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 4.6~5.4조원</span>
+    <span class="rating-pill">🏢 섹터: 첨단소재·반도체·2차전지</span>
+    <span class="rating-pill">⭐ 컨센서스: 보유(Hold) 우세</span>
+    <span class="rating-pill">🎯 컨센서스 목표가: 106,419원</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 유증 경고 배너 -->
+  <div class="warn-banner">
+    ⚠️ <strong>유상증자 희석 주의</strong>: 2026년 5월 14~15일 구주주 청약 완료 (확정 발행가 99,500원), 6월 8일 신주 상장 예정. 약 31% 신주 희석 발생. 조달 총액 약 1,167억~8,300억원(주가 연동). 신주 상장 이후 매물 출회 가능성 상존.
+  </div>
+
+  <!-- KPI 카드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 매출 (연결)</div>
+      <div class="kpi-value">4,966억원</div>
+      <div class="kpi-sub">QoQ +15.9% / 컨센서스 상회</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업손실</div>
+      <div class="kpi-value" style="color:var(--red)">-287억원</div>
+      <div class="kpi-sub">컨센서스 -504억 대비 +217억 어닝서프</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 EBITDA</div>
+      <div class="kpi-value" style="color:var(--green)">+100억원</div>
+      <div class="kpi-sub">10분기 만에 흑자전환 (핵심 시그널)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 주가 범위</div>
+      <div class="kpi-value">85,722~184,400</div>
+      <div class="kpi-sub">현재가는 고점 대비 -33% 구간</div>
+    </div>
+  </div>
+
+  <!-- 사업 구조 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏗️ 사업 포트폴리오 — 4개 축</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+      <div style="background:#f5f3ff;border-radius:8px;padding:0.875rem;border-left:3px solid var(--purple);">
+        <div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:4px;">🟣 유리기판 (앱솔릭스)</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">AI 반도체 패키징 차세대 핵심소재. 미국 조지아주 양산 공장 완공. AMD·아마존·인텔 고객사 인증 진행. 2027년 양산 압축 목표. CHIPS법 보조금 수령.</div>
+      </div>
+      <div style="background:#eff6ff;border-radius:8px;padding:0.875rem;border-left:3px solid var(--blue);">
+        <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:4px;">🔵 동박 (SK넥실리스)</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">EV 캐즘으로 부진 지속. ESS 전환으로 1Q26 ESS용 동박 +132% QoQ. 한국 5.2만톤 감축·말레이 5.7만톤 확대. 캐파 16만톤→11만톤 다운사이징.</div>
+      </div>
+      <div style="background:#fffbeb;border-radius:8px;padding:0.875rem;border-left:3px solid var(--amber);">
+        <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:4px;">🟡 화학</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">PG(프로필렌글리콜) 등. 정부 주도 NCC 구조조정(SK지오센트릭·대한유화·S-Oil) 포함 가능성. 통합법인 출자 시 지분법회사 전환 예상. 1Q26 화학부문 흑자 전환.</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.875rem;border-left:3px solid var(--teal);">
+        <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:4px;">🟢 ISC (반도체 소켓)</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">반도체 테스트 소켓 자회사. AI 반도체 테스트 수요 성장. 연결 기준 영업이익 925억원 기여(2026E). SKC 이익의 핵심 캐시카우.</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">2026년 이익 기여 구조 (추정): ISC 흑자 ↑ / 화학 소폭 흑자 / 동박 적자 / 유리기판 투자 중</div>
+      <div class="seg-bar"><div class="seg-glass" style="width:5%"></div><div class="seg-copper" style="width:30%"></div><div class="seg-chem" style="width:25%"></div><div class="seg-isc" style="width:40%"></div></div>
+      <div style="display:flex;gap:10px;font-size:11px;color:var(--muted);margin-top:4px;flex-wrap:wrap;"><span>🟣 유리기판(투자중) 5%</span><span>🔵 동박(적자) 30%</span><span>🟡 화학(소폭+) 25%</span><span>🟢 ISC(흑자) 40%</span></div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (2026.05.06 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출액 (실제 vs 컨센서스)</div>
+        <div style="font-size:18px;font-weight:700;">4,966억원 <span style="font-size:12px;color:var(--green);">▲ QoQ +15.9%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">북미 ESS용 동박 폭증 + 화학 회복</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 컨센서스)</div>
+        <div style="font-size:18px;font-weight:700; color:var(--amber);">-287억원 <span style="font-size:12px;color:var(--green);">▲ 컨센서스(-504억) 대비 +217억 어닝 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">EBITDA 100억 흑전 — 10분기 만 (핵심!)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#f0fdf4;border-left:3px solid var(--green);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>어닝 서프라이즈 + 30% 상한가(5/6):</strong> ① 1Q26 EBITDA +100억 흑전(10분기 만), ② 5/4 미국 유리기판 로드맵 발표·2027 양산 압축 시그널, ③ 북미 ESS용 동박 +132% QoQ 폭증이 동시 작용. 영업이익 적자 지속임에도 EBITDA 흑자 전환이 수익성 회복의 변곡점으로 평가됨. 메리츠·삼성증권 "2026년 턴어라운드 국면 진입" 분석.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">유상증자</span>
+        <span style="font-size:13px;font-weight:500;">주주배정 후 실권주 일반공모 유상증자 결의 — 약 1조원 규모</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.26</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">유증 확정가</span>
+        <span style="font-size:13px;font-weight:500;">유상증자 최종 발행가액 주당 99,500원 확정 — 총 1,167억원 조달</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.12</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 연결보고서 공시 (매출 4,966억·영업손실 287억·EBITDA 흑전)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.06</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">타법인투자</span>
+        <span style="font-size:13px;font-weight:500;">앱솔릭스 투자 유지 공시 — 약 5,896억원 3년간 집중 투입 계획</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02~05월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef3c7;color:#92400e;margin-right:8px;">구조조정</span>
+        <span style="font-size:13px;font-weight:500;">동박 캐파 다운사이징 (16만톤 → 11만톤) + 화학사업 NCC 통합법인 출자 검토</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026년 지속</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--amber);background:#fffbf0;border-radius:6px;padding:8px 12px;border-left:3px solid var(--amber);">
+      📌 <strong>투자자 주목</strong>: 당초 1조원 목표 유상증자가 주가 상한가 이후 발행가 확정(99,500원)되어 약 8,300억원 수준으로 조달 규모 증가. 앱솔릭스 투자 5,896억원은 기존 계획대로 유지. 차입금 상환 약 4,100억원. SK㈜ 120% 초과청약 참여로 최대주주 지지 확인. 6/8 신주 상장 이후 31% 희석 매물 주의.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.06</span></div>
+      <div class="news-title">1Q26 EBITDA 100억 흑전(10분기 만) + 유리기판 2027 양산 압축 발표 → 상한가 +30%</div>
+      <div class="news-summary">영업적자 지속에도 EBITDA 10분기 만 흑자전환과 앱솔릭스 2027년 양산 압축 로드맵이 동시에 나오며 장중 +30% 상한가 돌파. 북미 ESS용 동박 판매량 +132% QoQ 폭증이 서프라이즈를 견인. 메리츠증권은 "2026년 턴어라운드 국면 진입"으로 평가.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.04</span></div>
+      <div class="news-title">앱솔릭스 미국 유리기판 로드맵 발표 — 2027년 양산 시기 1년 앞당겨</div>
+      <div class="news-summary">직전 '2027~2028년'에서 '2027년'으로 양산 일정 압축. AMD·아마존(AWS)·인텔 등 빅테크 고객사 인증(PoC) 진행 중. AMD가 첫 공급 고객사로 유력 거론. 인텔·SK하이닉스 출신 강지호 신임 대표가 기술·영업 역량 강화 주도. CHIPS법 4,000만 달러(1차분) 보조금 수령 확인.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.02.26</span></div>
+      <div class="news-title">1조원 규모 유상증자 결의 — 앱솔릭스 투자 5,900억·차입금 상환 4,100억</div>
+      <div class="news-summary">SK㈜(최대주주, 40.64%) 120% 초과청약 공표로 최대주주 신뢰 확인. 5,900억원은 앱솔릭스 유리기판 제품 개발·양산 준비, 4,100억원은 차입금 상환에 투입. 유증 완료 시 부채비율 230%→140% 초반대로 대폭 개선 예상.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-warning">주의</span><span class="news-date">2026.05.12~6.08</span></div>
+      <div class="news-title">유상증자 발행가 99,500원 확정 — 6/8 신주 상장 · 31% 희석 이벤트 임박</div>
+      <div class="news-summary">5/6 상한가 급등 덕에 최종 발행가 99,500원으로 확정돼 당초보다 조달액 증가. 구주주 청약(5/14~15) 마무리. 6월 8일 신주 약 870만주 상장으로 기존 주식 수 대비 약 31% 희석 발생. 단기 매물 출회 가능성에 주가 상한가 직후 23% 급락.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026년 지속</span></div>
+      <div class="news-title">4년 연속 영업적자 예상 — 동박 구조조정·화학 NCC 통합 변수 상존</div>
+      <div class="news-summary">유안타증권은 2026년을 '다운사이징의 해'로 규정, 동박 캐파를 16만톤→11만톤으로 감축하고 화학사업이 NCC 통합법인에 출자될 가능성 제기. 2026E 영업손실 -1,104억원(전년 -3,050억원에서 개선). 동박(-985억) 적자, ISC(+925억) 흑자 구조. 흑자 전환은 2027년으로 전망.</div>
+    </div>
+  </div>
+
+  <!-- Bull/Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>유리기판 — 세계 최초 양산 공장 완공·2027 양산 압축</strong> — AI 반도체 패키징 차세대 소재 선점. 조지아주 공장 완공, AMD·아마존·인텔 인증 진행. CHIPS법 보조금 수령. 양산 성공 시 밸류에이션 리레이팅 강력 촉매.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>EBITDA 흑전 — 10분기 만의 수익성 회복 시그널</strong> — 1Q26 EBITDA +100억원으로 10분기 만 흑전. 화학 흑자, 동박 적자폭 축소. 2026년 하반기 영업이익 흑자 달성 가능성 상승.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>북미 ESS용 동박 폭증 — EV→ESS 전환 전략 유효</strong> — 1Q26 ESS용 동박 +132% QoQ. EV 캐즘 속에서 ESS 수요로 출구 마련. 말레이 공장 중심 원가 경쟁력 확보.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>ISC(반도체 소켓) — AI 반도체 테스트 수요 성장 캐시카우</strong> — 연간 영업이익 925억원 기여. HBM·AI 칩 테스트 소켓 수요 구조적 증가. SK그룹 내 방산 재편 시너지 기대.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>유증 완료 후 재무구조 대폭 개선</strong> — 부채비율 230%→140% 초반대 하락. 차입금 4,100억 상환으로 이자비용 감소. SK㈜ 120% 초과청약으로 대주주 신뢰 유지.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>유리기판 빅테크 최종 계약 미확정 — 양산 지연 리스크</strong> — AMD·아마존·인텔 인증 진행 중이나 최종 공급 계약 미공개. 경쟁사(삼성전기-스미토모 JV, BOE, 인텔 자체라인) 2027년 동시 양산 진입으로 '세계 최초' 프리미엄 축소.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>4년 연속 영업적자(2026E -1,104억) — 실제 흑자는 2027년 이후</strong> — 동박 부문 -985억 적자 지속. 흑자 전환은 2027년 전망. 컨센서스 목표주가(106,419원)가 현재가(122,900원) 하회 — 다수 증권사 Hold/매도 의견.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>유상증자 31% 희석 + 신주 상장(6/8) 매물 압박</strong> — 6월 8일 신주 약 870만주 상장. 단기 매물 출회로 상한가 직후 23% 급락. 신주 상장 이후 추가 조정 가능성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>화학·동박 동시 구조조정 — 단기 실적 부담 가중</strong> — NCC 통합법인 출자 시 화학사업 지분법 전환. 동박 캐파 감축으로 고정비 부담. 구조조정 비용 일시 반영 가능성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>높은 PBR(4~6배) + 영업적자 — 밸류에이션 부담</strong> — 화학·소재 피어 대비 PBR 과열. 유리기판 옵션 가치 선반영 구간. 빅테크 인증 실패·지연 시 주가 급락 취약.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">메리츠증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 140,000원 <span style="font-size:11px;color:var(--green)">(유리기판 사업화 변곡점 기대)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">삼성증권</span>
+      <div class="analyst-right"><span class="opinion-badge hold">Hold</span><span class="target-price">목표가 140,000원 <span style="font-size:11px;color:var(--amber)">(목표가 상향, 의견은 보유)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유안타증권 (황규원)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">Hold</span><span class="target-price">목표가 110,000원 <span style="font-size:11px;color:var(--red)">(120K→110K 하향, 다운사이징)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 평균 (9개사)</span>
+      <div class="analyst-right"><span class="opinion-badge sell">매도 우세</span><span class="target-price">목표가 106,419원 <span style="font-size:11px;color:var(--red)">(현재가 122,900원 대비 -13.4%)</span></span></div>
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      SKC는 EV 캐즘의 직격탄을 맞은 동박 사업을 구조조정하면서, 반도체 유리기판(앱솔릭스)이라는 차세대 먹거리로 피벗 중인 SK그룹 첨단 소재 기업이다. 2026년 1분기에 EBITDA가 10분기 만에 흑자로 전환되고 북미 ESS용 동박이 +132% QoQ 폭증한 것은 수익성 회복의 변곡점 신호로 읽힌다. 앱솔릭스의 미국 조지아주 양산 공장은 세계 최초로 완공됐으며, AMD·아마존·인텔 고객사 인증이 진행 중이고 2027년 양산을 목표로 일정이 압축됐다.
+
+      그러나 컨센서스 목표주가(106,419원)가 현재가(122,900원)를 하회하고 4년 연속 영업적자(2026E -1,104억원)가 예상되며, 다수 증권사가 Hold·매도 의견을 제시하고 있다. 6월 8일 신주 상장(약 31% 희석)에 따른 단기 수급 부담과 빅테크 최종 공급 계약 미확정이라는 리스크도 상존한다. <strong>유리기판 빅테크 최종 계약 체결과 실적 흑자 전환(2027년)을 중장기 시야로 기다릴 수 있는 성장주 투자자에게 적합하며</strong>, 단기적으로는 신주 상장(6/8) 이후 가격 안정화 구간 확인 후 접근이 바람직하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

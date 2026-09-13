@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applied Materials (AMAT) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0d2137;
+    --accent: #00a8e8;
+    --accent2: #003f6b;
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0d2137 0%, #003f6b 55%, #006da8 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #00a8e8; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 36px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: #00a8e8; border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #f0f7ff 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .warn-banner { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #92400e; display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">AMAT · NASDAQ</div>
+      <div class="company-name">Applied Materials, Inc.</div>
+      <div class="company-desc">세계 최대 반도체 웨이퍼 제조장비(WFE) 공급사 — 식각·증착·CMP·이온주입·어드밴스드 패키징 장비 선두. AI 인프라 투자의 핵심 수혜주.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 27일</div>
+      <div class="price-display">~$436</div>
+      <div class="price-change up">▲ YTD +71% · 1년 +151%</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$346B</span>
+    <span class="rating-pill">🏢 섹터: 반도체 장비 (WFE)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy</span>
+    <span class="rating-pill">📅 다음 실적: 2026.08.13 (Q3 FY2026)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 주목 배너 -->
+  <div class="warn-banner">
+    ⚡ <strong>실적 후 주목 이슈:</strong> Q2 FY2026 역대 최고 매출·EPS 달성, 반도체 장비 사업 성장률 >30% (CY2026) 상향. 단, 모건스탠리 등급 하향(Overweight→Equal Weight, 5/18)과 +71% YTD 밸류에이션 부담 상존.
+  </div>
+
+  <!-- KPI 카드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q2 FY2026 매출 (최신)</div>
+      <div class="kpi-value">$7.91B</div>
+      <div class="kpi-sub" style="color:var(--green);">YoY +11% · 역대 최고</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Non-GAAP 총이익률</div>
+      <div class="kpi-value">50.0%</div>
+      <div class="kpi-sub" style="color:var(--green);">25년래 최고 돌파</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 컨센서스</div>
+      <div class="kpi-value">$509.63</div>
+      <div class="kpi-sub">현재가 대비 +~17% (39개사 평균)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$153~$448</div>
+      <div class="kpi-sub">현재가: 52주 최고권 근접</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q2 FY2026 (최신 실적, 2026.05.14 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$7.91B <span style="font-size:12px;color:var(--green);">▲ +3.0% 컨센서스 초과</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $7.68B · YoY +11%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Non-GAAP EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$2.86 <span style="font-size:12px;color:var(--green);">▲ +6.7% 어닝 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $2.68 · YoY +20% (4연속 어닝 비트)</div>
+      </div>
+    </div>
+    <!-- 세부 지표 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">GAAP EPS</div>
+        <div style="font-weight:700;">$3.51 <span style="color:var(--green);font-size:10px;">YoY +33%</span></div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">순이익</div>
+        <div style="font-weight:700;">$2.81B <span style="color:var(--green);font-size:10px;">YoY +31%</span></div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">반도체시스템 매출</div>
+        <div style="font-weight:700;">$5.97B <span style="color:var(--green);font-size:10px;">YoY +10%</span></div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">분기 배당금</div>
+        <div style="font-weight:700;">$0.53 <span style="color:var(--green);font-size:10px;">+15% 인상</span></div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;margin-bottom:0.75rem;">
+      <strong>CEO 게리 딕커슨</strong>: "역대 최고 분기 성과 달성. CY2026 반도체 장비 사업 성장률을 30% 이상으로 상향 전망. AI 인프라의 급격한 글로벌 확장, 첨단 로직·DRAM·어드밴스드 패키징에서의 강력한 리더십이 다년간의 지속 성장 기반을 제공한다." 9년 연속 배당 인상.
+    </div>
+    <!-- Q3 가이던스 -->
+    <div style="background:#eef6ff;border-radius:8px;padding:12px;border:1px solid #bfdbfe;">
+      <div style="font-size:11px;font-weight:600;color:#1e40af;margin-bottom:8px;">🔭 Q3 FY2026 가이던스 (다음 실적 발표 2026.08.13)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:13px;">
+        <div><div style="font-size:11px;color:var(--muted);">매출 가이던스</div><div style="font-weight:700;color:#1d4ed8;">$8.95B ±$500M</div><div style="font-size:10px;color:var(--green);">vs 컨센서스 $8.09B ↑</div></div>
+        <div><div style="font-size:11px;color:var(--muted);">Non-GAAP EPS</div><div style="font-weight:700;color:#1d4ed8;">$3.36 ±$0.20</div></div>
+        <div><div style="font-size:11px;color:var(--muted);">Non-GAAP 영업비용</div><div style="font-weight:700;color:#1d4ed8;">~$1.485B</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">※ Q3 가이던스 매출이 컨센서스를 $860M 상회 — 시장 기대치를 대폭 웃도는 강력한 수요 가시성. 어드밴스드 패키징 2026년 성장률 >50% 전망.</div>
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Q2 FY2026 역대 최고 실적 발표 — 매출·EPS·총이익률 동시 기록</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.14</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">분기보고서 — FY2026 Q2 (종료일 2026.04.26) · $253M 수출통제 정산 비용 포함</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K 중요사항</span>
+        <span style="font-size:13px;font-weight:500;">미국 상무부 BIS와 $252.5M 수출통제 합의 — DoJ·SEC 조사 종결(무처벌)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.11</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#166534;margin-right:8px;">인수</span>
+        <span style="font-size:13px;font-weight:500;">ASMPT社 NEXX 사업부 인수 계약 — 대형 어드밴스드 패키징 증착장비 포트폴리오 확대</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.14</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">파트너십</span>
+        <span style="font-size:13px;font-weight:500;">Broadcom이 EPIC 이노베이션 파트너 합류 — AI 칩 패키징 공동 R&D</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.20</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#eff6ff;border-radius:6px;padding:8px 12px;color:#1e40af;">
+      📌 <strong>투자자 주목</strong>: $252.5M 수출통제 합의금은 사상 두 번째로 큰 BIS 민사 제재이지만, DoJ·SEC 조사가 처벌 없이 종결되어 최악의 시나리오(형사 기소, 수출 자격 박탈)는 소멸. 잔여 자사주 매입 한도 $13.6B — 주주환원 여력 충분. TSMC·SK하이닉스·Micron·NVIDIA·삼성이 모두 EPIC Center 협력사로 참여.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.15</span>
+      </div>
+      <div class="news-title">Q2 실적 발표 후 8개사 일제히 목표주가 상향 — $500~$575 구간으로 집결</div>
+      <div class="news-summary">도이치뱅크($550), B. Riley($550), Wolfe Research($550), TD Cowen($525), Needham($530), Cantor Fitzgerald($575), Argus($500) 등 8개 증권사가 하루 만에 목표주가 상향. 공통 논거는 AI 자본지출 사이클의 반도체 장비 레이어 수혜, >30% 시스템 성장 가이던스의 신뢰성. "AI 시대 인프라 장비 필수 공급사" 프레임 정착.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.20</span>
+      </div>
+      <div class="news-title">Broadcom, EPIC 이노베이션 파트너 합류 — AI 칩 패키징 기술 공동 개발</div>
+      <div class="news-summary">Broadcom이 Applied Materials의 EPIC(Equipment and Process Innovation and Commercialization) 센터의 공식 파트너로 참여. AI 시스템용 차세대 패키징 기술 공동 R&D를 추진. TSMC, SK하이닉스, Micron, NVIDIA, 삼성에 이어 Broadcom까지 가세하며 EPIC 생태계가 산업 표준으로 격상. EPIC 센터는 2026년 중 운영 개시 예정.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026년 진행 중</span>
+      </div>
+      <div class="news-title">어드밴스드 패키징 사업 2026년 >50% 성장 전망 — 칩렛 아키텍처 확산 수혜</div>
+      <div class="news-summary">AI 가속기의 칩렛 설계 및 HBM 결합 구조 확산으로 어드밴스드 패키징 장비 수요 폭증. 첨단 로직·DRAM·어드밴스드 패키징이 WFE 성장의 80%+ 차지할 것으로 전망되며, AMAT가 세 부문 모두에서 시장 선두 위치. NEXX 인수를 통해 패널 레벨 패키징 역량 추가 강화.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.05.18</span>
+      </div>
+      <div class="news-title">모건스탠리, AMAT 등급 하향 (Overweight→Equal Weight, 목표 $502)</div>
+      <div class="news-summary">실적 발표 4일 후 모건스탠리가 등급을 내렸다. 목표주가 $502는 현재가 대비 여전히 상승 여력을 시사하지만, 이미 주가에 강력한 성장이 반영됐다는 판단. "밸류에이션이 충분히 선반영(fully priced)"이라는 논거. 다만 8개사 동시 목표가 상향과 1개사 등급 하향이 대조되며, 컨센서스 방향성은 여전히 긍정적.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.02.11 확정</span>
+      </div>
+      <div class="news-title">BIS 수출통제 $252.5M 합의 완료 — SMIC 대상 재수출 위반 56건 혐의</div>
+      <div class="news-summary">2020~2022년 한국 법인(AMK)을 통해 엔티티리스트에 등재된 SMIC에 이온주입장비를 재수출했다는 혐의. 민사 제재 최대 금액($252.5M), DoJ·SEC 조사는 처벌 없이 종결. 3년간 수출허가 조건 준수 시 '거부명령' 철회 예정. 아시아·태평양이 매출의 85%(중국 30%)를 차지하는 구조에서 향후 추가 규제 강화 리스크는 잔존.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>WFE 사이클 최전선</strong> — AI 인프라 투자 확대로 웨이퍼 제조장비 수요 급증. 로직·DRAM·어드밴스드 패키징 3개 부문이 전체 WFE 성장의 80% 이상 차지, AMAT는 3개 부문 모두에서 선두</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>총이익률 25년 신고점</strong> — 비GAAP 총이익률 50% 돌파(25년래 최고). 고가 첨단 제품 믹스 개선과 운영 레버리지가 동시에 작용, 마진 추가 확대 여력 있음</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>강력한 가이던스 + 가시성</strong> — Q3 가이던스 $8.95B로 컨센서스 $8.09B 대폭 상회. 주요 고객사 전체(TSMC·삼성·SK하이닉스·Micron 등)가 EPIC 파트너로 참여해 수요 가시성 확보</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>주주환원 지속</strong> — 9년 연속 배당 인상(Q2에 15% 추가 인상). 자사주 매입 한도 $13.6B 잔여. 안정적 현금창출 능력이 주주환원을 뒷받침</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>수출규제 리스크 해소</strong> — DoJ·SEC 조사 종결(무처벌), BIS 합의 일회성 비용 처리로 장기 규제 불확실성 상당 부분 제거. 경영진이 기술 로드맵과 AI 수요 공략에 집중 가능</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>밸류에이션 부담</strong> — YTD +71%, 1년 +151% 급등. 현재 P/E ~44.8x로 프리미엄 구간. 모건스탠리 등급 하향처럼 "성장이 이미 주가에 선반영"됐다는 우려가 잠재적 상방 제한 요인</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>중국·아태 집중 리스크</strong> — 아태 비중 85%, 중국 단독 30%. 미중 기술 패권 갈등·추가 수출규제 강화 시 매출 급감 가능. 과거 BIS 제재가 재발할 여지도 배제 못함</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>ICAPS 수요 회복 지연</strong> — 산업용·소비자·차량용·전력(ICAPS) 부문은 현재 성숙 노드 소화 중. 해당 부문 장비 지출 재개 타이밍 불확실, 예상보다 늦어질 경우 성장률 압박</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>경쟁사 추격</strong> — ASML(EUV 독점), Lam Research(식각), KLA(검사·계측)는 각 전문 분야에서 AMAT보다 강력한 포지션. 제너럴리스트 전략이 전문화 경쟁에서 점유율을 잃을 가능성</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>고금리·국채금리 압박</strong> — 반도체 장비주는 높은 P/E 특성상 금리 민감도 높음. 인플레이션 재가속이나 연준의 매파적 전환 시 밸류에이션 재조정 위험. Q2 발표 당일 주가가 실적 호조에도 하락한 이유 중 하나</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (Q2 실적 발표 후 최신 업데이트)</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Cantor Fitzgerald (C.J. Muse)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.15 — Street-high</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price" style="color:#7c3aed;">$575 🔺</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Deutsche Bank</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.15</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$550</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Wolfe Research</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.15</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price">$550</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">B. Riley (Craig Ellis)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.15</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$550</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Needham</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.15</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$530</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Citigroup</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.12</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$520</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Argus (Jim Kelleher)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.19</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$500</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Morgan Stanley <span style="font-size:10px;color:var(--red);">⬇ 등급 하향</span></span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.18</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge hold">Equal Weight</span><span class="target-price">$502</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">S&amp;P Global 컨센서스 (39개사)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">Buy / 최고 $575, 최저 $358</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">평균 $509.63</span></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);background:#f9fafb;border-radius:6px;padding:8px;">
+      ※ 목표주가 평균 $509.63은 현재가(~$436) 대비 +17% 상승 여력. 최고 $575(Cantor)는 +32% 잠재 상승. 단, 이미 +71% YTD 상승 이후 포지셔닝으로 추가 상향 여지는 제한적.
+    </div>
+  </div>
+
+  <!-- 사업 구조 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📦 사업 구조 & AI 포지셔닝</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
+      <div style="background:#eff6ff;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#1d4ed8;margin-bottom:8px;">🔧 Semiconductor Systems (~75% 매출)</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6;">식각(Etch)·증착(CVD/PVD)·CMP·이온주입·어드밴스드 패키징 장비. Q2 매출 $5.97B(YoY +10%). AI 수혜 직결 부문: <strong>DRAM, 첨단 로직(2nm급), HBM 패키징</strong></div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:600;color:#15803d;margin-bottom:8px;">🛠 Applied Global Services — AGS (~25% 매출)</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6;">고객 팹 서비스·부품·자동화 소프트웨어. 설치 기반이 누적될수록 안정적 반복매출 확대. <strong>경기 완충 역할</strong>, 총이익률 고마진 기여.</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;background:#faf5ff;border-radius:8px;padding:12px;border:1px solid #ddd6fe;">
+      <div style="font-size:11px;font-weight:600;color:#7c3aed;margin-bottom:6px;">🔬 EPIC Center — 산업 최대 규모 R&D 투자</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.6;">미국 내 반도체 장비 R&D 사상 최대 투자. TSMC, 삼성, SK하이닉스, Micron, NVIDIA, Broadcom, 스탠퍼드대·RPI·ASU 등과 파트너십. 2026년 중 운영 개시 예정. 차세대 2nm급 칩 공정 + AI 패키징 기술 상용화 가속 목표.</div>
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Applied Materials는 AI 인프라 확장 사이클에서 "장비 공급자"라는 포지션 덕분에 특정 칩 아키텍처나 고객사에 과도하게 의존하지 않고 수혜를 받을 수 있는 구조적 강점을 보유한다. Q2 FY2026에서 매출·EPS·총이익률 모두 역대 최고를 기록했고, Q3 가이던스($8.95B)가 컨센서스를 $860M 이상 상회하며 2026년 반도체 장비 사업 성장률 전망을 >30%로 상향 조정했다. 총이익률 50% 돌파(25년래 최고)는 제품 믹스 고도화의 결과로, 어드밴스드 패키징·HBM·첨단 DRAM 장비 비중 확대가 계속될수록 마진 추가 개선도 가능하다. 한편 아태 매출 비중 85%(중국 30%)와 $252.5M 수출통제 합의금은 명확한 지정학·규제 리스크이며, YTD +71% 급등 후 P/E 44.8x의 밸류에이션 부담도 가볍지 않다. <strong>AMAT는 AI 반도체 제조 인프라 투자를 수년 지속 사이클로 보는 중장기 투자자에게 가장 적합하며, 단기 차익보다 '산업 성장을 장비 레이어에서 포착'하는 전략적 보유 관점이 유효하다.</strong> 단기 진입 시에는 실적 발표 전후 변동성을 고려한 분할 매수 전략을 권장.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주식 투자에는 원금 손실 위험이 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

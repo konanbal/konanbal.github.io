@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KODEX 200 (069500) 투자보고서</title>
+<style>
+  :root {
+    --primary: #0d1b4b;
+    --accent: #1a3a8f;
+    --accent2: #2563eb;
+    --accent3: #38bdf8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --gold: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0d1b4b 0%, #1a3a8f 55%, #1e88e5 100%);
+    color: white; padding: 2.5rem 2rem 2rem;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 30px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .etf-sub { font-size: 14px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .pill-gold { background: rgba(245,158,11,0.3); border-color: rgba(245,158,11,0.6); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Holdings */
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-rank.top2 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent2); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+  .holding-bar-top { height: 6px; background: linear-gradient(90deg, #f59e0b, #ef4444); border-radius: 3px; }
+
+  /* Sector */
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 52px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+  .bold-row td { font-weight: 700; background: #eff6ff !important; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Concentration warning */
+  .conc-box { background: linear-gradient(135deg, #fefce8, #fef9c3); border: 1px solid #fde68a; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .conc-title { font-size: 12px; font-weight: 700; color: #92400e; margin-bottom: 6px; }
+  .conc-bar-wrap { height: 20px; background: var(--border); border-radius: 4px; overflow: hidden; display: flex; margin-bottom: 4px; }
+  .conc-seg { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; }
+
+  .summary-box { background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  .highlight-badge { display: inline-block; background: linear-gradient(90deg, #2563eb, #7c3aed); color: white; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+  .badge-gold { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 069500 · KRX(코스피) · ISIN: KR7069500007</div>
+      <div class="etf-name">KODEX 200</div>
+      <div class="etf-sub">기초지수: KOSPI 200 | 운용사: 삼성자산운용 | 국내 대표 시장지수 ETF</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 11일</div>
+      <div class="nav-display">115,620원</div>
+      <div class="nav-change up">▲ 52주 저점(34,160원) 대비 +238%</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill pill-gold">💰 AUM: 약 23조원 (국내 최대급)</span>
+    <span class="pill">📋 총보수: 연 0.15%</span>
+    <span class="pill">📅 상장일: 2002.10.14 (23년 역사)</span>
+    <span class="pill">📈 1개월 수익률: +31.4%</span>
+    <span class="pill">🏦 퇴직연금 DC/IRP 투자가능</span>
+    <span class="pill">🔄 배당수익률: ~0.74%</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">현재가(종가)</div>
+      <div class="kpi-value">115,620원</div>
+      <div class="kpi-sub">2026.05.07 기준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순자산총액(AUM)</div>
+      <div class="kpi-value positive">~23조원</div>
+      <div class="kpi-sub">2026.05.04 기준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1개월 수익률</div>
+      <div class="kpi-value positive">+31.4%</div>
+      <div class="kpi-sub">코스피 대형주 랠리 반영</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1년 수익률(NAV)</div>
+      <div class="kpi-value positive">+200%+</div>
+      <div class="kpi-sub">반도체 슈퍼사이클 견인</div>
+    </div>
+  </div>
+
+  <!-- 집중도 경고 -->
+  <div class="conc-box">
+    <div class="conc-title">⚠️ 삼성전자·SK하이닉스 집중도 현황 (2026.04 기준) — KODEX 200 핵심 리스크이자 기회</div>
+    <div class="conc-bar-wrap">
+      <div class="conc-seg" style="width:24%;background:#2563eb;">삼성전자 ~24%</div>
+      <div class="conc-seg" style="width:18%;background:#7c3aed;">SK하이닉스 ~18%</div>
+      <div class="conc-seg" style="width:3%;background:#94a3b8;font-size:9px;">우</div>
+      <div class="conc-seg" style="width:55%;background:#cbd5e1;color:#475569;">나머지 197개 종목 ~55%</div>
+    </div>
+    <div style="font-size:11px;color:#92400e;margin-top:4px;">
+      코스피 전체 시총의 약 41%를 차지하는 두 반도체 종목이 KODEX 200 성과의 절반 가까이를 좌우. 삼성전자 2026년 1Q 영업이익 +755% YoY, SK하이닉스 +405% YoY 서프라이즈가 최근 랠리의 핵심 동력.
+    </div>
+  </div>
+
+  <!-- 구성종목 -->
+  <div class="card">
+    <div class="card-title">주요 구성 종목 TOP 10 (KOSPI 200 시총가중 기준, 추정)</div>
+
+    <div class="holding-row">
+      <div class="holding-rank top2">1</div>
+      <div class="holding-name">삼성전자 (005930) <span style="font-size:10px;background:#dbeafe;color:#1e40af;padding:1px 6px;border-radius:3px;font-weight:600;">반도체·전자</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~24%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar-top" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank top2">2</div>
+      <div class="holding-name">SK하이닉스 (000660) <span style="font-size:10px;background:#dbeafe;color:#1e40af;padding:1px 6px;border-radius:3px;font-weight:600;">반도체·HBM</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~18%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar-top" style="width:75%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">삼성전자우 (005935)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~3%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:13%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">LG에너지솔루션 (373220) <span style="font-size:10px;background:#d1fae5;color:#065f46;padding:1px 6px;border-radius:3px;font-weight:600;">2차전지</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~3%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:13%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">현대차 (005380)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~2.5%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:10%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">셀트리온 (068270) <span style="font-size:10px;background:#fce7f3;color:#9d174d;padding:1px 6px;border-radius:3px;font-weight:600;">바이오</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~2%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:8%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">7</div>
+      <div class="holding-name">삼성바이오로직스 (207940)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~2%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:8%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">8</div>
+      <div class="holding-name">KB금융 (105560)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~2%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:8%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">9</div>
+      <div class="holding-name">기아 (000270)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~2%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:8%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">10</div>
+      <div class="holding-name">POSCO홀딩스 (005490)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~1.5%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:6%"></div></div>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem;font-size:12px;color:var(--muted);">
+      ※ 상위 2개 종목(삼성전자·SK하이닉스) 합산 비중 ~42% | 총 구성종목 200개 | KOSPI 200 지수 시총가중 방식 패시브 추종
+    </div>
+  </div>
+
+  <!-- 섹터 + 수익률 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">섹터 배분 (KOSPI 200 추정)</div>
+      <div class="sector-item">
+        <div class="sector-name">💾 반도체·전자 (삼성전자·SK하이닉스 등)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~42%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#2563eb;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🏦 금융·보험 (KB금융·신한·하나 등)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~14%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:33%;background:#f59e0b;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🚗 자동차·부품 (현대차·기아)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~7%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:17%;background:#10b981;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🏥 헬스케어·바이오 (셀트리온·삼바 등)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~7%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:17%;background:#ec4899;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">⚓ 산업재·조선·방산</div>
+        <div class="sector-right">
+          <div class="sector-pct">~8%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:19%;background:#7c3aed;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🔋 에너지·화학·소재</div>
+        <div class="sector-right">
+          <div class="sector-pct">~8%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:19%;background:#ef4444;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🛒 소비재·커뮤니케이션·기타</div>
+        <div class="sector-right">
+          <div class="sector-pct">~14%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:33%;background:#94a3b8;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기간별 수익률</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>기간</th><th>ETF 수익률</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1개월</td><td class="positive">+31.4%</td><td>코스피 급등 반영</td></tr>
+          <tr><td>3개월</td><td class="positive">+32.1%</td><td>NAV 기준</td></tr>
+          <tr><td>YTD (연초~)</td><td class="positive">N/A</td><td>-</td></tr>
+          <tr class="bold-row"><td>1년</td><td class="positive">+200%+</td><td>반도체 슈퍼사이클</td></tr>
+          <tr><td>52주 저점 대비</td><td class="positive">+238%</td><td>34,160→115,620원</td></tr>
+          <tr><td>3년(연환산)</td><td class="positive">N/A</td><td>-</td></tr>
+          <tr><td>상장이후(23년)</td><td class="positive">장기 우상향</td><td>2002.10.14 상장</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">
+        ※ 삼성전자 1Q26 영업이익 +755% YoY, SK하이닉스 +405% YoY가 최근 랠리 핵심 동력
+      </div>
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04~05</span></div>
+      <div class="news-title">코스피 7,000선 돌파 &amp; 사상 최고치 경신 <span class="highlight-badge badge-gold">🔥 역사적 신고가</span></div>
+      <div class="news-summary">2026년 4월 코스피가 7,000선을 돌파하며 역사적 신고가를 기록. KODEX 200도 52주 최고가(116,180원)를 경신. AI 반도체 수요 폭증과 삼성전자·SK하이닉스의 어닝 서프라이즈가 주도. (나무위키/코스피 역사 2026년)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.07</span></div>
+      <div class="news-title">삼성전자 2026년 1분기 영업이익 57.2조원 — 전년 동기 대비 +755% <span class="highlight-badge">📊 분기 최대</span></div>
+      <div class="news-summary">삼성전자 1Q26 매출 133조원(+68.1% YoY), 영업이익 57.2조원(+755% YoY)으로 분기 기준 역대 최대 실적 경신. SK하이닉스도 1Q26 영업이익 37.6조원(+405% YoY). 두 종목 합산 코스피 시총 비중이 41% 돌파. (이코노믹글 외)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05</span></div>
+      <div class="news-title">삼성자산운용 KODEX ETF 순자산 100조원 돌파 — 국내 업계 최초</div>
+      <div class="news-summary">운용사 삼성자산운용의 전체 KODEX ETF 라인업 순자산이 100조원을 돌파. 코스피 랠리와 연금 자금 유입 가속화가 배경. KODEX 200은 순자산 약 23조원으로 단일 ETF 기준 국내 최대급. (Investing.com)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.05</span></div>
+      <div class="news-title">반도체 ETF·코스피200 ETF로 개인 순매수 급증 — 수급 쏠림 현상</div>
+      <div class="news-summary">KODEX 200 하루 개인 순매수 523억원 기록. 반도체 레버리지·대형주 ETF 수요 확대로 삼성전자·SK하이닉스에 수급 기반 강화. 반면 쏠림 현상 가속화로 동일가중 ETF(KODEX 200동일가중)와 수익률 괴리 확대. (인베스팅, 비즈한국)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.05</span></div>
+      <div class="news-title">외국인 3거래일 연속 순매도 — 고점 차익실현 압력</div>
+      <div class="news-summary">코스피 최고가 경신 구간에서 외국인 투자자가 2.1조원 규모 순매도 유지. 개인·기관 매수가 이를 흡수하며 지수 유지됐으나, 지정학적 리스크(중동 등)와 맞물려 하방 압력으로 작용. (한국경제)</div>
+    </div>
+  </div>
+
+  <!-- Bull/Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">🏆</span><span><strong>국내 증시 대표 벤치마크 ETF</strong> — 23년 운용 역사의 한국 코스피 200지수 패시브 상품. 개인·기관·연기금 모두 활용하는 시장 표준 포지션.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💾</span><span><strong>반도체 슈퍼사이클 수혜 극대화</strong> — 삼성전자·SK하이닉스 합산 비중 ~42%. AI 인프라 HBM 수요 급증 사이클에서 지수 자체가 반도체 집중 포트폴리오 역할. BofA 2026년 HBM 시장 +58% 성장 전망.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💰</span><span><strong>최저 수준의 총보수(연 0.15%)</strong> — 국내 대형 지수 ETF 중 최저 수준의 비용 구조. 동일 지수 추종 경쟁 상품(TIGER 200, ARIRANG 200) 대비 동등 이하 비용으로 시장 대표성 확보.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌊</span><span><strong>AUM 23조원 — 유동성 극대화</strong> — 하루 거래량 1,600만주 이상, 순자산 23조원. 기관·외국인도 대규모 포지션 운용 가능한 최고의 시장 유동성.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🏦</span><span><strong>밸류업 정책 지속 + 연금 자금 유입</strong> — 이재명 정부의 코스피 부양 정책과 퇴직연금 실적배당형 비중 확대(미래에셋 기준 54.9%)로 구조적 수급 기반 강화.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><strong>삼성·하이닉스 집중도 리스크</strong> — 두 종목이 지수의 42%를 차지. HBM 수요 피크아웃·경쟁 심화·공급 과잉 시 ETF 전체 성과 직격. 업종 분산 효과 미흡.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>고점 리스크 — 역대 최고 수준 밸류에이션</strong> — 코스피가 7,000선을 돌파하며 역대 최고가 구간 진입. 외국인 차익실현 압력, 중동 지정학적 리스크 등 하방 변수 동시 존재.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🌐</span><span><strong>미·중 반도체 수출 규제 확대 위험</strong> — 삼성전자·SK하이닉스의 중국 매출 비중 20~30% 수준. 미국 정부의 반도체 수출통제 범위 확대 시 두 핵심 구성종목 실적 직격.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">💱</span><span><strong>환율 영향 (외국인 입장)</strong> — 원화 약세 시 외국인의 환차손 발생 → 순매도 압력. 원달러 환율 변동이 단기 자금 흐름에 영향.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🔄</span><span><strong>패시브 특성 — 하락 시 완충 없음</strong> — 지수를 그대로 추종하므로 시장 급락 시 방어 장치 없음. 채권혼합·커버드콜 등 방어형 ETF 대비 변동성 크게 높음.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 분배금 -->
+  <div class="card">
+    <div class="card-title">분배금 현황 &amp; 비용 정보</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>항목</th><th>내용</th><th>비고</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>배당수익률</td><td>약 0.74~0.80%</td><td>연간 기준</td></tr>
+        <tr><td>분배 주기</td><td>연 1회 (1월)</td><td>KOSPI 200 구성종목 배당 수취 후 지급</td></tr>
+        <tr><td>총보수(운용보수)</td><td>연 0.15% (0.1240%)</td><td>국내 ETF 최저 수준</td></tr>
+        <tr><td>투자위험 등급</td><td>2등급 (높은위험)</td><td>주식형 ETF</td></tr>
+        <tr><td>세금 (일반계좌)</td><td>배당소득세 15.4%</td><td>분배금·매매차익 보유기간 과세</td></tr>
+        <tr><td>예금자보호</td><td>해당없음</td><td>원금 손실 가능</td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;">
+      ※ 배당수익률이 낮은 편이므로 KODEX 200은 배당보다 시세차익 중심의 투자 상품으로 적합
+    </div>
+  </div>
+
+  <!-- 유사 ETF 비교 -->
+  <div class="card">
+    <div class="card-title">유사 ETF 비교 (KOSPI 200 추종 계열)</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>ETF명</th><th>운용사</th><th>총보수</th><th>AUM 규모</th><th>특징</th></tr>
+      </thead>
+      <tbody>
+        <tr style="background:#eff6ff;">
+          <td><strong>KODEX 200 (069500)</strong></td><td>삼성</td><td>0.15%</td><td>~23조</td><td class="positive"><strong>최대 유동성</strong></td>
+        </tr>
+        <tr>
+          <td>TIGER 200 (102110)</td><td>미래에셋</td><td>0.05%</td><td>~5조</td><td>보수 최저</td>
+        </tr>
+        <tr>
+          <td>ARIRANG 200 (152100)</td><td>한투</td><td>0.04%</td><td>~1조</td><td>최저보수</td>
+        </tr>
+        <tr>
+          <td>KODEX 200 동일가중 (441680)</td><td>삼성</td><td>0.25%</td><td>소규모</td><td>반도체 쏠림 회피</td>
+        </tr>
+        <tr>
+          <td>KODEX 레버리지 (122630)</td><td>삼성</td><td>0.64%</td><td>~5조</td><td>2배 레버리지</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;">
+      ※ KODEX 200의 차별점: 압도적 유동성(일 거래량·AUM 1위)과 23년 운용 신뢰도. 순수 보수 경쟁에서는 TIGER 200·ARIRANG 200이 낮음.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      <strong>KODEX 200(069500)</strong>은 삼성자산운용이 2002년 10월 상장한 국내 최초 세대의 ETF 중 하나로, 코스피200 지수를 패시브로 추종하는 국내 대표 시장지수 ETF입니다. 순자산 약 23조원, 하루 거래량 1,600만주 이상으로 국내 ETF 중 최대급 유동성을 자랑하며, 개인·기관·연기금이 한국 주식시장 노출의 핵심 수단으로 활용합니다.<br><br>
+      <strong>2026년 현재 환경</strong>은 이 ETF에 독특한 국면을 만들고 있습니다. AI 인프라 투자 폭증에 따른 HBM 수요 급증으로 삼성전자(1Q26 영업이익 +755% YoY)와 SK하이닉스(+405% YoY)가 코스피 시총의 41%를 차지하는 사상 초유의 반도체 집중 국면이 형성됐습니다. 코스피는 7,000선을 돌파하며 역사적 최고치를 경신했고, KODEX 200의 1개월 수익률은 +31.4%에 달합니다.<br><br>
+      <strong>핵심 투자 고려사항</strong>: ①반도체 슈퍼사이클 지속 시 두 종목 집중 구조가 초과수익의 원천이지만, 반도체 업황 전환 시 가장 큰 하방 리스크가 된다는 이중성 ②코스피 역대 최고가 구간 진입으로 단기 차익실현 압력과 고점 리스크 상존 ③연 0.15% 총보수·23조원 유동성의 인프라적 강점 ④밸류업 정책·연금 자금의 구조적 유입이 수급 기반 강화. <em>반도체 사이클에 베팅하는 한국 증시 핵심 포지션을 원하는 투자자, 또는 한국 시장 전체 노출을 원하는 글로벌 투자자에게 가장 효율적인 수단이나, 현재 밸류에이션과 집중도 리스크를 반드시 인지해야 합니다.</em>
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 특정 투자를 권유하지 않습니다. ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다. 과거 성과가 미래 수익을 보장하지 않습니다. 구성종목 비중은 추정치이며 실제와 다를 수 있습니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

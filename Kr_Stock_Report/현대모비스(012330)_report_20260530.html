@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>현대모비스(012330) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0d1b2a;
+    --accent: #1565c0;
+    --accent2: #0a3d62;
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --teal: #0891b2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* HEADER */
+  .report-header { background: linear-gradient(135deg, #0d1b2a 0%, #1565c0 60%, #0a3d62 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 30px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.5px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; line-height: 1.6; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 34px; font-weight: 700; margin-top: 6px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  /* HOT BADGE */
+  .hot-ribbon { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(90deg,#f59e0b,#ef4444); color:white; font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; margin-left:10px; letter-spacing:0.5px; }
+
+  /* CONTAINER */
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; position:relative; overflow:hidden; }
+  .kpi::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background: linear-gradient(90deg, var(--accent), var(--teal)); }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight:500; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .kpi-sub.up { color: var(--green); font-weight:600; }
+  .kpi-sub.down { color: var(--red); font-weight:600; }
+
+  /* CARDS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: linear-gradient(180deg, var(--accent), var(--teal)); border-radius: 2px; }
+
+  /* NEWS */
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap:wrap; }
+  .news-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #e0e7ff; color: #3730a3; }
+  .tag-hot { background: linear-gradient(90deg,#fef3c7,#fde68a); color: #92400e; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  /* FACTORS */
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+
+  /* ANALYST */
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 600; color: var(--text); }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .buy { background: #dbeafe; color: #1e40af; }
+  .strong-buy { background: #d1fae5; color: #065f46; }
+  .target-price { font-weight: 700; color: var(--text); font-size: 14px; }
+
+  /* BUSINESS SEGMENT TABLE */
+  .seg-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .seg-table th { padding:8px 12px; text-align:left; font-size:11px; font-weight:700; color:var(--muted); background:#f9fafb; text-transform:uppercase; letter-spacing:0.05em; }
+  .seg-table td { padding:9px 12px; border-bottom:1px solid var(--border); }
+  .seg-table tr:last-child td { border-bottom:none; }
+
+  /* DART TABLE */
+  .dart-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; gap:12px; }
+  .dart-row:last-child { border-bottom: none; }
+  .dart-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; white-space:nowrap; }
+  .db-blue { background:#e0e7ff; color:#3730a3; }
+  .db-green { background:#dcfce7; color:#166534; }
+  .db-pink { background:#fce7f3; color:#9d174d; }
+  .db-amber { background:#fef9c3; color:#854d0e; }
+  .dart-title { font-size:13px; font-weight:500; flex:1; }
+  .dart-date { font-size:11px; color:var(--muted); white-space:nowrap; }
+
+  /* SUMMARY */
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 50%, #f0fdf4 100%); border: 1px solid #bfdbfe; border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 16px; font-weight: 700; color: var(--accent2); margin-bottom: 0.875rem; display:flex; align-items:center; gap:8px; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #bfdbfe; }
+
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">012330 · KOSPI · 운송장비·부품</div>
+      <div class="company-name">현대모비스 <span class="hot-ribbon">🔥 신고가 경신</span></div>
+      <div class="company-desc">현대차그룹 핵심 부품 계열사. 3대 핵심모듈·전동화·전장·A/S 부품 글로벌 공급. 보스턴다이나믹스 아틀라스 액추에이터 전량 공급사로 피지컬 AI 밸류체인 편입 주목.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 30일</div>
+      <div class="price-display">747,000원</div>
+      <div class="price-change up">▲ +8.89% (5/29 장중, 기관 7일 연속 순매수)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 57.6조원</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 적극매수 (27명)</span>
+    <span class="rating-pill">📉 PER: 7.7배 · PBR: 0.7배</span>
+    <span class="rating-pill">💰 52주 범위: 240,000 ~ 749,000원</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 매출</div>
+      <div class="kpi-value">15.6조원</div>
+      <div class="kpi-sub up">YoY +5.5%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익</div>
+      <div class="kpi-value">8,026억원</div>
+      <div class="kpi-sub up">YoY +3.3%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">컨센서스 목표가 (평균)</div>
+      <div class="kpi-value">~780,000원</div>
+      <div class="kpi-sub" style="color:var(--teal);">최고 900,000원 (다올·신한)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026E 영업이익 전망</div>
+      <div class="kpi-value">3.65조원</div>
+      <div class="kpi-sub up">YoY +8.6% (신한 추정)</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (2026.04.24 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div style="background:#f0f9ff;border-radius:10px;padding:1rem;border:1px solid #bae6fd;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:20px;font-weight:700;">15조 5,605억 <span style="font-size:11px;color:var(--amber);">▼ 소폭 미달 -1.3%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">컨센서스 약 15조 7,680억 · YoY +5.5%</div>
+      </div>
+      <div style="background:#fff1f2;border-radius:10px;padding:1rem;border:1px solid #fecaca;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 예상)</div>
+        <div style="font-size:20px;font-weight:700;">8,026억 <span style="font-size:11px;color:var(--red);">▼ 컨센서스 하회 -4.8%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">컨센서스 약 8,430억 · YoY +3.3%</div>
+      </div>
+      <div style="background:#fff1f2;border-radius:10px;padding:1rem;border:1px solid #fecaca;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">순이익</div>
+        <div style="font-size:20px;font-weight:700;">8,831억 <span style="font-size:11px;color:var(--red);">▼ YoY -14.4%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">EPS 약 8,570원 · 예상치 13,020원 대비 쇼크</div>
+      </div>
+    </div>
+    <!-- 사업부별 실적 -->
+    <div style="margin-bottom:0.75rem;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">사업부별 실적 (1Q26)</div>
+      <table class="seg-table">
+        <thead>
+          <tr>
+            <th>사업부문</th>
+            <th>매출액</th>
+            <th>YoY</th>
+            <th>영업이익</th>
+            <th>OPM</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600;">A/S 부품</td>
+            <td>3조 5,190억원</td>
+            <td style="color:var(--green);font-weight:600;">+7.4%</td>
+            <td style="font-weight:700;color:var(--green);">9,239억원</td>
+            <td style="font-weight:700;color:var(--green);">26.3%</td>
+            <td>환율 수혜 + 가격 인상 효과</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">모듈·핵심부품</td>
+            <td>12조 0,415억원</td>
+            <td style="color:var(--green);font-weight:600;">+4.9%</td>
+            <td style="color:var(--red);font-weight:700;">적자 지속</td>
+            <td style="color:var(--red);">—</td>
+            <td>유럽 전동화 공장 초기 비용</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.75;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 8px 8px 0;">
+      <strong>경영진 코멘트:</strong> "어려운 경영환경 속에서도 A/S 및 전장부품 중심의 실적 방어에 성공했다. 유럽 전동화 공장 가동 초기 비용은 당분간 지속되나, 주요 고객사 신차 출시 효과와 R&D 성과가 더해지면 실적은 점진적으로 개선될 것." — 2Q26 영업이익 컨센서스 약 9,480억원으로 전분기 대비 V자 반등 기대. 연간 R&D 투자 처음으로 <strong>2조원</strong> 돌파 예정.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="dart-row">
+      <span class="dart-badge db-green">자사주취득</span>
+      <span class="dart-title">5,000억원 규모 자기주식 신규 매입 후 전량 소각 — 전년 대비 +22% 증가</span>
+      <span class="dart-date">2026.04.24</span>
+    </div>
+    <div class="dart-row">
+      <span class="dart-badge db-blue">분기보고서</span>
+      <span class="dart-title">2026년 1Q 경영실적 공시 — 매출 15.6조, 영업이익 8,026억원</span>
+      <span class="dart-date">2026.04.24</span>
+    </div>
+    <div class="dart-row">
+      <span class="dart-badge db-amber">주주환원</span>
+      <span class="dart-title">DPS 6,500원 유지 방침 이사회 검토 — 배당수익률 약 0.97%</span>
+      <span class="dart-date">2026.04.24</span>
+    </div>
+    <div class="dart-row">
+      <span class="dart-badge db-pink">MOU체결</span>
+      <span class="dart-title">CES 2026 — 퀄컴과 SDV·ADAS 분야 업무협약 체결, 글로벌 수주 공동 추진</span>
+      <span class="dart-date">2026.01.07</span>
+    </div>
+    <div style="font-size:12px;color:var(--blue);background:#eff6ff;padding:8px 12px;border-radius:8px;margin-top:0.75rem;">
+      📌 <strong>투자자 주목 공시:</strong> 5,000억원 자사주 전량 소각은 현재 주가 기준 소각 규모가 전년 대비 22% 확대된 수치로, 밸류업 의지를 강하게 시사. 보스턴다이나믹스 IPO 관련 공식 공시는 미확정이나 2026년 6월 소프트뱅크 풋옵션 만기로 결정이 임박한 상황.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-hot">🔥 핵심</span>
+        <span class="news-date">2026.05.28~29</span>
+      </div>
+      <div class="news-title">신한·LS증권 목표주가 90만원 상향, 기관 7일 연속 순매수로 장중 신고가 경신</div>
+      <div class="news-summary">신한투자증권은 목표가를 90만원으로 57.9% 상향, "피지컬 AI 밸류체인 핵심 기업으로 재평가될 시점"이라 진단. LS증권도 87만원 제시하며 "단순 부품사를 넘어 대장으로" 평가. 기관의 누적 순매수는 66.74만주로 주가는 5/29 장중 749,000원 신고가를 갱신했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.05~07</span>
+      </div>
+      <div class="news-title">보스턴다이나믹스 아틀라스 공장 투입 모델 영상 공개 + 미국 나스닥 상장 6월 결정 임박</div>
+      <div class="news-summary">보스턴다이나믹스가 실제 공장 투입 모델인 '개발형 아틀라스' 최초 영상을 공개(유튜브 37만뷰). 소프트뱅크 풋옵션 만기(2026년 6월)로 상장 결정이 빠르면 이번 달 확정될 전망. 현대모비스는 아틀라스 1대당 액추에이터 40개 전량 공급 구조로 로봇 매출 직접 수혜. LS증권은 아틀라스 3만대 기준 로봇 매출 1조710억원으로 추정.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.13</span>
+      </div>
+      <div class="news-title">주가 하루 +18.4% 급등, 52주 신고가 연속 경신</div>
+      <div class="news-summary">아틀라스 영상 공개 효과로 5월 13일 단 하루에 18.4% 급등. 이후에도 목표주가 상향 릴레이와 기관 순매수가 이어지며 52주 최고가를 지속 갱신 중. 연초 기준 주가 상승률은 현대차(+7.2%)의 약 2배 수준을 기록.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.01.07</span>
+      </div>
+      <div class="news-title">CES 2026 — 퀄컴과 SDV·ADAS MOU 체결, 신흥시장 통합솔루션 개발 협력</div>
+      <div class="news-summary">퀄컴과 소프트웨어 정의 차(SDV)와 첨단 운전자 보조시스템(ADAS) 분야 글로벌 파트너십 체결. 단순 현대·기아 종속 공급사 이미지를 탈피해 비(非)캡티브 수주 비중 확대 전략의 일환.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.04.24</span>
+      </div>
+      <div class="news-title">R&D 투자 사상 최초 2조원 돌파 계획 발표 + 자사주 5,000억 소각</div>
+      <div class="news-summary">2026년 연간 R&D 투자가 사상 처음으로 2조원을 넘어설 예정. 전장·전동화·자율주행·로봇 핵심 기술 내재화에 집중. 동시에 5,000억원 규모 자사주 전량 소각을 발표해 주주환원과 미래 투자를 병행하는 모습이다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04.24</span>
+      </div>
+      <div class="news-title">1Q26 모듈·핵심부품 부문 적자 지속 — 유럽 전동화 공장 초기 비용 부담</div>
+      <div class="news-summary">슬로바키아 PE 시스템 공장 본격 양산 돌입, 스페인 BSA 공장 가동 임박으로 초기 고정비가 반영. 1분기 순이익이 YoY -14.4% 감소한 주원인. 글로벌 자동차 수요 둔화와 미국 관세 영향(8,600억원 규모 현대차 관세)도 공급사인 모비스에 간접 부담.</div>
+    </div>
+  </div>
+
+  <!-- Bull / Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">🤖</span>
+          <span><strong>보스턴다이나믹스 IPO + 아틀라스 액추에이터</strong> — 6월 상장 결정 임박. 현대모비스는 아틀라스 1대당 4만 달러 이상의 액추에이터를 전량 공급. 신한증권 추정 2030년 로봇 매출 2조원 이상 가능.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🛡️</span>
+          <span><strong>A/S 부문의 탄탄한 수익 방어선</strong> — 1Q26 OPM 26.3%. 글로벌 차령 상승과 고환율 수혜로 2026년 A/S 영업이익 3조 5,700억원(OPM 24.9%) 예상. 전사 이익의 안정적 버팀목.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🏭</span>
+          <span><strong>피지컬 AI·SDV 밸류체인 리레이팅</strong> — 단순 자동차 부품사에서 로봇 액추에이터·SDV 하드웨어 기업으로 밸류에이션 재평가. 목표주가 90만원 리포트 다수 등장.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">💰</span>
+          <span><strong>강력한 주주환원 + 저평가</strong> — 자사주 5,000억 전량 소각(+22% YoY), DPS 6,500원. PER 7.7배·PBR 0.7배로 글로벌 부품사 평균 대비 현저히 저평가 구간.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🌍</span>
+          <span><strong>非캡티브 수주 확대 + 유럽 EV 거점 구축</strong> — 퀄컴 MOU 등 글로벌 OEM 수주 목표 89.7억달러. 유럽 전동화 공장이 장기적으로 EU IRA 수혜 핵심 거점으로 자리잡을 전망.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>모듈·부품 부문 적자 장기화 우려</strong> — 유럽 전동화 공장 가동 초기 고정비가 2026년 상당 기간 지속. 전동화 부품 양산 손익분기점 달성까지 시간이 필요하며 전체 OPM을 구조적으로 제약한다.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>보스턴다이나믹스 상장 지연 가능성</strong> — 소프트뱅크 풋옵션 만기(2026년 6월)가 핵심 일정이나 가치 평가 이견으로 연기될 경우 로봇 모멘텀 후퇴. 상장 결정은 그룹 의지에 달린 변수.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>미국 관세·글로벌 수요 둔화</strong> — 현대차 1Q26 영업이익 -30.8%의 배경인 관세 충격이 모비스 수요에도 직결. 현대·기아 의존도 약 78%로 완성차 판매 부진 시 직격탄.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>로봇 매출 실현 시점 불확실성</strong> — 아틀라스 양산은 2028년 연 3만대가 목표치. 현재 수주 달성률 4%에 불과, 실제 매출 기여까지는 2~3년 이상의 기다림이 필요하다.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>단기 차익 실현 가능성 + 변동성 확대</strong> — 단기 주가 급등(연초 대비 2배 이상)으로 과열 우려. 보스턴다이나믹스 상장 관련 기대감이 이미 선반영됐을 경우 재료 소멸 시 조정 리스크.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (최근순)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">신한투자증권 (박광래)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge strong-buy">적극매수</span>
+        <span class="target-price">목표가 900,000원 (+20.5%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.28</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">다올투자증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge strong-buy">적극매수</span>
+        <span class="target-price">목표가 900,000원 (+20.5%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.21</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">LS증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">목표가 870,000원 (+16.5%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.27</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">삼성증권</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">목표가 650,000원 (-13.0%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.11</span>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem;padding:10px 12px;background:#f8f9fc;border-radius:8px;font-size:12px;color:var(--muted);">
+      ※ 총 27명 애널리스트 전원 매수·적극매수 의견 · 컨센서스 목표가 평균 약 571,241원 (기존 데이터 기준, 최근 리포트들은 87~90만원으로 급격히 상향 중) · 최고 900,000원
+    </div>
+  </div>
+
+  <!-- 영업이익 추정 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📊 연도별 주요 재무 추정 (신한투자증권 2026.05.28 기준)</div>
+    <div style="overflow-x:auto;">
+      <table class="seg-table">
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>2025 실적</th>
+            <th style="color:var(--blue);">2026E</th>
+            <th>2027E</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600;">연간 영업이익</td>
+            <td>약 3조 3,610억원</td>
+            <td style="font-weight:700;color:var(--blue);">3조 6,500억원</td>
+            <td>4조 1,000억원</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">YoY 성장률</td>
+            <td>—</td>
+            <td style="font-weight:700;color:var(--blue);">+8.6%</td>
+            <td>+12.2%</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">A/S 부문 매출 (2026E)</td>
+            <td>—</td>
+            <td style="font-weight:700;color:var(--blue);">29조 4,000억원</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">A/S 부문 영업이익 (2026E)</td>
+            <td>—</td>
+            <td style="font-weight:700;color:var(--blue);">3조 5,700억원 (OPM 24.9%)</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">R&D 투자 (2026E)</td>
+            <td>약 1조 8,000억원</td>
+            <td style="font-weight:700;color:var(--blue);">2조원 이상 (사상 최대)</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      현대모비스는 2026년 들어 '자동차 부품사'에서 '피지컬 AI 밸류체인 기업'으로의 정체성 전환이 시장에서 본격적으로 평가받기 시작했다. A/S 부문은 OPM 26%대의 안정적 수익 기반을 제공하며 밸류에이션 하단을 지지하고, 보스턴다이나믹스의 아틀라스 액추에이터 전량 공급사라는 위치가 상단을 크게 열어두고 있다. 1분기 모듈·부품 부문 적자와 순이익 감소는 유럽 전동화 공장의 초기 비용 때문으로, 하반기 신차 효과와 함께 점진적 개선이 예상된다. 이르면 6월 보스턴다이나믹스의 나스닥 상장이 확정될 경우 지분 가치(80%) 인식과 로봇 사업 가시화로 추가 밸류에이션 리레이팅이 가능하다. 5,000억원 규모 자사주 전량 소각과 R&D 2조원 투자의 병행은 단기 주주환원과 중장기 성장을 동시에 추구하는 전략이다. <strong>이 종목은 자동차 섹터의 안정성 위에 로봇·피지컬 AI 성장 옵션을 더하고 싶은 투자자, 그리고 PER 7.7배·PBR 0.7배의 저평가를 활용하고 싶은 가치투자자 모두에게 적합하다. 다만 보스턴다이나믹스 상장 일정과 로봇 매출 가시화 시점을 지속 모니터링해야 한다.</strong>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

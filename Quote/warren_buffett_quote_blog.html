@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>탐욕과 공포 사이 — 역발상 투자자의 조건 | 워런 버핏</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f9f9f7; min-height: 100vh; display: flex; justify-content: center; padding: 3rem 1.5rem; }
+    .blog-wrap {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #1a1a1a;
+      max-width: 680px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 3rem 3.5rem 4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    }
+    .category-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: #e8f0fb;
+      color: #1a56a0;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+    .blog-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin: 0 0 0.6rem;
+      color: #1a1a1a;
+    }
+    .blog-subtitle {
+      font-size: 15px;
+      color: #666666;
+      line-height: 1.6;
+      margin: 0 0 1rem;
+    }
+    .meta {
+      font-size: 12px;
+      color: #999999;
+      margin-bottom: 1.8rem;
+    }
+    .hero-quote {
+      border-left: 3px solid #4a8fd4;
+      background: #f6f6f4;
+      border-radius: 0 8px 8px 0;
+      padding: 1.2rem 1.5rem;
+      margin: 0 0 2rem;
+    }
+    .hero-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.7;
+      color: #1a1a1a;
+      margin: 0 0 0.5rem;
+    }
+    .hero-attr {
+      font-size: 13px;
+      color: #666666;
+    }
+    .section-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 2rem 0 0.8rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 0.5px solid #e0e0e0;
+    }
+    .body-text {
+      font-size: 15px;
+      line-height: 1.85;
+      color: #1a1a1a;
+      margin: 0 0 0.9rem;
+    }
+    .body-text strong { font-weight: 500; }
+    .person-card {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin: 1.5rem 0;
+    }
+    .person-card-item {
+      background: #f6f6f4;
+      border: 0.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+    }
+    .card-label { font-size: 11px; color: #999999; margin-bottom: 4px; }
+    .card-value { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+    .principle-list { list-style: none; padding: 0; margin: 1rem 0 1.5rem; }
+    .principle-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 0.9rem 0;
+      border-bottom: 0.5px solid #e0e0e0;
+    }
+    .principle-num {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #e8f0fb;
+      color: #1a56a0;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .principle-content { font-size: 15px; line-height: 1.75; color: #1a1a1a; }
+    .principle-content strong { font-weight: 500; }
+    .closing-quote {
+      border-top: 0.5px solid #e0e0e0;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      text-align: center;
+    }
+    .closing-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 15px;
+      color: #666666;
+      line-height: 1.8;
+      font-style: italic;
+    }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.5rem; }
+    .tag {
+      font-size: 12px;
+      color: #666666;
+      background: transparent;
+      border: 0.5px solid #cccccc;
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+  <span class="category-tag">투자 철학</span>
+  <h1 class="blog-title">탐욕과 공포 사이 — 역발상 투자자의 조건</h1>
+  <p class="blog-subtitle">시장이 극단으로 흔들릴 때, 워런 버핏이 선택하는 방향은 언제나 반대였다.</p>
+  <div class="meta">2025년 · 읽기 약 4분 · 투자 철학</div>
+
+  <div class="hero-quote">
+    <p>"모두가 탐욕스러울 때 두려워하고, 두려워할 때 탐욕스러워라."</p>
+    <span class="hero-attr">— 워런 버핏 (Warren Buffett)</span>
+  </div>
+
+  <p class="body-text">주식 시장에는 늘 두 가지 감정이 교차합니다. 모든 사람이 환호할 때 슬그머니 빠져나오고, 모두가 공황에 빠질 때 조용히 매수 버튼을 누르는 투자자 — 워런 버핏은 그렇게 90년 넘는 세월 동안 세계에서 가장 성공한 투자자 자리를 지켜왔습니다.</p>
+  <p class="body-text">이 명언은 단순한 역발상 전략이 아닙니다. 그것은 <strong>군중 심리를 이겨내는 자기 수련</strong>에 가깝습니다.</p>
+
+  <p class="section-title">명언의 핵심 — 감정이 아닌 가치를 보라</p>
+  <p class="body-text">시장 가격은 단기적으로 사람들의 감정이 결정합니다. 과도한 낙관은 거품을 만들고, 과도한 공포는 좋은 기업을 헐값에 내놓습니다. 버핏이 말하는 "탐욕스러워야 할 때"란 시장이 실제 가치보다 훨씬 싸게 팔리는 순간입니다. 반대로 "두려워해야 할 때"는 가격이 내재 가치를 한참 뛰어넘어 모두가 부자가 된 것처럼 착각하는 시점입니다.</p>
+  <p class="body-text">이 원칙을 실천하려면 군중이 달리는 방향과 반대편에 혼자 서 있을 수 있는 정신적 내구성이 필요합니다. 그것이 버핏이 평범한 투자자와 다른 이유입니다.</p>
+
+  <p class="section-title">워런 버핏 인물 카드</p>
+  <div class="person-card">
+    <div class="person-card-item"><div class="card-label">출생</div><div class="card-value">1930년 8월 30일</div></div>
+    <div class="person-card-item"><div class="card-label">별칭</div><div class="card-value">오마하의 현인</div></div>
+    <div class="person-card-item"><div class="card-label">회사</div><div class="card-value">버크셔 해서웨이</div></div>
+    <div class="person-card-item"><div class="card-label">투자 원칙</div><div class="card-value">가치 투자 (장기)</div></div>
+  </div>
+
+  <p class="section-title">이 명언에서 도출한 3가지 행동 원칙</p>
+  <ul class="principle-list">
+    <li class="principle-item">
+      <span class="principle-num">1</span>
+      <span class="principle-content"><strong>공황 매수의 준비</strong> — 시장이 30~50% 폭락해도 매수할 수 있도록 항상 현금 여유를 확보해 두세요. 위기는 예고 없이 찾아오지만, 준비된 투자자에게는 기회입니다.</span>
+    </li>
+    <li class="principle-item">
+      <span class="principle-num">2</span>
+      <span class="principle-content"><strong>과열 신호 감지</strong> — 주변의 택시 기사, 미용사가 특정 종목을 추천하기 시작할 때 포지션을 점검하세요. 시장의 열기가 일상 대화로 번질 때가 바로 경계할 시점입니다.</span>
+    </li>
+    <li class="principle-item">
+      <span class="principle-num">3</span>
+      <span class="principle-content"><strong>내재 가치 기준 고수</strong> — 감정이 아니라 기업의 펀더멘털을 기준으로 매수·매도 시점을 판단하세요. 주가가 아무리 오르내려도 좋은 기업은 여전히 좋은 기업입니다.</span>
+    </li>
+  </ul>
+
+  <p class="section-title">지금 이 시대, 이 명언이 유효한 이유</p>
+  <p class="body-text">SNS와 실시간 주가 알림이 일상화된 지금, 감정이 시장을 흔드는 속도는 어느 때보다 빠릅니다. 유튜브 쇼츠 하나로 개미들이 특정 종목에 몰리고, 공포 뉴스 하나에 수십만 개의 매도 주문이 쏟아집니다. 군중 심리에 의한 시장 왜곡이 더 심해진 만큼, 버핏의 역발상 철학은 오히려 더 강력한 무기가 되고 있습니다.</p>
+  <p class="body-text">단기 변동성이 두렵다면, 한번 자신에게 물어보세요. "지금 내가 두려운 것은 주가인가, 아니면 기업 가치인가?" 그 답에 따라 행동이 달라집니다.</p>
+
+  <div class="closing-quote">
+    <p>시장이 가장 무섭게 느껴지는 날이,<br>종종 가장 좋은 매수일이다.</p>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag">#워런버핏</span>
+    <span class="tag">#역발상투자</span>
+    <span class="tag">#가치투자</span>
+    <span class="tag">#공포와탐욕</span>
+    <span class="tag">#버크셔해서웨이</span>
+    <span class="tag">#투자철학</span>
+    <span class="tag">#주식명언</span>
+    <span class="tag">#장기투자</span>
+  </div>
+</article>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>크래프트 하인즈 (KHC) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">KHC · NASDAQ</div>
+      <div class="company-name">크래프트 하인즈 (The Kraft Heinz Company)</div>
+      <div class="company-desc">하인즈 케첩·크래프트 맥앤치즈·필라델피아 크림치즈·오스카 마이어를 보유한 세계 최대 포장식품 기업. 2015년 크래프트와 하인즈의 460억 달러 합병으로 출범.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 7월 30일<br>데이터 기준: 7월 29일 미국 현지 장중</div>
+      <div class="price-display">$27.84</div>
+      <div class="price-change up">▲ +1.98% (전일 대비)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: $33.0bn</span>
+    <span class="rating-pill">🏢 섹터: 필수소비재 · 포장식품</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Hold (19명)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (Q1 2026)</div>
+      <div class="kpi-value">$60.5억</div>
+      <div class="kpi-sub">YoY +0.8% · 유기적 -0.4%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">18.9%</div>
+      <div class="kpi-sub">전년동기 대비 -1.0%p</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$24.15</div>
+      <div class="kpi-sub" style="color:var(--red);font-weight:600;">현재가 대비 -13.3% (하회)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value" style="font-size:18px;">$21.04~$29.19</div>
+      <div class="kpi-sub">현재가 위치: 83%</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 · 최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$60.5억 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +2.5%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $58.9억 · YoY +0.8% (유기적 -0.4%)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">조정 EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$0.58 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +16%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $0.50 · YoY -6.5%</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:0.875rem 1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">조정 EBITDA</div>
+        <div style="font-size:15px;font-weight:700;">$13.9억 <span style="font-size:11px;color:var(--green);">+12.5% 초과</span></div>
+        <div style="font-size:11px;color:var(--muted);">마진 23%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:0.875rem 1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">잉여현금흐름 (FCF)</div>
+        <div style="font-size:15px;font-weight:700;">$8.0억 <span style="font-size:11px;color:var(--green);">+59% YoY</span></div>
+        <div style="font-size:11px;color:var(--muted);">FCF 마진 12.7% (전년 8%)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:0.875rem 1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">GAAP 희석 EPS</div>
+        <div style="font-size:15px;font-weight:700;">$0.67 <span style="font-size:11px;color:var(--green);">+13.6% YoY</span></div>
+        <div style="font-size:11px;color:var(--muted);">신흥시장 매출 +7.6%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>발표일 2026년 5월 6일</strong> (분기 종료 2026년 3월 28일). Cahillane CEO는 "2025년에 집행한 브랜드 투자가 초기 성과를 내고 있으며, 특히 테이스트 엘리베이션 등 반드시 이겨야 할 포트폴리오에서 시장점유율 추세가 개선되고 있다"고 언급.
+      <strong>FY2026 가이던스는 유지</strong> — 유기적 매출 -1.5%~-3.5%, 조정 EPS $1.98~$2.10(중간값 $2.04). 인플레이션과 소비심리 약화를 이유로 보수적 기조를 유지하며, SNAP(식품지원) 축소로 약 100bp 역풍을 반영. Q1 마케팅비는 전년비 +37% 증가(매출의 5.5% 이상 집행 방침).
+      <br><strong style="color:var(--accent);">▶ 다음 발표: 2026년 8월 5일 (Q2)</strong> — 컨센서스 매출 $62.1억 · 조정 EPS $0.538
+    </div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">정관(By-laws) 전면 개정 — 주주제안·이사 지명 절차 강화, 증권법 소송 연방법원 전속관할 지정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.22</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">월트디즈니와 장기 다년 전략적 제휴 체결 (식품·미디어·체험 전 영역)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.21</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">글로벌 운영구조 변경 발표 — 성장 가속 및 자원 배분 효율화</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.18</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">배당결정</span>
+        <span style="font-size:13px;font-weight:500;">분기배당 주당 $0.40 (기준일 6.05 / 지급일 6.26) — 전년 동일 수준 유지</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.06</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">FY2026 1분기 보고서 (분기 종료 2026.03.28)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.06</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">유로화 선순위채 €10억 발행 인수계약 — 2031년물 3.500% €5억 / 2034년물 3.950% €5억</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.07</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-K</span>
+        <span style="font-size:13px;font-weight:500;">FY2025 연간보고서 — 분사(Separation) 작업 중단 사실 기재</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.12</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;background:#f8faff;padding:10px 14px;border-radius:6px;margin-top:0.75rem;">
+      📌 <strong style="color:var(--text);">투자자 주목 공시</strong> — 7월 22일 정관 개정은 주주제안·이사 지명 절차를 까다롭게 하고 증권법 소송의 관할을 연방법원으로 못박은 내용입니다. 버크셔 해서웨이의 27.5% 지분 매각 가능성이 열려 있는 상황에서 이사회가 지배구조 방어선을 정비한 것으로 해석할 여지가 있어, 행동주의·지분 변동 시나리오를 보는 투자자에게는 실적보다 중요한 신호일 수 있습니다.
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.21</span></div>
+      <div class="news-title">디즈니와 랜드마크 장기 제휴 — 10개 브랜드를 테마파크·크루즈·미디어에 투입</div>
+      <div class="news-summary">푸드서비스·미디어·이벤트를 아우르는 전사적 제휴로, 신데렐라 같은 디즈니 캐릭터를 맥앤치즈 등 제품 패키지에 사용할 수 있게 됐습니다. 브랜드 노후화가 KHC의 핵심 약점이었던 만큼 방향은 정확합니다. 다만 배런스는 "실적 추정치를 바꿀 만한 근거는 아직 부족하다"며 투자자 반응이 제한적이라고 지적했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.02.11</span></div>
+      <div class="news-title">분사 계획 무기한 중단 — 대신 6억 달러 재투자로 선회</div>
+      <div class="news-summary">2025년 9월 이사회가 승인한 2개사 분할(비과세 스핀오프)을 신임 Cahillane CEO가 취임 6주 만에 중단시켰습니다. 2026년 3억 달러 비용 절감 효과가 있고, 마케팅·영업·R&amp;D에 6억 달러를 투입합니다. 다만 도이체방크는 "회사가 인정한 것보다 더 깊은 문제를 드러낸 결정"이라고 평가했고, 스핀오프 취소는 통계적으로 10건 중 1건 수준의 이례적 사건입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.01.20</span></div>
+      <div class="news-title">버크셔 해서웨이, 3.25억주(27.5%) 지분 매각 가능성 공개</div>
+      <div class="news-summary">버핏이 2015년 합병을 주도해 만든 회사에서 10여 년 만에 이탈할 수 있다는 신호로, 공개 당시 주가가 급락했습니다. 다만 그레그 아벨 CEO는 분사 중단에 대해 "절대적으로 옳은 접근"이라며 경영진을 공개 지지했습니다. 대규모 물량이 시장에 나올 수 있는 오버행이 여전히 해소되지 않았습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.05.21</span></div>
+      <div class="news-title">번스타인, KHC를 Underperform으로 하향 — 목표가 $25 → $21</div>
+      <div class="news-summary">알렉시아 하워드 애널리스트는 캠벨·코나그라·제너럴밀스와 함께 KHC를 동반 하향했습니다. 인플레이션 압력과 MAHA(석유계 인공색소 단계적 퇴출 등 식품 규제) 리스크를 근거로 들었습니다. 포장식품 업종 전반에 대한 구조적 회의론이 개별 종목 논리를 압도하고 있다는 뜻입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.03.18</span></div>
+      <div class="news-title">유니레버와 식품부문 합병 논의, 성과 없이 종료 (FT 보도)</div>
+      <div class="news-summary">유니레버 식품사업과 KHC 조미료 부문을 결합하는 구상이 수개월간 논의됐으나 결렬됐습니다. 논의는 분사 중단 결정 직전에 이뤄진 것으로 전해집니다. 대형 구조 개편 카드가 하나 더 소진된 셈이며, 시장에서는 장기적으로 분사 재추진 가능성이 다시 거론되고 있습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.07.27</span></div>
+      <div class="news-title">6억 달러 투자, 소비자 주도 혁신에 집중 — 락토스프리 크림치즈 사례</div>
+      <div class="news-summary">유당을 소화하지 못하는 미국인 3,000만~5,000만 명을 겨냥한 제품을 2년간 개발하면서 프리미엄 가격을 붙이지 않기로 했다고 포브스가 보도했습니다. 볼륨 회복을 우선하는 전략이 확인되지만, 가격 프리미엄을 포기한 만큼 마진 개선은 뒤로 밀립니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>턴어라운드 초기 신호가 숫자로 확인</strong> — Q1 조정 EPS가 컨센서스를 16% 상회하고 FCF가 전년비 59% 증가($8.0억). 조정 EBITDA도 예상을 12.5% 웃돌았습니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>배당수익률 5.75%</strong> — 분기 $0.40을 전년 수준으로 유지. 12개월 순손실 상태에서도 현금배당성향은 48% 수준으로 현금흐름이 배당을 덮고 있습니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>경영진 트랙레코드</strong> — Cahillane CEO는 켈로그 분할과 켈라노바의 마즈 매각을 완수한 인물. 디즈니 제휴처럼 브랜드 관련성을 되살리는 카드를 실제로 꺼내고 있습니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>신흥시장 성장 + 방어적 성격</strong> — 신흥시장 매출 +7.6%($7.46억)로 최고 성장 부문. 베타 0.08로 지수 급락 국면에서 변동성이 낮습니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>주가가 이미 컨센서스 목표가를 13.3% 초과</strong> — 현재 $27.84 vs 목표가 $24.15. 애널리스트 19명 중 매수 의견이 0명이고, BofA·번스타인은 매도, JP모간은 비중축소입니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>12개월 순손실 -$57.6억 (EPS -$4.86)</strong> — 브랜드 대규모 손상차손 영향으로 GAAP P/E 산출이 불가능합니다. 조정 실적과 회계상 실적의 괴리가 큽니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>유기적 매출 역성장 지속</strong> — FY2026 가이던스 자체가 -1.5%~-3.5%. Q1 볼륨/믹스는 -1.2%p로, 가격 인상(+0.8%p)이 물량 감소를 못 메우는 구조입니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>업종 구조적 역풍</strong> — GLP-1 확산, PB(자체브랜드) 경쟁, MAHA 인공색소 규제, SNAP 축소(약 100bp). WSJ은 "빅푸드가 쓸 수 있는 카드가 소진됐다"고 진단했습니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>버크셔 27.5% 오버행 + 마진 압박</strong> — 3.25억주 매각 가능성이 열려 있고, 6억 달러 재투자로 영업이익률은 -1.0%p 하락. FY26 EPS 전망($2.04)은 분사 계획 시절 추정($2.50)보다 크게 낮습니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">UBS <span style="font-size:11px;color:var(--muted);">(7.16 상향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$25</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wells Fargo · Chris Carey <span style="font-size:11px;color:var(--muted);">(7.08 상향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$25</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Piper Sandler · Michael Lavery <span style="font-size:11px;color:var(--muted);">(6.25 상향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$24</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Evercore ISI · David Palmer <span style="font-size:11px;color:var(--muted);">(7.23 상향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$23</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">JPMorgan <span style="font-size:11px;color:var(--muted);">(7.15 상향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge sell">비중축소</span><span class="target-price">$22</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Bernstein · Alexia Howard <span style="font-size:11px;color:var(--muted);">(5.21 하향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge sell">시장수익률 하회</span><span class="target-price">$21</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Bank of America <span style="font-size:11px;color:var(--muted);">(7.10 유지)</span></span>
+      <div class="analyst-right"><span class="opinion-badge sell">매도</span><span class="target-price">N/A</span></div>
+    </div>
+    <div class="analyst-row" style="background:#f8faff;margin:0 -1.5rem;padding:10px 1.5rem;">
+      <span class="analyst-firm" style="font-weight:700;">컨센서스 (19명)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립 (Hold)</span><span class="target-price">$24.15</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:0.75rem;">
+      최근 두 달간 목표가는 대부분 <strong style="color:var(--text);">상향</strong>됐지만, <strong style="color:var(--text);">투자의견을 매수로 올린 곳은 한 곳도 없습니다.</strong> 목표가 상향은 실적 개선 기대가 아니라 이미 오른 주가를 뒤늦게 반영한 성격이 강합니다.
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      크래프트 하인즈는 지금 <strong>"주가가 펀더멘털을 앞질러 간 구간"</strong>에 있습니다. 52주 최저 $21.04에서 현재 $27.84까지 32% 올라 52주 범위의 83% 위치에 도달했지만, 애널리스트 19명의 컨센서스 목표가는 $24.15로 현재가를 13.3% <strong>밑돕니다</strong>. 매수 의견을 낸 기관이 단 한 곳도 없다는 점이 이 종목의 현재 위치를 가장 정확히 요약합니다.<br><br>
+      스토리 자체는 개선됐습니다. 신임 Cahillane CEO는 취임 6주 만에 분사 계획을 접고 6억 달러를 브랜드·마케팅·R&amp;D에 재투자하는 쪽으로 방향을 틀었고, Q1에는 조정 EPS가 컨센서스를 16% 상회하며 FCF를 59% 늘렸습니다. 디즈니와의 장기 제휴는 브랜드 노후화라는 핵심 약점을 정면으로 겨냥한 카드입니다. 문제는 이 모든 것이 <strong>아직 매출 성장으로 연결되지 않았다는 점</strong>입니다. 회사 스스로 FY2026 유기적 매출을 -1.5%~-3.5%로 제시하고 있고, 볼륨/믹스는 여전히 마이너스입니다. 12개월 순손실 -$57.6억이라는 회계상 숫자도 부담입니다.<br><br>
+      단기적으로는 <strong>8월 5일 Q2 실적</strong>이 분기점입니다. 컨센서스는 매출 $62.1억·조정 EPS $0.538이며, 주가가 이미 목표가를 넘어선 상태이므로 서프라이즈가 나와도 상승 여력은 제한적이고 미달 시 하방은 클 수 있는 비대칭 구조입니다. 중기적으로는 볼륨/믹스의 플러스 전환 여부, 그리고 버크셔의 27.5% 지분 처리 방향이 핵심 변수입니다.<br><br>
+      <strong>이 종목은 5.75% 배당수익률과 베타 0.08의 낮은 변동성을 목적으로 장기 보유하려는 인컴형 투자자에게 적합합니다.</strong> 반면 주가 상승을 노리는 투자자에게는 지금 진입 가격이 불리합니다. 실적 개선의 초기 신호는 있으나 시장이 이를 이미 상당 부분 선반영했고, 애널리스트 전원이 중립 이하라는 사실은 무시하기 어려운 신호입니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

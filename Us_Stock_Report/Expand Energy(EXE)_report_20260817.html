@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expand Energy 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">EXE · NASDAQ</div>
+      <div class="company-name">Expand Energy (익스팬드 에너지)</div>
+      <div class="company-desc">Chesapeake Energy와 Southwestern Energy 합병으로 탄생한 북미 최대 천연가스 생산업체. 텍사스주 Haynesville 및 애팔래치아 분지(Marcellus)에서 천연가스·원유·NGL을 생산</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 08월 17일</div>
+      <div class="price-display">$94.35</div>
+      <div class="price-change down">8/13 종가 기준 (52주 저점권 근접)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $21.8B</span>
+    <span class="rating-pill">🏢 섹터: 에너지 · 천연가스 탐사·생산(E&P)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (2026 Q2)</div>
+      <div class="kpi-value">$2.96B</div>
+      <div class="kpi-sub">YoY +5.4%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">조정 EBITDAX 마진</div>
+      <div class="kpi-value">약 40%</div>
+      <div class="kpi-sub">영업이익률 22.3%(전년 45.2%↓)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$129.80</div>
+      <div class="kpi-sub">현재가 대비 +37.6%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$84.98~$126.62</div>
+      <div class="kpi-sub">현재가 위치: 약 22%(저점권)</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 · 2026 Q2)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$2.96B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +49.1%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.98B · YoY +5.4% (마케팅·파생상품 이익이 서프라이즈 견인)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">조정 EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.33 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +19.1%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.12 · GAAP 순이익 $522M(희석 EPS $2.19)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      실적 발표일 2026.07.28(장 마감 후). 평균 순생산량 약 7.48 Bcfe/d(천연가스 비중 92%)로 연간 가이던스(7.4~7.6 Bcfe/d)를 재확인. 분기 중 자사주 약 $530M 매입(연초 이후 누적 $850M, 발행주식의 약 4%), 신규 $1B 자사주매입 한도 승인. 순부채는 $3.1B(레버리지 0.5배)로 대폭 개선. 다만 유가·가스 매출 자체는 예상치를 소폭 밑돌아 핵심 업스트림 수익성은 전년 대비 둔화.
+    </div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Twin Eagle Holdings 인수 합병계약 체결 공시($1.25B)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.27</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 실적 발표(순이익 $522M, 조정 EPS $1.33)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.28</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">배당결정</span>
+        <span style="font-size:13px;font-weight:500;">분기 기본배당 주당 $0.575 결의 (지급일 9/3), $1B 신규 자사주매입 승인</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07월 발표</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.27</span></div>
+      <div class="news-title">Twin Eagle Holdings 인수로 "생산+마케팅" 수직계열화 완성</div>
+      <div class="news-summary">가스 마케팅·물류 전문기업 Twin Eagle을 $1.25B에 인수하며 북미 최대 통합 천연가스 기업으로 전환. 마케팅·상업전략 부문 연간 잉여현금흐름 목표를 기존 대비 50% 상향한 $750M로 제시. 즉시 EBITDA 증대 효과(연 $200M+)와 2028년까지 연 $150M 시너지 기대. 3분기 중 거래 종결 예정.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.28</span></div>
+      <div class="news-title">2분기 실적 매출·EPS 모두 컨센서스 큰 폭 상회, 주가는 단기 조정</div>
+      <div class="news-summary">매출 49%, EPS 19% 서프라이즈를 기록했음에도 실적 발표 직후 주가는 차익실현 매물로 약 1.7% 하락. 실적 발표 전 1주일간 +4%, 1개월간 +2.3% 상승했던 데 따른 단기 되돌림 성격.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.07.30</span></div>
+      <div class="news-title">실적 발표 후 애널리스트 목표주가 엇갈림 — 대부분 하향 조정하되 매수의견 유지</div>
+      <div class="news-summary">Truist $134→$117, UBS $135→$127, Citi $125→$115로 목표가를 낮췄으나 매수 의견은 유지. 반면 Wolfe Research는 $110→$114로 상향하며 Outperform 유지. Siebert Williams Shank는 Hold로 신규 커버리지 개시(목표가 $100, Twin Eagle 인수 이후 밸런스드 리스크·보상 판단).</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.03</span></div>
+      <div class="news-title">모닝스타, 2035년 북미 천연가스 수요 1,690억 입방피트/일 전망</div>
+      <div class="news-summary">데이터센터 전력수요 확대 및 LNG 수출 증가로 장기 가스 수요 성장을 전망하는 리포트 발표. Haynesville 분지는 LNG 수출터미널 인접성 덕분에 수혜가 클 것으로 평가되어 Expand Energy의 자산 포지셔닝에 긍정적.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.10</span></div>
+      <div class="news-title">에너지업종 내 투자의견 엇갈림 지속 — 주가는 52주 저점권 근접</div>
+      <div class="news-summary">Comstock Resources 등 동종업계와 비교한 투자의견이 혼재되며 주가는 8월 중순 52주 최저가($84.98) 부근까지 근접. 천연가스 가격 약세와 업스트림 마진 축소가 주가 하방 압력으로 작용.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>Twin Eagle 인수로 생산+마케팅 수직계열화, 마케팅 부문 잉여현금흐름 목표를 연 $750M로 50% 상향</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>순부채 $3.1B·레버리지 0.5배로 재무건전성 우수, 2분기에만 자사주 $530M 매입 등 적극적 주주환원</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>데이터센터 전력수요·LNG 수출 확대에 따른 구조적 천연가스 수요 증가 — Haynesville 자산의 LNG터미널 인접성이 강점</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>손익분기 가스 가격 약 $2.70/Mcf(배당 제외)로 업계 최저 수준, 저유가 환경에서도 현금 창출력 유지</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>영업이익률이 전년 45.2%→22.3%로 크게 하락, 핵심 업스트림(가스·원유·NGL) 매출은 컨센서스 소폭 미달</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>천연가스 가격 약세가 지속되며 주가는 52주 저점권까지 하락, 실적 발표 후에도 다수 하우스가 목표가 하향</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>Twin Eagle 인수(2026년 3분기 종결 예정)에 따른 통합 리스크 및 인수 자금(현금+리볼빙 크레딧) 부담</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>잉여현금흐름 마진이 전년 23.7%→11.6%로 축소, 천연가스 업황의 경기 순환적 변동성 상존</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">UBS</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$127 (구 $135)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Truist</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$117 (구 $134)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Citi</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$115 (구 $125)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wolfe Research</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Outperform)</span><span class="target-price">$114 (구 $110)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Morgan Stanley</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">유지</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Siebert Williams Shank</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립(신규 개시)</span><span class="target-price">$100</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Expand Energy는 2026년 2분기 매출·EPS 모두 컨센서스를 큰 폭 상회했고, Twin Eagle Holdings 인수로 생산과 마케팅을 아우르는 북미 최대 통합 천연가스 기업으로 도약하며 연간 잉여현금흐름 목표를 50% 상향했다. 순부채 축소와 활발한 자사주매입 등 재무 건전성·주주환원 측면에서도 강점을 보이고 있다. 다만 영업이익률과 잉여현금흐름 마진이 전년 대비 크게 둔화된 점은 업스트림 가스 가격 약세를 반영하며, 주가는 최근 52주 저점권까지 후퇴한 상태다. 애널리스트 컨센서스 목표가($129.80)는 현재가 대비 약 38%의 상승 여력을 제시하고 있어, 데이터센터·LNG 수요 확대라는 장기 천연가스 성장 스토리와 낮은 손익분기 가스 가격($2.70/Mcf)에 주목하는 중장기·가치투자 성향 투자자에게 적합한 종목이다. 다만 Twin Eagle 인수 통합 과정과 가스 가격 변동성은 지속적으로 확인할 필요가 있다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

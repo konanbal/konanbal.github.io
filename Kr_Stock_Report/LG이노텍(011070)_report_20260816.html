@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LG이노텍 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">011070 · KOSPI</div>
+      <div class="company-name">LG이노텍</div>
+      <div class="company-desc">광학솔루션(카메라모듈)·반도체기판(FC-BGA 등)·전장부품을 생산하는 LG그룹 전자부품 계열사. 애플 아이폰 카메라모듈의 핵심 협력사이자 AI 서버용 반도체 기판 수혜주로 주목받고 있음.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 08월 16일</div>
+      <div class="price-display">514,000원</div>
+      <div class="price-change up">▲ +21.2% (2026.07.31 종가, 전일 대비 반등)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 12.2조원</span>
+    <span class="rating-pill">🏢 섹터: 전자부품·반도체기판</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (매수 22 · 매도 1)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2026년 2분기 매출</div>
+      <div class="kpi-value">5조5,272억원</div>
+      <div class="kpi-sub">YoY +40.5% (2분기 기준 역대 최대)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">4.4%</div>
+      <div class="kpi-sub">전분기(5.3%) 대비 -0.9%p</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (최근 리포트 범위)</div>
+      <div class="kpi-value">68만~200만원</div>
+      <div class="kpi-sub">현재가 대비 대폭 상회 (증권사별 편차 큼)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">150,700~1,788,000원</div>
+      <div class="kpi-sub">고점 대비 약 70% 조정된 구간</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (2026년 2분기, 잠정)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출</div>
+        <div style="font-size:18px;font-weight:700;">5조5,272억원 <span style="font-size:12px;color:var(--green);">2분기 기준 역대 최대</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +40.5% · 직전분기 대비 -0.1%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 컨센서스)</div>
+        <div style="font-size:18px;font-weight:700;">2,458억원 <span style="font-size:12px;color:var(--green);">▲ 컨센서스(1,460억) 대비 +68%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +2,057% · 직전분기 대비 -16.8%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      2026.07.27 잠정실적 공시. 상반기 누적 매출 11조621억원으로 창사 이래 최초로 상반기 매출 10조원 돌파. 계절적 비수기(2분기)에도 모바일 고부가 카메라모듈 수요와 FC-BGA 등 반도체기판 공급 확대가 실적을 견인. 3분기는 스마트폰 신제품 양산 확대, 차량용 카메라 공급 증가, FC-BGA 생산능력 증설 효과로 추가 성장 전망.
+    </div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">잠정실적</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 연결 영업(잠정)실적 공시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.27</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 분기보고서 제출</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05 (사업연도 2026)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">감사보고서</span>
+        <span style="font-size:13px;font-weight:500;">감사보고서 제출 (연결 자산 11.9조·자본 5.8조)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.27</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">주총소집</span>
+        <span style="font-size:13px;font-weight:500;">정기주주총회 소집공고</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.06</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.27</span></div>
+      <div class="news-title">2분기 어닝 서프라이즈…영업이익 전년比 2,057% 급증</div>
+      <div class="news-summary">2분기 영업이익 2,458억원으로 컨센서스를 크게 상회. 상반기 매출은 최초로 10조원을 돌파했으며, 부채비율도 87.2%로 전년말 대비 약 20%p 개선되며 재무구조가 안정화되고 있음.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.07.28</span></div>
+      <div class="news-title">TDK와 피지컬 AI 센싱 분야 전략적 파트너십 체결</div>
+      <div class="news-summary">LG이노텍의 광학·초정밀 설계 기술과 TDK의 센서 기술을 결합해 로봇용 비전·촉각 센싱 모듈을 공동 개발하기로 함. 광학솔루션 사업의 신규 응용처 확대 시도로 해석됨.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.07 초</span></div>
+      <div class="news-title">애플 부품가·완제품 가격 인상 우려로 투자심리 위축</div>
+      <div class="news-summary">애플이 맥북·아이패드 가격을 인상하며 아이폰 가격 인상 가능성이 대두, 출하량 둔화 우려로 주가가 연고점(153만원) 대비 큰 폭 조정. 증권가는 "출하량 훼손 정도의 급격한 인상은 어렵다"며 펀더멘털은 견조하다는 평가.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.07.24~29</span></div>
+      <div class="news-title">반도체·AI 관련주 전반 급락 동반, 기판주도 10%대 급락</div>
+      <div class="news-summary">AI 투자 지속성 우려와 지정학적 리스크가 겹치며 삼성전자·SK하이닉스·삼성전기 등과 함께 LG이노텍도 최근 한 달새 큰 폭 하락(-65% 수준 언급). 7월 28~29일 이틀간 각각 -12%대 급락 후 7월 31일 큰 폭 반등.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.31</span></div>
+      <div class="news-title">급락 이후 반등 성공, 외국인 매수세 유입</div>
+      <div class="news-summary">7월 31일 전일 종가(424,000원) 대비 +21% 급등한 514,000원에 마감. 급락 국면에서 외국인 순매수세가 유입되며 저가 매수 기회라는 시각도 제기됨.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>AI 서버용 반도체 기판(FC-BGA) 구조적 공급 부족 — 글로벌 고객사 장기공급계약 확대로 증설분 즉시 풀가동 기대, FC-BGA 매출 2026년 1,400억→2030년 2조원 이상 전망</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>프리미엄 아이폰 판매 호조 및 차량용 카메라 성장 — 광학솔루션 수익성 개선 지속, 2분기 광학솔루션 매출 YoY +48%</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>재무구조 개선 — 부채비율 87.2%로 하락, 차입금 감소세, 베트남 신공장 증설로 성장 투자 병행</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>애플 가격정책 리스크 — 아이폰 가격 인상 시 출하량 둔화 가능성, 매출의 상당 부분이 애플向 광학솔루션에 집중된 고객 편중 구조</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>극심한 주가 변동성 — 최근 한 달 새 반도체·AI주 전반 급락에 동반, 단기간 -65%~+21% 등 변동폭이 매우 커 투자심리에 취약</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>수급 불안정 — 최근 외국인·기관 순매도 우위 지속, 단기 급등 국면에서 차익실현 매물 출회 반복</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026.04~07 리포트 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">KB증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">2,000,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">신한투자증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">1,500,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">하나증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">1,300,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">iM증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">1,100,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">교보증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(BUY)</span><span class="target-price">680,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">전체 컨센서스 (Investing.com 집계)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 22 · 매도 1</span><span class="target-price">평균 1,113,800원</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">LG이노텍은 2026년 2분기 계절적 비수기에도 컨센서스를 68% 상회하는 영업이익 어닝 서프라이즈를 기록하며 광학솔루션(카메라모듈)과 반도체기판(FC-BGA) 두 축의 펀더멘털 개선을 재확인했다. 다만 6~7월 사이 반도체·AI 관련주 전반의 밸류에이션 조정과 애플 가격정책 우려가 겹치며 주가는 연고점(153만원) 대비 상당폭 하락했다가 7월 말 급반등하는 등 변동성이 극심한 국면을 지나고 있다. 증권가는 대체로 목표주가를 하향하지 않고 유지·상향하는 분위기이나 목표주가 편차(68만~200만원)가 매우 큰 만큼 밸류에이션에 대한 시각차가 존재한다. AI 서버향 기판 수요 확대라는 중장기 구조적 성장 스토리에 공감하면서도, 단기 주가 변동성과 애플向 매출 편중 리스크를 감내할 수 있는 투자자에게 적합한 종목이다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

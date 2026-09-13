@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIME Korea플러스배당액티브 (441800) 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 60%, var(--accent3) 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  .dividend-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .div-box { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #86efac; border-radius: 10px; padding: 1rem 1.25rem; text-align: center; }
+  .div-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .div-value { font-size: 22px; font-weight: 700; color: var(--green); }
+  .div-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid, .dividend-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">441800 · 액티브 ETF · KRX 코스피</div>
+      <div class="etf-name">TIME Korea플러스배당액티브</div>
+      <div class="etf-index">참조지수: 코스피200 (비교지수) | 운용사: 타임폴리오자산운용</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 10일</div>
+      <div class="nav-display">34,960원</div>
+      <div class="nav-change up">▲ +0.89% (2026.05.08 장마감)</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산(AUM): 약 4,428억원+</span>
+    <span class="pill">📋 총보수: 연 0.80%</span>
+    <span class="pill">📅 상장일: 2022.09.27</span>
+    <span class="pill">💵 배당수익률: 약 4.3~5.5%</span>
+    <span class="pill">🔄 분배 주기: 월배당</span>
+    <span class="pill">🏦 개인연금·퇴직연금 가능</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">현재가 (iNAV)</div>
+      <div class="kpi-value">34,960원</div>
+      <div class="kpi-sub">iNAV: 34,849원 | 2026.05.08</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1개월 수익률</div>
+      <div class="kpi-value positive">+26.10%</div>
+      <div class="kpi-sub">2026.05.08 기준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">YTD 수익률 (3월 기준)</div>
+      <div class="kpi-value positive">+37.01%</div>
+      <div class="kpi-sub">코스피200 대비 +0.43%p 초과</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">상장 이후 누적 수익률</div>
+      <div class="kpi-value positive">+255.05%</div>
+      <div class="kpi-sub">배당재투자 기준 (2022.09 상장)</div>
+    </div>
+  </div>
+
+  <!-- 구성종목 + 섹터 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">상위 구성 종목 TOP 10</div>
+      <div class="holding-row">
+        <div class="holding-rank">1</div>
+        <div class="holding-name">SK하이닉스</div>
+        <div class="holding-right">
+          <div class="holding-weight">22.08%</div>
+          <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+        </div>
+      </div>
+      <div class="holding-row">
+        <div class="holding-rank">2</div>
+        <div class="holding-name">삼성전자</div>
+        <div class="holding-right">
+          <div class="holding-weight">14.56%</div>
+          <div class="holding-bar-wrap"><div class="holding-bar" style="width:65%"></div></div>
+        </div>
+      </div>
+      <div class="holding-row">
+        <div class="holding-rank">3</div>
+        <div class="holding-name">미래에셋증권</div>
+        <div class="holding-right">
+          <div class="holding-weight">6.54%</div>
+          <div class="holding-bar-wrap"><div class="holding-bar" style="width:30%"></div></div>
+        </div>
+      </div>
+      <div class="holding-row">
+        <div class="holding-rank">4</div>
+        <div class="holding-name">키움증권</div>
+        <div class="holding-right">
+          <div class="holding-weight">4.31%</div>
+          <div class="holding-bar-wrap"><div class="holding-bar" style="width:20%"></div></div>
+        </div>
+      </div>
+      <div class="holding-row">
+        <div class="holding-rank">5</div>
+        <div class="holding-name">한국금융지주</div>
+        <div class="holding-right">
+          <div class="holding-weight">4.13%</div>
+          <div class="holding-bar-wrap"><div class="holding-bar" style="width:19%"></div></div>
+        </div>
+      </div>
+      <div class="holding-row">
+        <div class="holding-rank">6</div>
+        <div class="holding-name">한화투자증권</div>
+        <div class="holding-right">
+          <div class="holding-weight">3.45%</div>
+          <div class="holding-bar-wrap"><div class="holding-bar" style="width:16%"></div></div>
+        </div>
+      </div>
+      <div class="holding-row">
+        <div class="holding-rank">7</div>
+        <div class="holding-name">삼성증권</div>
+        <div class="holding-right">
+          <div class="holding-weight">3.15%</div>
+          <div class="holding-bar-wrap"><div class="holding-bar" style="width:14%"></div></div>
+        </div>
+      </div>
+      <div class="holding-row">
+        <div class="holding-rank">8</div>
+        <div class="holding-name">JB금융지주</div>
+        <div class="holding-right">
+          <div class="holding-weight">3.10%</div>
+          <div class="holding-bar-wrap"><div class="holding-bar" style="width:14%"></div></div>
+        </div>
+      </div>
+      <div class="holding-row">
+        <div class="holding-rank">9</div>
+        <div class="holding-name">BNK금융지주</div>
+        <div class="holding-right">
+          <div class="holding-weight">3.10%</div>
+          <div class="holding-bar-wrap"><div class="holding-bar" style="width:14%"></div></div>
+        </div>
+      </div>
+      <div class="holding-row">
+        <div class="holding-rank">10</div>
+        <div class="holding-name">우리금융지주</div>
+        <div class="holding-right">
+          <div class="holding-weight">~2.5%</div>
+          <div class="holding-bar-wrap"><div class="holding-bar" style="width:11%"></div></div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:10px;">※ 2026.02.09 기준 (이후 리밸런싱 가능)</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">추정 섹터 배분</div>
+      <div class="sector-item">
+        <div class="sector-name">반도체 / IT</div>
+        <div class="sector-right">
+          <div class="sector-pct">~37%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#2196f3"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">금융 / 증권 / 은행</div>
+        <div class="sector-right">
+          <div class="sector-pct">~30%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:81%;background:#ff9800"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">소비재 / 식품</div>
+        <div class="sector-right">
+          <div class="sector-pct">~10%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:27%;background:#e91e63"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">산업재 / 조선 / 기계</div>
+        <div class="sector-right">
+          <div class="sector-pct">~10%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:27%;background:#9c27b0"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">기타 (현금·파생 등)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~13%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:35%;background:#607d8b"></div></div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px;">※ 구성종목 기준 추정치. 액티브 전략으로 수시 리밸런싱</p>
+
+      <div style="margin-top:1.5rem;">
+        <div class="card-title">ETF 기본 정보</div>
+        <table style="width:100%;font-size:13px;border-collapse:collapse;">
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">ISIN</td>
+            <td style="padding:7px 0;font-weight:600;">KR7441800000</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">상장 거래소</td>
+            <td style="padding:7px 0;font-weight:600;">KRX (코스피)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">ETF 유형</td>
+            <td style="padding:7px 0;font-weight:600;">국내주식 · 액티브</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 0;color:var(--muted);">총보수 (운용보수)</td>
+            <td style="padding:7px 0;font-weight:600;">연 0.80% (0.69%)</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 0;color:var(--muted);">연금 투자</td>
+            <td style="padding:7px 0;font-weight:600;">개인연금 100% / 퇴직연금 70%</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 수익률 -->
+  <div class="card">
+    <div class="card-title">기간별 수익률 성과</div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>기간</th>
+          <th>ETF 수익률</th>
+          <th>코스피200</th>
+          <th>초과 수익</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1개월</td>
+          <td class="positive">+26.10%</td>
+          <td>N/A</td>
+          <td class="positive">-</td>
+          <td style="font-size:12px;color:var(--muted);">2026.05.08 기준</td>
+        </tr>
+        <tr>
+          <td>3개월</td>
+          <td class="positive">+25.80%</td>
+          <td>N/A</td>
+          <td class="positive">-</td>
+          <td style="font-size:12px;color:var(--muted);">2026.01.06 기준</td>
+        </tr>
+        <tr>
+          <td>YTD (2026 연초)</td>
+          <td class="positive">+37.01%</td>
+          <td>+36.58%</td>
+          <td class="positive">+0.43%p</td>
+          <td style="font-size:12px;color:var(--muted);">2026.03.24 기준</td>
+        </tr>
+        <tr>
+          <td>상장 이후</td>
+          <td class="positive">+255.05%</td>
+          <td>+~150%</td>
+          <td class="positive">+~50%p 이상</td>
+          <td style="font-size:12px;color:var(--muted);">배당재투자 기준</td>
+        </tr>
+        <tr>
+          <td>연간 분배율 (2024)</td>
+          <td class="positive">~8.0%</td>
+          <td>-</td>
+          <td>-</td>
+          <td style="font-size:12px;color:var(--muted);">배당 포함</td>
+        </tr>
+        <tr>
+          <td>연간 분배율 (2025)</td>
+          <td class="positive">~7.5%</td>
+          <td>-</td>
+          <td>-</td>
+          <td style="font-size:12px;color:var(--muted);">배당 포함</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 배당 -->
+  <div class="card">
+    <div class="card-title">월배당 현황</div>
+    <div class="dividend-grid">
+      <div class="div-box">
+        <div class="div-label">배당수익률 (12M)</div>
+        <div class="div-value">4.33%</div>
+        <div class="div-sub">연간 주당 약 ₩1,126</div>
+      </div>
+      <div class="div-box">
+        <div class="div-label">분배 주기</div>
+        <div class="div-value">월배당</div>
+        <div class="div-sub">매월 정기 + 성과 특별배당</div>
+      </div>
+      <div class="div-box">
+        <div class="div-label">최근 주당 분배금</div>
+        <div class="div-value">₩66</div>
+        <div class="div-sub">2026.02.27 배당락 / 03.05 지급</div>
+      </div>
+    </div>
+    <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-top:12px;font-size:13px;color:var(--muted);">
+      💡 <strong style="color:var(--text);">특별배당 이력</strong>: 2026년 3월 기존 월 정기배당(0.5%)에 특별배당 0.5%를 더해 총 <strong>1%</strong> 일시 지급. 3년 연속 특별배당 실시 중. 2025년 연간 총 ₩838 지급 완료.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">✅ 호재</span>
+        <span class="news-date">2026.03.26</span>
+      </div>
+      <div class="news-title">3년 연속 특별배당 실시 — 총 1% 일시 지급</div>
+      <div class="news-summary">연초 이후 37% 수익 달성에 따라 기존 월 배당에 0.5% 특별배당을 추가, 투자자에게 즉각 환원. 연초 대비 3,000억원 자금 유입도 동반.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">✅ 호재</span>
+        <span class="news-date">2026.01.28</span>
+      </div>
+      <div class="news-title">상장 이후 배당재투자 기준 누적 수익률 255% 돌파</div>
+      <div class="news-summary">코스피200 대비 50%p 이상 초과 성과 달성. 시장 주도주 + 고배당주 균형 운용 전략이 상승·하락 국면 모두에서 효과적으로 작동했다는 평가.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">✅ 호재</span>
+        <span class="news-date">2026 상반기</span>
+      </div>
+      <div class="news-title">타임폴리오 TIME 액티브 ETF 라인업 순자산 5조원 돌파</div>
+      <div class="news-summary">Korea플러스배당액티브를 포함한 타임폴리오 전체 액티브 ETF 라인업이 순자산 5조원을 넘어서며 운용 안정성과 브랜드 신뢰도 동반 상승.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">📌 중립</span>
+        <span class="news-date">2025~2026</span>
+      </div>
+      <div class="news-title">증권주 비중 확대 — 대선 이후 증시 호황 수혜</div>
+      <div class="news-summary">포트폴리오 내 증권주 비중이 크게 늘며 미래에셋·키움·한화투자증권 등이 상위권 편입. 대선 이후 증시 부양 기대감과 금융섹터 강세가 ETF 성과에 기여.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">⚠️ 리스크</span>
+        <span class="news-date">상시</span>
+      </div>
+      <div class="news-title">총보수 0.80% — 유사 패시브 ETF 대비 높은 비용 구조</div>
+      <div class="news-summary">코스피200 패시브 ETF(0.05~0.15%)와 비교 시 비용 차이가 크며, 초과 수익이 지속되지 않을 경우 비용 부담이 수익을 잠식할 수 있음. 장기 비용 효율성 모니터링 필요.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 매력 포인트</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>국내 유일 액티브형 월배당 전략</strong> — 매월 0.5% 정기 배당을 지급하며, 성과 달성 시 추가 특별배당을 3년 연속 실시. 현금흐름을 중시하는 장기 투자자에게 유리.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>시장 대비 꾸준한 초과 수익</strong> — 상장 이후 코스피200 대비 50%p 이상 초과 성과를 달성. 주도주 선별 능력이 검증된 타임폴리오 운용 역량이 배경.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>개인연금·퇴직연금 활용 가능</strong> — 절세 혜택이 있는 연금 계좌에서 100% 편입 가능(퇴직연금은 70%). 배당소득세 이연 효과를 누리며 장기 복리 투자에 유리.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>대형 운용사 안정성</strong> — 5조원 이상 규모의 타임폴리오 액티브 ETF 라인업 내 대표 상품으로, 유동성과 운용 연속성 리스크가 상대적으로 낮음.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>반도체 집중 리스크</strong> — SK하이닉스(22%)·삼성전자(15%) 합산 비중이 37%에 달해 반도체 업황 악화 시 ETF 전체가 큰 폭으로 흔들릴 수 있음.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>액티브 전략 특성상 리밸런싱 위험</strong> — 운용역의 판단에 따라 포트폴리오가 수시로 변경되므로, 시장 예측 실패 시 패시브 ETF 대비 하락 폭이 확대될 수 있음.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>높은 총보수 (0.80%)</strong> — 코스피200 패시브 ETF(0.05~0.15%)와 비교 시 비용 차이가 크며, 초과 수익이 지속되지 않을 경우 실질 수익률이 하락할 수 있음.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>배당금 변동성</strong> — 시장 상황에 따라 월 배당금이 변동되거나 미지급될 수 있으며, 과표기준가 증분 발생 시 배당소득세가 부과됨.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 ETF 투자자 관점 종합 요약</div>
+    <div class="summary-text">
+      TIME Korea플러스배당액티브(441800)는 타임폴리오자산운용이 2022년 9월 상장한 국내 유일의 액티브형 월배당 ETF로, 시장 주도주와 고배당주를 균형 있게 편입하는 전략을 구사합니다. 상장 이후 배당재투자 기준 255%의 누적 수익률을 기록하며 코스피200 대비 50%p 이상 초과 성과를 달성했고, 3년 연속 특별배당을 실시하는 등 투자자 환원에 적극적인 운용 철학이 돋보입니다. 2026년 연초 이후만으로도 37%가 넘는 수익을 기록해 현재 기준가가 34,960원에 달하는 등 가파른 성장세를 이어가고 있습니다. 다만 총보수가 연 0.80%로 패시브 ETF 대비 높고, SK하이닉스·삼성전자 등 반도체 종목 집중도가 높아 업황 변동에 따른 변동성이 있다는 점은 유의할 필요가 있습니다. 안정적인 월 현금흐름을 원하면서도 시장 초과 수익을 추구하는 중장기 투자자, 특히 개인연금·퇴직연금 계좌를 통해 절세 혜택과 함께 배당을 받고 싶은 투자자에게 적합한 상품입니다.
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ 본 보고서는 공개된 정보를 기반으로 작성된 투자 참고 자료이며, 투자 권유가 아닙니다. ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 수익률 및 보유 종목은 시점에 따라 변동될 수 있습니다. 투자 전 투자설명서를 반드시 읽으시기 바랍니다.
+  </div>
+
+</div>
+</body>
+</html>

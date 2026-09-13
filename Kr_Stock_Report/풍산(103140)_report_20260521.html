@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>풍산(103140) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --defense: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .segment-bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin: 8px 0; }
+  .seg-defense { background: var(--defense); }
+  .seg-copper { background: #0284c7; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-warning { background: #fef3c7; color: #92400e; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .alert-box { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 10px 14px; margin-bottom: 1rem; font-size: 13px; color: #9a3412; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">103140 · KOSPI</div>
+      <div class="company-name">풍산</div>
+      <div class="company-desc">신동(동·동합금 가공) + 방산(탄약) 양대 사업 | 국내 유일 종합탄약 전문기업 | PMX Industries(미국) 보유</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 21일</div>
+      <div class="price-display">약 87,700원</div>
+      <div class="price-change down">▼ 52주 고점 172,200원 대비 49% 하락 (탄약사업 매각 무산 충격)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 1.6조원</span>
+    <span class="rating-pill">🏢 섹터: 비철금속·방산</span>
+    <span class="rating-pill">⭐ 컨센서스: 적극 매수(Strong Buy)</span>
+    <span class="rating-pill">🎯 컨센서스 목표가: 약 147,940원</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 매각 이슈 알림 -->
+  <div class="alert-box">
+    🔔 <strong>핵심 이슈</strong>: 2026년 4월 탄약사업부 매각(한화에어로스페이스 대상, 추산가 1조 5,000억원+) 협상이 풍산 측 결정으로 돌연 중단됨. 이후 주가는 8만원대로 반락. 매각 협상 재개 여부가 단기 주가 최대 변수.
+  </div>
+
+  <!-- KPI 카드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025년 연간 매출 (연결)</div>
+      <div class="kpi-value">3조 8,491억원</div>
+      <div class="kpi-sub">YoY +10.9% / 가이던스 오차 1.3%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025년 영업이익 (연결)</div>
+      <div class="kpi-value">2,472억원</div>
+      <div class="kpi-sub">YoY -8.1% / OPM 6.4%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026년 1Q 영업이익</div>
+      <div class="kpi-value">902억원</div>
+      <div class="kpi-sub">YoY +9.9% / 컨센서스 하회</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026년 회사 가이던스</div>
+      <div class="kpi-value">4조 2,923억원</div>
+      <div class="kpi-sub">영업이익 2,762억원 / YoY +11.8%</div>
+    </div>
+  </div>
+
+  <!-- 사업구조 카드 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏗️ 사업 포트폴리오 구조</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--blue);margin-bottom:6px;">🔵 신동(Copper) 부문 — 매출 70%</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">동·동합금 판·대, 리드프레임 소재, 봉·선, 주화용 소전 제조. 전기차·반도체·신재생에너지 수요 성장. 구리 LME 가격 직결(현재 ~1만 3,000달러/톤). PMX Industries(미국)·중국·동남아 자회사 운영.</div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--defense);margin-bottom:6px;">🟣 방산(Defense) 부문 — 매출 30%, 이익 70%+</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;">5.56mm~155mm 탄약, 추진화약, 정밀 단조품, 신관. 국내 유일 종합탄약 기업. 방산 수출: K2·K9 등 한국산 무기 수출 연동. 155mm 증설 완료, 120mm Capa 확대. 드론 무기 개발 착수. 사거리연장탄 30년까지 1.3조 장기계약.</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">이익 기여도 추정 (방산 70%+ / 신동 30%-)</div>
+      <div class="segment-bar"><div class="seg-defense" style="width:70%"></div><div class="seg-copper" style="width:30%"></div></div>
+      <div style="display:flex;gap:16px;font-size:11px;color:var(--muted);margin-top:4px;"><span>🟣 방산 70%+</span><span>🔵 신동 30%-</span></div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (2026.04.30 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">1Q26 매출액</div>
+        <div style="font-size:18px;font-weight:700;">1조 2,709억원 <span style="font-size:12px;color:var(--green);">▲ YoY 성장</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">구리 가격 강세(1만 3,000달러) 및 방산 수출 견조</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">1Q26 영업이익</div>
+        <div style="font-size:18px;font-weight:700;">902억원 <span style="font-size:12px;color:var(--amber);">▲ YoY +9.9% / 컨센서스 하회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">방산 내수 중심 납기, 수출 믹스 둔화로 마진 압박</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>1Q26 어닝 미스 — 주가 하락:</strong> 구리 LME 가격 1만 3,000달러 수준으로 신동 부문은 견조했으나, 방산 부문이 내수 납기 중심으로 수출 비중이 낮아 마진이 저조. 증권가 컨센서스 하회로 실적 발표 당일 주가 약세. 2026년 회사 가이던스(매출 4.3조·영업이익 2,762억원)는 하반기 방산 수출 반등이 전제.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">사업계획공시</span>
+        <span style="font-size:13px;font-weight:500;">2026년 영업실적 전망 공시 — 매출 4.3조·영업이익 2,762억원</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.04</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">탄약사업 매각 관련 검토 중 공시 ("구체적 사항 확정 없음")</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fee2e2;color:#991b1b;margin-right:8px;">매각철회</span>
+        <span style="font-size:13px;font-weight:500;">탄약 사업 매각 중단 — "현재 추진하고 있는 바 없음" 공시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.09</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 연결 분기보고서 (매출 1.3조·영업익 902억원)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.30</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">IR개최</span>
+        <span style="font-size:13px;font-weight:500;">2025년 4분기 경영실적 IR 개최 안내 공시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.04</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--amber);background:#fffbf0;border-radius:6px;padding:8px 12px;border-left:3px solid var(--amber);">
+      📌 <strong>투자자 주목 공시</strong>: 2026년 3~4월 최대 이슈는 탄약사업부 매각 추진 → 돌연 철회. 한화에어로스페이스가 비공개 입찰에 단독 참여해 최종 제안서까지 제출했으나 풍산 측이 가격·조건 불만족으로 6일 만에 중단. IB업계에선 매각 가격 이견(풍산 추산 1.5조+ vs 한화 제안)과 승계 이슈가 복합 작용한 것으로 분석. 매각 협상 재개 시 강력한 주가 촉매 예상.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.04.09~13</span></div>
+      <div class="news-title">탄약사업부 매각 돌연 철회 — 주가 8만원대로 급락</div>
+      <div class="news-summary">한화에어로스페이스가 단독 입찰해 최종 제안서까지 제출했으나 풍산 측이 '매각 중단' 공시를 내며 협상 백지화. 매각가는 1.5조원 이상으로 추산됐으나 가격·방식 이견으로 결렬. 방산사업은 방위사업법상 외국 국적자(미국인 2세 로이스 류) 경영권 제한 이슈와 맞물려 승계 구도 불확실성 지속.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-warning">주목</span><span class="news-date">2026.04.30</span></div>
+      <div class="news-title">1Q26 영업이익 902억원 +9.9% — 구리 가격 강세에도 컨센서스 하회로 주가 약세</div>
+      <div class="news-summary">구리 LME 가격이 1만 3,000달러 수준으로 회사 가정(1만 700달러)을 크게 상회했음에도, 방산 부문이 내수 납기 위주로 수출 비중 낮아 영업이익이 시장 기대에 못 미침. 방산 부문은 매출 30%지만 이익 70%+ 차지하는 핵심 수익원이라 수출 믹스 회복 여부가 실적 키.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.02.04</span></div>
+      <div class="news-title">2026년 매출 4.3조원·영업이익 2,762억원 가이던스 공시 — YoY +11.8%</div>
+      <div class="news-summary">회사가 직접 공시한 2026년 영업 계획. 구리 가격 가정(1만 700달러/톤 기준)이 현 시세(1만 3,000달러)보다 낮아 가이던스 상회 가능성이 높다는 분석. 방산 수출이 2025년 3,000억원대에서 2026년 4,000억원대로 증가 전망하나, 내수 중심 납기가 상반기를 지배하는 상황.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026년 지속</span></div>
+      <div class="news-title">K2 전차·K9 자주포 수출 연동 탄약 수요 확대 — 글로벌 지정학 위기 지속</div>
+      <div class="news-summary">폴란드·루마니아 등 동유럽 K2·K9 수출 계약에 연동된 탄약 수요 중장기 견조. 155mm 생산설비 증설 완료, 120mm Capa 확대 진행 중. 사거리연장탄은 2025년 초도 생산 시작, 2030년까지 1.3조원 장기 납품 계약 진행. NATO 회원국 독자 방위력 강화 추세도 수주 모멘텀으로 작용.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026년</span></div>
+      <div class="news-title">구리 LME 1만 3,000달러 — 회사 가이던스 크게 초과, 신동 부문 이익 상방 서프라이즈 기대</div>
+      <div class="news-summary">풍산의 2026년 신동 부문 구리 가격 가정은 톤당 1만 700달러이나 실제 LME 가격은 1만 3,000달러 수준. 가정 대비 20% 이상 초과로 신동 영업이익 상방 가능성 높음. 전기차·반도체·전력망 확대에 따른 구조적 구리 수요 증가도 중장기 호재.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>구리 가격 강세(1만 3,000달러) — 가이던스 상회 기대</strong> — 회사 가정(1만 700달러) 대비 20% 이상 초과. 신동 부문 연간 1,500억원+ 영업이익 가능. 현 구리 강세 구조 유지 시 2026년 가이던스를 크게 상회할 가능성.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>방산 수출 하반기 반등 모멘텀</strong> — 2025년 3,000억원대 → 2026년 4,000억원대 방산 수출 증가 전망. K2·K9 수출 계약 연동 탄약 수요, 유럽향 155mm 탄약 수주 파이프라인 견조.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>탄약사업 매각 재개 시 강력한 트리거</strong> — 1.5조원+ 매각가 기준 현 시가총액(1.6조) 대비 방산사업만으로 버금가는 가치. 협상 재개 보도 시 단기 30~50% 주가 급등 가능성.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>사거리연장탄 1.3조 장기계약 진행</strong> — 2025년 초도 생산, 2030년까지 장기 납품 계약. 방산 내수 매출 안정적 기반. 120mm·155mm 설비 증설로 대구경 생산 Capa 확대 완료.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>밸류에이션 매력 (PER ~10.5배)</strong> — 방산 수출 부진 반영된 현 주가는 PER 10.5배 수준. 글로벌 방산 피어 대비 현저히 저평가. 매각 이슈 해소나 방산 수출 회복 시 밸류 리레이팅 여지.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>방산 수출 단기 둔화 — 내수 중심 납기 지속</strong> — 2025~2026년 상반기 방산 매출이 내수 대구경 재고 축적 중심. 수출 믹스 회복이 늦어질수록 전체 OPM 하락 지속. 방산 수출 본격 증가는 2028년 이후라는 시각도 있음.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>탄약사업 매각 무산 — 주가 불확실성 구간 진입</strong> — 매각 중단 이후 주가가 고점 대비 반토막. 매각 재개·승계 구조 불투명으로 지배구조 디스카운트 지속. 류진 회장 미국인 2세 승계 제약이 해소될 때까지 구조적 불확실성 상존.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>구리 가격 급락 시 신동 이익 급감</strong> — 신동 부문은 구리 가격에 직결. LME 가격 하락 시 메탈 이익 급감. 과거 구리 가격 변동기에 분기 이익 변동폭 매우 컸던 사업 구조.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>미국 관세 — 레저탄(스포츠탄) 매출 부진</strong> — 미국 수출 레저탄(소총탄 등)에 대한 관세 부담. 수주 기반 방산 수출이 이를 보완하고 있으나 레저탄 부문 매출 감소 지속.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>PMX Industries(미국) 실적 부진 가능성</strong> — 미국 자회사 PMX의 수익성 회복 여부가 연결 실적에 영향. 2025년 지분법 손익 -107억원 기록. 원자재 수급·미국 내 경쟁 심화 리스크.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">DB금융투자증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 180,000원 <span style="font-size:11px;color:var(--green)">(최고 목표가)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">교보증권 / 대신증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 150,000~160,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">한화투자증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">BUY</span><span class="target-price">목표가 147,000원 <span style="font-size:11px;color:var(--amber)">(178,000→147,000 하향)</span></span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">한국투자증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Buy)</span><span class="target-price">목표가 140,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">BNK투자증권</span>
+      <div class="analyst-right"><span class="opinion-badge hold">보유</span><span class="target-price">목표가 120,000원 <span style="font-size:11px;color:var(--muted)">(최저 목표가)</span></span></div>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);background:#f8f9fc;padding:8px;border-radius:6px;">
+      ※ 컨센서스 평균 목표가 약 147,940원. 현재가(87,700원) 대비 평균 +68.7% 상승 여력. 9개 증권사 전원 매수 또는 보유 의견 (매도 0).
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      풍산은 신동(구리·동합금 가공)과 방산(탄약) 두 사업의 이중 구조를 가진 독보적 기업으로, 방산 부문이 매출의 30%에 불과하나 영업이익의 70% 이상을 창출하는 핵심 캐시카우다. 2026년 1분기 영업이익이 컨센서스를 소폭 하회하며 주가가 조정받고 있으나, 구리 LME 가격(1만 3,000달러)이 회사 가정(1만 700달러)을 20% 이상 상회하고 있어 신동 부문의 이익 상방 서프라이즈 가능성이 높다. 방산 수출도 K2·K9 해외 수출 연동 탄약 수요와 유럽향 대구경 탄약 수주 확대로 하반기 반등이 기대된다.
+
+      최대 주가 변수는 탄약사업부 매각 이슈다. 2026년 4월 한화에어로스페이스와의 협상이 가격 이견으로 돌연 중단됐고 주가는 고점(172,200원)에서 반토막 났다. 한국투자증권은 "주가는 실적보다 매각 변수가 더 크게 작용하고 있다"고 진단했다. 매각 협상 재개 보도가 나올 경우 30~50%의 단기 상승이 가능하며, 반대로 장기화될 경우 현 밸류에이션(PER 10.5배)이 바닥으로 작용할 것이다. <strong>구리 가격 강세와 방산 수출 반등, 매각 이슈 해소라는 세 가지 촉매를 기다리는 중장기 가치·이벤트 투자자에게 적합한 종목</strong>이다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ciena Corporation (CIEN) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">CIEN · NYSE</div>
+      <div class="company-name">Ciena Corporation (시에나)</div>
+      <div class="company-desc">미국 메릴랜드 소재 광네트워킹 시스템·소프트웨어 기업. AT&T, 버라이즌, 도이치텔레콤 등을 고객으로 두며 AI데이터센터·하이퍼스케일러向 광네트워크 장비 수요의 핵심 수혜주로 부각</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 8월 17일</div>
+      <div class="price-display">$428.77</div>
+      <div class="price-change down">▼ 최근 급등락 반복 (2026.08.14 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $66B</span>
+    <span class="rating-pill">🏢 섹터: 통신장비/광네트워킹</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy 우세(Moderate Buy)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (FY26 2분기, 3~5월)</div>
+      <div class="kpi-value">$1.57B</div>
+      <div class="kpi-sub">YoY +40% · 가이던스 상단 $71M 초과</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">확인 불가</div>
+      <div class="kpi-sub">참고: 조정순이익률 약 15.3%($2.40억/$15.7억)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스, 약 20명)</div>
+      <div class="kpi-value">$565.71</div>
+      <div class="kpi-sub">현재가 대비 +32%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$84.41~$637.51</div>
+      <div class="kpi-sub">현재가 위치: 약 62%</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (2026 회계연도 2분기, 3~5월)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.57B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +4.6%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.50B · YoY +40%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">조정 EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.64 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +12.3%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.46 · 전년동기 대비 약 +290%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      발표일 2026.06.04. 광네트워킹 매출 +42%(RLS·Waveserver 각각 +55% 이상), 라우팅&스위칭 +88%(데이터센터 대역외관리 제품 견인), 다이렉트 클라우드 고객 매출 +70%. 백로그가 분기 중 $6억 이상 증가해 $77억으로 확대, 2027년까지 매출 가시성 확보. 회사는 2026 회계연도 매출 가이던스를 $63억±$1억(중간값 기준 +32% 성장, 기존 +28%에서 상향)으로 올렸고, 3분기 매출 가이던스는 $16.25억±$5천만·조정영업마진 19~20%를 제시했다. 다만 실적 서프라이즈에도 불구, 이미 반영된 높은 기대치로 인해 발표 당일 주가는 오히려 13.66% 급락했다.
+    </div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-K</span>
+        <span style="font-size:13px;font-weight:500;">2025 회계연도 연차보고서</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2025.12월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2분기 실적 발표 (매출 +40%, 연간 가이던스 상향)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.04</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">$25억 규모 무이자(0.00%) 전환사채(2031년 만기) 발행가격 확정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">Form 4</span>
+        <span style="font-size:13px;font-weight:500;">CEO 등 경영진 자사주 매도 지속 (최근 3개월 $1,720만, 매수 0건)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026년 상반기~8월</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.06.05</span></div>
+      <div class="news-title">실적 서프라이즈에도 밸류에이션 부담으로 주가 -13.66% 급락</div>
+      <div class="news-summary">매출·EPS 모두 컨센서스를 크게 상회하고 가이던스까지 상향했지만, 발표 전 90일간 주가가 두 배 이상 오른 상태였던 만큼 차익실현 매물이 쏟아졌다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.28</span></div>
+      <div class="news-title">버라이즌-구글 다크파이버 계약 수혜 전망 — Needham 매수 유지($600)</div>
+      <div class="news-summary">니덤 애널리스트는 해당 계약에서 시에나가 $1억 이상의 매출을 확보할 수 있다고 추정, 하이퍼스케일러向 인프라 수요 확대의 직접 수혜를 강조했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.04</span></div>
+      <div class="news-title">퀀텀코리도어·도시바와 양자내성(quantum-safe) 네트워킹 시범 성공</div>
+      <div class="news-summary">미 중서부 상용망에서 고속 양자내성 네트워킹 시범을 완료, 차세대 보안 네트워크 기술력을 입증하며 신규 시장 확대 가능성을 시사했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026년 상반기~8월</span></div>
+      <div class="news-title">최근 3개월 CEO 등 내부자 $1,720만 매도, 매수 0건</div>
+      <div class="news-summary">주가가 사상 최고치 부근에서 거래되는 가운데 경영진의 순매도가 이어지며 내부자 심리에 대한 경계감이 일부 제기됐다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.08.12~13</span></div>
+      <div class="news-title">광통신 업종 내 실적 명암 갈리며 CIEN 하루 만에 +11.5% 급등</div>
+      <div class="news-summary">코히런트·시스코가 실적 부진으로 하락한 반면 노키아·시에나는 강세를 보이며 업종 내 종목별 차별화가 뚜렷해졌다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>백로그 $77억(분기 +$6억) — 2027년까지 매출 가시성 확보, 하이퍼스케일러向 신규 RLS Hyper-Rail 첫 수주</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>다이렉트 클라우드 고객 매출 +70%, 라우팅&스위칭 +88% — AI데이터센터 인프라 수요의 직접 수혜</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>2026 회계연도 매출 가이던스 32% 성장으로 상향(기존 28%) — 하이퍼스케일러·서비스제공자 자본지출 확대의 구조적 수혜</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>버라이즌-구글, e&UAE 등 대형 신규 계약 잇따라 확보 — 고객 다변화와 파이프라인 확장 지속</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>PER 140배 이상의 극단적 고밸류에이션 — 실적 서프라이즈에도 주가가 급락한 전례(6월 -13.66%)가 보여주듯 기대치가 매우 높음</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>최근 3개월 CEO 등 경영진 $1,720만 매도, 매수 0건 — 고점권 내부자 매도는 신뢰 신호로는 약함</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>$25억 규모 무이자 전환사채 발행 — 향후 주식 희석 리스크 존재</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>광통신 업종 내 종목별 실적 명암이 크게 갈리는 구간(코히런트·시스코 부진) — 개별 실행 리스크가 여전히 큰 산업</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026.06 2분기 실적 이후 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Rosenblatt (2026.06.05)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$720 (기존 $350)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Barclays (2026.06.05)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Overweight)</span><span class="target-price">$607 (기존 $372)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Morgan Stanley (2026.06.05)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수(Overweight)</span><span class="target-price">$490 (기존 $405)</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Ciena(CIEN)는 AI데이터센터·하이퍼스케일러向 광네트워킹 수요의 최전선에서 2분기 매출·EPS 모두 컨센서스를 크게 상회하는 실적을 기록했다. 백로그가 $77억까지 확대되며 2027년까지의 매출 가시성을 확보했고, 다이렉트 클라우드 고객 매출이 70% 성장하는 등 AI 인프라 투자 사이클의 직접적 수혜가 뚜렷하다. 다만 실적 서프라이즈에도 주가가 오히려 13.66% 급락했던 전례가 보여주듯, 이미 90일간 주가가 두 배 이상 오른 상태에서 형성된 높은 기대치가 밸류에이션 부담으로 작용하고 있으며, PER 140배 이상이라는 극단적 수준은 여전히 유의할 부분이다. 최근 경영진의 지속적인 자사주 매도와 전환사채 발행에 따른 희석 리스크도 함께 살펴볼 필요가 있다. 애널리스트 대다수가 매수 의견을 유지하며 목표주가는 현재가 대비 약 32%의 상승여력을 제시하고 있지만, 목표가 자체가 최근 급등을 뒤따라 큰 폭으로 상향된 만큼 변동성이 매우 크다는 점을 감안해야 한다. 이 종목은 AI 광네트워킹 인프라의 구조적 성장 스토리에 투자하면서, 극심한 밸류에이션 변동성을 감내할 수 있는 공격적 성향의 투자자에게 적합하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

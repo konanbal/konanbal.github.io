@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uber Technologies(UBER) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">UBER · NYSE</div>
+      <div class="company-name">Uber Technologies, Inc.</div>
+      <div class="company-desc">모빌리티·배달·화물 플랫폼 및 자율주행(AV) 유통 네트워크를 운영하는 글로벌 기술 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 08월 17일</div>
+      <div class="price-display">$75.88</div>
+      <div class="price-change down">▼ 52주 저점($65.41) 근접권 (8/13~14 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $155B</span>
+    <span class="rating-pill">🏢 섹터: 모빌리티 / 온디맨드 플랫폼</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy (목표주가 대비 큰 괴리)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (2026 2분기)</div>
+      <div class="kpi-value">$14.19B</div>
+      <div class="kpi-sub">YoY +12%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총예약액(Gross Bookings)</div>
+      <div class="kpi-value">$58.0B</div>
+      <div class="kpi-sub">YoY +24% (4분기 연속 20%+ 성장)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$101.50</div>
+      <div class="kpi-sub">현재가 대비 +33.8%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$65.41~$101.99</div>
+      <div class="kpi-sub">현재가 위치: 약 29% (저점권)</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 · 2026년 2분기, 2026.06.30 마감)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$14.19B <span style="font-size:12px;color:var(--red);">▼ 컨센서스 소폭 미달 -0.2%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 약 $14.22B · YoY +12%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상, Non-GAAP)</div>
+        <div style="font-size:18px;font-weight:700;">$0.81 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 부합~소폭 상회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $0.80 · YoY +35%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      실적 발표일: 2026년 8월 5일(장 시작 전). 총예약액 $58.0B(+24% YoY)로 가이던스 상단을 상회했고, TTM 잉여현금흐름이 사상 최초로 $100억을 돌파했습니다. 그러나 3분기 가이던스(총예약액 중간값 $59.25B, Non-GAAP EPS $0.84~$0.88)가 컨센서스를 소폭 하회하며 발표 당일 주가가 약 5% 하락했습니다. 다음 실적(3분기)은 2026년 11월경 발표 예정입니다.
+    </div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">Delivery Hero SE 인수 계약 체결 — 지분가치 약 $148억(주당 €41.50)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.16</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기(2026.06.30 마감) 분기보고서, Delivery Hero 인수 계약 반영</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 실적 발표 및 3분기 가이던스 공시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.05</span>
+    </div>
+  </div>
+  <div style="font-size:12px;color:var(--muted);margin:-0.5rem 0 1rem 0.25rem;">📌 투자자 주목 공시: Delivery Hero 인수는 최소 50%+1주 지분 인수 조건의 자발적 공개매수 방식이며, 기존 보유 현금과 신규 부채 조달로 자금을 마련할 계획입니다. 거래는 2027년 하반기 완료를 목표로 하며, 규제 승인이 핵심 변수입니다.</div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.05</span></div>
+      <div class="news-title">2분기 매출 근소한 미달·보수적 3분기 가이던스로 주가 약 5% 하락</div>
+      <div class="news-summary">총예약액과 잉여현금흐름은 사상 최대치를 경신했지만, 3분기 총예약액·EPS 가이던스가 시장 기대치를 소폭 밑돌면서 견조한 실적에도 불구하고 투자심리가 위축됐습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.07.24</span></div>
+      <div class="news-title">Waymo와의 로보택시 독점 파트너십 균열 — 애틀랜타·오스틴 배타성 종료 예고</div>
+      <div class="news-summary">Waymo가 2028년 1월부터 애틀랜타·오스틴에서 자체 앱 서비스를 시작하겠다고 통보하며 Uber 플랫폼과의 독점 관계가 흔들리고 있습니다. 앞서 5월에는 피닉스에서도 제한적 파트너십이 종료된 바 있어, 2027년 1분기까지 전면적인 관계 청산 가능성이 제기되며 발표 당일 주가가 4% 이상 하락했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.16</span></div>
+      <div class="news-title">Delivery Hero 인수 계약 체결 — 배달 사업 글로벌 확장 가속</div>
+      <div class="news-summary">약 $148억(주당 €41.50) 규모의 공개매수 방식으로, 모빌리티·배달을 동시에 제공하는 시장 수를 거의 두 배로 늘릴 계획입니다. Delivery Hero 이사회도 거래를 지지하고 있으나, 각국 규제 승인이 관건입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.13~14</span></div>
+      <div class="news-title">Pony AI와 유럽 로보택시 2,000대 확장 파트너십, 도쿄 로보택시 파일럿 개시</div>
+      <div class="news-summary">중국 자율주행 기업 Pony AI와 유럽 4개 도시에 2,000대 이상의 로보택시를 배치하는 파트너십을 확대했으며, 일본 택시업체 히노마루교통과 도쿄 로보택시 시범 서비스도 시작했습니다. Waymo 의존도를 낮추는 멀티 AV 파트너 전략의 일환으로 해석됩니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026년 8월 (진행 중)</span></div>
+      <div class="news-title">애널리스트 목표주가 엇갈림 — Jefferies·BMO 상향 vs Cantor·Roth 하향</div>
+      <div class="news-summary">Jefferies는 목표주가를 $100→$110로 상향(매수 유지)한 반면, Cantor Fitzgerald와 Roth Capital은 각각 $98→$90, $105→$100로 하향했습니다. 실적 자체보다는 AV 경쟁구도 변화와 3분기 가이던스에 대한 해석 차이가 원인으로 풀이됩니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>4분기 연속 총예약액 20%+ 성장, TTM 잉여현금흐름 사상 최초 $100억 돌파 — 플랫폼 수익화 가속</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>Pony AI·Wayve·히노마루교통 등 복수 AV 파트너 확보로 Waymo 의존도 축소, "개방형 AV 유통 플랫폼" 전략 강화</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>Delivery Hero 인수로 모빌리티+배달 동시 제공 시장 거의 2배 확대, 장기 성장동력 확보</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>52주 저점권에서 컨센서스 목표주가 대비 업사이드 34%, 52명 중 다수 애널리스트가 Strong Buy 의견 유지</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>Waymo와의 독점 파트너십 청산 절차 — 자체 앱 진출 시 Uber 플랫폼에서 이탈할 가능성, AV 경쟁 구도 불확실성 확대</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>매출 성장률이 총예약액 대비 둔화 — 사업모델 변경으로 보고 매출 성장률이 약 8%p 낮아지는 구조적 요인 상존</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>Delivery Hero 인수에 따른 신규 부채 조달 부담, 규제 승인 지연·불허 리스크(완료 목표 2027년 하반기)</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>GAAP 순이익의 상당 부분이 지분평가 재평가익(비현금성)에서 발생 — 향후 분기별 변동성 확대 가능</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026.08 최근 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Jefferies</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$110 (상향, 이전 $100)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">BMO Capital Markets</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Outperform)</span><span class="target-price">$113 (재확인 상단권)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Cantor Fitzgerald</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Overweight)</span><span class="target-price">$90 (하향, 이전 $98)</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">Uber는 모빌리티·배달·화물을 아우르는 글로벌 플랫폼으로, 2026년 2분기 총예약액이 24% 성장하고 잉여현금흐름이 사상 최초로 $100억을 돌파하는 등 견조한 펀더멘털을 이어가고 있습니다. 다만 매출이 컨센서스를 근소하게 밑돌고 3분기 가이던스가 시장 기대에 못 미치면서 주가는 52주 저점권($65.41)에 머물러 있습니다. 특히 Waymo와의 로보택시 독점 파트너십이 도시별로 해체되며 자율주행 경쟁구도의 불확실성이 커진 점은 핵심 리스크입니다. 그럼에도 Pony AI·Wayve 등 복수 AV 파트너 확보와 $148억 규모 Delivery Hero 인수를 통한 배달 사업 확장은 장기 성장 스토리를 뒷받침합니다. 컨센서스 목표주가 대비 업사이드가 34%에 달하는 만큼, 이 종목은 AV 산업 재편 과정의 변동성을 감내하며 플랫폼 비즈니스의 구조적 성장에 투자하고자 하는 중장기 투자자에게 적합합니다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

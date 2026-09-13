@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘의 열기는 내일의 기준이 아니다 — 존 보글의 투자 철학</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f9f9f7;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .bw {
+      font-family: 'Noto Sans KR', sans-serif;
+      max-width: 680px;
+      width: 100%;
+      color: #1a1a1a;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 3rem 3.5rem 4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    }
+
+    .cat-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: #e8f0fb;
+      color: #1a56a0;
+      margin-bottom: 1.2rem;
+    }
+
+    .blog-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin: 0 0 0.6rem;
+      color: #1a1a1a;
+    }
+
+    .blog-sub {
+      font-size: 16px;
+      color: #666666;
+      margin: 0 0 1rem;
+      line-height: 1.6;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #999999;
+      margin-bottom: 1.8rem;
+    }
+
+    .hero {
+      border-left: 3px solid #4a8fd4;
+      background: #f6f6f4;
+      border-radius: 0 8px 8px 0;
+      padding: 1.4rem 1.6rem;
+      margin: 0 0 2rem;
+    }
+
+    .hero-lines { margin: 0 0 0.8rem; }
+
+    .hero-line {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 17px;
+      line-height: 1.8;
+      color: #1a1a1a;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .hero-attr {
+      font-size: 13px;
+      color: #666666;
+    }
+
+    .section { margin-bottom: 2rem; }
+
+    .sec-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0 0 0.8rem;
+      padding-bottom: 6px;
+      border-bottom: 0.5px solid #e0e0e0;
+    }
+
+    .body-text {
+      font-size: 15px;
+      line-height: 1.85;
+      color: #1a1a1a;
+      margin: 0 0 0.8rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .info-card {
+      background: #f6f6f4;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .info-label {
+      font-size: 11px;
+      color: #999999;
+      margin: 0 0 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .info-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin: 0;
+    }
+
+    .principle-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 2rem;
+    }
+
+    .principle-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 0.9rem 0;
+      border-bottom: 0.5px solid #e0e0e0;
+    }
+
+    .principle-item:last-child { border-bottom: none; }
+
+    .p-num {
+      min-width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #e8f0fb;
+      color: #1a56a0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .p-content { flex: 1; }
+
+    .p-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0 0 4px;
+      color: #1a1a1a;
+    }
+
+    .p-desc {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #666666;
+      margin: 0;
+    }
+
+    .closing {
+      border-top: 0.5px solid #e0e0e0;
+      padding-top: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .closing-text {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 16px;
+      line-height: 1.8;
+      color: #666666;
+      margin: 0;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      font-size: 12px;
+      color: #666666;
+      border: 0.5px solid #cccccc;
+      border-radius: 100px;
+      padding: 4px 12px;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .bw { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+<article class="bw">
+  <span class="cat-tag">투자 철학</span>
+  <h1 class="blog-title">오늘의 열기는 내일의 기준이 아니다</h1>
+  <p class="blog-sub">존 보글이 말한 내재 가치, 군중 심리, 그리고 인덱스 투자의 본질</p>
+  <p class="meta">2025년 5월 · 읽기 5분 · 가치투자 / 장기투자</p>
+
+  <div class="hero">
+    <div class="hero-lines">
+      <span class="hero-line">"오늘 뜨거운 종목이 내일도 뜨거운 경우는 거의 없다.</span>
+      <span class="hero-line">장기적으로 주식시장은 내재 가치에 회귀한다.</span>
+      <span class="hero-line">군중을 따라가지 마라."</span>
+    </div>
+    <span class="hero-attr">— 존 보글 (John C. Bogle), 뱅가드 그룹 창업자</span>
+  </div>
+
+  <div class="section">
+    <h2 class="sec-title">인덱스 펀드의 아버지</h2>
+    <p class="body-text">1929년 미국 뉴저지에서 태어난 존 보글은 프린스턴 대학교 졸업 논문에서 이미 "뮤추얼 펀드는 시장을 이길 수 없다"는 테제를 세웠습니다. 1974년 뱅가드 그룹을 창설하고, 1976년 세계 최초의 인덱스 펀드인 <strong style="font-weight:500">뱅가드 500</strong>을 출시하며 투자의 판도를 바꿔놓았습니다.</p>
+    <p class="body-text">당시 월가는 그를 비웃었습니다. "평범함을 팔고 있다"는 조롱도 있었지만, 50년이 지난 지금 그의 철학은 수십조 달러 규모의 자산 운용 방식으로 자리잡았습니다. 2019년 세상을 떠나기 전까지 그가 남긴 메시지는 언제나 한 방향을 가리켰습니다. 비용을 낮추고, 오래 기다리고, 군중을 따르지 말라.</p>
+  </div>
+
+  <div class="section">
+    <h2 class="sec-title">명언의 핵심 구조</h2>
+    <p class="body-text">이 세 문장은 하나의 논리로 연결되어 있습니다. 시장에는 항상 지금 당장 '뜨거운 테마'가 존재합니다. AI, 반도체, 2차전지, 코인… 이름은 시대마다 달라지지만 패턴은 반복됩니다. 군중이 몰릴수록 가격은 내재 가치에서 멀어지고, 멀어진 만큼 언젠가 반드시 돌아옵니다.</p>
+    <p class="body-text">보글이 강조한 <strong style="font-weight:500">내재 가치 회귀</strong>는 단순한 경구가 아닙니다. 단기 수익률은 심리가 지배하지만, 장기 수익률은 결국 기업의 실제 이익과 배당이 결정한다는 실증적 관찰이었습니다. 10년, 20년 단위의 데이터가 이를 반복해서 증명해 왔습니다.</p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <p class="info-label">연도</p>
+      <p class="info-value">1929 — 2019</p>
+    </div>
+    <div class="info-card">
+      <p class="info-label">별칭</p>
+      <p class="info-value">세인트 잭 (St. Jack)</p>
+    </div>
+    <div class="info-card">
+      <p class="info-label">창업</p>
+      <p class="info-value">뱅가드 그룹 (1974)</p>
+    </div>
+    <div class="info-card">
+      <p class="info-label">운용 자산</p>
+      <p class="info-value">8조 달러+ (2024)</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="sec-title">실전 3원칙</h2>
+    <ul class="principle-list">
+      <li class="principle-item">
+        <span class="p-num">1</span>
+        <div class="p-content">
+          <p class="p-title">열기와 가치를 구분할 것</p>
+          <p class="p-desc">수익률 상위 종목 목록은 뒤처진 투자자들의 참회록입니다. 지금 화제가 된 이유가 내재 가치 때문인지, 군중 심리 때문인지 먼저 물어보십시오.</p>
+        </div>
+      </li>
+      <li class="principle-item">
+        <span class="p-num">2</span>
+        <div class="p-content">
+          <p class="p-title">시간을 자산으로 활용할 것</p>
+          <p class="p-desc">내재 가치로의 회귀는 단기에 일어나지 않습니다. 복리와 회귀의 힘이 동시에 작동하려면 충분한 시간이 필요합니다. 기다림 자체가 수익의 원천입니다.</p>
+        </div>
+      </li>
+      <li class="principle-item">
+        <span class="p-num">3</span>
+        <div class="p-content">
+          <p class="p-title">비용과 감정을 최소화할 것</p>
+          <p class="p-desc">군중을 따라 잦은 매매를 반복하면 세금과 수수료가 쌓입니다. 보글이 인덱스 펀드를 만든 이유이기도 합니다. 덜 움직이는 것이 더 많이 버는 길이 될 수 있습니다.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2 class="sec-title">지금 이 시대에 던지는 질문</h2>
+    <p class="body-text">SNS와 알고리즘 피드는 '지금 뜨거운 종목'을 실시간으로 전파합니다. 정보의 속도는 빨라졌지만, 군중이 만들어내는 과열과 과냉각의 사이클은 오히려 더 짧아지고 더 격렬해졌습니다.</p>
+    <p class="body-text">보글의 경고는 1990년대보다 오늘날 더 절실하게 들립니다. 밈 주식, 테마 ETF 과열, 코인 사이클… 형태는 달라도 본질은 같습니다. 당신의 포트폴리오가 내재 가치를 향해 있는지, 군중의 체온을 따라가고 있는지 한 번쯤 점검해볼 때입니다.</p>
+  </div>
+
+  <div class="closing">
+    <p class="closing-text">시장의 소음은 매일 바뀌지만,<br>가치는 결국 제자리를 찾는다.</p>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag">#존보글</span>
+    <span class="tag">#뱅가드</span>
+    <span class="tag">#인덱스투자</span>
+    <span class="tag">#내재가치</span>
+    <span class="tag">#장기투자</span>
+    <span class="tag">#군중심리</span>
+    <span class="tag">#가치투자</span>
+    <span class="tag">#투자철학</span>
+  </div>
+</article>
+</body>
+</html>

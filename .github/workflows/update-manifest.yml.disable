@@ -1,0 +1,39 @@
+name: Update manifest.js
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Kr_Daily_Report/**'
+      - 'Us_Daily_Report/**'
+      - 'Stock_Report/**'
+      - 'ETF_Report/**'
+      - 'Weekly_Report/**'
+
+jobs:
+  update-manifest:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run update_manifest.py
+        run: python update_manifest.py
+
+      - name: Commit and push manifest.js (if changed)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add manifest.js
+          git diff --cached --quiet || git commit -m "chore: auto-update manifest.js [skip ci]"
+          git push

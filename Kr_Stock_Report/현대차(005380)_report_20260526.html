@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>현대차(005380) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">005380 · KOSPI</div>
+      <div class="company-name">현대자동차</div>
+      <div class="company-desc">글로벌 완성차 + Physical AI(보스턴다이내믹스) + SDV 모빌리티 플랫폼 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 26일</div>
+      <div class="price-display">655,000원</div>
+      <div class="price-change down">▼ 기준가 (2026.05.22 종가)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 150조원</span>
+    <span class="rating-pill">🏢 섹터: 자동차 · 로보틱스</span>
+    <span class="rating-pill">⭐ 컨센서스: 매수 (27명 전원)</span>
+    <span class="rating-pill">💰 분기배당: 2,500원/주 (배당락 5/28)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 매출액</div>
+      <div class="kpi-value">45.9조</div>
+      <div class="kpi-sub">YoY +3.4% · 1Q 역대 최대</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익률</div>
+      <div class="kpi-value">5.5%</div>
+      <div class="kpi-sub">영업이익 2조 5,147억 (YoY -30.8%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">컨센서스 목표주가 (평균)</div>
+      <div class="kpi-value">667,465원</div>
+      <div class="kpi-sub">최고 100만원 · 최저 50만원</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 가격 범위</div>
+      <div class="kpi-value">17.9~77.5만</div>
+      <div class="kpi-sub">현재가 위치: 52주 고점 대비 약 85%</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (발표일: 2026.04.23)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출액 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">45조 9,389억 <span style="font-size:12px;color:var(--red);">▼ 컨센서스 -3.3% 하회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +3.4% · 1Q 역대 최대 매출</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 / EPS</div>
+        <div style="font-size:18px;font-weight:700;">2조 5,147억 <span style="font-size:12px;color:var(--red);">▼ EPS -60% 어닝 쇼크</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY -30.8% · 관세 8,600억 + 환율 충격 반영</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>경영진 코멘트:</strong> "관세·환율 일회성 충격이 집중됐으나 하이브리드(HEV) 판매는 분기 최대(17만대)를 기록, 글로벌 시장점유율은 오히려 4.6%→4.9%로 개선. 하반기 HEV 신차(엘란트라·투싼) 확대와 RMAC 개소로 실적·모멘텀 동반 회복 자신."  
+      <span style="color:var(--muted);font-size:11px;margin-left:6px;">(2026.04.23 컨퍼런스콜)</span>
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 DART 공시</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 분기보고서 (IFRS 연결)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.15</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">자사주·배당</span>
+        <span style="font-size:13px;font-weight:500;">현금·현물 배당 결정 — 1분기 주당 2,500원 (배당락 2026.05.28)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.23</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">기업가치제고</span>
+        <span style="font-size:13px;font-weight:500;">기업가치 제고 계획 — 3년간 자사주 4조원 매입·소각, TSR 35%+ 목표</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.25</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">보스턴다이내믹스 HMGMA 투입 계약 — 아틀라스·스폿·스트레치 대량 도입</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.04</span>
+    </div>
+    <div style="margin-top:0.75rem;font-size:12px;color:var(--amber);font-weight:500;background:#fffbf0;padding:8px 12px;border-radius:6px;">
+      📌 투자자 주목 공시: 5월 28일 배당락일 도래. 1분기 주당 2,500원, 연간 4회 분기배당 체계 유지. 자사주 4조원 매입·소각 계획은 2025~2027년 단계 집행 중으로, 주당순자산 가치 제고 효과 기대.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.14</span>
+      </div>
+      <div class="news-title">보스턴다이내믹스 나스닥 상장 여부, 6월 풋옵션 시한 도래로 결정 임박</div>
+      <div class="news-summary">소프트뱅크 보유 지분(약 20%)에 대한 풋옵션 행사 기한이 2026년 6월 도래한다. 빅테크 매각 혹은 나스닥 IPO 추진 여부가 결정되면, BD 간접지분(27.1%)을 보유한 현대차의 지분가치(최대 12조원 추산) 재평가가 이뤄질 전망이다. (출처: 버핏연구소, iM증권)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.21</span>
+      </div>
+      <div class="news-title">HMGMA 공장에 HEV 생산 전환 — 2분기 실적 반등 기대감 확산</div>
+      <div class="news-summary">미국 조지아주 HMGMA(현대차·기아 공동 공장)에서 하이브리드 차량 생산을 개시, 관세 충격에 대응하는 현지 생산 다변화 전략이 본격화됐다. 2분기부터 HEV 믹스 개선과 관세 영향 완화가 기대된다. (출처: EBN, 2026.05.21)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.11</span>
+      </div>
+      <div class="news-title">KB증권 목표가 800,000원 유지 — "Physical AI 전략, 테슬라 시총의 1/14 수준 극복 가능"</div>
+      <div class="news-summary">KB증권은 현대차그룹 전체 시총이 테슬라의 14분의 1에 불과하다며 Boston Dynamics가 2035년 하이엔드 휴머노이드 연간 150만대·시장점유율 10%를 달성할 경우 현재 주가는 극도로 저평가라고 분석했다. (출처: KB증권 리서치, 2026.05.11)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04.23</span>
+      </div>
+      <div class="news-title">1Q26 영업이익 YoY -30.8% — 관세 8,600억·환율 충격으로 EPS 컨센서스 -60% 미달</div>
+      <div class="news-summary">미국 관세(8,600억원)와 원·달러 환율 급등에 따른 판매보증충당부채 증가(2,700억원), 인센티브 확대(3,000억원)가 동시에 반영되며 어닝 쇼크를 기록했다. 단, 매출은 1Q 역대 최대를 달성하고 시장점유율은 오히려 개선됐다. (출처: 뉴스와이어, 2026.04.23)</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.05.21</span>
+      </div>
+      <div class="news-title">보스턴다이내믹스, 스팟 로봇 '섬광탄 탑재' 판매계획 직원 반발로 철회</div>
+      <div class="news-summary">보스턴다이내믹스는 스팟에 섬광탄을 장착해 군·경찰 대상으로 판매하려던 계획을 직원 집단 반발로 취소했다. 로보틱스 윤리 논란이 단기 이슈로 부상했으나 중장기 사업 방향성에는 영향이 제한적이다. (출처: EBN, 2026.05.21)</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>보스턴다이내믹스 IPO 트리거:</strong> 6월 풋옵션 시한 결정 → BD 나스닥 상장 시 지분가치 최대 12조원 재평가. 현대차 순자산 대비 현저한 언더밸류 해소 기회.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>HEV 고성장 + 믹스 개선:</strong> 1Q HEV 판매 17만대+ 역대 최대. 하반기 엘란트라·투싼 HEV 신차로 고부가가치 믹스 추가 개선, 수익성 회복 기대.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>SDV·RMAC 모멘텀 본격화:</strong> 6월 SDV 페이스카 도로 테스트, 3Q RMAC(로봇 메타플랜트) 개소, 아틀라스 양산 준비 가속. Physical AI 기업으로의 밸류에이션 재평가 촉매.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>4조원 자사주 매입·소각 + 분기배당:</strong> 2025~2027년 자사주 4조원 매입·소각 진행 중. 분기 2,500원 배당(연 1만원+) 체계로 TSR 35%+ 목표. 주주환원 가시성 높음.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>시장점유율 개선 + 방산 로보틱스 신규 내러티브:</strong> 1Q 미국 점유율 6.0%(+0.4%p). 육군 아틀라스 경계·순찰 로봇 수요 부상으로 방산+로보틱스 시너지 새 주가 동력.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>미국 관세 구조적 지속 리스크:</strong> 1Q에 8,600억원 관세 반영됐으나 미·한 무역협상 미타결 시 2Q 이후에도 지속될 수 있음. 미국 현지 생산 확대에 시간 소요.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>글로벌 수요 감소 (-7.2% YoY):</strong> 1Q 업계 전체 수요가 7.2% 감소. 지정학 리스크(중동 판매 부진, 팔레사이드 중단 영향)가 2Q 도매판매 압박으로 이어질 수 있음.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>SDV·로보틱스 성과 가시화까지 시간 지연:</strong> iM증권이 지적하듯 실질 성과 확인은 2026년 하반기 이후. 기대감 先반영 후 실행 실망 시 주가 되돌림 위험.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>원·달러 환율 변동성:</strong> 환율 급등 시 판매보증충당부채 추가 계상 위험. 1Q에만 2,700억원 이상 영향 받음. 달러 강세 시나리오는 지속적 EPS 압박 요인.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>경쟁 심화:</strong> 중국 BYD의 글로벌 HEV·EV 공세 강화. 북미 시장에서 토요타·혼다의 HEV 경쟁도 심화 중. 인센티브 증가가 이익률 방어의 한계를 시험할 수 있음.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">KB증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">Physical AI 밸류에이션 반영, DCF 기준 상승여력 30%+</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">800,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">한국투자증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">BD 지분가치 12조원 추산, 상장 트리거 주목</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">700,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">신한투자증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">SDV·로보틱스 하반기 본격화 전망</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">740,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">DS투자증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">하반기 아이오닉 신차, 도매판매 반등 기대</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">740,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">iM증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">성과 확인 필요, 하반기 이후 촉매 기대</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">640,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <div><span class="analyst-firm">유진투자증권</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">SDV·로보틱스 가장 공격적 밸류에이션 반영</span></div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">1,000,000원</span></div>
+    </div>
+    <div style="margin-top:0.75rem;font-size:12px;color:var(--muted);background:#f8f9fc;padding:8px 12px;border-radius:6px;">
+      ※ 커버리지 27개 증권사 전원 매수 의견 유지. 컨센서스 평균 목표주가 667,465원 (Investing.com 기준, 2026.05.22).
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      현대차는 2026년 1분기에 매출 45.9조원(역대 1Q 최대)을 달성했으나, 미국 관세(8,600억원)와 원·달러 환율 급등으로 영업이익이 YoY -30.8% 감소하며 어닝 쇼크를 기록했다. 이는 대부분 일회성 충격으로, 하이브리드 판매(분기 최대)와 미국 시장점유율 개선(6.0%)이 구조적 경쟁력을 증명하고 있다는 점에서 단기 노이즈로 해석된다.
+
+      더 큰 투자 내러티브는 자동차를 넘어선 <strong>Physical AI 기업으로의 전환</strong>이다. 6월에는 소프트뱅크 풋옵션 시한이 도래해 보스턴다이내믹스 IPO 또는 전략적 매각 여부가 결정된다. BD 간접지분(27.1%)에 최대 12조원의 가치가 잠재돼 있으며, 이 이벤트는 현재 주가에 촉매가 될 수 있다. 2026년 3분기에는 RMAC(로봇 메타플랜트) 개소, 하반기에는 SDV 페이스카 도로 테스트·아틀라스 양산 준비 일정이 줄줄이 예정되어 있다.
+
+      주주환원 측면에서도 3년간 자사주 4조원 매입·소각과 분기 2,500원 배당이 가시화된 상태다. 현재 PER 약 20배, PBR 약 0.93배 수준은 글로벌 완성차 중 최저 수준으로, Physical AI 프리미엄이 본격 반영될 경우 상당한 밸류에이션 리레이팅이 가능하다. 단, 미국 관세의 구조적 장기화 리스크와 SDV 사업 성과 지연 가능성은 지속 모니터링이 필요하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MP Materials (MP) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #172554;
+    --accent: #1d4ed8;
+    --accent2: #1e3a8a;
+    --bg: #eff6ff;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --gold: #b45309;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #172554 0%, #1e3a8a 50%, #1d4ed8 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #f59e0b; color: #1c1917; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 560px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 36px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #fca5a5; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .story-banner { background: linear-gradient(90deg, #fef9c3 0%, #fef3c7 100%); border: 1px solid #fde68a; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #78350f; display: flex; align-items: flex-start; gap: 8px; }
+  .warn-banner { background: #fff1f2; border: 1px solid #fecaca; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #7f1d1d; display: flex; align-items: flex-start; gap: 8px; }
+  .vertical-chain { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 10px; }
+  .chain-box { border-radius: 8px; padding: 10px 8px; text-align: center; font-size: 12px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .vertical-chain { grid-template-columns: 1fr 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">MP · NYSE</div>
+      <div class="company-name">MP Materials Corp.</div>
+      <div class="company-desc">서반구 유일 완전 수직통합 희토류 기업 — 캘리포니아 마운틴패스 채굴 → NdPr 산화물 정제 → 네오디뮴 자석(NdFeB) 제조까지 일관 생산. 美 국방부·GM·Apple이 앵커 고객.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 27일</div>
+      <div class="price-display">~$65</div>
+      <div class="price-change down">▼ 52주 고점 $100.25 대비 약 35% 조정 · 저점 $18.64</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$11B</span>
+    <span class="rating-pill">🏢 섹터: 희토류 / 크리티컬 미네랄</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy</span>
+    <span class="rating-pill">📅 다음 실적: 2026.08월 예정 (Q2 FY2026)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 핵심 스토리 배너 -->
+  <div class="story-banner">
+    🇺🇸 <strong>MP의 핵심 내러티브:</strong> 중국이 글로벌 희토류의 90%+를 지배하는 구조에서, MP는 서반구에서 유일하게 광산→정제→자석까지 일관 생산이 가능한 기업. 미 국방부가 $4억 우선주 투자 + 10년 가격 보장 계약을 체결한 국가 전략 자산. 드론·로봇·EV·F-35 전투기에 필수인 네오디뮴 자석 공급망 탈중국의 핵심 거점.
+  </div>
+
+  <!-- 내부자 매도 경고 -->
+  <div class="warn-banner">
+    ⚠️ <strong>내부자 매도 주의:</strong> CEO 제임스 리틴스키(~29만 주 매도), CFO 라이언 코벳(2만 주 = 직접 보유의 52%, 5/8 매도), 법무 책임자(약 7천 주)가 연이어 매도. 52주 고점($100.25) 부근에서 집중 발생. 정례 베스팅일 가능성이 있으나 규모와 타이밍은 모니터링 필요.
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 총 매출+PPA</div>
+      <div class="kpi-value">$132.9M</div>
+      <div class="kpi-sub" style="color:var(--green);">QoQ +28% · Materials $114.5M / Magnetics $21.1M</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">NdPr 산화물 생산 (Q1)</div>
+      <div class="kpi-value">917 MT</div>
+      <div class="kpi-sub" style="color:var(--green);">YoY +63% · QoQ +28% — 분기 최고 기록</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 컨센서스</div>
+      <div class="kpi-value">$80.86</div>
+      <div class="kpi-sub">15개사 평균 · 최고 $100(Wedbush) · Strong Buy</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">현금 보유 (Q1 말)</div>
+      <div class="kpi-value">$1.7B</div>
+      <div class="kpi-sub">DoD 투자·계약 현금흐름 기반 — 10X 자본지출 자력 조달 가능</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q1 FY2026 (2026.05.07 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#eff6ff;border-radius:8px;padding:1rem;border:1px solid #bfdbfe;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$90.65M <span style="font-size:12px;color:var(--green);">▲ +23.2% 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $73.57M · (총매출+PPA: $132.9M)</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">조정 EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$0.03 <span style="font-size:12px;color:var(--green);">▲ +400% 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 -$0.01 · 조정 EBITDA $36.6M</div>
+      </div>
+    </div>
+    <!-- 세그먼트 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:0.75rem;">
+      <div style="background:#fafafa;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">소재 부문 EBITDA</div>
+        <div style="font-weight:700;">$36.7M</div>
+      </div>
+      <div style="background:#fafafa;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">자석 부문 EBITDA</div>
+        <div style="font-weight:700;color:var(--green);">$9.6M</div>
+      </div>
+      <div style="background:#fafafa;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">분기 자본지출</div>
+        <div style="font-weight:700;">$77.4M</div>
+        <div style="font-size:10px;color:var(--muted);">60% 자석 부문</div>
+      </div>
+      <div style="background:#fafafa;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">애플 선불금 누계</div>
+        <div style="font-weight:700;color:var(--blue);">$72M</div>
+        <div style="font-size:10px;color:var(--muted);">2월 $32M 수령</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fef9f0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;margin-bottom:0.75rem;">
+      <strong>CEO 제임스 리틴스키</strong>: "GM, Apple, 미 국방부와의 파트너십을 포함해 당사의 현금흐름은 계약으로 확보돼 있다. 방위, 드론, 로봇, 'Physical AI' 애플리케이션에서 고객 참여가 매우 높다. 최근 중동 분쟁은 드론과 로봇이 전쟁에서 더 큰 역할을 할 것임을 재확인시켜 희토류 자석 수요를 가속화할 수 있다."
+    </div>
+    <!-- Q2 가이던스 -->
+    <div style="background:#fef2f2;border-radius:8px;padding:12px;border:1px solid #fecaca;">
+      <div style="font-size:11px;font-weight:600;color:#7f1d1d;margin-bottom:6px;">⚠️ Q2 FY2026 가이던스 — 일시적 조정 구간</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.7;">
+        NdPr 산화물 생산량 Q2에 <strong>한 자릿수 % QoQ 감소</strong> 예상 (반기 정기 유지보수 + 신규 프로젝트 커미셔닝). Q3부터 <strong>유의미한 순차 성장 재개</strong> 기대. 중량 희토류(테르븀·디스프로슘) 분리 회로 Q2 커미셔닝 시작 예정 → H2 2026 생산 목표. 완전한 NdFeB 자석(현재는 전구체) H2 2026 첫 매출 예정.
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 공시 & 전략 이벤트 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 & 전략 이벤트</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">Q1 FY2026 분기보고서 — NdPr 917MT 최고 기록, 중량 희토류 회로 진척, Apple $72M 선불금</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.07</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">🏛️ DoD 투자</span>
+        <span style="font-size:13px;font-weight:500;">미 국방부 $4억 우선주 투자 + 10년 NdPr 가격 보장($110/kg) + DoD = 최대 주주</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2025.하반기</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#166534;margin-right:8px;">🏗️ 10X 부지</span>
+        <span style="font-size:13px;font-weight:500;">텍사스 노스레이크 120에이커 선정 — $12.5억+ 투자, 7,000MT/년, 1,500+ 일자리 창출</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.Q1</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">🌍 사우디 JV</span>
+        <span style="font-size:13px;font-weight:500;">사우디 국영 광물회사 Maaden + DoW와 사우디 희토류 정제 합작법인 설립 — 경·중량 희토류 산화물 생산</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.초</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fecaca;color:#7f1d1d;margin-right:8px;">내부자 매도</span>
+        <span style="font-size:13px;font-weight:500;">CEO 리틴스키 ~29만 주 + CFO 코벳 2만 주(직접 보유의 52%) + 법무 6,958주 매도</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.08~12</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#eff6ff;border-radius:6px;padding:8px 12px;color:#1e3a8a;">
+      📌 <strong>투자자 주목</strong>: $4억 DoD 우선주는 단순 자금 조달이 아닌 국가 안보 전략의 일환. 10년 가격 보장($110/kg)은 현재 시장가 대비 상당한 프리미엄 — NdPr 가격 하락 시 완충. 3대 계약(DoD + Apple + GM)으로 "미래 현금흐름 완전 계약화"가 완성됐다는 게 경영진 주장. 애플 선불금 $72M 잔여 수익($62M) H2 2026 인식 예정.
+    </div>
+  </div>
+
+  <!-- 수직통합 체인 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">⛓️ 수직통합 밸류체인 — 서반구 유일 Mine-to-Magnet</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">중국 依存 탈피를 원하는 서방 정부·기업들이 대안으로 선택할 수 있는 유일한 원스톱 공급사</div>
+    <div class="vertical-chain">
+      <div class="chain-box" style="background:#fef9c3;border:1px solid #fde68a;">
+        <div style="font-size:18px;margin-bottom:4px;">⛏️</div>
+        <div style="font-size:11px;font-weight:600;color:#78350f;">채굴</div>
+        <div style="font-size:10px;color:var(--muted);">마운틴패스 (캘리포니아)</div>
+        <div style="font-size:10px;color:var(--green);margin-top:2px;">현재 운영 중</div>
+      </div>
+      <div class="chain-box" style="background:#eff6ff;border:1px solid #bfdbfe;">
+        <div style="font-size:18px;margin-bottom:4px;">🧪</div>
+        <div style="font-size:11px;font-weight:600;color:#1e3a8a;">정제</div>
+        <div style="font-size:10px;color:var(--muted);">NdPr·Ce·La 산화물</div>
+        <div style="font-size:10px;color:var(--green);margin-top:2px;">Q1 917MT 최고 기록</div>
+      </div>
+      <div class="chain-box" style="background:#f5f3ff;border:1px solid #ddd6fe;">
+        <div style="font-size:18px;margin-bottom:4px;">⚗️</div>
+        <div style="font-size:11px;font-weight:600;color:#4c1d95;">중량 희토류</div>
+        <div style="font-size:10px;color:var(--muted);">Tb·Dy 분리</div>
+        <div style="font-size:10px;color:var(--amber);margin-top:2px;">Q2 커미셔닝 시작</div>
+      </div>
+      <div class="chain-box" style="background:#f0fdf4;border:1px solid #86efac;">
+        <div style="font-size:18px;margin-bottom:4px;">🔩</div>
+        <div style="font-size:11px;font-weight:600;color:#14532d;">금속·합금·자석</div>
+        <div style="font-size:10px;color:var(--muted);">Independence (포트워스)</div>
+        <div style="font-size:10px;color:var(--green);margin-top:2px;">GM 전구체 출하 중</div>
+      </div>
+      <div class="chain-box" style="background:#fff7ed;border:1px solid #fed7aa;">
+        <div style="font-size:18px;margin-bottom:4px;">🏭</div>
+        <div style="font-size:11px;font-weight:600;color:#9a3412;">10X 대형 공장</div>
+        <div style="font-size:10px;color:var(--muted);">노스레이크, TX · 7,000MT</div>
+        <div style="font-size:10px;color:var(--amber);margin-top:2px;">2028 커미셔닝 목표</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#f9fafb;border-radius:6px;padding:8px 12px;color:var(--muted);">
+      완성 시 총 미국 생산능력: Independence 3,000MT + 10X 7,000MT = <strong>10,000MT/년</strong> (현재 글로벌 비중국 자석 생산량의 대부분 점유 목표). NdPr 산화물 2톤 → 자석 1톤의 규칙으로, 10,000MT 자석에는 약 5,000MT NdPr 필요 — 마운틴패스 확장이 병행 필수.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.07</span>
+      </div>
+      <div class="news-title">Q1 실적 발표 — EPS 400% 서프라이즈, 매출 23% 초과. 그러나 주가 -7% 당일 하락</div>
+      <div class="news-summary">어닝 서프라이즈임에도 주가가 하락한 이유는 ① Q2 생산량 일시 감소 전망, ② 내부자 대규모 매도 공시, ③ 이미 고점($100.25) 대비 조정 중인 기술적 상태가 복합 작용. 기초체력(펀더멘털)은 개선 중이나 단기 모멘텀 둔화 구간.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.20</span>
+      </div>
+      <div class="news-title">Wedbush "거의 대체 불가(Nearly Irreplaceable)" 평가 — $90 목표주가로 커버 개시</div>
+      <div class="news-summary">웨드부시가 "미국의 희토류 독립을 위한 유일한 실질적 플레이"라며 Outperform 등급으로 커버 개시. 이후 5/8에 목표주가 $100으로 상향. 주가 당일 +9.36% 급등, 심리적 분기점으로 작용. Barclays(Overweight, 5/21), Goldman Sachs(Buy, 5/8)도 잇따라 커버 개시 또는 등급 상향.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.Q1</span>
+      </div>
+      <div class="news-title">10X 부지 확정 — 텍사스 노스레이크 120에이커, 미국 최대 희토류 자석 공장 건설 착수</div>
+      <div class="news-summary">포트워스 Independence 시설에서 10마일 이내 위치 선정. $12.5억+ 투자, 7,000MT/년, 1,500+ 일자리. 텍사스 주정부·지자체 인센티브 패키지 + 미 국방부 10년 오프테이크 약정 지원. 2028년 커미셔닝 목표. 주요 장비 주문 모두 확정 완료.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.초</span>
+      </div>
+      <div class="news-title">사우디 Maaden + 미 국방부와 희토류 정제 합작법인 — 사우디 자원 활용, 글로벌 공급망 다각화</div>
+      <div class="news-summary">사우디아라비아의 미개발 희토류 자원 + 저렴한 에너지·인프라를 활용한 경·중량 희토류 산화물 정제 합작. 미국·사우디·동맹국 제조업 및 방위 산업 공급 목적. 마운틴패스 의존도를 낮추고 지정학 분산과 규모 경제 동시 추구. 단, 실현까지는 수년 이상 소요 예상.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.08~12</span>
+      </div>
+      <div class="news-title">CEO·CFO·법무 3명 대규모 내부자 매도 — 52주 고점 부근에서 집중 발생</div>
+      <div class="news-summary">CEO 리틴스키 약 29만 주, CFO 코벳 2만 주(직접 보유의 52%), 법무 약 7천 주 매도. DoD 거래 발표 이후 고점에서 락업 만료·베스팅 물량 처리 가능성이 높으나, CEO 매도 규모가 상당하며 '경영진의 현재 주가 과열 인식' 가능성도 배제하기 어려움.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>서반구 유일 Mine-to-Magnet 독점적 포지션</strong> — 중국 희토류 의존 탈피를 원하는 미국·유럽·일본 고객 모두 대안이 없음. 새로운 희토류 광산 개발은 10년 이상 소요되며 비용도 수십억 달러. MP의 마운틴패스는 수십 년 채굴 가능 자원 보유</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>DoD $4억 투자 + 10년 가격 보장 = 국가 안보 자산 지위</strong> — $110/kg NdPr 가격 보장은 현재 시장가 대비 프리미엄. 미국 정부가 최대 주주이자 10년 오프테이크 고객이 된 구조. 정치적 리스크 헤지와 동시에 안정적 수익 가시성 확보</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>3대 앵커 계약으로 현금흐름 완전 보호</strong> — GM(자동차 EV 자석), Apple($500M 규모 자석+재활용 계약), DoD(방위 자석)가 매출 기반. 현금 $1.7B + 계약 현금흐름으로 10X 자본지출 완전 자력 조달 가능</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>Physical AI·드론·로봇 수요 폭발적 확대</strong> — 네오디뮴 자석은 EV 모터, 로봇 관절, 드론 모터, 국방 시스템 모두에 필수. AI 에이전트가 물리 세계로 확장될수록 자석 수요는 기하급수 증가. 중동 분쟁 심화 → 드론·로봇 전쟁 가속 → 방위 자석 수요 폭증</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>중량 희토류(테르븀·디스프로슘) 새 수익원</strong> — EV·방위 시스템에 필수인 Tb·Dy는 사실상 중국 독점(95%+). Q2 분리 회로 커미셔닝 후 H2 생산 시 서방 시장에서 독보적 프리미엄 가능. 기존 NdPr만의 사업에서 중량 희토류 추가는 매출·마진 대폭 향상 촉매</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>NdPr 가격 변동성</strong> — 희토류는 중국의 수출 통제·공급 조절에 따라 가격이 급등락. 중국이 수출 제한 완화 시 가격 하락 직격탄. DoD 가격 보장($110/kg)은 헤지이지만 시장 전반에서 MP의 가격 결정력 제한</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>10X 시설 실행 위험</strong> — $12.5억+ 대규모 공장의 2028 커미셔닝 목표는 토목·엔지니어링·장비 조달 지연 위험. Independence 확장(3,000MT)과 10X 동시 진행으로 자본 배분 복잡성 증가. 예상보다 긴 램프업 기간 및 수율 문제 가능성</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>CEO·CFO 대규모 내부자 매도</strong> — CFO가 직접 보유의 52%를 52주 고점 근방에서 매도. CEO도 대규모 매도. "소 팔고 나서 황소 투자하라"는 신호로 읽을 수 있는 위험. 현재 주가가 적정 수준임을 경영진이 인지하는 시그널일 가능성</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>현재 적자 구조 — EPS 흑자 전환까지 긴 여정</strong> — Q1 조정 EPS $0.03으로 간신히 흑전환 시작. 2026년 FY EPS 예상 $0.33, 2027년 $1.13 수준. 10X 자본지출이 본격화될수록 GAAP 손실 확대 불가피. 성장 이야기가 실적으로 전환되기까지 2028~2030년까지 인내가 필요</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>미중 관계 변수</strong> — 미중 희토류 분쟁이 오히려 완화될 경우 중국 공급 재개로 MP의 가격 경쟁력 약화. 중국의 보복성 수출 급증이나 저가 덤핑은 MP의 비용 구조를 압박. 단, 국가 안보 관점에서 완전한 정상화는 정책적으로 어려울 것</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (최신 업데이트)</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Wedbush</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08 — "거의 대체 불가" 평가</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price" style="color:var(--purple);">$100 🔺</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">DA Davidson</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.23 — Buy 유지, 비중국 자석 독보적 포지션</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$85</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Barclays</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.21 — 신규 커버 개시</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Overweight</span><span class="target-price">확인 중</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Canaccord Genuity</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$82</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Goldman Sachs</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08 — 신규 커버</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">확인 중</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Deutsche Bank</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.12</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$70</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Morgan Stanley</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$70</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">컨센서스 (15개사 Strong Buy)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">매도 0개 · 최저 $70 · 최고 $100</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy</span><span class="target-price">평균 $80.86</span></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);background:#f9fafb;border-radius:6px;padding:8px;">
+      ※ 현재가 ~$65에서 컨센서스 목표 $80.86까지 +24% 잠재 상승 여력. 최고 목표 Wedbush $100은 +54% 잠재 상승. 다만 Q2 생산 감소·내부자 매도 영향으로 단기 조정 가능. 다음 주요 촉매: Q2 실적(8월 예정), 중량 희토류 첫 생산, H2 완전 자석 첫 매출.
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      MP Materials는 오늘 분석한 6개 종목 중 가장 독특한 포지셔닝을 가진 기업이다. 반도체·메모리 사이클에 직접 노출된 MU·SNDK·WDC·AMAT·QCOM과 달리, MP는 그 모든 첨단 기술의 물리적 기반이 되는 희토류 자석 공급망에서 서반구 유일의 완전 수직통합 기업이다. AI 로봇·드론·EV 모터·F-35 전투기 모두 네오디뮴 자석 없이는 존재하지 못하고, 중국이 아닌 곳에서 그 자석을 구할 수 있는 곳은 사실상 MP뿐이다. Q1 FY2026에서 NdPr 최고 생산(917MT, +63% YoY), 매출 23% 서프라이즈, EPS 흑전환으로 성장 궤도가 분명해졌다. DoD $4억 투자 + 10년 가격 보장, Apple $500M 계약, GM 자석 공급 계약이 현금흐름을 뒷받침하며 $1.7B 현금으로 10X 시설($12.5억+) 자력 조달이 가능하다. 그러나 여전히 GAAP 적자 구조이고, 10X 2028 커미셔닝까지 실행 위험이 존재하며, CEO·CFO의 대규모 내부자 매도와 Q2 일시 생산 감소는 단기 모멘텀을 약화시킨다. <strong>MP는 '희토류 공급망 탈중국'이라는 구조적 테마에 장기 베팅하는 투자자, 즉 5~10년 지평으로 미국 크리티컬 미네랄 독립에 투자하고자 하는 분들에게 적합한 핵심 보유 종목이다. 단기 수익을 기대하는 투자자에게는 밸류에이션 부담과 현재의 적자 구조 때문에 권장하기 어렵다.</strong>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주식 투자에는 원금 손실 위험이 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

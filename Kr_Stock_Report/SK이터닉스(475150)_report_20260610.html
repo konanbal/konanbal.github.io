@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SK이터닉스(475150) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .breaking-banner { background: linear-gradient(90deg, #dc2626, #b91c1c); color: white; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">475150 · KOSPI</div>
+      <div class="company-name">SK이터닉스</div>
+      <div class="company-desc">태양광·풍력·연료전지·ESS 사업을 영위하는 국내 대표 민간 신재생에너지 디벨로퍼</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 6월 10일</div>
+      <div class="price-display">44,350원</div>
+      <div class="price-change up">▲ +10,200원 (+29.87%) — 상한가</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 1.4조원 추정</span>
+    <span class="rating-pill">🏢 섹터: 신재생에너지</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: BUY</span>
+    <span class="rating-pill">🔥 오늘 상한가 기록</span>
+  </div>
+</div>
+<div class="container">
+
+  <!-- 긴급 속보 배너 -->
+  <div class="breaking-banner">
+    🚨 오늘의 핵심 이슈 — SK그룹·KKR 신재생에너지 빅딜(약 1조 8,000억원) 본계약 체결 → 상한가(+29.87%)
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">2025년 연간 매출</div><div class="kpi-value">3,856억원</div><div class="kpi-sub">YoY +16.1%</div></div>
+    <div class="kpi"><div class="kpi-label">2025년 영업이익</div><div class="kpi-value">530억원</div><div class="kpi-sub">YoY +40.8%</div></div>
+    <div class="kpi"><div class="kpi-label">2026E 목표주가(컨센)</div><div class="kpi-value">60,000원</div><div class="kpi-sub">현재가 대비 +35.2%</div></div>
+    <div class="kpi"><div class="kpi-label">2026년 매출 추정(컨센)</div><div class="kpi-value">5,523억원</div><div class="kpi-sub">YoY 약 +43%</div></div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (2026년 1분기 · 최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출액</div>
+        <div style="font-size:18px;font-weight:700;">275억원</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +6.1%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익</div>
+        <div style="font-size:18px;font-weight:700;">49억원</div>
+        <div style="font-size:11px;color:var(--green);margin-top:2px;">YoY +362.2%</div>
+      </div>
+      <div style="background:#fff1f2;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">당기순이익</div>
+        <div style="font-size:18px;font-weight:700;">-51억원</div>
+        <div style="font-size:11px;color:var(--red);margin-top:2px;">전기(+9.8억) 대비 적자전환</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>⚡ 1Q26 컨센서스 하회:</strong> 하나증권 유재선 애널리스트는 "1분기 실적은 시장 컨센서스를 하회했다. 풍력과 ESS 매출 외에 특이사항이 없는 분기"라고 평가. 연료전지 대소원(40MW)·파주(31MW) 인도 및 의성 황학산 풍력(99MW) 완공이 2026년 하반기에 집중돼 <strong>하반기 실적 모멘텀이 핵심</strong>. 대소원에코파크 연료전지 발전소는 2026년 4월 22일 상업운전 개시 완료.
+    </div>
+  </div>
+
+  <!-- 오늘의 핵심 공시: KKR 빅딜 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 및 이벤트 (DART / 시장 공시)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">SK그룹-KKR 신재생에너지 사업 재편 사업양수도 계약 체결 (1조 8,000억원 패키지 딜)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.09~10</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 분기보고서 제출 (5월 14일 전후)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">최대주주변경</span>
+        <span style="font-size:13px;font-weight:500;">KKR, SK디스커버리·한앤컴퍼니 보유 지분 총 43.5% (3,480억원) 인수 확정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03~05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">사업보고서</span>
+        <span style="font-size:13px;font-weight:500;">2025년 사업보고서(제2기) 제출 및 정기주주총회 개최</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.24</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">사업진행</span>
+        <span style="font-size:13px;font-weight:500;">대소원에코파크(40MW SOFC) 연료전지 발전소 상업운전 개시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.22</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#eff6ff;border-left:3px solid var(--blue);padding:10px 14px;border-radius:0 6px 6px 0;color:var(--text);">
+      📌 <strong>투자자 주목:</strong> SK디스커버리가 보유한 SK이터닉스 경영권 지분 30.98%를 포함, SK이노베이션 E&S 신재생에너지 사업부·SK에코플랜트 신재생에너지 사업 등이 KKR에 이전 후 SK-KKR 합작법인(JV) 설립 예정. 이번 딜로 분산됐던 SK그룹 내 신재생에너지 자산이 SK이터닉스를 플랫폼으로 통합될 것이라는 기대가 투자 심리를 강하게 자극.
+    </div>
+  </div>
+
+  <!-- 뉴스 섹션 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.06.09~10</span>
+      </div>
+      <div class="news-title">SK그룹·KKR, 신재생에너지 사업 재편 본계약 체결 — SK이터닉스 상한가(+29.87%)</div>
+      <div class="news-summary">SK그룹 내 분산된 신재생에너지 자산(SK이노베이션 E&S, SK에코플랜트 신재생부문, SK이터닉스 경영권 지분)을 KKR에 패키지 매각 후 합작법인을 설립해 공동 육성하는 구조. 거래 규모 약 1조 8,000억원. KKR은 에너지·인프라 분야에 강점을 보유한 글로벌 PEF로, 자금력+SK의 사업 역량이 결합되면서 솔라닉스 등 재생에너지 개발 사업이 대폭 가속화될 것이라는 기대.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.15</span>
+      </div>
+      <div class="news-title">하나증권, 목표주가 28,000원→60,000원으로 114.3% 대폭 상향 (BUY 유지)</div>
+      <div class="news-summary">KKR의 최대주주 변경, 인천 굴업도 해상풍력(750MW) 경쟁 입찰 참여(6월 중 결과 공개 예정), 하반기 ESS 중앙계약시장 입찰 등을 주요 모멘텀으로 제시. 2027년 예상 BPS에 목표 PBR 6.0배 적용.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.22</span>
+      </div>
+      <div class="news-title">대소원에코파크(40MW SOFC) 연료전지 발전소 상업운전 정식 개시</div>
+      <div class="news-summary">충북 충주 소재 고체산화물연료전지(SOFC) 발전소. 총 사업비 2,710억원, 연간 발전량 330GWh. 이를 포함하면 누적 연료전지 운영 규모 169MW로 확대. 하반기 파주(31MW) 인도 완료 시 200MW 운영 체제 완성 예정.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.03.19</span>
+      </div>
+      <div class="news-title">교보증권, BUY 신규 커버리지 개시 — 2026년 매출 5,523억·영업이익 644억 전망</div>
+      <div class="news-summary">연료전지 대소원·파주 인도 집중, 의성 황학산 풍력(99MW) 완공, 신안우이 PF 클로징 이후 추가 개발용역 정산이 겹치면서 풍력 1,409억원(+15.6% YoY) 확대 전망. 솔라닉스 연 250MW 구조화(550억원)로 태양광 전년비 30% 성장 예상.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.06.10</span>
+      </div>
+      <div class="news-title">인천 굴업도 해상풍력(750MW) 경쟁 입찰 참여 — 6월 중 결과 공개 예정</div>
+      <div class="news-summary">SK이터닉스가 750MW 규모의 인천 굴업도 해상풍력 경쟁 입찰에 참여. 낙찰 시 대형 수주로 중장기 매출 기반이 대폭 확대될 전망. 당초 6월 중 결과가 공개될 예정으로 단기 촉매제로 작용 가능.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05</span>
+      </div>
+      <div class="news-title">2026년 1분기 실적 컨센서스 하회 — 순이익 적자전환</div>
+      <div class="news-summary">1분기 영업이익은 49억원으로 YoY +362% 성장했으나 당기순이익이 -51억원으로 적자전환. 하반기 실적 집중 구조(연료전지·풍력 인도 집중)로 1~2분기는 저수익 구간. CHPS 일반수소 입찰 규모 축소 우려도 존재.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>SK-KKR JV 설립으로 SK그룹 내 신재생에너지 자산이 SK이터닉스를 플랫폼으로 통합 → 사업 규모 급팽창 기대</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>2026년 하반기 연료전지(대소원·파주)·풍력(의성 황학산) 인도 집중 → 2H26 실적 대폭 개선 예상</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>솔라닉스 연간 250MW 구조화 확대 + 직접PPA 누적 255MW — 안정적 장기 반복 수익 기반 구축</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>인천 굴업도(750MW) 해상풍력 입찰 결과 임박 — 낙찰 시 중장기 수주 대폭 확대</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>정부 2030년 재생에너지 100GW 목표 + 신재생에너지 정책 수혜 — 태양광·풍력 시장 구조적 확대</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>미국 텍사스 ESS(100MW) 상업운전 개시 — 해외 수익화 가시권 진입</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>상한가 급등 이후 단기 차익실현 매물 출회 가능성 — 오늘 주가 기준 PER 등 밸류에이션 부담 확대</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>1~2분기 실적 비수기 구조 (하반기 인도 집중) — 단기 실적 모멘텀 부재</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>CHPS 일반수소 입찰 규모 축소 우려 — 연료전지 중장기 물량 확보 불확실성</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>KKR JV 설립 세부 조건·지분 구조에 따른 SK이터닉스 실질 편익 불확실성 — 딜 구조 확인 필요</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>신안우이 해상풍력(390MW) EPC 규모 감소 가능성 — 주주구성 변경 과정에서 매출 기여 축소 우려</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>국내 재생에너지 정책 변동 리스크 — 정권 교체 이후 지원 정책 지속성 관찰 필요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">하나증권 (유재선)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 BUY</span><span class="target-price">목표가 60,000원 ↑ (5월 15일 기준)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">교보증권 (조혜빈)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 BUY</span><span class="target-price">신규 커버리지 개시 (3월 17일)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">DS투자증권 (안주원)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 BUY</span><span class="target-price">목표가 43,000원 → 추가 상향 가능성</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">신영증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 BUY</span><span class="target-price">목표가 30,000원 (2월 12일)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">메리츠증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">2026E 영업이익 733억원 추정</span></div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#f0fdf4;border-radius:6px;padding:10px 14px;color:var(--text);">
+      💡 <strong>컨센서스 요약:</strong> 커버리지 증권사 전원 '매수' 유지. 기존 목표주가 대역 28,000~43,000원에서 오늘 KKR 빅딜 공식화 이후 추가 목표주가 상향 조정 리포트 가능성 높음. 현재 주가(44,350원) 기준 일부 기존 목표주가 대비 이미 초과 상승한 상태.
+    </div>
+  </div>
+
+  <!-- 사업 포트폴리오 요약 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏗️ 사업 포트폴리오 현황</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      <div style="background:#f0f9ff;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">☀️ 태양광</div>
+        <div style="font-size:16px;font-weight:700;">~180MW</div>
+        <div style="font-size:11px;color:var(--muted);">운영 중</div>
+        <div style="font-size:11px;color:var(--green);margin-top:4px;">솔라닉스 250MW/년 구조화</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">💨 육상풍력</div>
+        <div style="font-size:16px;font-weight:700;">158MW</div>
+        <div style="font-size:11px;color:var(--muted);">운영 중</div>
+        <div style="font-size:11px;color:var(--green);margin-top:4px;">의성황학산(99MW) 착공 中</div>
+      </div>
+      <div style="background:#fefce8;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">🔋 연료전지</div>
+        <div style="font-size:16px;font-weight:700;">169MW</div>
+        <div style="font-size:11px;color:var(--muted);">운영(대소원 포함)</div>
+        <div style="font-size:11px;color:var(--amber);margin-top:4px;">파주(31MW) 하반기 인도 예정</div>
+      </div>
+      <div style="background:#fdf4ff;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">⚡ ESS</div>
+        <div style="font-size:16px;font-weight:700;">795MWh</div>
+        <div style="font-size:11px;color:var(--muted);">국내 점유율 20%</div>
+        <div style="font-size:11px;color:var(--purple);margin-top:4px;">美 텍사스 100MW 준공 완료</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);">
+      해상풍력 파이프라인: 신안우이(390MW) + 인천 굴업도(755MW) 등 총 1,345MW 개발 중. 신안우이는 2029년 상업운전 계획.
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      SK이터닉스는 태양광·풍력·연료전지·ESS를 아우르는 국내 대표 민간 신재생에너지 디벨로퍼로, 2025년 사업보고서 기준 매출 3,856억원(+16.1%), 영업이익 530억원(+40.8%)의 안정적 성장을 시현했다. 2026년은 연료전지 대소원·파주 인도, 의성 황학산 풍력 완공, 솔라닉스 구조화 확대가 하반기에 집중되면서 증권사 컨센서스 기준 매출 5,523억원(+43.2%), 영업이익 644억원(+21.5%)이 예상되는 실적 도약의 해다. 여기에 오늘(6월 10일) SK그룹과 글로벌 PEF KKR이 약 1조 8,000억원 규모의 신재생에너지 빅딜 본계약을 체결함으로써, SK이터닉스는 분산된 SK그룹 신재생에너지 자산을 통합하는 플랫폼 기업으로 도약할 가능성이 열렸다. KKR의 자금력과 글로벌 네트워크가 더해지면 솔라닉스 사업 확장, 해상풍력 개발 등에서 실질적인 사업 가속이 기대된다. 다만 오늘 상한가 급등 이후 단기 차익실현 압력, JV 설립의 구체적 조건 불확실성, 1~2분기 비수기 실적 구조 등은 유의해야 할 변수다. <strong>이 종목은 신재생에너지 테마와 실적 성장의 동시 수혜를 추구하는 중장기 투자자에게 적합하며, 단기적으로는 상한가 이후 거래량과 후속 애널리스트 리포트(목표주가 재산정) 흐름을 확인하는 것이 유효하다.</strong>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

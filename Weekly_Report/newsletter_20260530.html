@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주간 금융 뉴스레터 — 2026년 5월 5주차</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+    background: #f0f2f5;
+    color: #1c1c1c;
+    font-size: 15px;
+    line-height: 1.85;
+  }
+  .wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px 16px 64px;
+  }
+
+  /* ── Header ── */
+  .nl-header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%);
+    border-radius: 14px;
+    padding: 36px 40px 30px;
+    color: white;
+    margin-bottom: 24px;
+  }
+  .nl-header .label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 10px;
+  }
+  .nl-header h1 {
+    font-size: 1.55em;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .nl-header .meta {
+    font-size: 12px;
+    opacity: 0.65;
+  }
+
+  /* ── Summary bar ── */
+  .summary-bar {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+    border-left: 4px solid #1d4ed8;
+  }
+  .summary-bar h2 {
+    font-size: 0.85em;
+    font-weight: 700;
+    color: #1d4ed8;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .summary-bar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .summary-bar ul li {
+    font-size: 0.9em;
+    padding: 4px 0;
+    border-bottom: 1px dashed #e5e7eb;
+    color: #374151;
+  }
+  .summary-bar ul li:last-child { border-bottom: none; }
+  .summary-bar ul li::before {
+    content: "▸ ";
+    color: #1d4ed8;
+    font-weight: 700;
+  }
+
+  /* ── Section card ── */
+  .section-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px 32px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 10px rgba(0,0,0,0.06);
+  }
+  .section-card .sec-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f2f5;
+  }
+  .section-card .sec-icon {
+    font-size: 1.5em;
+    line-height: 1;
+  }
+  .section-card h2 {
+    font-size: 1.1em;
+    font-weight: 800;
+    color: #1e3a5f;
+  }
+
+  /* ── Key numbers ── */
+  .key-numbers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .kn-chip {
+    background: #f0f4ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.82em;
+    font-weight: 700;
+    color: #1e40af;
+    white-space: nowrap;
+  }
+  .kn-chip.up { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+  .kn-chip.dn { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+  .kn-chip.warn { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+
+  /* ── Body text ── */
+  .section-card p {
+    font-size: 0.91em;
+    color: #374151;
+    margin-bottom: 12px;
+    line-height: 1.8;
+  }
+  .section-card p:last-child { margin-bottom: 0; }
+  .section-card strong { color: #1e3a5f; }
+
+  /* ── Insight box ── */
+  .insight-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+    border-left: 4px solid #1d4ed8;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin-top: 14px;
+  }
+  .insight-box .tag {
+    font-size: 0.78em;
+    font-weight: 700;
+    color: #1d4ed8;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .insight-box p {
+    font-size: 0.88em !important;
+    color: #1e3a5f !important;
+    margin: 0 !important;
+    font-weight: 500;
+  }
+
+  /* ── Events table ── */
+  .events-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 10px rgba(0,0,0,0.06);
+  }
+  .events-card h2 {
+    font-size: 1em;
+    font-weight: 800;
+    color: #1e3a5f;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f2f5;
+  }
+  .events-table { width: 100%; border-collapse: collapse; font-size: 0.86em; }
+  .events-table th {
+    background: #1e3a5f;
+    color: white;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+  .events-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+  }
+  .events-table tr:last-child td { border-bottom: none; }
+  .events-table tr:nth-child(even) td { background: #f9fafb; }
+  .badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 0.75em;
+    font-weight: 600;
+  }
+  .badge-kr { background: #fef3c7; color: #92400e; }
+  .badge-us { background: #dbeafe; color: #1e40af; }
+  .badge-gl { background: #d1fae5; color: #065f46; }
+
+  /* ── Disclaimer ── */
+  .disclaimer {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 0.8em;
+    color: #6b7280;
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+  .disclaimer strong { color: #374151; }
+
+  @media (max-width: 480px) {
+    .nl-header { padding: 24px 20px 20px; }
+    .section-card { padding: 20px 18px; }
+    .key-numbers { gap: 6px; }
+    .kn-chip { font-size: 0.77em; }
+    .events-card { padding: 18px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!-- ══ HEADER ══ -->
+<header class="nl-header">
+  <div class="label">📬 주간 금융 뉴스레터</div>
+  <h1>5월 5주차 시장 브리핑<br>역사적인 한 주 — 코스피 8,200, AI 빅사이클 확인</h1>
+  <div class="meta">2026년 5월 26일 ~ 5월 30일 | 기준: 2026-05-29 마감</div>
+</header>
+
+<!-- ══ 한줄 요약 ══ -->
+<div class="summary-bar">
+  <h2>⚡ 이번 주 핵심 3줄</h2>
+  <ul>
+    <li><strong>국내:</strong> 코스피 사상 첫 8,200 돌파 — 삼성전자 역대 최고가, 한은 기준금리 2.5% 8회 연속 동결</li>
+    <li><strong>매크로:</strong> 미·이란 휴전 연장 협상에 WTI 주간 -9.2% 급락, 4월 PCE 3.8%로 연준 동결 장기화</li>
+    <li><strong>미국:</strong> Dell AI서버 쇼크(+757% YoY)→ 소프트웨어 AI 교란론 해소, S&amp;P500·나스닥 동반 신고가</li>
+  </ul>
+</div>
+
+<!-- ══ 섹션 A: 국내 증시 ══ -->
+<div class="section-card">
+  <div class="sec-header">
+    <span class="sec-icon">📈</span>
+    <h2>국내 주식·증시</h2>
+  </div>
+
+  <div class="key-numbers">
+    <span class="kn-chip up">코스피 8,185 ▲ (주간 +약4%)</span>
+    <span class="kn-chip up">삼성전자 30.7만원 역대 최고</span>
+    <span class="kn-chip warn">한은 기준금리 2.5% 동결 (8회 연속)</span>
+    <span class="kn-chip">외국인 5월 누계 순매도 약 20조원</span>
+  </div>
+
+  <p>이번 주 국내 증시는 <strong>역사적 이정표</strong>를 두 개나 세웠다. 5월 26일 코스피가 종가 기준 사상 처음으로 <strong>8,000선을 돌파</strong>했고, 이틀 뒤인 27일에는 삼성전자·SK하이닉스의 폭발적 상승에 힘입어 <strong>8,200선마저 넘어섰다</strong>. 삼성전자는 장중 32만3천원의 역대 최고가를 터치하며 코스피 시가총액에서 반도체 두 종목(삼성전자·SK하이닉스)의 비중이 50%를 웃도는 '반도체 독주' 구도가 심화됐다.</p>
+
+  <p>28일에는 중동 유가 상승·국고채 금리 부담에 외국인·기관 동반 매도로 8,200선을 반납하는 숨고르기가 이어졌다. <strong>한국은행 금통위(5/28)</strong>는 기준금리를 2.5%로 8회 연속 동결했다. 중동 분쟁에 따른 인플레이션 상향(연간 전망 2.7%)과 약한 원화·고환율이 인하 여력을 제약했다. 5월 소비자심리지수(CCSI)는 106.1(전월대비 +6.9p)로 상승, 주식시장 낙관론이 가계 심리까지 반영되고 있다.</p>
+
+  <p>반도체 차익실현 매물 속에 <strong>2차전지·자동차·로봇</strong> 관련주로 순환매가 확산됐다. LG에너지솔루션은 이틀 연속 사상 최고치를 경신했다. 증권가에서는 코스피 8,200 달성이 AI 반도체 빅사이클 수혜를 실적으로 확인시키는 동시에, '반도체 외길' 구조의 집중도 리스크 관리라는 과제도 남겼다고 평가한다.</p>
+
+  <div class="insight-box">
+    <div class="tag">📌 인사이트</div>
+    <p>코스피의 8,200 달성은 외국인 20조원 순매도에도 지수가 버텼다는 점에서 국내 수급 기반의 다변화를 시사한다. 다만 반도체 두 종목에 의한 지수 견인이 극단적으로 심화된 구조에서, 향후 금리 인하 국면 진입 시 반도체 외 업종으로 자금 순환이 얼마나 원활히 이뤄질지가 상승장 지속의 핵심 변수다.</p>
+  </div>
+</div>
+
+<!-- ══ 섹션 B: 글로벌 매크로 ══ -->
+<div class="section-card">
+  <div class="sec-header">
+    <span class="sec-icon">🌐</span>
+    <h2>글로벌 매크로</h2>
+  </div>
+
+  <div class="key-numbers">
+    <span class="kn-chip dn">WTI $87.2 (주간 -9.2%)</span>
+    <span class="kn-chip dn">브렌트 $92.6 (주간 -10.5%)</span>
+    <span class="kn-chip up">금 $4,530 (주간 소폭 상승)</span>
+    <span class="kn-chip warn">달러인덱스 99.0</span>
+    <span class="kn-chip warn">4월 PCE 3.8% YoY</span>
+    <span class="kn-chip">연준 기준금리 3.50~3.75% 동결</span>
+  </div>
+
+  <p>이번 주 매크로의 가장 큰 사건은 <strong>미·이란 휴전 연장 협상</strong> 보도다. 로이터·Axios에 따르면 미국과 이란이 60일 휴전 연장 및 호르무즈 해협 자유로운 운항을 포함한 MoU에 잠정 합의했다는 보도가 나왔다. Trump 대통령이 아직 최종 승인을 내리지 않았고 이란 국영 매체도 미확정 입장을 고수하고 있지만, 이 보도만으로도 <strong>WTI 주간 -9.2%, 브렌트 -10.5%</strong>의 급락이 일어났다. WTI는 5월 한 달간 약 -17%로 코로나19 이후 최대 월간 하락폭을 기록 중이다.</p>
+
+  <p>반면 연준은 여전히 <strong>'더 오래 더 높게(Higher for Longer)'</strong> 기조를 굳히고 있다. 28일 발표된 4월 PCE는 헤드라인 기준 <strong>3.8% YoY</strong>(2023년 5월 이후 최고), 코어 PCE는 3.3% YoY로 집계됐다. Q1 GDP 수정치도 1.6%(초기 2.0%에서 하향)로 발표돼 스태그플레이션 우려를 자극했다. 파생상품 시장은 <strong>6월 FOMC(6/16~17) 동결 확률을 97.5%</strong>로 반영 중이며, 연내 인하 가능성도 사실상 소거됐다. 4월 FOMC에서 Jerome Powell의 마지막 회의를 끝으로 Kevin Warsh 신임 연준 의장 체제가 도래할 예정으로, 매파적 정책 지속성에 무게가 실린다.</p>
+
+  <p>금 가격은 $4,530 내외로 3주 연속 주간 상승세를 이어가다 이번 주는 소폭 조정을 받았다. 유가 급락이 인플레 압력을 완화하는 신호로 읽히며 리스크 프리미엄이 부분 해소된 영향이다. 달러인덱스는 99 내외로 안정적이나, 원달러 환율은 중동 리스크와 한은 동결 기조 속 변동성이 지속됐다.</p>
+
+  <div class="insight-box">
+    <div class="tag">📌 인사이트</div>
+    <p>미·이란 협상이 실제로 타결된다면 에너지 비용 급락 → 글로벌 인플레이션 경로 하향 수정 → 연준 금리인하 재개 기대 복원이라는 선순환이 가능하다. 반면 협상 결렬 시 유가 재반등과 연준 동결 장기화, 글로벌 경기 둔화 우려가 동시에 부각될 수 있어, 이 협상의 행방이 하반기 자산 배분에서 가장 중요한 단일 변수다.</p>
+  </div>
+</div>
+
+<!-- ══ 섹션 C: 미국 증시 ══ -->
+<div class="section-card">
+  <div class="sec-header">
+    <span class="sec-icon">🇺🇸</span>
+    <h2>미국 증시</h2>
+  </div>
+
+  <div class="key-numbers">
+    <span class="kn-chip up">S&amp;P500 7,581 ▲ 신고가</span>
+    <span class="kn-chip up">나스닥 26,976 ▲ 신고가</span>
+    <span class="kn-chip up">다우 50,668</span>
+    <span class="kn-chip up">Dell +32.8% (AI서버 쇼크)</span>
+    <span class="kn-chip up">Snowflake +36%</span>
+    <span class="kn-chip warn">PCE 3.8% → 연준 동결 장기화</span>
+  </div>
+
+  <p>이번 주 미국 증시는 <strong>어닝 시즌 클라이맥스</strong>가 연속으로 터지면서 S&amp;P500과 나스닥이 동반 사상 최고치를 갈아치웠다. 가장 폭발적인 이벤트는 <strong>Dell Technologies의 Q1 FY27 실적</strong>이었다. AI서버 부문 매출이 $16.1B으로 전년 대비 +757% 폭증했고, 연간 AI서버 매출 가이던스를 $50B 이상으로 제시하면서 AI 인프라 빅사이클이 기대가 아닌 실적으로 확인됐다. 이 충격파는 NetApp(+22.4%), HP Inc.(+8.1%), Hewlett Packard Enterprise(+12.8%) 등 하드웨어 섹터 전반으로 파급됐다.</p>
+
+  <p>Snowflake가 역대 최대 단일 세션 +36%를 기록한 데 이어, AI 교란론에 짓눌려 있던 <strong>엔터프라이즈 소프트웨어 섹터도 일제히 반등</strong>했다. ServiceNow(+14.4%), Atlassian(+15.4%), Workday(+12.5%), Oracle(+10.8%) 등이 52주 신고가를 경신하며 'AI는 SaaS를 파괴하는 것이 아니라 SaaS 수요 자체를 폭발시킨다'는 내러티브 전환을 촉발했다. IBM은 $100억 규모 양자컴퓨팅 5개년 투자 계획으로 +12.7% 급등했다. Palantir·Microsoft·Broadcom·CrowdStrike·ARM도 동반 신고가를 경신했다.</p>
+
+  <p>매크로 측면에서는 4월 PCE 3.8%(헤드라인)·3.3%(코어)라는 뜨거운 인플레이션 수치가 발표됐음에도 증시는 동요 없이 강세를 유지했다. <strong>S&amp;P500 연간 EPS 성장률 전망이 28.6%로 상향</strong>(4월 14.4%에서 급등)되면서 이 랠리가 밸류에이션 팽창이 아닌 이익 성장에 기반하고 있다는 점이 강세 지속 근거로 작용하고 있다.</p>
+
+  <div class="insight-box">
+    <div class="tag">📌 인사이트</div>
+    <p>AI 인프라 지출이 하드웨어(서버·스토리지)→ 소프트웨어(SaaS·보안)로 전이되는 '2차 파급 랠리'가 본격화됐다. 다음 주 Broadcom 실적(6/4 예정)이 AI 반도체 ASIC 수요의 확인 여부를 판가름할 핵심 이벤트다. PCE 호조와 연준 동결에도 증시가 이익 성장으로 버티고 있는 지금, 6/5 고용 데이터와 6/10 CPI가 이 흐름을 이어갈 분기점이 될 전망이다.</p>
+  </div>
+</div>
+
+<!-- ══ 다음 주 주요 일정 ══ -->
+<div class="events-card">
+  <h2>📅 다음 주 주목할 이벤트 (6월 2일~6일)</h2>
+  <table class="events-table">
+    <thead>
+      <tr>
+        <th>날짜</th>
+        <th>이벤트</th>
+        <th>구분</th>
+        <th>핵심 포인트</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>6/2 (월)</strong></td>
+        <td>ISM 제조업 PMI (5월)</td>
+        <td><span class="badge badge-us">미국</span></td>
+        <td>경기 경착륙 여부 체크</td>
+      </tr>
+      <tr>
+        <td><strong>6/4 (수)</strong></td>
+        <td>Broadcom (AVGO) Q2 실적 발표</td>
+        <td><span class="badge badge-us">미국</span></td>
+        <td>AI ASIC 수요 확인, 소프트웨어 랠리 지속 여부</td>
+      </tr>
+      <tr>
+        <td><strong>6/5 (목)</strong></td>
+        <td>미국 5월 비농업 고용 (NFP)</td>
+        <td><span class="badge badge-us">미국</span></td>
+        <td>연준 6월 동결 확신 vs. 시장 기대 변화 분기점</td>
+      </tr>
+      <tr>
+        <td><strong>6/5 (목)</strong></td>
+        <td>ECB 통화정책 회의</td>
+        <td><span class="badge badge-gl">글로벌</span></td>
+        <td>인하 여부 및 에너지 인플레이션 전망 언급</td>
+      </tr>
+      <tr>
+        <td><strong>6/10 (화)</strong></td>
+        <td>미국 5월 CPI</td>
+        <td><span class="badge badge-us">미국</span></td>
+        <td>유가 하락 반영 시 인플레 완화 → 연준 시나리오 전환 가능</td>
+      </tr>
+      <tr>
+        <td><strong>6/16~17</strong></td>
+        <td>FOMC 통화정책 결정</td>
+        <td><span class="badge badge-us">미국</span></td>
+        <td>Warsh 체제 첫 회의; 동결 확률 97.5% 반영 중</td>
+      </tr>
+      <tr>
+        <td><strong>주중</strong></td>
+        <td>미·이란 휴전 협상 진전 여부</td>
+        <td><span class="badge badge-gl">글로벌</span></td>
+        <td>타결 시 유가·인플레·연준 경로 전방위 변화</td>
+      </tr>
+      <tr>
+        <td><strong>주중</strong></td>
+        <td>국내 5월 수출 데이터</td>
+        <td><span class="badge badge-kr">국내</span></td>
+        <td>반도체 수출 YoY 확인, 코스피 추가 상승 재료 여부</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══ 면책 문구 ══ -->
+<div class="disclaimer">
+  <strong>⚠️ 투자 유의 사항</strong><br>
+  본 뉴스레터는 공개된 시장 데이터와 뉴스를 기반으로 작성된 <strong>정보 제공 목적</strong>의 자료입니다. 특정 종목에 대한 투자를 권유하지 않으며, 투자 결정은 본인의 판단과 책임 하에 이루어져야 합니다. 과거 수익률이 미래 수익을 보장하지 않습니다.<br><br>
+  데이터 기준: NASDAQ/NYSE·KRX 2026-05-29 장 마감 | 작성: 주간 금융 뉴스레터 자동 리포트 시스템
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooper Companies (COO) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">COO · NASDAQ</div>
+      <div class="company-name">The Cooper Companies, Inc.</div>
+      <div class="company-desc">글로벌 의료기기 기업 — CooperVision(콘택트렌즈) + CooperSurgical(여성 건강·불임 치료) 양대 사업부 운영</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 6월 6일</div>
+      <div class="price-display">$67.34</div>
+      <div class="price-change up">▲ +8.58% (6/5 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$13.1bn</span>
+    <span class="rating-pill">🏢 섹터: 헬스케어 / 의료기기</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy</span>
+    <span class="rating-pill">🔁 10연속 어닝비트</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q2 FY2026 매출 (비GAAP)</div>
+      <div class="kpi-value">$1.08B</div>
+      <div class="kpi-sub">YoY +8% · 유기적 +5%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">비GAAP 영업이익률</div>
+      <div class="kpi-value">27.0%</div>
+      <div class="kpi-sub">전년 대비 +120bp 개선</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (애널리스트 평균)</div>
+      <div class="kpi-value">~$91</div>
+      <div class="kpi-sub">현재가 대비 +35% 업사이드</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$58.88~$89.83</div>
+      <div class="kpi-sub">현재가 위치: 약 52%</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q2 FY2026 (발표일: 2026-06-04)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.082B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +1.6%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.065B · YoY +8.0%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">비GAAP EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$1.21 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +10.5%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $1.10~$1.11 · YoY +26%</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">CooperVision 매출</div>
+        <div style="font-size:18px;font-weight:700;">$723.5M</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +8% · 유기적 +5%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">CooperSurgical 매출</div>
+        <div style="font-size:18px;font-weight:700;">$358.0M</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +8% · 불임 부문 +13%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>경영진 코멘트 (CEO Al White):</strong> "10분기 연속 컨센서스 초과 달성. CooperSurgical 불임 미디어 리콜 소송 합의($271.6M 세전 비용, 보험 $52.5M 회수)로 전략적 검토 재개 가능." | <strong>FY2026 가이던스:</strong> 매출 $4.285~$4.321B(5~6% 성장) · 비GAAP EPS $4.58~$4.66 · FCF $575~625M(YoY +33~44%)
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Q2 FY2026 실적 발표 — 매출 $1.08B, 비GAAP EPS $1.21 (컨센서스 상회)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.04</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K (주요사항)</span>
+        <span style="font-size:13px;font-weight:500;">CooperSurgical 불임 미디어 리콜 소송 합의 — $271.6M 비용 인식 (보험 $52.5M 회수 포함)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.04</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">Q1 FY2026 분기보고서 제출 (회계연도 1월 31일 종료)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">임원 선임</span>
+        <span style="font-size:13px;font-weight:500;">Paul Keel 사외이사 선임 (7/1 발효) — 의료기기 CEO 경험 (Envista, Smiths Group, 3M)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.04</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">임원 선임</span>
+        <span style="font-size:13px;font-weight:500;">Muru Annamalai, CooperVision 아시아태평양 사장 선임 (6/1 발효)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.01</span>
+    </div>
+    <div style="font-size:12px;color:var(--amber);background:#fffbf0;border-left:3px solid var(--amber);padding:8px 12px;border-radius:0 6px 6px 0;margin-top:0.75rem;">
+      📌 <strong>투자자 주목:</strong> 소송 합의 완료로 CooperSurgical 전략적 검토(분리매각 포함)가 본격 재개. Wells Fargo는 CSI 매각 예상가 $41억 추정. 매각 완료 시 CooperVision 순수 플레이로 재평가 가능성.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.06.04</span>
+      </div>
+      <div class="news-title">Q2 FY2026 어닝서프라이즈 — 10분기 연속 컨센서스 초과</div>
+      <div class="news-summary">비GAAP EPS $1.21(컨센서스 $1.10 대비 +10.5%), 매출 $1.082B(+8% YoY) 모두 예상 상회. CooperVision·CooperSurgical 양 부문이 각각 8% 성장하며 고른 실적을 시현했다. 자유현금흐름(FCF) $96.4M, 비GAAP 영업이익률 27.0%(+120bp). CEO Al White는 "신제품 출시와 운영 규율의 결실"이라 평가했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.06.04</span>
+      </div>
+      <div class="news-title">CooperSurgical 불임 미디어 리콜 소송 — 실질적 전부 합의 완료</div>
+      <div class="news-summary">2023년 12월 자발적 리콜에서 비롯된 소송의 대부분을 $271.6M(보험 회수 $52.5M 포함)에 합의. GAAP 기준으로는 대규모 손실이지만, 해당 비용을 비GAAP에서 제외함으로써 재무 불확실성이 해소됐다. 소송 마무리는 CooperSurgical 전략적 검토(분리매각 포함) 재개를 위한 핵심 조건이었다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.06.01</span>
+      </div>
+      <div class="news-title">경영진 내부 매수 — CEO 포함 6개월간 5건 순매수</div>
+      <div class="news-summary">CEO Albert White가 주가 $80대에 1만 주($808,000)를 매수했으며, 이사 Lawrence Kurzius도 $165,000를 추가 매수. 최근 6개월간 내부자 매도 0건, 매수 5건으로 경영진의 자사주 신뢰가 높다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.06.04</span>
+      </div>
+      <div class="news-title">FY2026 연간 가이던스 소폭 하향 — 성장률 3.5~4.5%로 조정</div>
+      <div class="news-summary">종전 가이던스(유기적 성장 4.5~5.5%)에서 소폭 하향 조정됐다. 아시아태평양 지역 CooperVision이 일본을 중심으로 -6% YoY 역성장했고, 이커머스 채널 경쟁 심화가 원인이다. 반면 미주·EMEA 지역은 견조한 성장세를 유지했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.04.09</span>
+      </div>
+      <div class="news-title">MADE BETTER™ 지속가능성 플랫폼 출시 — MyDay® 렌즈 우선 적용</div>
+      <div class="news-summary">ISCC PLUS 인증 바이오 기반 플라스틱 도입, 제조 공정 GHG 배출 약 30% 감축(2021년 대비), 플라스틱 중립성 파트너십으로 약 1,240만 kg 연안 폐플라스틱 상쇄. ESG 경쟁력 강화를 통한 유럽 시장 입지 확대 목적.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.06.05</span>
+      </div>
+      <div class="news-title">Wells Fargo, CooperSurgical 매각 가정 하에 목표주가 하향</div>
+      <div class="news-summary">Wells Fargo는 CSI 매각 완료 시 EPS 희석 효과를 반영해 목표주가를 하향했다. CSI 예상 매각가를 약 $41억으로 추정하며, 매각 대금 전액을 자사주매입·부채상환에 쓸 경우 단기 EPS 타격이 불가피하다는 분석이다. Citi도 Neutral 유지하며 목표주가를 $80으로 낮췄다.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>10연속 어닝비트 + FCF 급증 전망</strong> — Q2까지 10분기 연속 컨센서스 초과. FY2026 FCF $575~625M으로 YoY +33~44% 급증 예상. 잉여현금이 자사주 매입 재원으로 전환될 경우 EPS 가속.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>MiSight 근시 관리 시장 독점</strong> — FDA 유일 승인 소아 근시 진행 억제 콘택트렌즈. 글로벌 근시 관리 시장 규모 $50억+ 추정. 일별 소모품 특성상 높은 환자 재구매율.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>CooperSurgical 전략적 분리매각 모멘텀</strong> — 소송 합의 완료로 CSI 매각 프로세스 공식 재개. 다수 잠재 인수자 접촉 중. 매각 성사 시 CooperVision 순수 플레이로 밸류에이션 리레이팅 기대.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>낮아진 밸류에이션 — 역사적 저점 근접</strong> — 52주 저점 $58.88에서 소폭 반등. Morningstar 공정가치 $76, 애널리스트 평균 목표주가 $91로 현재가 대비 35% 이상 업사이드. CEO 등 내부자 순매수 지속.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>불임 사업부 구조적 성장</strong> — Q2 불임 부문 +13% YoY. 고령화·늦은 임신 트렌드와 보조생식술 시장 확대로 장기 수요 기반 탄탄.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>아시아태평양 역성장 지속 우려</strong> — CooperVision 아태 지역 Q2 -6% YoY. 일본 시장 부진 + 이커머스 채널 경쟁 심화. 아태 비중이 전체 매출의 약 20%로 회복 지연 시 전사 가이던스 압박.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>CooperSurgical 분리매각 불확실성</strong> — 매각이 지연되거나 예상보다 낮은 가격에 성사될 경우 EPS 희석. 매각 실패 시 구조적 문제(외과 마진 낮음, 리콜 리스크)가 재부각될 수 있음.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>GAAP 대규모 손실 — 회계 불확실성</strong> — Q2 GAAP EPS $(0.40). 소송 관련 $271.6M 비용 인식으로 GAAP 기준 적자 전환. 추가 소송 또는 리콜 리스크 잔존.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>관세 및 환율 역풍</strong> — 미국 관세 정책으로 원가 구조에 부담. Q2 매출총이익률 66.2%(전년 대비 -80bp). 강달러는 해외 매출(전체의 ~60%) 환산 시 역풍.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>경쟁 심화 — Alcon, J&J Vision 등 대형사 압박</strong> — 근시 관리·프리미엄 데일리 렌즈 시장에서 Alcon의 TOTAL30, J&J의 ACUVUE Oasys와 직접 경쟁. 시장점유율 방어에 지속적 R&D·마케팅 투자 필요.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026년 5~6월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Needham</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">목표가 $101</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Barclays</span>
+      <div class="analyst-right"><span class="opinion-badge buy">비중확대 (Overweight)</span><span class="target-price">목표가 $103</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Mizuho</span>
+      <div class="analyst-right"><span class="opinion-badge buy">시장초과 (Outperform)</span><span class="target-price">목표가 $85</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Rothschild &amp; Co Redburn</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립 (Neutral)</span><span class="target-price">목표가 $85</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Citigroup</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립 (Neutral)</span><span class="target-price">목표가 $80</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wells Fargo</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립 (Equal Weight)</span><span class="target-price">목표가 하향 (CSI 매각 가정)</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);">
+      17개 기관 평균 컨센서스: <strong>Buy</strong> | 평균 목표주가: <strong>~$91.07</strong> (현재가 $67.34 대비 약 +35%)
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Cooper Companies(COO)는 글로벌 2위권 콘택트렌즈 사업(CooperVision)과 세계 최대 불임치료 소모품 사업(CooperSurgical)을 보유한 의료기기 복합 기업이다. Q2 FY2026에서 비GAAP EPS $1.21(+26% YoY, 서프라이즈 +10.5%)을 달성하며 10분기 연속 어닝비트를 기록했고, FY2026 FCF는 $575~625M(+33~44%)으로 역대 최대 현금창출 구간에 진입했다.<br><br>
+      단기 핵심 카탈리스트는 CooperSurgical 전략적 매각이다. 소송 합의($271.6M) 완료로 매각 프로세스가 재개됐으며, 매각 완료 시 CooperVision 순수 플레이로 재평가(멀티플 확장) 가능성이 열린다. 다만 아시아태평양 지역 역성장(-6%), 환율·관세 역풍, 그리고 매각가 불확실성은 단기 리스크 요인이다. 주가는 52주 고점($89.83) 대비 25% 이상 할인된 수준에서 거래 중이며, 애널리스트 평균 목표주가 $91 대비 약 35%의 업사이드가 내재돼 있다.<br><br>
+      이 종목은 의료기기 섹터의 구조적 성장(근시 인구 증가, 고령화에 따른 불임치료 수요)에 투자하면서 CooperSurgical 분리매각이라는 이벤트 드리븐 모멘텀까지 노리는 투자자에게 적합하다. 단, 매각 타임라인의 불확실성과 아태 지역 회복 속도가 핵심 모니터링 변수다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

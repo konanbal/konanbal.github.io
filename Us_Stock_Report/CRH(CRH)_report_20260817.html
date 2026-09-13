@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRH plc(CRH) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">CRH · NYSE</div>
+      <div class="company-name">CRH plc</div>
+      <div class="company-desc">골재·시멘트·레미콘 등 건축자재를 공급하는 북미·유럽 최대 인프라 소재 기업 (아일랜드 더블린 본사)</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 08월 17일</div>
+      <div class="price-display">$111.25</div>
+      <div class="price-change up">▲ 최근 30일간 +10.8% (실적 발표 후 상승세)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $74.0B</span>
+    <span class="rating-pill">🏢 섹터: 건축자재 / 소재</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (Arcosa 인수 후 목표주가 상향 다수)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (2026 2분기)</div>
+      <div class="kpi-value">$10.8B</div>
+      <div class="kpi-sub">YoY +6%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">조정 EBITDA 마진</div>
+      <div class="kpi-value">약 24%</div>
+      <div class="kpi-sub">전년동기 대비 +30bp (13년 연속 확장 궤도)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$140</div>
+      <div class="kpi-sub">현재가 대비 +25.8%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$94.12~$131.55</div>
+      <div class="kpi-sub">현재가 위치: 약 46%</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 · 2026년 2분기, 2026.06.30 마감)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$10.8B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +1.2%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 약 $10.67B · YoY +6%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상, 조정)</div>
+        <div style="font-size:18px;font-weight:700;">$2.21 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +8.9%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $2.03 · YoY +14%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      실적 발표일: 2026년 7월 30일(장 시작 전). 순이익 $15억(+13% YoY), 조정 EBITDA $26억(+7% YoY)으로 사상 최대 2분기 실적을 기록했습니다. 회사는 2026년 연간 가이던스(순이익 $39억~$41억, 조정 EBITDA $81억~$85억, 희석 EPS $5.60~$6.05)를 재확인했으며, 다음 실적(3분기)은 2026년 11월경 발표 예정입니다.
+    </div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">Arcosa Inc. 전액 현금 인수 합의 — 총 $85억 규모, 사상 최대 M&A</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.22</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 실적 발표 및 연간 가이던스 재확인</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.30</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">임원변동</span>
+        <span style="font-size:13px;font-weight:500;">Tony Will 이사 선임(전 CF Industries CEO), 2026.7.1 발효</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06월 발표</span>
+    </div>
+  </div>
+  <div style="font-size:12px;color:var(--muted);margin:-0.5rem 0 1rem 0.25rem;">📌 투자자 주목 공시: Arcosa 인수(주당 $150, 2026년 EV/EBITDA 11.5배)는 CRH 역사상 최대 규모 딜로, $57.5억 브릿지론으로 자금을 조달하며 인수 완료(2027년 1분기 예정) 전까지 신규 자사주 매입은 일시 중단될 예정입니다.</div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.06.22</span></div>
+      <div class="news-title">CRH, Arcosa를 $85억에 인수 — 사상 최대 규모 딜로 북미 골재·인프라 1위 굳히기</div>
+      <div class="news-summary">Arcosa 주주에게 주당 $150(60일 거래량가중평균 대비 25% 프리미엄)를 현금으로 지급하는 조건이며, 3년 내 연 $1.75억 규모 시너지가 기대됩니다. 데이터센터·에너지·수자원 인프라 수요 확대에 대응한 전략적 포석으로 평가됩니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.07.30</span></div>
+      <div class="news-title">2분기 매출·EPS 모두 컨센서스 상회, 13년 연속 마진 확장 궤도 재확인</div>
+      <div class="news-summary">북미 골재 부문(Americas Materials Solutions)이 매출 +10%, 조정 EBITDA +12%로 성장을 견인했으며, 5월 인수한 Axius Water(수처리)도 기여했습니다. 연간 가이던스가 그대로 유지되며 시장은 실적을 긍정적으로 받아들였습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026 회계연도</span></div>
+      <div class="news-title">주거용 건설 부진으로 Americas Building Solutions 매출 -2%</div>
+      <div class="news-summary">데이터센터·에너지 관련 프로젝트가 견조했음에도 신규 주택 착공 둔화와 사업부 매각 영향으로 해당 부문 매출이 소폭 감소했습니다. 인프라 대비 주거용 건자재 수요의 상대적 부진이 이어지고 있습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.08.14 (배당락)</span></div>
+      <div class="news-title">분기 배당 $0.39 지급 결정, 전년 대비 5% 인상</div>
+      <div class="news-summary">배당락일 8월 14일, 지급일은 9월 16일입니다. Arcosa 인수에 따른 부채 확대에도 안정적인 주주환원 기조를 유지하고 있음을 보여줍니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026년 8월</span></div>
+      <div class="news-title">애널리스트 목표주가 엇갈림 — Jefferies·Bernstein 상향 vs Wells Fargo·Stephens 하향</div>
+      <div class="news-summary">Jefferies는 Arcosa 딜 반영 후 목표가를 $149→$165.60로 상향했지만, Wells Fargo와 Stephens는 실적 발표를 전후해 각각 $135→$132, $135→$125로 소폭 하향 조정했습니다. Arcosa 인수 프리미엄과 통합 리스크에 대한 시각차가 반영된 것으로 풀이됩니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>13년 연속 마진 확장 궤도 — 2분기 매출 +6%, 조정 EBITDA +7%, EPS +14%로 사상 최대 실적 경신</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>Arcosa 인수로 북미 골재·인프라 1위 지위 강화, 3년 내 연 $1.75억 시너지 기대, 인수 후 12개월 내 이익 증대(accretive) 전망</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>미국 인프라 투자 확대, 데이터센터·에너지전환·수자원 관련 구조적 수요 증가 수혜</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>컨센서스 목표주가 대비 업사이드 약 26%, 다수 애널리스트(19명 매수 vs 0명 매도)가 Buy 의견 유지</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>Arcosa 인수에 따른 레버리지 확대 — $57.5억 브릿지론 조달, 순부채 $154억로 증가, 기존 자사주 매입 프로그램 일시 중단</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>대형 M&A 통합 리스크 — 사상 최대 규모 딜인 만큼 시너지 실현과 조직 통합의 성패가 향후 실적을 좌우</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>주거용 건설 수요 부진 지속 — Americas Building Solutions 매출 감소, 신규 주택 착공 둔화 여파</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>일부 애널리스트(Wells Fargo, Stephens)는 목표주가를 오히려 하향 — 밸류에이션·성장 둔화에 대한 신중론도 상존</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026.07~08 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Jefferies</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$165.60 (상향, 이전 $149)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Bernstein SocGen</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Outperform)</span><span class="target-price">$150 (재확인)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wells Fargo</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Overweight)</span><span class="target-price">$132 (하향, 이전 $135)</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">CRH는 북미와 유럽에서 골재·시멘트·레미콘 등 건축자재를 공급하는 글로벌 최대 인프라 소재 기업으로, 2026년 2분기 매출·EPS 모두 컨센서스를 상회하며 13년 연속 마진 확장이라는 견조한 실적 흐름을 이어가고 있습니다. 6월 발표한 $85억 규모 Arcosa 인수는 회사 역사상 최대 딜로, 북미 골재·인프라 시장 지배력을 한층 강화할 전망이지만 브릿지론 조달에 따른 레버리지 확대와 대형 M&A 통합 리스크는 함께 짚어야 할 부분입니다. 데이터센터·에너지전환·수자원 등 구조적 인프라 투자 수요가 성장 동력인 반면, 주거용 건설 부문의 부진은 계속되고 있습니다. 컨센서스 목표주가 대비 업사이드가 26%대로 남아있어, 이 종목은 미국 인프라 투자 사이클과 M&A를 통한 장기 성장 스토리에 투자하고자 하는 배당·가치 중시형 투자자에게 적합합니다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

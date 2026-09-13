@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">NVDA · NASDAQ</div>
+      <div class="company-name">NVIDIA (엔비디아)</div>
+      <div class="company-desc">데이터센터 규모 AI 인프라 기업. Compute & Networking(데이터센터 가속컴퓨팅·AI 네트워킹)과 Graphics(게이밍·워크스테이션 GPU) 2개 부문 운영. Blackwell·Rubin 아키텍처를 앞세운 AI GPU 시장 절대 강자</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 08월 17일</div>
+      <div class="price-display">$224.75</div>
+      <div class="price-change up">8/16 장중 기준 (52주 고점 대비 -5% 이내)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $5.4T 내외</span>
+    <span class="rating-pill">🏢 섹터: 반도체 · AI 인프라</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (FY27 Q1)</div>
+      <div class="kpi-value">$81.6~$82B</div>
+      <div class="kpi-sub">YoY +85%, 데이터센터 $75B(+92%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">비GAAP 매출총이익률</div>
+      <div class="kpi-value">약 71~75%</div>
+      <div class="kpi-sub">차기 가이던스 74.9~75.0%(±50bp)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$302.83~$304.36</div>
+      <div class="kpi-sub">현재가 대비 +34~35%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$164.07~$236.54</div>
+      <div class="kpi-sub">현재가 위치: 약 84%</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 · FY2027 1분기, 4월 결산)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제)</div>
+        <div style="font-size:18px;font-weight:700;">$81.6B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 상회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +85%, QoQ +20% · 데이터센터 매출 $75.2B(YoY +92%)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">비GAAP EPS (실제)</div>
+        <div style="font-size:18px;font-weight:700;">$1.87 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 상회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +140% · GAAP 순이익 $58.3B, 자유현금흐름 $48.6B</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      실적 발표일 2026.05.20. 매출·EPS 모두 컨센서스 상회하는 "beat-and-raise" 실적에도 발표 후 주가는 4분기 연속 조정 흐름을 보임(높아진 시장 기대치 반영). 2분기(FY27) 가이던스는 매출 $91.0B(±2%, 중국 데이터센터 매출 미반영), 비GAAP 매출총이익률 75.0%(±50bp) 제시. 이사회는 분기 배당을 주당 $0.01→$0.25로 대폭 인상하고 $80B 규모 자사주매입 한도를 추가 승인(만기 없음). 중국向 Hopper 제품 매출은 1분기 중 전무(전년 동기 $4.6B)했으며, 재고는 $25.8B·공급 관련 약정은 $119.0B로 확대. 다음 실적(FY27 2분기)은 2026.08.26 발표 예정.
+    </div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">FY2027 1분기 실적 발표 및 2분기 가이던스(매출 $91.0B)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.20</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">배당·자사주</span>
+        <span style="font-size:13px;font-weight:500;">분기배당 $0.01→$0.25 대폭 인상, $80B 자사주매입 한도 추가 승인</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.18 이사회 승인</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">규제</span>
+        <span style="font-size:13px;font-weight:500;">대중국 H200 수출 승인 조건(매출의 25% 미국 정부 배분) 관련 진행 상황 공시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">지속 업데이트</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.08.14</span></div>
+      <div class="news-title">OpenAI 오하이오 데이터센터向 $250B 보증 규모를 $120B 미만으로 축소 — WSJ 보도</div>
+      <div class="news-summary">투자자들의 리스크 노출 우려를 반영해 SoftBank 자회사 SB Energy가 개발하는 10GW 데이터센터 프로젝트의 1단계에 대해서만 금융 보증을 제공하는 방향으로 조정. 이는 엔비디아가 6대 금융기관과 함께 AI 인프라向 $500B+ 규모 제3자 자본 조달 플랫폼을 발표한 직후 나온 소식.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.08.17(오늘 예정 발언)</span></div>
+      <div class="news-title">골드만삭스, 엔비디아 관련 신규 금융조달 딜 투자자 물색 중 — 로이터 보도</div>
+      <div class="news-summary">대규모 AI 인프라 자금조달을 뒷받침하기 위한 추가 금융 구조가 논의 중인 것으로 알려지며, 엔비디아發 대규모 부채·보증 구조에 대한 시장의 관심이 지속.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">지속 이슈(2026년 상반기~)</span></div>
+      <div class="news-title">중국向 H200 칩 수출, 승인에도 매출 실현 지연</div>
+      <div class="news-summary">미국 정부가 매출의 25%를 배분받는 조건으로 H200의 중국 수출을 허용했으나 보안 심사 등으로 실제 매출은 아직 발생하지 않은 상태(1분기 중국向 데이터센터 매출 $0). 과거 중국은 데이터센터 매출의 약 20%를 차지했던 만큼, 관세·수출 통제 리스크가 지속적인 변수.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08월 초</span></div>
+      <div class="news-title">UBS, 2분기 매출 큰 폭 서프라이즈 및 강한 3분기 가이던스 전망</div>
+      <div class="news-summary">UBS 애널리스트 Timothy Arcuri는 8/26 실적 발표를 앞두고 7월 분기 매출이 시장 예상을 상당폭 상회할 것으로 전망. 반도체 업종 전반의 AI 수요가 견조하다는 평가가 이어지며 실적 발표를 앞두고 투자심리가 개선.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">지속 이슈</span></div>
+      <div class="news-title">Meta 등 빅테크의 커스텀 실리콘(자체 개발 칩) 확대 — 장기 경쟁 구도 변수</div>
+      <div class="news-summary">Meta를 비롯한 주요 고객사들이 자체 AI 칩 개발을 확대하며 엔비디아의 시장 지배력에 대한 장기적 위협 요인으로 거론. 다만 CUDA 소프트웨어 생태계와 통합 플랫폼 우위가 여전히 강력한 해자로 평가됨.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>데이터센터 매출 3분기 연속 가속화(+92% YoY), Blackwell 아키텍처 수요가 여전히 공급을 초과하는 상황</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>2분기 가이던스 매출 $91.0B(중국 매출 미반영 기준)로 컨센서스 상회, UBS 등은 추가 서프라이즈 가능성 제기</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>OpenAI·6대 금융기관과 함께 $500B+ 규모 AI 인프라 자금조달 플랫폼 구축 — 장기 수요 파이프라인 확보</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>배당 25배 인상($0.01→$0.25)과 $80B 자사주매입 추가 승인 등 적극적 주주환원, 자유현금흐름 $48.6B의 압도적 현금창출력</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>중국向 H200 매출이 승인에도 여전히 실현되지 않고 있어 데이터센터 매출의 지역 편중 리스크 지속</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>OpenAI 데이터센터 보증 규모를 $250B→$120B 미만으로 축소 — 대규모 AI 파이낸싱 구조에 대한 투자자 우려 반영</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>Meta 등 고객사의 커스텀 실리콘 확대 움직임이 장기 경쟁 구도의 변수로 부각</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>실적 서프라이즈에도 4분기 연속 발표 후 주가 조정 — 이미 높아진 시장 기대치와 밸류에이션 부담, 재고·공급 약정 급증(재고 $25.8B, 공급 약정 $119B)에 따른 실행 리스크</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">UBS</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">2분기 서프라이즈·강한 가이던스 전망</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 (58~68개 하우스)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy</span><span class="target-price">평균 $302.83~$304.36</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">최고 목표가</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$500</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">최저 목표가</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립적 시각</span><span class="target-price">$180</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">매수/중립/매도 분포</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 58 · 중립 2 · 매도 1</span><span class="target-price">(총 61개 하우스 기준)</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      NVIDIA는 FY2027 1분기 매출 $81.6B(+85% YoY), 데이터센터 매출 $75.2B(+92% YoY)로 시장 기대를 다시 한번 뛰어넘는 "beat-and-raise" 실적을 기록했다. 2분기 가이던스(매출 $91.0B, 중국 매출 미반영)도 견조하며, 배당 25배 인상과 $80B 규모 자사주매입 추가 승인 등 압도적 현금창출력을 바탕으로 한 주주환원도 눈에 띈다. 다만 중국向 H200 매출이 정부 승인에도 여전히 실현되지 않고 있고, 최근 OpenAI 데이터센터向 보증 규모 축소 소식은 대규모 AI 파이낸싱 구조에 대한 투자자들의 신중론을 반영한다. 애널리스트 컨센서스는 Strong Buy 등급에 목표가 $302.83~$304.36(현재가 대비 약 34~35% 상승 여력)로 여전히 강한 낙관론을 유지하고 있다. 8월 26일 예정된 2분기 실적 발표가 다음 핵심 변수이며, AI 인프라 투자 사이클의 구조적 성장과 중국·거대 파이낸싱 구조 관련 리스크를 함께 주시할 필요가 있는 종목이다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

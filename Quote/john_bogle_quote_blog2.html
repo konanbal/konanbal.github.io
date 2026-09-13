@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>투자란 원래 이렇게 단순합니다 — 잭 보글의 다섯 가지 원칙</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f9f9f7;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+    .blog-wrap {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #1a1a1a;
+      max-width: 680px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 3rem 3.5rem 4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    }
+    .category-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #1a56a0;
+      background: #e8f0fb;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 1.2rem;
+    }
+    .blog-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.45;
+      color: #1a1a1a;
+      margin-bottom: 0.6rem;
+    }
+    .blog-subtitle {
+      font-size: 15px;
+      color: #666666;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .meta {
+      font-size: 12px;
+      color: #999999;
+      margin-bottom: 1.6rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .hero-quote {
+      background: #f6f6f4;
+      border-left: 3px solid #4a8fd4;
+      border-radius: 0 8px 8px 0;
+      padding: 1.4rem 1.6rem;
+      margin: 1.6rem 0;
+    }
+    .hero-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 15px;
+      line-height: 1.9;
+      color: #1a1a1a;
+      margin-bottom: 0.7rem;
+    }
+    .hero-attr {
+      font-size: 13px;
+      color: #666666;
+    }
+    .section-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 2rem 0 0.8rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .body-text {
+      font-size: 14.5px;
+      line-height: 1.85;
+      color: #444444;
+      margin-bottom: 1rem;
+    }
+    .info-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin: 1.4rem 0;
+    }
+    .info-card {
+      background: #f6f6f4;
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+    }
+    .ic-label {
+      font-size: 11px;
+      color: #999999;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .ic-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+    .rules-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.2rem 0;
+    }
+    .rules-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .rules-list li:last-child { border-bottom: none; }
+    .rule-num {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 50%;
+      background: #e8f0fb;
+      color: #1a56a0;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .rule-head {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 3px;
+    }
+    .rule-desc {
+      font-size: 13px;
+      color: #666666;
+      line-height: 1.7;
+    }
+    .highlight-box {
+      background: #e8f0fb;
+      border-radius: 8px;
+      padding: 1.2rem 1.4rem;
+      margin: 1.6rem 0;
+    }
+    .highlight-box p {
+      font-size: 14px;
+      color: #1a56a0;
+      line-height: 1.8;
+    }
+    .closing-quote {
+      text-align: center;
+      padding: 1.8rem 0 1rem;
+      border-top: 1px solid #e0e0e0;
+      margin-top: 2rem;
+    }
+    .closing-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 15px;
+      color: #666666;
+      line-height: 1.8;
+    }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 1.4rem;
+    }
+    .tag {
+      font-size: 12px;
+      color: #666666;
+      border: 1px solid #cccccc;
+      border-radius: 20px;
+      padding: 3px 12px;
+    }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+  <span class="category-tag">투자 철학</span>
+  <h1 class="blog-title">투자란 원래 이렇게 단순합니다<br>— 잭 보글의 다섯 가지 원칙</h1>
+  <p class="blog-subtitle">시작하고, 오래 버티고, 기대를 낮추고, 단순하게 유지하고, 끝까지 가라. 인덱스 투자의 아버지가 평생 지킨 다섯 문장.</p>
+  <div class="meta">2026년 6월 7일 &nbsp;·&nbsp; 읽기 약 4분 &nbsp;·&nbsp; 장기투자 / 인덱스펀드</div>
+
+  <div class="hero-quote">
+    <p>
+      첫 번째, 투자는 반드시 해야 합니다.<br>
+      두 번째, 최대한 장기간 투자하세요.<br>
+      세 번째, 미래 수익률에 대해 합리적인 기대치를 가지고, 시장 하락에 대해 정신적으로 준비하세요.<br>
+      네 번째, 간단하게 투자하세요.<br>
+      다섯 번째, 무슨 일이 일어나더라도 끝까지 투자하세요.
+    </p>
+    <span class="hero-attr">— 잭 보글 (John C. Bogle)</span>
+  </div>
+
+  <div class="section-title">인덱스 투자의 아버지</div>
+  <p class="body-text">잭 보글(1929~2019)은 뱅가드 그룹의 창업자이자, 개인 투자자의 역사를 바꾼 사람입니다. 그는 1976년 세계 최초의 개인용 인덱스 펀드를 만들었고, 수십 년간 "싸게, 단순하게, 오래"라는 원칙 하나로 수백만 명의 은퇴 자산을 지켜냈습니다.</p>
+  <p class="body-text">화려한 전략도, 복잡한 수식도 아니었습니다. 그가 남긴 이 다섯 문장은 평생의 철학을 압축한 것입니다. 짧을수록 더 오래 살아남는다는 것을 보글은 누구보다 잘 알았습니다.</p>
+
+  <div class="info-card-grid">
+    <div class="info-card">
+      <span class="ic-label">생몰연도</span>
+      <span class="ic-value">1929 – 2019 (89세)</span>
+    </div>
+    <div class="info-card">
+      <span class="ic-label">별칭</span>
+      <span class="ic-value">세인트 잭 (Saint Jack)</span>
+    </div>
+    <div class="info-card">
+      <span class="ic-label">창립</span>
+      <span class="ic-value">뱅가드 그룹 (1974)</span>
+    </div>
+    <div class="info-card">
+      <span class="ic-label">최초 인덱스 펀드</span>
+      <span class="ic-value">1976년 출시</span>
+    </div>
+  </div>
+
+  <div class="section-title">다섯 원칙 깊이 읽기</div>
+  <ul class="rules-list">
+    <li>
+      <span class="rule-num">1</span>
+      <div>
+        <div class="rule-head">투자는 반드시 해야 합니다</div>
+        <div class="rule-desc">시작하지 않으면 아무것도 없습니다. 완벽한 타이밍을 기다리는 사이, 시간은 가장 강력한 복리 엔진을 멈춰버립니다. 보글은 "최선의 투자 시점은 지금"이라고 반복해서 강조했습니다.</div>
+      </div>
+    </li>
+    <li>
+      <span class="rule-num">2</span>
+      <div>
+        <div class="rule-head">최대한 장기간 투자하세요</div>
+        <div class="rule-desc">시간이 길수록 복리의 마법이 작동합니다. 뱅가드의 데이터에 따르면, 미국 주식시장은 어떤 30년 구간에서도 손실을 기록하지 않았습니다. 단기 등락을 버티는 것이 수익률을 만듭니다.</div>
+      </div>
+    </li>
+    <li>
+      <span class="rule-num">3</span>
+      <div>
+        <div class="rule-head">합리적인 기대와 정신적 준비</div>
+        <div class="rule-desc">연 20~30% 수익을 기대하면 폭락장에서 공황 매도를 하게 됩니다. 역사적 평균(연 7~10%)을 기준으로 삼고, 시장이 30~50% 빠지는 것이 정상임을 미리 받아들이는 것이 흔들림 없는 투자의 전제입니다.</div>
+      </div>
+    </li>
+    <li>
+      <span class="rule-num">4</span>
+      <div>
+        <div class="rule-head">간단하게 투자하세요</div>
+        <div class="rule-desc">복잡한 전략일수록 비용이 높고, 실수할 여지가 커집니다. 보글의 답은 저비용 인덱스 펀드 하나였습니다. 전체 시장을 사서 보유하는 것이 대부분의 액티브 펀드를 이겼습니다.</div>
+      </div>
+    </li>
+    <li>
+      <span class="rule-num">5</span>
+      <div>
+        <div class="rule-head">무슨 일이 일어나더라도 끝까지</div>
+        <div class="rule-desc">금융위기, 전쟁, 팬데믹, 기술 거품 붕괴. 역사 속에서 시장은 반복해서 무너졌고, 반복해서 회복했습니다. 보글은 "끝까지 머무는 것"이 가장 어려우면서도 가장 확실한 방법이라 했습니다.</div>
+      </div>
+    </li>
+  </ul>
+
+  <div class="section-title">지금 이 시대에 보글이 던지는 메시지</div>
+  <p class="body-text">AI 테마, 수익률 경쟁, SNS 속 '대박 스토리'가 넘쳐나는 요즘, 보글의 5원칙은 오히려 더 빛납니다. 복잡해질수록, 빠를수록, 시장은 느리고 단순한 전략을 이기기 어렵게 만들어왔습니다.</p>
+  <div class="highlight-box">
+    <p>비용은 줄이고, 기간은 늘리고, 기대는 낮추세요. 그리고 그냥 버티세요. 보글이 평생 말한 것은 결국 그것뿐이었습니다.</p>
+  </div>
+
+  <div class="closing-quote">
+    <p>"시장에서 시간을 보내는 것이,<br>시장 타이밍을 맞추는 것보다 언제나 강합니다."<br><span style="font-size:13px;color:#999999;">— 잭 보글</span></p>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag">#잭보글</span>
+    <span class="tag">#인덱스투자</span>
+    <span class="tag">#장기투자</span>
+    <span class="tag">#뱅가드</span>
+    <span class="tag">#투자철학</span>
+    <span class="tag">#복리</span>
+    <span class="tag">#패시브투자</span>
+    <span class="tag">#존보글</span>
+  </div>
+</article>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로봇 구동부 밸류체인 해부 — 네이버 발행용</title>
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+        font-size: 16px; line-height: 1.9; color: #1c1c1c; background: #f0f2f5;
+    }
+    .page-wrapper { max-width: 860px; margin: 0 auto; padding: 0 16px 80px; }
+    .site-header {
+        background: linear-gradient(135deg, #0f4c47 0%, #0f766e 100%); color: white;
+        padding: 36px 40px 28px; border-radius: 0 0 12px 12px;
+    }
+    .site-header .series-label { font-size: 13px; font-weight: 500; letter-spacing: 0.08em; opacity: 0.85; margin-bottom: 8px; }
+    .site-header h1 { font-size: 1.4em; font-weight: 800; color: white; border: none; padding: 0; margin: 0; }
+    .site-header .report-date { font-size: 13px; opacity: 0.75; margin-top: 6px; }
+    .article-card {
+        background: #ffffff; border-radius: 12px; padding: 40px 48px 56px;
+        margin-top: 20px; box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    }
+    h1 { font-size: 1.75em; font-weight: 800; line-height: 1.35; color: #111; margin-bottom: 6px;
+         border-bottom: 3px solid #0f766e; padding-bottom: 12px; }
+    h2 { font-size: 1.35em; font-weight: 700; color: #111; margin-top: 2.4em; margin-bottom: 0.7em;
+         padding: 10px 14px; background: #f1f6f5; border-left: 4px solid #0f766e; border-radius: 0 6px 6px 0; }
+    h3 { font-size: 1.15em; font-weight: 700; color: #222; margin-top: 2em; margin-bottom: 0.5em;
+         border-bottom: 1px solid #e8eaed; padding-bottom: 6px; }
+    h4 { font-size: 1.05em; font-weight: 700; color: #333; margin-top: 1.6em; margin-bottom: 0.4em; }
+    p { margin-bottom: 1.1em; }
+    strong { font-weight: 700; }
+    em { font-style: normal; font-weight: 700; color: #0f766e; }
+    ul, ol { margin: 0.6em 0 1.1em 1.6em; }
+    li { margin-bottom: 0.45em; }
+    blockquote {
+        margin: 1.4em 0; padding: 14px 20px; border-left: 4px solid #0f766e;
+        background: #f0fdfa; color: #134e4a; border-radius: 0 6px 6px 0; font-size: 0.96em;
+    }
+    blockquote p { margin-bottom: 0; }
+    table {
+        width: 100%; border-collapse: collapse; margin: 1.4em 0; font-size: 0.93em;
+        overflow: hidden; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    }
+    thead tr { background: #0f766e; color: white; }
+    th { font-weight: 600; text-align: left; padding: 11px 14px; }
+    td { padding: 10px 14px; border-bottom: 1px solid #edf0f4; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) { background: #f7faf9; }
+    hr { border: none; border-top: 1px solid #e2e8f0; margin: 2.8em 0; }
+    .article-footer { margin-top: 3em; padding-top: 1.2em; border-top: 1px solid #e2e8f0; font-size: 0.85em; color: #8a9ab0; }
+    .tag-line { margin-top: 1.6em; font-size: 0.9em; color: #0f766e; line-height: 1.9; }
+    @media (max-width: 640px) {
+        body { font-size: 14px; }
+        .article-card { padding: 24px 20px 40px; }
+        .site-header { padding: 24px 20px 18px; }
+        h1 { font-size: 1.4em; }
+        h2 { font-size: 1.15em; }
+        table { font-size: 0.82em; }
+        th, td { padding: 8px 10px; }
+    }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+    <header class="site-header">
+        <div class="series-label">🔗 테마 밸류체인 해부 시리즈 | 1편</div>
+        <h1>로봇 구동부 밸류체인 해부</h1>
+        <div class="report-date">작성일: 2026년 8월 17일 (7/23 초판 · 8/1·8/17 갱신) | 주가는 2026.08.14 종가 기준</div>
+    </header>
+    <main class="article-card">
+
+<h1>🔗 로봇 구동부 밸류체인 해부 — 이 판에서 진짜 돈 버는 곳은 어디인가</h1>
+
+<blockquote>
+<p>테마 밸류체인 해부 시리즈 1편입니다. 관련주를 나열하는 대신, <strong>어느 단계가 실제로 마진을 가져가는지</strong>를 뜯어봅니다.</p>
+</blockquote>
+
+<hr>
+
+<h2>🔍 왜 지금 로봇 구동부인가</h2>
+
+<p>휴머노이드가 연구실을 벗어나 양산 단계로 들어가고 있습니다. 7월 22일 발표된 테슬라 2분기 실적에서 이게 숫자로 확인됐습니다. 테슬라는 프리몬트 공장의 모델 S·X 생산 라인 철거를 완료하고 그 자리를 <strong>옵티머스 1세대 대량생산 라인</strong>으로 전환 중이라고 밝혔습니다. 당초 2026년 3월로 예정됐던 옵티머스 3세대 공개·양산이 미뤄졌다가, 이번 발표로 <strong>3분기(지금) 양산 시작</strong>이 확인됐습니다.</p>
+
+<p>그런데 투자자 입장에서 진짜 중요한 건 이 로봇의 <strong>원가 구조</strong>입니다. 증권가 리포트는 구동계(Actuation)가 휴머노이드 원가(BOM)의 <em>약 52%</em>를 차지한다고 분석합니다. AI 칩도 배터리도 아닌 관절이 원가의 절반이라는 뜻입니다. 그래서 감속기·모터·액추에이터가 이 테마의 중심에 놓입니다.</p>
+
+<p>한국이 거론되는 이유는 자동차 산업에서 쌓은 정밀 가공과 대량 양산 경험 때문입니다. 비(非)중국권 공급망을 짜려는 미국 기업들에게 현실적인 선택지라는 것이죠. 실제로 지난 6월 삼현이 글로벌 휴머노이드 기업으로부터 관절용 액추에이터 양산 프로토를 수주했고, 현대모비스는 CES 2026에서 보스턴다이내믹스 아틀라스 공급사로 확정됐습니다. 7월 말에는 로보티즈가 핵심 로봇부품으로 미국 FCC 인증을 받아 북미 수출길을 넓혔다는 소식도 나왔습니다.</p>
+
+<p>최근 한 달 주가는 롤러코스터였습니다. 7월 21~22일 삼성전자 로봇 전담조직(RX사업추진실) 신설 소식에 급등했다가, 7월 28일경 중동 리스크·유가 급등으로 5%대 급락, 이후 8월 들어 외국인 매수가 돌아오며 다시 상승했습니다. 8월 14일 종가 기준 레인보우로보틱스는 50만원, 로보티즈는 28만원, 에스피지는 11만원대(분할 반영)까지 회복했습니다. 8월 19일 레인보우로보틱스·에스비비테크 실적 발표가 예정돼 있어, 여기서 <strong>기대가 숫자로 확인되는지</strong>가 다음 분수령입니다. 이런 널뛰기와 실제 이익이 나는 위치는 별개라는 게 이 글의 요지입니다.</p>
+
+<h3>📌 숫자로 보는 시장</h3>
+
+<table>
+    <thead>
+        <tr><th>항목</th><th>수치</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>로봇용 감속기 시장 규모</td><td><strong>17.1억 달러</strong> (2026년 전망)</td></tr>
+        <tr><td>연평균 성장률</td><td><strong>6.4%</strong> (2026~2035년)</td></tr>
+        <tr><td>휴머노이드 원가 중 구동계 비중</td><td><strong>약 52%</strong></td></tr>
+        <tr><td>정밀 감속기 일본 점유율</td><td><strong>75~85%</strong></td></tr>
+    </tbody>
+</table>
+
+<hr>
+
+<h2>🗺️ 밸류체인 한눈에 보기</h2>
+
+<table>
+    <thead>
+        <tr><th>단계</th><th>하는 일</th><th>국내 대표 종목</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>① 상류</strong><br>소재·베어링</td>
+            <td>감속기에 들어가는 베어링, 스틸볼, 소결 부품. 표면 정밀도가 곧 성능</td>
+            <td>엔비알모션, 한국피아이엠, 골드텍</td>
+        </tr>
+        <tr>
+            <td><strong>② 중류</strong><br>감속기·액추에이터</td>
+            <td>하모닉·RV 감속기와 모터·제어기 통합 모듈. <strong>이 테마의 핵심</strong></td>
+            <td>에스피지, 로보티즈, 삼현, 현대모비스, 에스비비테크</td>
+        </tr>
+        <tr>
+            <td><strong>③ 하류</strong><br>로봇 완제품</td>
+            <td>부품을 사와 로봇을 조립. 구동부 업체 입장에선 고객사</td>
+            <td>레인보우로보틱스, 두산로보틱스, 뉴로메카</td>
+        </tr>
+        <tr>
+            <td><strong>④ 전방 수요</strong><br>휴머노이드 발주처</td>
+            <td>실제로 돈을 쓰는 최종 고객. 이들 양산 일정이 체인 전체의 속도</td>
+            <td>테슬라, 보스턴다이내믹스, 피규어 AI</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>① 상류 — 베어링·소재·정밀가공</h3>
+
+<p>표면 정밀도가 곧 제품 성능이라 진입이 쉽지 않지만, 국내에서는 아직 로봇향 매출 규모가 작아 실적으로 검증된 곳이 드뭅니다.</p>
+
+<ul>
+    <li><strong>엔비알모션 (0004V0)</strong> — 씬섹션·크로스롤러 베어링. 스틸볼 국산화에 이어 3분기부터 세라믹볼 확대 예상. 북미 휴머노이드향 양산은 아직 기대 단계</li>
+    <li><strong>한국피아이엠</strong> — MIM(금속분말사출) 공정. 소형·고정밀 부품 양산에 적합</li>
+    <li><strong>골드텍</strong> — 미국 RBC베어링의 씬섹션 베어링 국내 공급</li>
+</ul>
+
+<h3>② 중류 — 감속기·모터·통합 액추에이터</h3>
+
+<p>이 테마의 핵심 구간입니다. 하모닉·RV 감속기와 모터·제어기를 묶은 모듈이 여기서 나옵니다.</p>
+
+<ul>
+    <li><strong>에스피지 (058610)</strong> — 국내 유일하게 하모닉(SH)·RV(SR)·유성 감속기 3종을 모두 자체 생산. 로봇 제조사 입장에선 한 곳에서 모든 관절 규격을 해결할 수 있다는 뜻입니다. <strong>2026년 예상 로봇 매출비중 7.2%</strong></li>
+    <li><strong>로보티즈 (108490)</strong> — 다이나믹셀 액추에이터(모터+감속기+제어기+통신 일체형). 하반기 우즈베키스탄 신공장 가동 시 연간 생산량 67% 증가 전망</li>
+    <li><strong>삼현 (437730)</strong> — 모터·제어기·감속기 3-in-1 통합 솔루션. 6월 15일 글로벌 휴머노이드 기업 양산 프로토 수주. 자동차 전장에서 쌓은 양산 신뢰성이 수주 배경</li>
+    <li><strong>현대모비스 (012330)</strong> — 아틀라스 5세대에 바디 액추에이터 31개 탑재. 2027년부터 매출 인식, 2028년 35만 개 목표</li>
+    <li><strong>에스비비테크 (389500)</strong> — 국내 최초 하모닉 감속기 국산화(로보드라이브). 감속기·베어링 일체형 기술</li>
+</ul>
+
+<p>해외 비교군은 <strong>하모닉드라이브시스템즈(HDS)</strong>와 <strong>나브테스코</strong>입니다. 사실상 이 시장의 주인입니다.</p>
+
+<h3>③ 하류 — 로봇 완제품</h3>
+
+<ul>
+    <li><strong>레인보우로보틱스 (277810)</strong> — 협동로봇·휴머노이드. 에스피지 감속기 공급처</li>
+    <li><strong>두산로보틱스 (454910)</strong> — 협동로봇 완제품</li>
+    <li><strong>뉴로메카 (348340)</strong> — 완제품 + 자체 스마트 액추에이터 CORE 수직통합</li>
+</ul>
+
+<h3>④ 전방 수요 — 휴머노이드 발주처</h3>
+
+<ul>
+    <li><strong>테슬라 옵티머스</strong> — 2026년 5만 대 목표, 2027년 기가텍사스 2공장 가동 후 확대</li>
+    <li><strong>보스턴다이내믹스 아틀라스</strong> — 현대차그룹. 5세대 양산형에 액추에이터 31개, 2028년 35만 개 목표</li>
+    <li><strong>피규어 AI</strong> — 초기 1만 대 → 4년간 10만 대 계획</li>
+    <li><strong>유니트리·유비테크(중국)</strong> — 자국 공급망을 쓰기 때문에 국내 업체엔 고객이 아니라 경쟁자에 가깝습니다</li>
+</ul>
+
+<hr>
+
+<h2>💰 단계별 마진 구조 — 격차가 여기서 갈립니다</h2>
+
+<table>
+    <thead>
+        <tr><th>단계</th><th>수익성</th><th>왜 이 수준인가</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>① 상류 베어링·소재</td><td>확인 불가</td><td>로봇향 매출이 아직 분리 공시되지 않음</td></tr>
+        <tr><td>② 중류 감속기 전업(국내)</td><td><strong>-104% ~ +6.5%</strong></td><td>생산량이 적어 고정비를 흡수 못 함</td></tr>
+        <tr><td>② 중류 통합 모듈(2028E)</td><td><em>EBITDA 약 30%</em></td><td>대량 양산 체제 + 고부가 모듈</td></tr>
+        <tr><td>③ 하류 완제품</td><td><strong>적자 다수</strong></td><td>부품 사와서 조립 → 원가 전가 어려움</td></tr>
+    </tbody>
+</table>
+
+<p>근거를 밝히면 이렇습니다. 에스피지의 2026년 연간 영업이익률 컨센서스가 6.5%(하나증권, 2026년 1월)이고, 에스비비테크의 1분기 매출은 17.7억 원인데 영업이익은 마이너스 18.5억 원이었습니다(공시, 5월 14일).</p>
+
+<p>통합 모듈의 30%는 현대모비스의 2028년 액추에이터 예상 매출 5,250억 원과 EBITDA 1,575억 원(메리츠증권, 6월 21일)에서 나온 수치입니다. EBITDA 마진이라 영업이익률과 직접 비교되지는 않는다는 점은 감안해 주세요.</p>
+
+<hr>
+
+<h2>🔑 병목 구간 — 정밀 감속기, 그런데 그 이익은 아직 일본에 있습니다</h2>
+
+<blockquote>
+<p>이 체인에서 대체 불가능한 자리는 정밀 감속기입니다. <strong>다만 지금 그 자리의 이익을 가져가는 건 국내 기업이 아닙니다.</strong></p>
+</blockquote>
+
+<p>감속기는 모터의 빠른 회전을 느리고 힘 있게 바꿔주는 부품입니다. 나브테스코와 하모닉드라이브시스템즈(HDS) 두 일본 회사가 전 세계 정밀 감속기의 <em>75~85%</em>를 쥐고 있습니다. HDS 단독 점유율만 70%가 넘습니다. ABB·화낙·쿠카 같은 글로벌 로봇 제조사들이 대부분 이 둘에서 감속기를 받습니다.</p>
+
+<p>제가 자료를 보면서 가장 인상 깊었던 대목은 이겁니다. <strong>2013년에 이미 기본 특허가 만료됐는데도 이 구도가 그대로 유지되고 있다</strong>는 점입니다.</p>
+
+<p>특허가 풀렸는데 왜 안 깨질까요. 치형(톱니 모양) 설계, 소재 미세가공, 열처리 노하우가 종합적으로 필요하기 때문입니다. 에스비비테크는 2013년 특허 만료 직후 개발에 착수했지만 실제 양산 판매는 2017년부터였습니다. <strong>진입에 4년이 걸렸고</strong>, 이 시간은 후발주자에게도 똑같이 적용됩니다.</p>
+
+<h4>병목이 유지되는 이유 두 가지</h4>
+
+<ul>
+    <li><strong>기술 진입장벽</strong> — 특허가 만료돼도 양산까지 약 4년</li>
+    <li><strong>고객 락인</strong> — 글로벌 로봇 제조사들이 이미 일본산을 표준으로 채택</li>
+</ul>
+
+<p>그래서 지금 국내 감속기 업체 주가는 <strong>"병목을 뚫을 수 있다는 기대"를 사고 있는 것</strong>이지, 병목의 이익을 이미 가져오고 있는 게 아닙니다. 이 구분이 이 테마에서 가장 헷갈리기 쉬운 부분이라고 생각합니다.</p>
+
+<h4>반대로 마진이 가장 눌리는 구간</h4>
+
+<p>하류 완제품과, 규모가 작은 국내 감속기 전업사입니다. 완제품 업체는 부품을 사와서 조립하니 원가 전가가 어렵고, 감속기 전업사는 생산량이 적어 고정비를 넘기지 못합니다. 에스비비테크의 1분기 매출이 전년 대비 51% 늘었는데도 영업적자가 이어진 게 그 증거입니다.</p>
+
+<blockquote>
+<p>💡 같은 로봇 테마가 떠올라도, <strong>어느 단계에 있느냐</strong>에 따라 실적 개선 폭은 전혀 다릅니다.</p>
+</blockquote>
+
+<hr>
+
+<h2>📊 핵심 종목 비교</h2>
+
+<table>
+    <thead>
+        <tr><th>종목</th><th>단계</th><th>주가<br>(8.14 종가)</th><th>최근 수익성</th><th>테마 매출비중</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>에스피지</strong><br>058610</td><td>중류</td>
+            <td>118,600원<br>(8/14, 분할반영)</td><td>OPM 5.5%<br>1Q26</td><td><strong>7.2%</strong><br>2026E</td>
+        </tr>
+        <tr>
+            <td><strong>로보티즈</strong><br>108490</td><td>중류</td>
+            <td>280,000원<br>(8/14)</td><td>적자전환<br>1Q26</td><td>높음</td>
+        </tr>
+        <tr>
+            <td><strong>삼현</strong><br>437730</td><td>중류</td>
+            <td>40,100원<br>(8/14)</td><td>확인 불가</td><td>낮음<br>(전장 주력)</td>
+        </tr>
+        <tr>
+            <td><strong>현대모비스</strong><br>012330</td><td>중류</td>
+            <td>547,000원<br>(8/14)</td><td>EBITDA 30%<br>2028E</td><td>극소</td>
+        </tr>
+        <tr>
+            <td><strong>에스비비테크</strong><br>389500</td><td>중류</td>
+            <td>41,100원<br>(8/14)</td><td>-104%<br>1Q26</td><td>높음</td>
+        </tr>
+        <tr>
+            <td><strong>엔비알모션</strong><br>0004V0</td><td>상류</td>
+            <td>6,960원<br>(8/14)</td><td>확인 불가</td><td>확인 불가</td>
+        </tr>
+        <tr>
+            <td><strong>레인보우로보틱스</strong><br>277810</td><td>하류</td>
+            <td>501,000원<br>(8/14)</td><td>확인 불가</td><td>100%</td>
+        </tr>
+        <tr>
+            <td><strong>뉴로메카</strong><br>348340</td><td>하류</td>
+            <td>23,600원<br>(8/14)</td><td>확인 불가</td><td>혼합</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>주가는 <strong>8월 14일 종가 기준</strong>입니다. 7월 말 급락 이후 8월 들어 로봇주가 전반적으로 회복했습니다. <strong>에스피지는 3차례 액면분할이 있어</strong> 분할 전 시세(6월 초 13만 원대)와 분할 후 시세를 단순 비교하면 안 됩니다. 8월 19일 레인보우·에스비비테크 실적 발표가 있어 그 뒤 수치가 또 바뀔 수 있습니다.</p>
+
+<blockquote>
+<p>여기서 꼭 보셔야 할 건 <strong>테마 매출비중</strong>입니다. 에스피지의 2026년 예상 로봇 매출은 300억 원, 전체의 7.2%입니다. 나머지 92.8%는 여전히 가전·산업용 모터입니다. 로봇 뉴스에 주가가 20% 넘게 오르는 건 이 7.2%가 앞으로 커진다는 기대 때문이지, 지금 실적 때문이 아닙니다.</p>
+</blockquote>
+
+<hr>
+
+<h2>👀 이 지표만 보고 계시면 됩니다</h2>
+
+<p>주가는 결과고, 아래가 원인입니다.</p>
+
+<table>
+    <thead>
+        <tr><th>#</th><th>지표</th><th>왜 중요한가</th><th>확인처</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>1</td><td><strong>옵티머스 3세대 양산 실제 개시</strong></td><td>3분기 양산 시작이 예고된 상태. 목표가 아니라 실제 라인 가동·출하가 관건. 이게 확인돼야 부품사 수주가 매출로 전환</td><td>테슬라 3분기 실적발표·업데이트</td></tr>
+        <tr><td>2</td><td><strong>국내 업체 분기 매출</strong></td><td>수주 공시와 매출 인식 사이엔 몇 분기 시차가 있음</td><td>DART 분기보고서<br>사업부문별 매출</td></tr>
+        <tr><td>3</td><td><strong>증설 완공·가동 시점</strong></td><td>감속기는 캐파가 곧 매출 (로보티즈 우즈벡, 삼현 2공장)</td><td>DART 신규시설투자 공시</td></tr>
+        <tr><td>4</td><td><strong>대일 수입 물량·단가</strong></td><td>국산화가 진행되면 수입이 줄거나 단가가 내려감</td><td>관세청 무역통계</td></tr>
+        <tr><td>5</td><td><strong>대기업 로봇 투자 발표</strong></td><td>7/22 삼성 전담조직처럼 단기 최강 트리거</td><td>각 사 조직개편·투자 공시</td></tr>
+    </tbody>
+</table>
+
+<p>특히 <strong>2번</strong>을 강조하고 싶습니다. 수주 뉴스와 매출은 다릅니다. 현대모비스 액추에이터 매출은 2027년부터 잡힙니다. 지금 주가는 1년 반 뒤의 숫자를 미리 사고 있는 셈입니다.</p>
+
+<hr>
+
+<h2>⚠️ 리스크 — 이 신호가 나오면 재점검</h2>
+
+<h4>① 양산 일정 지연 (이미 한 차례 발생)</h4>
+<p>휴머노이드 한 대에 약 1만 개의 부품이 들어갑니다. 하나만 막혀도 전체가 밀립니다. 실제로 옵티머스 3세대 공개·양산은 당초 2026년 3월 예정이었다가 3분기로 미뤄졌습니다. 테슬라 경영진도 2분기 컨콜에서 "새 부품이 많아 초기 양산은 느릴 것"이라고 인정했습니다. 일정이 또 밀릴 수 있다는 뜻입니다.</p>
+<ul><li>⚠ <strong>현실화 신호</strong> — 테슬라 실적발표에서 옵티머스 생산 대수를 공개하지 않거나 목표를 하향할 때</li></ul>
+
+<h4>② 기대와 실적의 간극</h4>
+<p>로봇 매출비중 7.2%인 회사가 로봇 기업으로 평가받고 있습니다. 이 간극이 좁혀지는 방법은 둘 중 하나입니다. 매출이 급증하거나, 주가가 내려오거나.</p>
+<ul><li>⚠ <strong>현실화 신호</strong> — 호실적 발표 후에도 주가가 빠지는 패턴이 두 개 분기 연속 나타날 때</li></ul>
+
+<h4>③ 중국의 저가 공세</h4>
+<p>유니트리는 G1을 2,000만 원대에 내놨고, 감속기에서도 리더드라이브 같은 업체가 빠르게 올라오고 있습니다. 국내 업체의 무기가 "일본 대비 30% 저렴"이었는데, 그 자리를 중국이 더 낮은 가격으로 노리고 있습니다.</p>
+<ul><li>⚠ <strong>현실화 신호</strong> — 감속기 판매단가 하락이 실적 코멘트에 등장하거나, 중국 업체의 비중국권 수주 사례가 나올 때</li></ul>
+
+<h4>④ 희토류·소재 공급망</h4>
+<p>액추에이터용 영구자석은 희토류 의존도가 높고 중국 비중이 절대적입니다. 비중국권 공급망을 짜려던 전략이 오히려 원가 부담으로 되돌아올 수 있습니다.</p>
+<ul><li>⚠ <strong>현실화 신호</strong> — 희토류 수출 통제 발표, 네오디뮴 자석 가격 급등</li></ul>
+
+<hr>
+
+<h2>✅ 투자 전 체크리스트</h2>
+
+<ul>
+    <li>이 회사의 <strong>로봇 매출 비중</strong>을 분기보고서에서 직접 확인했는가</li>
+    <li>발표된 것이 <strong>수주</strong>인가, <strong>MOU·공동개발</strong>인가, <strong>양산 프로토</strong>인가 — 셋은 확실성이 전혀 다릅니다</li>
+    <li>그 수주가 <strong>언제 매출로 인식</strong>되는지 확인했는가 (현대모비스는 2027년부터)</li>
+    <li>증설 캐파가 <strong>실제로 가동</strong> 중인가, 아직 착공·계획 단계인가</li>
+    <li>지금 주가가 <strong>7월 말 급등·급락·반등을 거친 뒤 가격</strong>인지 확인했는가 (하루 ±10% 구간이었음)</li>
+</ul>
+
+<hr>
+
+<h2>📋 한 장 요약</h2>
+
+<p>휴머노이드 원가의 절반(약 52%)이 구동계라는 점에서, 로봇 구동부가 이 테마에서 가장 두꺼운 매출 풀을 가진 구간인 건 맞습니다.</p>
+
+<p>그 안에서 대체 불가능한 병목은 정밀 감속기입니다. 나브테스코와 HDS가 75~85%를 쥐고 있고, 2013년 특허 만료 뒤에도 구도가 바뀌지 않은 건 특허가 아니라 가공·열처리 노하우가 장벽이기 때문입니다.</p>
+
+<p>문제는 <strong>병목의 위치와 이익의 위치가 아직 다르다</strong>는 것입니다. 국내 감속기 업체들은 병목을 뚫는 중이지 뚫은 상태가 아닙니다. 그래서 매출이 51% 늘어도 적자가 나고, 영업이익률이 한 자릿수에 머뭅니다.</p>
+
+<p>현재 자료에서 두 자릿수 마진이 확인되는 유일한 구간은 <strong>대량 양산 체제를 갖춘 통합 액추에이터 모듈</strong>입니다(현대모비스 2028년 EBITDA 마진 약 30% 전망). 자동차 부품에서 넘어온 양산 역량이 왜 이 판에서 유리한지 보여주는 대목이라고 봅니다.</p>
+
+<p>확인해야 할 건 뉴스가 아니라 숫자 세 개입니다. <em>옵티머스 실제 생산 대수, 국내 업체의 분기 매출(수주 아님), 증설 가동 시점.</em></p>
+
+<p>이 테마는 <strong>2~3년 시계로 국산화 진척을 추적할 수 있는 분</strong>에게 맞습니다. 반대로 분기 실적으로 바로 검증받길 원하거나 변동성이 부담스러운 분에게는, 지금 구간은 기대가 실적보다 한참 앞서 있습니다.</p>
+
+<hr>
+
+<h2>📚 테마 밸류체인 해부 시리즈</h2>
+
+<ul>
+    <li><strong>이전 편</strong> — 없습니다. 이번이 첫 편입니다.</li>
+    <li><strong>다음 편 예고</strong> — HBM 후공정 또는 전력기기·초고압 변압기</li>
+</ul>
+
+<div class="tag-line">
+#로봇구동부 #감속기 #액추에이터 #밸류체인 #휴머노이드 #로봇관련주 #소부장 #에스피지 #로보티즈 #삼현 #현대모비스 #에스비비테크 #옵티머스 #아틀라스 #피지컬AI
+</div>
+
+<div class="article-footer">
+⚠️ 본 글은 산업 구조 이해를 돕기 위한 개인 리서치 기록이며, 특정 종목의 매수·매도를 권유하는 글이 아닙니다. 수치는 작성 시점(2026년 8월 17일)의 공개 자료 기준이고, 주가는 2026년 8월 14일 종가 기준입니다. 에스피지는 액면분할이 반영된 값입니다. 투자 판단과 그 결과에 대한 책임은 투자자 본인에게 있습니다.
+</div>
+
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAVER(035420) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #03c75a;
+    --dark: #0c1426;
+    --accent2: #1a4a1e;
+    --bg: #f4f7f4;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --naver: #03c75a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header { background: linear-gradient(135deg, #0c1426 0%, #1a3a20 60%, #0a2d15 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #03c75a; color: white; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 30px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.5px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 540px; line-height: 1.6; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 34px; font-weight: 700; margin-top: 6px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; position: relative; overflow: hidden; }
+  .kpi::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #03c75a, #059669); }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; margin-top: 3px; }
+  .kpi-sub.up { color: var(--green); font-weight: 600; }
+  .kpi-sub.down { color: var(--red); font-weight: 600; }
+  .kpi-sub.neutral { color: var(--muted); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: linear-gradient(180deg, #03c75a, #059669); border-radius: 2px; }
+
+  .seg-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .seg-table th { padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--muted); background: #f9fafb; text-transform: uppercase; letter-spacing: 0.05em; }
+  .seg-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  .seg-table tr:last-child td { border-bottom: none; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+  .news-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #e0e7ff; color: #3730a3; }
+  .tag-watch { background: #fef3c7; color: #92400e; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 600; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .buy { background: #dbeafe; color: #1e40af; }
+  .top-pick { background: #d1fae5; color: #065f46; }
+  .target-price { font-weight: 700; font-size: 14px; }
+
+  .dart-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; gap: 12px; }
+  .dart-row:last-child { border-bottom: none; }
+  .dart-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .db-blue { background: #e0e7ff; color: #3730a3; }
+  .db-green { background: #dcfce7; color: #166534; }
+  .db-pink { background: #fce7f3; color: #9d174d; }
+  .db-amber { background: #fef9c3; color: #854d0e; }
+  .db-red { background: #fee2e2; color: #991b1b; }
+  .dart-title { font-size: 13px; font-weight: 500; flex: 1; }
+  .dart-date { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+  .valuation-box { background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .valuation-title { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .upside-bar { background: #e5e7eb; height: 8px; border-radius: 4px; margin: 6px 0; }
+  .upside-fill { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #03c75a, #059669); }
+
+  .summary-box { background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f0f9ff 100%); border: 1px solid #86efac; border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 16px; font-weight: 700; color: var(--accent2); margin-bottom: 0.875rem; display: flex; align-items: center; gap: 8px; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #86efac; }
+
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">035420 · KOSPI · IT서비스</div>
+      <div class="company-name">NAVER</div>
+      <div class="company-desc">한국 1위 인터넷 포털·커머스 플랫폼. 광고·커머스·핀테크·C2C·소버린 AI를 5대 축으로 글로벌 확장 중. 두나무 합병·배민 인수 검토로 대형 M&A 국면 진입.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 30일</div>
+      <div class="price-display">205,000원</div>
+      <div class="price-change down">▼ 52주 최고가(295,000원) 대비 -30.5%</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 33.7조원</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 매수 (23명)</span>
+    <span class="rating-pill">🎯 목표주가 평균: 294,741원 (+43.8%↑)</span>
+    <span class="rating-pill">💰 52주 범위: 185,500 ~ 295,000원</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 매출 (사상 최대)</div>
+      <div class="kpi-value">3조 2,411억</div>
+      <div class="kpi-sub up">YoY +16.3%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익</div>
+      <div class="kpi-value">5,418억</div>
+      <div class="kpi-sub up">YoY +7.2% · OPM 16.7%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">컨센서스 목표가 평균</div>
+      <div class="kpi-value">294,741원</div>
+      <div class="kpi-sub up">현재가 대비 +43.8%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025 연간 영업이익</div>
+      <div class="kpi-value">2조 2,081억</div>
+      <div class="kpi-sub up">YoY +11.6%</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (2026.04.30 발표, 최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div style="background:#f0fdf4;border-radius:10px;padding:1rem;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (1Q 사상 최대)</div>
+        <div style="font-size:20px;font-weight:700;">3조 2,411억 <span style="font-size:11px;color:var(--green);">▲ +16.3% YoY</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">AI 접목 광고·커머스·C2C 동반 성장</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:1rem;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익</div>
+        <div style="font-size:20px;font-weight:700;">5,418억 <span style="font-size:11px;color:var(--green);">▲ +7.2% YoY</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">OPM 16.7% · AI 인프라 투자 영향으로 소폭 둔화</div>
+      </div>
+      <div style="background:#fff1f2;border-radius:10px;padding:1rem;border:1px solid #fecaca;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">순이익</div>
+        <div style="font-size:20px;font-weight:700;">YoY -31% <span style="font-size:11px;color:var(--red);">▼ AI 투자 비용 급증</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">GPU 확보 등 AI 인프라 비용 +32.5%</div>
+      </div>
+    </div>
+    <!-- 부문별 실적 -->
+    <div style="margin-bottom:0.75rem;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">사업 부문별 매출 (1Q26 · 신규 구분 적용)</div>
+      <table class="seg-table">
+        <thead>
+          <tr><th>부문</th><th>매출</th><th>YoY</th><th>주요 내용</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600;">네이버 플랫폼</td>
+            <td>1조 8,398억원</td>
+            <td style="color:var(--green);font-weight:600;">+14.7%</td>
+            <td>검색·디스플레이 광고 + 쇼핑·멤버십·플레이스. AI 브리핑 쿼리 20% 확대 효과</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">파이낸셜 플랫폼 (Npay)</td>
+            <td>4,597억원</td>
+            <td style="color:var(--green);font-weight:600;">+18.9%</td>
+            <td>Npay 결제액 24.2조(+23.4%). 핀테크 고성장 지속</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">글로벌 도전</td>
+            <td>9,416억원</td>
+            <td style="color:var(--green);font-weight:600;">+18.4%</td>
+            <td>C2C 3,511억(+57.7%) · 엔터프라이즈 +18.8%. 왈라팝 신규 편입</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.75;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 8px 8px 0;">
+      <strong>최수연 대표:</strong> "네이버는 AI 에이전트 시대의 핵심 경쟁력인 검색·커머스·결제 인프라를 하나의 흐름으로 보유한 독보적인 플랫폼." — '실행형 AI' 전략으로 쇼핑 에이전트·AI Tab 출시 예정. 3개년 주주환원계획(FCF의 25~35% 자사주 소각 또는 현금배당) 동시 발표.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="dart-row">
+      <span class="dart-badge db-red">해명공시</span>
+      <span class="dart-title">배달의민족 인수 컨소시엄 참여 보도 해명 — "구체적으로 결정된 바 없다"</span>
+      <span class="dart-date">2026.05.19</span>
+    </div>
+    <div class="dart-row">
+      <span class="dart-badge db-blue">분기보고서</span>
+      <span class="dart-title">2026년 1Q 실적 공시 + 3개년 주주환원계획 발표 (FCF 25~35% 환원)</span>
+      <span class="dart-date">2026.04.30</span>
+    </div>
+    <div class="dart-row">
+      <span class="dart-badge db-green">MOU체결</span>
+      <span class="dart-title">네이버클라우드–한미글로벌 MOU — 사우디 글로벌 데이터센터 사업 공동 참여</span>
+      <span class="dart-date">2026.04.24</span>
+    </div>
+    <div class="dart-row">
+      <span class="dart-badge db-pink">주요사항</span>
+      <span class="dart-title">왈라팝 경영권 취득 — NW 홀딩스 주식 9,727억원 취득 (스페인 C2C MAU 1,900만)</span>
+      <span class="dart-date">2025.12.16</span>
+    </div>
+    <div class="dart-row">
+      <span class="dart-badge db-amber">기업결합</span>
+      <span class="dart-title">네이버파이낸셜–두나무 합병 이사회 의결 — 정부 승인 절차 진행 중 (9월 30일 연기)</span>
+      <span class="dart-date">2025.11 ~</span>
+    </div>
+    <div style="font-size:12px;color:#065f46;background:#f0fdf4;padding:8px 12px;border-radius:8px;margin-top:0.75rem;border:1px solid #86efac;">
+      📌 <strong>투자자 주목 공시:</strong> 두나무 합병 진행 중 — 핀테크 대주주 지분 규제(20%·34% 논의 중)가 핵심 변수. 합병 완료 시 업비트(가상자산 거래소)의 수익이 네이버 연결 실적에 반영되며 EPS 급등 가능. 배민 인수 참여 여부도 하반기 중 가시화될 전망.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.30</span>
+      </div>
+      <div class="news-title">1Q26 매출 사상 최대 — AI 접목 광고·커머스·C2C 트리플 성장</div>
+      <div class="news-summary">1분기 매출 3조2,411억원으로 분기 사상 최대 갱신. 네이버 플랫폼(광고·커머스) +14.7%, 파이낸셜 플랫폼 +18.9%, 글로벌 도전(C2C) +18.4%의 균형 잡힌 성장. AI 브리핑이 검색 광고 수익성에 긍정적임이 데이터로 확인됐으며 쿼리의 20%까지 확대됐다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-watch">주목</span>
+        <span class="news-date">2026.05.19 ~</span>
+      </div>
+      <div class="news-title">배민(배달의민족) 인수 검토 — 우버와 8:2 컨소시엄 구성 보도, "결정 없다" 해명</div>
+      <div class="news-summary">딜리버리히어로가 보유한 배민 지분 인수에 네이버·우버 컨소시엄이 거론됐다. 네이버는 공식적으로 "결정된 바 없다"고 해명했으나, "오프라인 데이터 확보가 필요하다"며 검토 의지를 시사. 성사 시 대규모 커머스 시너지 기대이나, 수조원의 현금 소진 리스크도 병존.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.24</span>
+      </div>
+      <div class="news-title">소버린 AI — 사우디 데이터센터·클라우드 사업 MOU 체결, 중동 진출 본격화</div>
+      <div class="news-summary">네이버클라우드가 한미글로벌과 사우디 데이터센터 공동 진출 MOU 체결. 사우디 국부펀드(PIF) 주도 뉴 무라바 스마트시티 디지털 트윈 사업도 진행 중. 세계 3번째 자국어 LLM 보유라는 기술력을 앞세워 중동 소버린 AI 시장을 공략하는 전략. 네이버클라우드 엔터프라이즈 부문이 고성장 중.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-watch">주목</span>
+        <span class="news-date">2026.03 ~</span>
+      </div>
+      <div class="news-title">두나무 합병 정부 승인 절차 진행 중 — 완료 시 업비트 수익 연결 반영</div>
+      <div class="news-summary">네이버파이낸셜과 두나무(업비트 운영사)의 합병이 9월 30일로 연기됐으나 방향성은 유지. 핀테크 대주주 지분 규제(20% 또는 34%) 확정이 관건. 합병 완료 시 업비트의 고수익 구조가 네이버 연결 실적에 직접 반영돼 밸류에이션 재평가 가능성이 크다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2025.08</span>
+      </div>
+      <div class="news-title">왈라팝 인수 완료 — 스페인 최대 C2C 플랫폼, MAU 1,900만명 유럽 거점 확보</div>
+      <div class="news-summary">6,045억원을 투입해 왈라팝 지분 70.5% 추가 확보, 경영권 취득. 포시마크(미국)·크림(한국)·소다(일본)와 함께 글로벌 C2C 4각 편대 완성. 1Q26 C2C 매출이 YoY +57.7% 급증하며 글로벌 전략이 성과를 내고 있다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04.30</span>
+      </div>
+      <div class="news-title">AI 인프라 투자 급증으로 순이익 31% 감소, FCF도 1,500억원 이상 감소</div>
+      <div class="news-summary">GPU 확보 등 AI 인프라 비용이 YoY +32.5% 급증해 영업이익률이 16.7%로 하락. FCF는 3,198억원으로 줄었고 차입금은 3조6,178억원으로 증가. 단기 재무 부담이 확대되고 있으나 AI 수익화 시점에 대한 시장의 기다림이 요구된다.</div>
+    </div>
+  </div>
+
+  <!-- 밸류에이션 -->
+  <div class="valuation-box" style="margin-bottom:1rem;">
+    <div class="valuation-title">📊 밸류에이션 현황 — 목표주가 대비 상승 여력</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1rem;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">현재가</div>
+        <div style="font-size:18px;font-weight:700;">205,000원</div>
+        <div class="upside-bar"><div class="upside-fill" style="width:45%"></div></div>
+        <div style="font-size:11px;color:var(--muted);">52주 저점 대비 위치</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">컨센서스 평균 목표가</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">294,741원</div>
+        <div class="upside-bar"><div class="upside-fill" style="width:73%"></div></div>
+        <div style="font-size:11px;color:var(--green);font-weight:600;">+43.8% 상승 여력</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">최고 목표가</div>
+        <div style="font-size:18px;font-weight:700;color:var(--blue);">400,000원</div>
+        <div class="upside-bar"><div class="upside-fill" style="width:100%;background:linear-gradient(90deg,#2563eb,#7c3aed)"></div></div>
+        <div style="font-size:11px;color:var(--blue);font-weight:600;">+95.1% 상승 여력</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">52주 최고가 대비</div>
+        <div style="font-size:18px;font-weight:700;color:var(--red);">-30.5%</div>
+        <div class="upside-bar"><div style="height:8px;border-radius:4px;background:#dc2626;width:30%"></div></div>
+        <div style="font-size:11px;color:var(--red);">저점 구간 · 역발상 매력</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bull / Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">🤝</span>
+          <span><strong>두나무 합병 완료 = 업비트 수익 연결 반영</strong> — 합병 승인 시 국내 1위 가상자산 거래소 업비트의 고수익이 NAVER 연결 실적에 직접 반영. EPS 급등과 함께 밸류에이션 리레이팅 트리거.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🤖</span>
+          <span><strong>AI 광고·커머스 수익화 가속</strong> — AI 브리핑 쿼리 20% 확대가 광고 수익에 긍정적임 확인. 하반기 쇼핑 에이전트·AI Tab 출시로 커머스 거래액 추가 성장 기대. 광고 단가(CPM) 상승 구조 정착 중.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🌍</span>
+          <span><strong>글로벌 C2C 4각 편대 고성장</strong> — 크림(한국)·포시마크(미국)·왈라팝(유럽)·소다(일본). 1Q26 C2C 매출 +57.7%. 네이버의 기술(AI·검색·결제)을 각 플랫폼에 적용해 추가 수익화 가능.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🏙️</span>
+          <span><strong>소버린 AI 중동 수주 확대</strong> — 사우디 디지털 트윈·클라우드 사업 진출. 네이버는 세계 3번째 자국어 LLM 개발 기업으로 중동·동남아 소버린 AI 수요에 최적 포지션.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">💰</span>
+          <span><strong>주가 저점 + 강력한 주주환원</strong> — 52주 최고가 대비 -30.5%, 컨센서스 목표가 대비 -31%. 3개년 FCF 25~35% 환원 정책으로 주주환원 구조화. 역발상 매수 기회로 볼 수 있는 구간.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>AI 투자 비용 부담 장기화</strong> — GPU 등 AI 인프라 비용 +32.5%, 순이익 -31%, FCF 1,500억 감소. 투자 확대가 실제 매출·수익 성장으로 이어지는 속도가 관건. 수익화 지연 시 밸류에이션 압박 지속.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>두나무 합병 규제 불확실성</strong> — 핀테크 대주주 지분 규제(20%~34% 논의)에 따라 합병 구조가 변동될 수 있음. 합병 연기 또는 구조 변경 시 기대감 후퇴. 9월 30일 기한 내 결론 여부 모니터링 필수.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>구글 AI 검색 국내 침투 위협</strong> — 구글이 크롬에 AI를 내장하며 한국 검색 시장 공략 강화. 네이버의 국내 검색 점유율 잠식 가능성은 광고 매출 성장의 구조적 리스크.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>배민 인수 시 대규모 현금 소진</strong> — 인수가 수조원 규모로 추정. 왈라팝·두나무에 이어 세 번째 대형 M&A가 동시 진행될 경우 재무 부담 가중, 차입금 추가 증가 우려.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>글로벌 C2C 수익 구조 미성숙</strong> — C2C 매출 고성장에도 불구하고 포시마크·왈라팝의 영업이익 기여는 아직 미미. 투자 회수까지의 기간과 수익화 모델 확립이 과제.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem;margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">하나증권 (이준호)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge top-pick">TOP PICK</span>
+        <span class="target-price">목표가 350,000원 (+70.7%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05.05 / 01.09</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 평균 (23명)</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">목표가 평균 294,741원 (+43.8%)</span>
+        <span style="font-size:11px;color:var(--muted);">2026.05 기준</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 최고</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">목표가 최고 400,000원 (+95.1%)</span>
+        <span style="font-size:11px;color:var(--muted);">—</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 최저</span>
+      <div class="analyst-right">
+        <span class="opinion-badge buy">매수</span>
+        <span class="target-price">목표가 최저 230,000원 (+12.2%)</span>
+        <span style="font-size:11px;color:var(--muted);">—</span>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem;padding:10px 12px;background:#f0fdf4;border-radius:8px;font-size:12px;color:#065f46;border:1px solid #86efac;">
+      ✅ 23명 애널리스트 전원 매수 의견 · 매도 0명 · 현재가 대비 컨센서스 평균 상승 여력 <strong>+43.8%</strong>로 코스피 대형주 중 상위권 저평가 상태.
+    </div>
+  </div>
+
+  <!-- 재무 추정 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📊 주요 재무 실적 & 추정</div>
+    <div style="overflow-x:auto;">
+      <table class="seg-table">
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>2024 실적</th>
+            <th>2025 실적</th>
+            <th style="color:#059669;">2026E (컨센서스)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600;">연간 매출</td>
+            <td>10조 7,370억원</td>
+            <td>12조 350억원</td>
+            <td style="font-weight:700;color:#059669;">약 13조 5,000억원</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">YoY 성장률</td>
+            <td>—</td>
+            <td>+12.1%</td>
+            <td style="font-weight:700;color:#059669;">약 +12% 추정</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">영업이익</td>
+            <td>1조 9,786억원</td>
+            <td>2조 2,081억원</td>
+            <td style="font-weight:700;color:#059669;">약 2조 5,000억원 추정</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">OPM</td>
+            <td>~18.4%</td>
+            <td>~18.4%</td>
+            <td style="font-weight:700;color:#059669;">AI 투자 영향으로 단기 하락 후 회복</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">EPS (TTM)</td>
+            <td>—</td>
+            <td>—</td>
+            <td style="font-weight:700;color:#059669;">12,009원 (두나무 합병 이전 기준)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;">* 2026E는 컨센서스 기반 추정치. 두나무 합병 완료 시 EPS 대폭 상향 조정 예상.</div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      NAVER는 2026년 1분기 매출이 사상 최대를 기록하며 AI 접목을 통한 핵심 사업 성장세를 입증했다. 그러나 GPU 등 AI 인프라 투자 비용 급증으로 순이익이 31% 감소하고 주가는 52주 최고가 대비 30% 이상 하락한 저점 구간에 머물러 있다. 현재 주가와 컨센서스 평균 목표가(294,741원) 간의 괴리는 43.8%로, 코스피 대형 IT주 중 가장 큰 편에 속한다. 하반기 핵심 촉매는 두 가지다. 첫째, 두나무 합병 정부 승인으로 업비트의 고수익 구조가 연결 실적에 반영될 경우 EPS가 급등하고 밸류에이션 재평가가 불가피하다. 둘째, 쇼핑 에이전트·AI Tab의 수익화 가시화로 OPM이 회복 궤도에 오르는 시점이 주가 재평가의 분기점이 될 것이다. 글로벌 C2C(크림·포시마크·왈라팝)의 외형 성장과 중동 소버린 AI 수주 확대는 중장기 성장 스토리를 강화한다. 배민 인수는 강력한 오프라인 데이터 확보와 커머스 시너지라는 상방 요인이지만, 재무 부담 확대라는 리스크와 함께 검토해야 한다. <strong>이 종목은 AI 수익화 시점을 6~12개월 호흡으로 기다릴 수 있는 투자자, 두나무 합병이라는 숨겨진 밸류에이션 카탈리스트에 베팅하고 싶은 투자자에게 현 주가 수준은 매력적인 진입 기회가 될 수 있다.</strong>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

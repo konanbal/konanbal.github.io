@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIGER 코리아휴머노이드로봇산업 ETF 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0a2342 0%, #1e3a5f 40%, #0077b6 80%, #00b4d8 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.down { color: #fca5a5; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-sub { font-size: 11px; color: var(--muted); }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  .tag-robot { background: #ede9fe; color: #5b21b6; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 3px; }
+
+  .comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .comp-table th { background: #f1f5f9; color: var(--text); padding: 8px 12px; font-size: 11px; text-align: center; font-weight: 700; }
+  .comp-table td { padding: 8px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .highlight-row td { background: #eff6ff; font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 0148J0 · KRX · 국내주식형</div>
+      <div class="etf-name">TIGER 코리아휴머노이드로봇산업</div>
+      <div class="etf-index">추종 지수: KEDI 코리아 휴머노이드로봇산업 지수 (PR) | 운용사: 미래에셋자산운용</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 21일</div>
+      <div class="nav-display">11,625원</div>
+      <div class="nav-change down">▼ -505원 (-4.16%) 전일 대비</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산(AUM): 약 6,667억원</span>
+    <span class="pill">📋 총보수: 연 0.50% (실부담 0.52%)</span>
+    <span class="pill">📅 상장일: 2026.01.06</span>
+    <span class="pill">🔄 분배 주기: 분기(1·4·7·10월)</span>
+    <span class="pill">🏦 연금투자: 개인연금 100% / 퇴직연금 70%</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">현재가 (5/20 종가)</div>
+      <div class="kpi-value">11,625원</div>
+      <div class="kpi-sub">52주 최고 15,920 / 최저 9,520</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순자산(AUM)</div>
+      <div class="kpi-value" style="font-size:18px;">6,667억원</div>
+      <div class="kpi-sub">상장 후 급성장 (1월 4,445억→)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수 (실부담)</div>
+      <div class="kpi-value" style="font-size:18px;">0.52%</div>
+      <div class="kpi-sub">운용보수 0.469% + 기타 0.048%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">구성 종목 수</div>
+      <div class="kpi-value">15~16개</div>
+      <div class="kpi-sub">리밸런싱: 연 4회 (1·4·7·10월)</div>
+    </div>
+  </div>
+
+  <!-- ===== 구성 종목 ===== -->
+  <div class="card">
+    <div class="card-title">상위 구성 종목 (포트폴리오)</div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">레인보우로보틱스 <span class="tag-robot">로봇 제조</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~13.9%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:93%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">로보티즈 <span class="tag-robot">핵심부품·액추에이터</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~12.4%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:83%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">에스피지 <span class="tag-robot">감속기·구동계</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~11.7%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:78%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">두산로보틱스 <span class="tag-robot">협동로봇</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~10.1%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:68%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">뉴로메카 <span class="tag-robot">협동로봇 (포스코 협력)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~9.8%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:65%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">현대오토에버 <span class="tag-robot">로봇 SW·관제</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~7%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:47%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">7</div>
+      <div class="holding-name">현대무벡스 <span class="tag-robot">물류자동화</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~6%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:40%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">8</div>
+      <div class="holding-name">LG씨엔에스 <span class="tag-robot">AI·시스템통합</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~4.1%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:27%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">9</div>
+      <div class="holding-name">엔젤로보틱스 / 유일로보틱스 외</div>
+      <div class="holding-right">
+        <div class="holding-weight">기타</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:20%"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      ※ 비중은 상장 초기(2026.01 기준) 참고치이며, 리밸런싱 이후 변동 가능 | 종목별 CAP: 15% / 소프트웨어 업종 CAP: 6%
+    </div>
+  </div>
+
+  <!-- ===== 섹터 배분 & 수익률 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">산업 구성 (밸류체인별)</div>
+      <div class="sector-item">
+        <div class="sector-name">🦾 핵심 부품 (액추에이터·감속기·구동계)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~40%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#2196f3;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🤖 로봇 완제품 제조 (완성로봇·협동로봇)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~35%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:88%;background:#4caf50;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">💻 SW·관제·시스템 통합</div>
+        <div class="sector-right">
+          <div class="sector-pct">≤6%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:15%;background:#9c27b0;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🏭 물류자동화·기타</div>
+        <div class="sector-right">
+          <div class="sector-pct">~19%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:48%;background:#ff9800;"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:0.75rem; font-size:11px; color:var(--muted);">
+        ※ NAVER·카카오 등 SW 비중 최소화. 순수(Pure) 휴머노이드 밸류체인 집중 설계
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기간별 수익률 (NAV 기준)</div>
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>기간</th>
+            <th>ETF</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1개월</td><td class="negative">-2.12%</td><td>조정 구간</td></tr>
+          <tr><td>YTD(연초후)</td><td class="positive">+16.3%</td><td>10,000→11,625원</td></tr>
+          <tr><td>상장후(1월~3월 고점)</td><td class="positive">+59.2%</td><td>3월 최고 15,920원</td></tr>
+          <tr><td>상장후(현재)</td><td class="positive">+16.3%</td><td>10,000원 기준</td></tr>
+          <tr><td>52주 최저→최고</td><td class="positive">+67.2%</td><td>9,520→15,920</td></tr>
+          <tr><td>3년 / 5년</td><td colspan="2" style="color:var(--muted);">N/A (2026.01 신규상장)</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:0.75rem; font-size:11px; color:var(--muted);">
+        ※ 2026.01.06 상장 직후 1월 내 43% 수익률 기록. 이후 3월 고점 대비 조정 중
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 유사 ETF 비교 ===== -->
+  <div class="card">
+    <div class="card-title">국내 로봇 ETF 비교 (순자산 순위, 2026.05 기준)</div>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>ETF명</th>
+          <th>운용사</th>
+          <th>순자산</th>
+          <th>투자 대상</th>
+          <th>총보수</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align:left;">KODEX 로봇액티브</td>
+          <td>삼성자산운용</td>
+          <td>1조 2,413억</td>
+          <td>국내·글로벌 로봇</td>
+          <td>N/A</td>
+        </tr>
+        <tr class="highlight-row">
+          <td style="text-align:left;">🏷 TIGER 코리아휴머노이드로봇산업</td>
+          <td>미래에셋</td>
+          <td>7,570억원</td>
+          <td>국내 휴머노이드 Pure</td>
+          <td>0.50%</td>
+        </tr>
+        <tr>
+          <td style="text-align:left;">RISE AI&로봇</td>
+          <td>KB자산운용</td>
+          <td>5,390억원</td>
+          <td>AI·로봇 복합</td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td style="text-align:left;">TIGER 차이나휴머노이드로봇</td>
+          <td>미래에셋</td>
+          <td>4,129억원</td>
+          <td>중국 휴머노이드</td>
+          <td>N/A</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 최근 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.01.06</span>
+      </div>
+      <div class="news-title">상장 15분 만에 초기 설정 물량 완판 — CES 2026 '피지컬 AI' 테마 폭발</div>
+      <div class="news-summary">세계 최대 IT 전시회 CES 2026의 메인 키워드가 '피지컬 AI'로 부각되며, 상장 첫날 개인 투자자 매수가 폭발. 1월 상장 이후 불과 3주 만에 순자산 4,445억원 돌파, 연초 이후 개인 순매수 테마 ETF 1위 기록.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.01.22</span>
+      </div>
+      <div class="news-title">TIGER 휴머노이드 ETF 2종 합산 순자산 9,000억원 돌파</div>
+      <div class="news-summary">미래에셋자산운용 발표. 'TIGER 코리아휴머노이드로봇산업'은 연초 이후 개인 투자자 자금 3,352억원이 유입되며 테마 ETF 중 개인 순매수 1위. 상장 이후 수익률 43%를 기록했다고 공시.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.14</span>
+      </div>
+      <div class="news-title">로봇 ETF 순자산 경쟁 심화 — TIGER 코리아 7,570억으로 2위 도약</div>
+      <div class="news-summary">5월 기준 국내 로봇 ETF 순자산 순위 공개. KODEX 로봇액티브(1조 2,413억) 1위에 이어 TIGER 코리아휴머노이드로봇산업이 7,570억으로 2위. 피지컬 AI 수혜 기대감 지속 속에 자금 유입 이어져.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.03~05</span>
+      </div>
+      <div class="news-title">3월 고점(15,920원) 이후 조정 — 단기 차익 실현 매물 출회</div>
+      <div class="news-summary">3월 중순 고점 대비 약 27% 조정 진행 중(현재 11,625원). 글로벌 증시 불안, 미중 관세 갈등 재개 등 외부 변수가 단기 차익실현 빌미로 작용. 다만 순자산은 지속 증가 추세 유지.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05 (예정)</span>
+      </div>
+      <div class="news-title">한국 정부 M.AX 휴머노이드 투자 6.6조원 규모 — 2028년 양산 로드맵 확정</div>
+      <div class="news-summary">정부는 2025~2027년 100개 이상 실증 사업 추진 후 2028년 본격 양산 계획 발표. 'M.AX 휴머노이드 얼라이언스' 출범으로 레인보우로보틱스(삼성), 로보티즈(LG), 뉴로메카(포스코) 등 ETF 편입 기업이 직접 수혜 예상.</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">📈</span><span><strong>순수(Pure) 휴머노이드 밸류체인 집중:</strong> NAVER·카카오 등 비관련 IT 종목을 배제하고 로봇 부품·제조 기업만 편입해 테마 집중도가 경쟁 ETF 대비 월등히 높음. 소프트웨어 CAP 6% 적용으로 차별화.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🏭</span><span><strong>국내 대기업 협력 생태계 직접 수혜:</strong> 레인보우로보틱스(삼성전자), 로보티즈(LG전자), 뉴로메카(포스코), 두산로보틱스(두산) 등 대기업과 협업 중인 검증된 기업 편입. 양산 단계 전환 시 즉각 매출 발생.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🇰🇷</span><span><strong>한국 정부 32조원 규모 AI·로봇 지원:</strong> 국민성장펀드(150조) 중 5년간 32조원 이상을 AI·로봇 분야에 투입 계획. 2028년 본격 양산을 목표로 100개 이상 실증 사업 진행 중.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌍</span><span><strong>미·중 공급망 재편의 최대 수혜국:</strong> 트럼프 정부가 중국 의존도 낮춘 휴머노이드 로봇 공급망 구축을 추진하면서, 부품 경쟁력을 갖춘 한국 기업이 대안 공급처로 주목. 글로벌 시장 2035년 380억 달러(약 55조원) 전망(골드만삭스).</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💰</span><span><strong>연금 계좌 투자 가능 (개인 100%):</strong> 개인연금 100%, 퇴직연금 70% 투자 허용으로 장기 투자 자금 유입 기반 탄탄. 분기 배당(1·4·7·10월)으로 분배금도 기대.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><strong>높은 총보수(0.50%):</strong> 국내 대형 인덱스 ETF(0.05~0.15%) 대비 10배 수준. 장기 보유 시 비용 부담. 테마 ETF 특성상 어쩔 수 없으나 투자 기간이 길수록 수익률 잠식.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>3월 고점 대비 약 27% 조정 중:</strong> 단기 과열 후 차익 실현 매물 출회. 상장 4개월 만에 52주 고가 15,920원 → 현재 11,625원. 변동성이 극히 높은 소형·테마주 중심 포트폴리오 위험.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🔬</span><span><strong>양산 시기의 불확실성:</strong> 휴머노이드 로봇 대량 양산은 2028년 이후 예상. 현재 편입 종목 대부분이 아직 본격적인 휴머노이드 매출 없이 기대감으로만 주가 형성. 기술·상업화 지연 시 급격한 조정 위험.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🏦</span><span><strong>소수 종목 집중 리스크:</strong> 15개 종목에만 투자하는 소규모 포트폴리오. 상위 5개 종목이 전체의 약 55% 차지. 구성 종목 중 한 개라도 악재 발생 시 ETF 전체에 큰 영향. 추적오차 평균 2.56% 수준으로 다소 높음.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🔻</span><span><strong>경쟁 ETF 증가 및 시장 분산:</strong> 2026년 5월 현재 유사 로봇 ETF가 계속 출시되며 자금이 분산될 가능성. RISE 현대차고정피지컬AI 등 신규 상품 출시가 이어지고 있어 기존 ETF로의 자금 유입이 약화될 수 있음.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 배당/분배금 ===== -->
+  <div class="card">
+    <div class="card-title">배당 / 분배금 현황</div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>분배 기준일</th>
+          <th>분배금(주당)</th>
+          <th>배당수익률(환산)</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>2026년 4월 (예정)</td><td>미정</td><td>N/A</td><td>2회차 분배 예정</td></tr>
+        <tr><td>2026년 1월 (1회차)</td><td>N/A</td><td>N/A</td><td>상장 직후 (미지급 가능)</td></tr>
+        <tr><td colspan="4" style="color:var(--muted); font-size:12px; text-align:left; padding:8px 12px;">※ 2026.01.06 신규 상장 ETF로 분배금 실적 데이터 미집계. 분배 예정일: 1·4·7·10월 마지막 영업일</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      <strong>TIGER 코리아휴머노이드로봇산업(0148J0)</strong>은 미래에셋자산운용이 2026년 1월 6일 출시한 국내 최초 '순수 한국 휴머노이드 로봇 밸류체인' 집중 ETF다. KEDI 코리아 휴머노이드로봇산업 지수(PR)를 추종하며, 레인보우로보틱스·로보티즈·에스피지·두산로보틱스·뉴로메카 등 15개 국내 핵심 기업에 집중 투자한다.<br><br>
+
+      이 ETF의 가장 큰 투자 thesis는 <strong>미·중 공급망 재편의 반사 수혜</strong>다. 트럼프 행정부가 중국 의존을 줄인 휴머노이드 공급망 구축을 추진하는 과정에서, 부품 경쟁력과 대기업 협업 생태계를 갖춘 한국 기업들이 유력한 대안으로 부상하고 있다. 여기에 한국 정부의 150조원 국민성장펀드(AI·로봇 32조원 집중 투입), M.AX 휴머노이드 얼라이언스 출범, 2028년 양산 로드맵이 맞물리며 구조적 성장 동력이 분명하다.<br><br>
+
+      경쟁 ETF 대비 차별점은 <strong>'순수성'</strong>이다. 타 로봇 ETF가 NAVER·카카오 등 일반 IT 플랫폼을 다수 편입하는 것과 달리, 이 ETF는 소프트웨어 업종에 6% CAP을 두고 휴머노이드 로봇이 판매될 때 즉각 매출이 발생하는 순수 부품·제조 기업에만 집중한다. 상장 4개월 만에 순자산 7,570억원(로봇 ETF 2위)을 달성하고 연초 개인 순매수 테마 ETF 1위를 기록한 것이 시장 신뢰를 방증한다.<br><br>
+
+      그러나 리스크도 명확하다. 15개 종목 집중 포트폴리오의 높은 변동성(52주 내 67% 최저→최고 변동), 0.50%의 다소 높은 총보수, 아직 실질 매출보다 기대감 위주인 밸류에이션, 그리고 2028년 이후로 예상되는 양산 시기의 불확실성은 반드시 감안해야 할 요소다. 현재 고점(15,920원) 대비 약 27% 조정된 가격대는 중장기 투자자에게 분할 매수 기회가 될 수 있으나, 단기 변동성이 극히 높은 테마 ETF임을 항상 유의해야 한다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다. 구성종목 비중 등 일부 데이터는 공개된 참고치이며 실시간 데이터와 차이가 있을 수 있습니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

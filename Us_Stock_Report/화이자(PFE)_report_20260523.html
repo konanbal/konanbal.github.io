@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>화이자 (PFE) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #003087;
+    --accent: #003087;
+    --accent2: #00539C;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --teal: #0d9488;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #003087 0%, #00539C 55%, #0077c8 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '💊';
+    position: absolute;
+    right: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 110px;
+    opacity: 0.07;
+    pointer-events: none;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #e8a317; color: #1a1a2e; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.75; max-width: 530px; line-height: 1.6; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.55; }
+  .price-display { font-size: 34px; font-weight: 700; margin-top: 4px; letter-spacing: -1px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .price-change.up { color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); }
+  .rating-pill.highlight { background: #e8a317; color: #1a1a2e; border-color: #e8a317; }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* 배당 강조 박스 */
+  .dividend-hero {
+    background: linear-gradient(135deg, #003087 0%, #0077c8 100%);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    color: white;
+    margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    text-align: center;
+  }
+  .div-item-label { font-size: 11px; opacity: 0.7; margin-bottom: 4px; }
+  .div-item-value { font-size: 22px; font-weight: 700; }
+  .div-item-sub { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-pipeline { background: #ede9fe; color: #4c1d95; }
+  .tag-dividend { background: #fef3c7; color: #78350f; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); color: #1a3a2e; }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); color: #3a1a1a; }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; color: var(--text); }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .target-up { color: var(--green); font-size: 11px; }
+  .target-down { color: var(--red); font-size: 11px; }
+
+  /* 특허절벽 타임라인 */
+  .cliff-timeline { display: flex; flex-direction: column; gap: 8px; }
+  .cliff-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .cliff-year { font-size: 11px; font-weight: 700; color: white; background: var(--red); border-radius: 4px; padding: 2px 8px; min-width: 42px; text-align: center; flex-shrink: 0; }
+  .cliff-bar-wrap { flex: 1; background: #f3f4f6; border-radius: 6px; height: 20px; overflow: hidden; position: relative; }
+  .cliff-bar { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 8px; }
+  .cliff-bar-text { font-size: 11px; font-weight: 600; color: white; white-space: nowrap; }
+  .cliff-amount { font-size: 12px; font-weight: 700; color: var(--red); min-width: 70px; text-align: right; }
+
+  /* 파이프라인 테이블 */
+  .pipeline-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; gap: 8px; }
+  .pipeline-row:last-child { border-bottom: none; }
+  .pipeline-drug { font-weight: 600; min-width: 120px; }
+  .pipeline-indication { flex: 1; color: var(--muted); font-size: 12px; }
+  .phase-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+  .ph3 { background: #dcfce7; color: #14532d; }
+  .ph2 { background: #dbeafe; color: #1e40af; }
+  .launched { background: #fef3c7; color: #78350f; }
+  .pipeline-catalyst { font-size: 11px; color: var(--amber); font-weight: 500; text-align: right; min-width: 80px; }
+
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1px solid #bfdbfe; border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #bfdbfe; line-height: 1.6; }
+
+  .earnings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; }
+  .earnings-box { background: #f8faff; border-radius: 10px; padding: 1rem 1.1rem; border: 1px solid #e0eaf7; }
+  .earnings-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .earnings-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .earnings-beat { font-size: 11px; color: var(--green); font-weight: 600; margin-left: 6px; }
+  .earnings-miss { font-size: 11px; color: var(--red); font-weight: 600; margin-left: 6px; }
+  .earnings-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .filing-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .filing-row:last-child { border-bottom: none; }
+  .filing-type { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-right: 8px; white-space: nowrap; }
+  .ft-10q { background: #e0e7ff; color: #3730a3; }
+  .ft-8k { background: #fce7f3; color: #9d174d; }
+  .ft-8k-pos { background: #d1fae5; color: #065f46; }
+  .ft-8k-warn { background: #fef3c7; color: #92400e; }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .earnings-grid, .dividend-hero { grid-template-columns: 1fr 1fr; }
+    .header-meta { text-align: left; }
+    .price-display { font-size: 26px; }
+    .company-name { font-size: 22px; }
+    .cliff-row { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">PFE · NYSE · 대형 제약</div>
+      <div class="company-name">화이자 (Pfizer Inc.)</div>
+      <div class="company-desc">세계 최대 제약사 중 하나. 종양학(Seagen 인수), 심혈관(Eliquis·Vyndaqel), 백신(Comirnaty·Prevnar), 내과(Ibrance·Paxlovid), 비만(Metsera 인수)을 아우르는 다각화 포트폴리오. 연매출 ~$60B, 350회 연속 분기 배당.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 23일</div>
+      <div class="price-display">$25.86</div>
+      <div class="price-change down">▼ -0.09 (전일 대비)</div>
+      <div style="font-size:11px;opacity:0.55;margin-top:4px;">기준: NYSE 종가 5/22/2026</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$147B</span>
+    <span class="rating-pill">🏢 섹터: 대형 제약 / 바이오파마</span>
+    <span class="rating-pill rating-highlight">💰 배당수익률: 6.6%</span>
+    <span class="rating-pill">📉 P/E: 8.5× (업종 최저 수준)</span>
+    <span class="rating-pill">📅 다음 실적: 2026.08.04</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── 배당 강조 (핵심 투자 포인트 1) ── -->
+  <div class="dividend-hero">
+    <div>
+      <div class="div-item-label">분기 배당 (350회 연속)</div>
+      <div class="div-item-value">$0.43</div>
+      <div class="div-item-sub">6/12 지급 · 5/8 기준일</div>
+    </div>
+    <div>
+      <div class="div-item-label">연간 배당 (TTM)</div>
+      <div class="div-item-value">$1.72</div>
+      <div class="div-item-sub">10년 평균 성장률 +4.4%/yr</div>
+    </div>
+    <div>
+      <div class="div-item-label">배당수익률</div>
+      <div class="div-item-value" style="color:#fbbf24;">6.6%</div>
+      <div class="div-item-sub">업종 평균 2.4%의 2.8배</div>
+    </div>
+    <div>
+      <div class="div-item-label">FY2026 배당 총지급 예상</div>
+      <div class="div-item-value">~$9.7B</div>
+      <div class="div-item-sub">주주환원 최우선 유지</div>
+    </div>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 매출</div>
+      <div class="kpi-value">$14.5B</div>
+      <div class="kpi-sub">컨센서스 +4.7% 초과 / YoY +5.4%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">조정 EPS (Q1)</div>
+      <div class="kpi-value">$0.75</div>
+      <div class="kpi-sub">컨센서스 $0.72 상회 / YoY -18%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">FY2026 매출 가이던스</div>
+      <div class="kpi-value" style="font-size:16px;">$59.5~62.5B</div>
+      <div class="kpi-sub">조정 EPS $2.80~$3.00</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value" style="font-size:16px;">$22.8~$28.7</div>
+      <div class="kpi-sub">현재가는 52주 고점 대비 -10%</div>
+    </div>
+  </div>
+
+  <!-- ── Q1 실적 속보 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q1 2026 (2026.05.05 발표)</div>
+    <div class="earnings-grid">
+      <div class="earnings-box">
+        <div class="earnings-label">매출 (실제 vs 컨센서스)</div>
+        <div class="earnings-value">$14.45B <span class="earnings-beat">▲ +4.7% 초과</span></div>
+        <div class="earnings-sub">컨센서스 $13.92B · 비COVID 포트폴리오 +7% YoY</div>
+      </div>
+      <div class="earnings-box">
+        <div class="earnings-label">조정 EPS (실제 vs 컨센서스)</div>
+        <div class="earnings-value">$0.75 <span class="earnings-beat">▲ 컨센서스 상회</span></div>
+        <div class="earnings-sub">컨센서스 $0.72 · GAAP EPS $0.47 (-9.5% 하회)</div>
+      </div>
+    </div>
+    <!-- 주요 제품 성과 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);">Padcev (방광암)</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">+39%</div>
+        <div style="font-size:10px;color:var(--muted);">YoY 성장</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);">Nurtec (편두통)</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">+41%</div>
+        <div style="font-size:10px;color:var(--muted);">YoY 성장</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);">신규출시·인수 포트</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">+22%</div>
+        <div style="font-size:10px;color:var(--muted);">$3.1B 규모</div>
+      </div>
+      <div style="background:#fff7ed;border-radius:8px;padding:0.75rem;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);">Comirnaty/Paxlovid</div>
+        <div style="font-size:18px;font-weight:700;color:var(--red);">↓급감</div>
+        <div style="font-size:10px;color:var(--muted);">COVID 수요 지속 하락</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.8;background:#fffbf0;border-left:3px solid var(--amber);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:4px;">
+      <strong>CEO Albert Bourla 코멘트:</strong> "2026년 강력한 시작. R&D 파이프라인은 다방면 진전 중이며, Phase 3 양성 결과와 중기 연구 성과가 의미 있는 모멘텀을 만들고 있다. 특히 종양학과 비만 두 분야에서 Pfizer가 선도적 위치를 점할 수 있다고 확신한다." 2026년 전체 매출 가이던스 재확인. 조정 총이익률 76%, 조정 영업이익률 38%(팬데믹 이전 수준 상회). Q1 영업현금흐름 $2.6B.
+    </div>
+  </div>
+
+  <!-- ── SEC 공시 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 및 주요 이벤트</div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-10q">10-Q</span>
+        <span style="font-weight:500;">Q1 2026 분기보고서 (회계분기 종료 2026.03.29)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.05</span>
+    </div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-8k">8-K</span>
+        <span style="font-weight:500;">Q1 2026 실적 발표 — 매출 $14.45B, 조정 EPS $0.75 어닝 비트</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.05</span>
+    </div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-8k-pos">8-K 파이프라인</span>
+        <span style="font-weight:500;">Elrexfio(elranatamab) Phase 3 MagnetisMM-5 양성 톱라인 결과 — 재발성 다발성 골수종</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05월</span>
+    </div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-8k">8-K 배당</span>
+        <span style="font-weight:500;">Q2 2026 배당 $0.43 선언 — 350번째 연속 분기 배당 (6/12 지급)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.22</span>
+    </div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-8k-pos">법적 해결</span>
+        <span style="font-weight:500;">Vyndamax 특허 소송 합의 — 미국 독점 만료 2031년 6월로 연장</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.Q1</span>
+    </div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-8k-warn">지분 매각</span>
+        <span style="font-weight:500;">ViiV Healthcare 지분 $1.875B 매각 완료 — 자금 재배분</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.Q1</span>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#1e3a5f;background:#eff6ff;border-left:3px solid #3b82f6;padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.7;">
+      📌 <strong>투자자 주목:</strong> 10-Q에서 Metsera 인수($8B, 2025년 11월 완료) 상세 회계 처리가 공개됐다. 추가로 $8.42B 규모 종업원 지분 공모 신청서(shelf) 등록 — 잠재적 희석 요인으로 모니터링 필요. Eliquis EU 특허는 2026년 5월 이미 만료됐으며 제네릭 경쟁이 유럽에서 본격화될 전망.
+    </div>
+  </div>
+
+  <!-- ── 특허 절벽 타임라인 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">⏰ 특허 만료 절벽 (LOE) 타임라인 — 핵심 리스크</div>
+    <div class="cliff-timeline">
+      <div class="cliff-row">
+        <span class="cliff-year">2026</span>
+        <div class="cliff-bar-wrap">
+          <div class="cliff-bar" style="width:25%;background:linear-gradient(90deg,#f59e0b,#fbbf24);">
+            <span class="cliff-bar-text">Eliquis(EU 5월 만료) · Xeljanz(미국 중반)</span>
+          </div>
+        </div>
+        <span class="cliff-amount">~$1.5B↓</span>
+      </div>
+      <div class="cliff-row">
+        <span class="cliff-year">2027</span>
+        <div class="cliff-bar-wrap">
+          <div class="cliff-bar" style="width:50%;background:linear-gradient(90deg,#ef4444,#f87171);">
+            <span class="cliff-bar-text">Ibrance(3월 만료) · Eliquis 미국 만료</span>
+          </div>
+        </div>
+        <span class="cliff-amount">~$4.5B↓</span>
+      </div>
+      <div class="cliff-row">
+        <span class="cliff-year">2028</span>
+        <div class="cliff-bar-wrap">
+          <div class="cliff-bar" style="width:80%;background:linear-gradient(90deg,#dc2626,#b91c1c);">
+            <span class="cliff-bar-text">Xtandi · Vyndaqel · Prevnar 만료 — 누적 최대 영향</span>
+          </div>
+        </div>
+        <span class="cliff-amount">~$6B+↓</span>
+      </div>
+      <div class="cliff-row">
+        <span class="cliff-year">2031</span>
+        <div class="cliff-bar-wrap">
+          <div class="cliff-bar" style="width:30%;background:linear-gradient(90deg,#059669,#10b981);">
+            <span class="cliff-bar-text">Vyndamax — 소송 합의로 연장 (기존 2028 → 2031)</span>
+          </div>
+        </div>
+        <span class="cliff-amount" style="color:var(--green);">+호재</span>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#7f1d1d;background:#fff1f2;border-left:3px solid var(--red);padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.7;">
+      ⚠️ <strong>절벽 규모:</strong> 2026~2028년 LOE 예상 누적 매출 손실 약 <strong>$17~18B/년</strong> (2024년 매출의 약 1/3). 파이프라인과 신규 출시 제품이 이 공백을 메울 수 있느냐가 투자 핵심 테제.
+    </div>
+  </div>
+
+  <!-- ── 주요 파이프라인 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🔬 주요 파이프라인 & 성장 카탈리스트</div>
+    <div class="pipeline-row">
+      <span class="pipeline-drug">Padcev</span>
+      <span class="pipeline-indication">방광암 (Seagen 인수) — 근침윤성 방광암 적응증 우선심사 진행 중</span>
+      <span class="phase-badge launched">출시</span>
+      <span class="pipeline-catalyst">2026 FDA 결정</span>
+    </div>
+    <div class="pipeline-row">
+      <span class="pipeline-drug">Elrexfio</span>
+      <span class="pipeline-indication">재발성·불응성 다발성 골수종 — Phase 3 MagnetisMM-5 양성 발표</span>
+      <span class="phase-badge ph3">Phase 3 ✓</span>
+      <span class="pipeline-catalyst">FDA 제출 예정</span>
+    </div>
+    <div class="pipeline-row">
+      <span class="pipeline-drug">MET-097i (Metsera)</span>
+      <span class="pipeline-indication">비만 — 월 1회 투여 GLP-1 수용체 작용제 차세대 후보</span>
+      <span class="phase-badge ph3">Phase 3 개시</span>
+      <span class="pipeline-catalyst">첫 승인 목표 2028</span>
+    </div>
+    <div class="pipeline-row">
+      <span class="pipeline-drug">tilrekimig</span>
+      <span class="pipeline-indication">아토피 피부염 — Phase 3 삼중항체 연구 개시 예정</span>
+      <span class="phase-badge ph2">Phase 2→3</span>
+      <span class="pipeline-catalyst">2026 피벗 시작</span>
+    </div>
+    <div class="pipeline-row">
+      <span class="pipeline-drug">Lorbrena</span>
+      <span class="pipeline-indication">ALK+ 비소세포폐암 — 시장점유율 확대 중</span>
+      <span class="phase-badge launched">출시</span>
+      <span class="pipeline-catalyst">Q4 2025 +38%</span>
+    </div>
+    <div class="pipeline-row">
+      <span class="pipeline-drug">25vPnC</span>
+      <span class="pipeline-indication">25가 폐렴구균 접합 백신 — Phase 2/3 영아 대상 연구 진행</span>
+      <span class="phase-badge ph3">Phase 2/3</span>
+      <span class="pipeline-catalyst">Prevnar 후속</span>
+    </div>
+    <div style="margin-top:12px;padding:10px 14px;background:#f0fdf4;border-radius:8px;font-size:12px;color:#1a3a2e;line-height:1.7;">
+      🧬 <strong>2026 파이프라인 계획:</strong> 약 20개 피벗 연구 개시 · 주요 데이터 리드아웃 8개 이상 예정. 종양학 블록버스터 8개 목표(2030년) · 비만 포트폴리오 Phase 3 10개 연구 진행. CEO Bourla: "2028년부터 고단위 5년 매출 성장 달성 목표."
+    </div>
+  </div>
+
+  <!-- ── 주요 뉴스 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.05</span>
+      </div>
+      <div class="news-title">Q1 2026 매출·EPS 어닝 비트 — 비COVID 포트폴리오 +7%, 가이던스 재확인</div>
+      <div class="news-summary">매출 $14.45B로 컨센서스 $13.92B를 +4.7% 상회. Padcev +39%, Nurtec +41%, 신규출시제품 전체 +22%. 비COVID 기반 사업이 견조하게 성장하며 COVID 제품 매출 감소를 일부 상쇄. FY2026 매출 $59.5B~$62.5B, 조정 EPS $2.80~$3.00 가이던스 재확인. 조정 영업이익률 38%(팬데믹 이전 수준 상회).</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-pipeline">파이프라인</span>
+        <span class="news-date">2026.05월</span>
+      </div>
+      <div class="news-title">Elrexfio Phase 3 MagnetisMM-5 양성 결과 — 재발성 다발성 골수종 1차 치료</div>
+      <div class="news-summary">elranatamab(Elrexfio)이 최소 1회 이상 기존 치료를 받은 재발성·불응성 다발성 골수종 환자 대상 Phase 3에서 1차 평가변수를 유의미하게 달성. Seagen 인수로 확보한 이중항체 플랫폼의 가치를 또 한 번 입증했으며, FDA 제출을 통한 적응증 확대가 이어질 전망.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.Q1</span>
+      </div>
+      <div class="news-title">Vyndamax 특허 합의 — 미국 독점 만료 2028년 → 2031년 6월로 3년 연장</div>
+      <div class="news-summary">심근병증 치료제 Vyndamax 특허 합의로 제네릭 진입이 2031년까지 봉쇄됐다. 기존 LOE 우려를 크게 완화하는 발전으로, 연간 $3B+ 규모 프랜차이즈의 현금흐름이 3년 더 보호된다. 특허 절벽 전체 규모 추산에서 Vyndamax 몫이 제거된 것이 긍정적.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05월</span>
+      </div>
+      <div class="news-title">유럽 집행위, Hympavzi 적응증 확대 승인 — Pfizer 면역학 사업 강화</div>
+      <div class="news-summary">EC가 Hympavzi(marstacimab)의 마케팅 승인을 확장, 면역·염증 분야 포트폴리오를 강화한다. Pfizer의 비만·종양학 외 면역학 사업이 유럽에서도 성장 동력을 확보한 사례.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05월</span>
+      </div>
+      <div class="news-title">Eliquis EU 특허 5월 만료 — 유럽 제네릭 경쟁 본격화 시작</div>
+      <div class="news-summary">연 $6~7B 규모 Pfizer 최대 단일 매출원 Eliquis의 EU 특허가 2026년 5월 만료됐다. 유럽에서 제네릭 경쟁이 즉시 시작되며, 미국 특허도 late-2026~2028년 순차 만료 예정. 이미 알려진 리스크이나 수익 감소가 현실화되는 시점에 진입했다.</div>
+    </div>
+  </div>
+
+  <!-- ── 투자 포인트 ── -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>P/E 8.5× + 배당수익률 6.6% — 역대급 저평가</strong> — 업종 평균 P/E 15~20×에 비해 절반 수준. 배당수익률 6.6%는 업종 평균 2.4%의 2.8배. 파이프라인 가치를 제외하고도 배당만으로 투자금의 상당 부분을 회수 가능한 인컴 투자 구조.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>Seagen 종양학 자산이 예상 이상 성과 — Padcev +39%</strong> — $43B 인수 당시 '비싸다'는 평가를 반박하는 수준의 실적. ADC(항체약물결합체) 플랫폼의 Padcev·Tukysa·Adcetris·Tivdak가 여러 암 적응증에서 동시 성장. 2030년까지 종양학 블록버스터 8개 목표.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>비만 파이프라인(Metsera) — GLP-1 시장 후발 진입 가능성</strong> — 월 1회 투여 장기 지속형 GLP-1 agonist MET-097i는 주 1회 주사의 위고비·오젬픽 대비 편의성 우위. Phase 3 진입 중, 2028년 첫 승인 목표. 성공 시 Pfizer에 전혀 새로운 성장 엔진.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>Vyndamax 특허 2031 연장 — 최대 리스크 하나 제거</strong> — $3B+/년 규모 Vyndaqel/Vyndamax 프랜차이즈가 3년 더 보호. 총 LOE 규모가 축소되며, 2028년 절벽의 충격이 기존 예상보다 완화됐다.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>2026년 20개 피벗 연구 시작 — 카탈리스트가 풍부</strong> — 상반기~하반기 파이프라인 데이터 발표가 지속돼 주가 촉매가 줄을 잇는다. 어느 하나라도 성공 시 PFE 재평가 가능. 현재 주가는 파이프라인 성공을 거의 반영하지 않는 수준.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>2026~2028 특허 절벽 누적 $17~18B — 파이프라인이 못 따라가면 위기</strong> — Eliquis, Ibrance, Vyndaqel, Xtandi가 순차 만료되며 연간 매출의 30% 가까이 리스크에 노출. 파이프라인이 이를 보완하지 못하면 매출 급감·배당 삭감 가능성.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>배당 지속가능성 우려 — 현재 EPS 대비 페이아웃 비율 126%</strong> — 조정 EPS 기준이 아닌 GAAP EPS($0.47)로 계산하면 분기 배당 $0.43이 수익을 초과. EPS가 예상대로 2026~2028년 -10% 이상 하락하면 배당 삭감 압력이 커질 수 있다.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>비만 파이프라인 2번 실패 후 재도전 — Metsera 신뢰도 과제</strong> — Pfizer는 경구 GLP-1 개발에서 2번 좌절했다. Metsera 자산(주사형)은 전략을 바꿨지만, 노보노디스크·일라이릴리와의 경쟁에서 후발주자의 불리함이 크다. 2028년 승인 전까지 3년 이상 불확실성 지속.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>COVID 포트폴리오 지속 약화 + IRA 약가 협상 리스크</strong> — Comirnaty·Paxlovid 매출 급감은 이미 진행형. 인플레이션 감소법(IRA)에 따른 약가 협상이 핵심 의약품에 적용될 경우 추가 매출 압박. 정치적 불확실성 상존.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>GAAP EPS 지속 감소 + $8.42B 직원지분 등록 잠재 희석</strong> — 조정 EPS $2.90이 아닌 GAAP 기준 수익성은 이미 약화. $8.42B 규모 종업원 지분 공모 신청서가 등록되어 있어 주식 희석 리스크 존재. EPS 3년간 연 -13% 예상(컨센서스).</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 애널리스트 의견 ── -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <div style="background:#f0fdf4;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">컨센서스</div>
+        <div style="font-size:18px;font-weight:700;color:#065f46;">Buy</div>
+        <div style="font-size:11px;color:var(--muted);">11명 매수 / 3명 매도</div>
+      </div>
+      <div style="background:#f8faff;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #dde8f7;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">평균 목표주가</div>
+        <div style="font-size:18px;font-weight:700;">$29.19</div>
+        <div style="font-size:11px;color:var(--green);">현재가 대비 +12.9%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #dde8f7;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">시나리오 목표가</div>
+        <div style="font-size:14px;font-weight:600;">강세 $32~35</div>
+        <div style="font-size:11px;color:var(--muted);">기본 $26~28 / 약세 $20</div>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wolfe Research</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$26</span><span style="font-size:11px;color:var(--muted);">↑ from $25 (5월 상향)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Simply Wall St 집계</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy (컨빅션)</span><span class="target-price">$29~$36</span><span class="target-up">P/E 8× 저평가 강조</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 강세 시나리오</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$32~$35</span><span class="target-up">+24~+35%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 기본 시나리오</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$26~$28</span><span style="font-size:11px;color:var(--muted);">현재가 +1~8%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 약세 시나리오</span>
+      <div class="analyst-right"><span class="opinion-badge sell">매도</span><span class="target-price">$20</span><span class="target-down">-23%</span></div>
+    </div>
+    <div style="margin-top:12px;padding:10px 14px;background:#f9fafb;border-radius:8px;font-size:12px;color:var(--muted);line-height:1.6;">
+      * Morningstar 정량: P/E 8.5×, P/S 2.34× — 동종 업계 최저 수준의 밸류에이션. 35개 이상 기관이 커버리지 중 (평균 목표 $29). 3년간 연 -13% EPS 하락 컨센서스가 낮은 멀티플의 이유. 배당 지속과 파이프라인 성공이 재평가의 조건.
+    </div>
+  </div>
+
+  <!-- ── 종합 요약 ── -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      화이자(PFE)는 현재 대형 제약 역사상 가장 극적인 전환점을 지나고 있다. COVID 특수가 끝나고, 핵심 의약품의 특허 만료라는 이중 파고를 맞닥뜨리고 있지만, P/E 8.5×·배당수익률 6.6%는 이미 최악의 시나리오를 상당 부분 주가에 반영한 수준이다. Q1 2026에서 매출·조정 EPS 모두 컨센서스를 상회하며 가이던스를 재확인한 것은 기반 사업의 견조함을 보여준다. Padcev +39%, Nurtec +41%, 신규출시제품 전체 +22%의 성장은 Seagen 인수 통합이 순조롭게 진행되고 있음을 입증한다.
+      <br><br>
+      투자 핵심 테제는 두 가지다. ① Seagen 종양학 ADC 플랫폼이 2027~2028년 Eliquis·Ibrance 특허 절벽을 얼마나 보완하는가, ② Metsera GLP-1 자산이 2028년 승인에 성공해 비만 시장의 후발주자 진입에 성공할 수 있는가. 둘 중 하나만 성공해도 현재 주가는 현저히 저평가다.
+      <br><br>
+      <strong>결론:</strong> PFE는 배당(6.6%)을 받으며 파이프라인 카탈리스트를 기다릴 수 있는 인컴+가치 투자자에게 가장 적합한 종목이다. 특히 포트폴리오에 고배당 방어주가 필요한 투자자, 또는 바이오파마 파이프라인 베팅을 원하는 투자자 모두에게 진입 구간이다. 단, GAAP 기준 EPS 하락과 배당 지속가능성 우려는 지속적으로 모니터링해야 한다. 8월 4일 Q2 실적 발표와 하반기 Phase 3 데이터 리드아웃이 단기 주가 방향을 결정할 것이다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. 의약품 임상시험 결과는 불확실하며, 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 데이터 기준일: 2026년 5월 23일.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

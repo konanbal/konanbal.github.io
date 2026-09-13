@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NXP Semiconductors (NXPI) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">NXPI · NASDAQ</div>
+      <div class="company-name">NXP Semiconductors N.V.</div>
+      <div class="company-desc">자동차·산업 IoT·모바일·통신 인프라용 반도체 솔루션 전문 글로벌 팹리스. 소프트웨어 정의 차량(SDV) 및 엣지 AI 리더십 강화 중.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 06월 03일</div>
+      <div class="price-display">$311.38</div>
+      <div class="price-change down">▼ -3.1% (6월 01일 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$78.6B</span>
+    <span class="rating-pill">🏢 섹터: 반도체 (Semiconductors)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy</span>
+    <span class="rating-pill">📅 다음 실적 발표: 2026.07.28</span>
+  </div>
+</div>
+<div class="container">
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 매출</div>
+      <div class="kpi-value">$3.18B</div>
+      <div class="kpi-sub">YoY +12%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Non-GAAP 영업이익률</div>
+      <div class="kpi-value">33.1%</div>
+      <div class="kpi-sub">전년 Q1 31.9%→개선</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$302.39</div>
+      <div class="kpi-sub">32개 애널리스트 평균</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$183~$340</div>
+      <div class="kpi-sub">현재가: 52주 고점 근방</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 섹션 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q1 2026 (2026년 4월 28일 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$3.18B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +0.95%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $3.15B · YoY +12%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Non-GAAP EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$3.05 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +2.35%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $2.98 · YoY +15.5%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>Q2 2026 가이던스:</strong> 매출 $3.35B~$3.55B (중간값 $3.45B, YoY +18%). Non-GAAP EPS $3.29~$3.72 (중간값 $3.50). 월가 예상치를 크게 상회하는 가이던스 제시. CEO Rafael Sotomayor: "모든 핵심 사업부에서 광범위한 개선이 이루어졌으며, 나머지 2026년 전반에 걸쳐 모멘텀이 가속화될 것"이라고 발언.
+    </div>
+    <!-- 사업부별 매출 -->
+    <div style="margin-top:0.75rem;display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;">
+      <div style="background:#f0fdf4;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">Automotive</div>
+        <div style="font-size:14px;font-weight:700;">$1.782B</div>
+        <div style="font-size:10px;color:var(--green);">YoY +6%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">Industrial &amp; IoT</div>
+        <div style="font-size:14px;font-weight:700;">$628M</div>
+        <div style="font-size:10px;color:var(--green);">YoY +24%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">Mobile</div>
+        <div style="font-size:14px;font-weight:700;">$391M</div>
+        <div style="font-size:10px;color:var(--green);">YoY +16%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:6px;padding:8px 10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">Comm. Infra. &amp; Other</div>
+        <div style="font-size:14px;font-weight:700;">$380M</div>
+        <div style="font-size:10px;color:var(--green);">YoY +21%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 공시 섹션 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 SEC 공시</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">Form 10-Q — Q1 2026 분기보고서 제출 (TTTech Auto 인수 완료 반영)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.01</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">3.875% 선순위채권 $750M 상환 완료</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.20</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#d1fae5;color:#065f46;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Q1 2026 실적 발표 — 매출 $3.18B, Non-GAAP EPS $3.05 어닝 서프라이즈</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.28</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">MEMS 센서 사업부 매각 완료, 현금 $878M 수령, 처분이익 $627M 인식</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.02</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">DEF 14A</span>
+        <span style="font-size:13px;font-weight:500;">2026년 6월 10일 연례 주주총회 소집 통지 및 위임장 자료 배포</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.27</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:0.75rem;padding:8px 10px;background:#f8faff;border-radius:6px;">
+      📌 <strong>투자자 주목:</strong> MEMS 사업부 매각($878M)으로 확보한 재원을 활용해 부채 상환($750M 채권 조기 상환 포함)을 적극 진행 중. 순 재무 레버리지가 1.9x → 1.7x로 개선됨.
+    </div>
+  </div>
+
+  <!-- 뉴스 섹션 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.28</span>
+      </div>
+      <div class="news-title">Q1 2026 어닝 서프라이즈 — 4월 한 달간 주가 +49.1% 급등</div>
+      <div class="news-summary">매출·EPS 모두 컨센서스 상회, Q2 가이던스도 월가 예상을 크게 넘어섰다. 자동차·산업 IoT 중심의 광범위한 성장 회복이 투자심리를 강하게 자극했으며, Needham·Truist·KeyBanc·Cantor Fitzgerald 등 다수 증권사가 목표주가를 상향 조정했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.03.16</span>
+      </div>
+      <div class="news-title">NVIDIA와 협업 — 로보틱스용 실시간 데이터 처리·고급 네트워킹 솔루션 발표</div>
+      <div class="news-summary">NXP가 NVIDIA와 협력해 신뢰성 높은 실시간 데이터 처리 및 센서 융합 솔루션을 개발. Physical AI 시대의 로봇·자율시스템 시장에서 존재감을 키우는 전략의 일환으로, 장기 성장 동력 확보에 기여한다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.01.05</span>
+      </div>
+      <div class="news-title">S32N7 슈퍼 통합 프로세서 공개 — SDV 시대의 핵심 제품</div>
+      <div class="news-summary">완성차 업체들이 차량 내 핵심 기능을 디지털화할 수 있는 차세대 고집적 프로세서를 출시. 소프트웨어 정의 차량(SDV) 시장 리더십을 강화하는 전략적 신제품으로, 중장기 차량용 반도체 매출 성장의 핵심 드라이버가 될 전망이다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.01.06</span>
+      </div>
+      <div class="news-title">GE HealthCare와 협업 — 엣지 AI 혁신 공동 개발 발표</div>
+      <div class="news-summary">NXP의 엣지 AI 역량을 의료기기 분야로 확장하는 파트너십. eIQ Agentic AI 프레임워크도 동시 발표하며 산업·IoT 세그먼트 내 고부가가치 AI 솔루션 포지셔닝을 강화하고 있다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.06.01</span>
+      </div>
+      <div class="news-title">주가 단기 조정 — 내부자 매도 $2.5M 포착, 밸류에이션 부담 논의</div>
+      <div class="news-summary">최근 3개월간 내부자 매수 없이 약 $2.5M 규모 내부자 매도 발생. 일부 분석기관은 현재 주가가 GF Value 대비 36% 프리미엄 수준이라 지적하며 추가 상승 여력에 대한 논쟁이 이어지고 있다.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>SDV·Physical AI 핵심 공급업체 — S32N7 프로세서, NVIDIA 협업 등 자동차·로보틱스 AI 컴퓨팅 시장에서 독보적 포지션 구축 중</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>데이터센터 매출 고성장 — 2025년 $200M → 2027년 $500M 목표. AI 인프라 수요와 맞물린 비자동차 부문의 새로운 성장축</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>전 사업부 동반 회복 — Industrial &amp; IoT +24%, Mobile +16%, Comm. Infra. +21%로 자동차 의존도 탈피, 포트폴리오 다각화 가속</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>자본 배분 우수 — MEMS 사업 매각($878M), 부채 상환, 자사주 매입, 배당 유지 등 주주가치 제고 의지 강함</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>마진 확장 기조 — Non-GAAP 총이익률 57%대 안정, Q2 가이던스에서 58%대 추가 개선 제시</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>자동차 시장 의존도 — 매출의 56%가 Automotive 세그먼트. 글로벌 차량 생산 둔화 또는 EV 침투율 변동 시 직접적 타격 불가피</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>밸류에이션 부담 — 52주 최고 근방에서 거래 중이며, 일부 기관은 내재가치(DCF) 대비 현저한 프리미엄으로 평가. 실적 기대치 충족 실패 시 급락 위험</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>중국 노출 리스크 — 중국이 주요 매출 지역 중 하나로, 미·중 무역 갈등·반도체 수출 규제 확대 시 중국 고객 수요 위축 가능</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>채널 재고 증가 — 유통 채널 재고가 10주 → 11주로 증가. 수요 선행 지표로 다소 경계할 필요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026년 4~5월 최신 업데이트)</div>
+    <div class="analyst-row"><span class="analyst-firm">Cantor Fitzgerald (Matthew Prisco)</span><div class="analyst-right"><span class="opinion-badge buy">Overweight</span><span class="target-price">$380</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">KeyBanc (John Vinh)</span><div class="analyst-right"><span class="opinion-badge buy">Overweight</span><span class="target-price">$345</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">Barclays</span><div class="analyst-right"><span class="opinion-badge buy">Overweight</span><span class="target-price">$340</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">TD Cowen</span><div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$310</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">Truist (William Stein)</span><div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$310</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">Needham</span><div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">$300</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">Mizuho</span><div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price">$285</span></div></div>
+    <div class="analyst-row"><span class="analyst-firm">Wells Fargo (Joe Quatrochi)</span><div class="analyst-right"><span class="opinion-badge hold">Equal Weight</span><span class="target-price">$265</span></div></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:0.75rem;padding:8px;background:#f8faff;border-radius:6px;">
+      컨센서스: Buy (32개 애널리스트 평균 목표주가 $302.39) · Q2 2026 EPS 컨센서스 $3.55, 매출 컨센서스 $3.51B
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      NXP Semiconductors는 2026년 1분기 매출 $3.18B(+12% YoY), Non-GAAP EPS $3.05로 컨센서스를 초과 달성하며 뚜렷한 회복 신호를 보내고 있다. 전통 강점인 자동차 반도체 외에도 Industrial &amp; IoT(+24%), 통신 인프라(+21%) 등 전 세그먼트가 두 자릿수 성장을 기록했다는 점이 특히 고무적이다. S32N7 프로세서, NVIDIA와의 로보틱스 협업, GE HealthCare와의 엣지 AI 파트너십 등을 통해 소프트웨어 정의 차량(SDV)과 Physical AI 생태계 내 핵심 공급업체로 자리를 굳히고 있으며, 데이터센터 매출도 2027년 $500M을 향해 빠르게 성장 중이다. MEMS 사업 매각 및 잇단 부채 상환으로 재무구조도 개선됐다. 다만 현재 주가는 52주 최고가 부근에서 거래되며 밸류에이션 부담이 존재하고, 매출의 절반 이상을 차지하는 자동차 시장 동향과 중국 지정학적 리스크는 지속 모니터링이 필요하다. 본 종목은 반도체 업종 내 AI·SDV 테마와 견고한 배당(수익률 ~1.35%)을 동시에 추구하는 중장기 투자자에게 적합하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

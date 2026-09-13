@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>강세장이 끝날 때 청구서가 온다 — 벤자민 그레이엄</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f9f9f7; min-height: 100vh; display: flex; justify-content: center; padding: 3rem 1.5rem; font-family: 'Noto Sans KR', sans-serif; }
+    .blog-wrap { color: #1a1a1a; max-width: 680px; width: 100%; background: #ffffff; border-radius: 16px; padding: 3rem 3.5rem 4rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05); }
+    .cat-tag { display: inline-block; font-size: 12px; font-weight: 500; letter-spacing: .06em; color: #1a56a0; background: #e8f0fb; padding: 4px 12px; border-radius: 20px; margin-bottom: 1.2rem; }
+    .blog-title { font-family: 'Noto Serif KR', serif; font-size: 26px; font-weight: 700; line-height: 1.45; color: #1a1a1a; margin-bottom: .7rem; }
+    .blog-subtitle { font-size: 15px; color: #666666; line-height: 1.7; margin-bottom: 1rem; }
+    .meta { font-size: 12px; color: #999999; margin-bottom: 2rem; display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-quote { border-left: 3px solid #4a8fd4; background: #f6f6f4; border-radius: 0 8px 8px 0; padding: 1.4rem 1.6rem; margin: 0 0 2.2rem; }
+    .hero-quote p { font-family: 'Noto Serif KR', serif; font-size: 17px; font-weight: 600; line-height: 1.8; color: #1a1a1a; margin-bottom: .6rem; }
+    .hero-attr { font-size: 13px; color: #666666; }
+    .sec-title { font-family: 'Noto Serif KR', serif; font-size: 17px; font-weight: 700; color: #1a1a1a; margin: 2rem 0 .8rem; padding-bottom: .4rem; border-bottom: 0.5px solid #e0e0e0; }
+    .body-p { font-size: 14.5px; line-height: 1.9; color: #1a1a1a; margin-bottom: .9rem; }
+    .body-p strong { font-weight: 500; }
+    .info-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 1.5rem 0 2rem; }
+    .info-card { background: #f6f6f4; border-radius: 8px; padding: .9rem 1rem; text-align: center; }
+    .info-card .ic-label { font-size: 11px; color: #999999; margin-bottom: 4px; }
+    .info-card .ic-val { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+    .principle-list { list-style: none; padding: 0; margin: 1rem 0 2rem; }
+    .principle-list li { display: flex; align-items: flex-start; gap: 12px; padding: 1rem 0; border-bottom: 0.5px solid #e0e0e0; }
+    .principle-list li:last-child { border-bottom: none; }
+    .p-num { min-width: 28px; height: 28px; border-radius: 50%; background: #e8f0fb; color: #1a56a0; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; margin-top: 1px; flex-shrink: 0; }
+    .p-text { font-size: 14px; line-height: 1.8; color: #1a1a1a; }
+    .p-text strong { font-weight: 500; }
+    .closing-quote { border-top: 0.5px solid #e0e0e0; padding-top: 1.8rem; margin-top: .5rem; text-align: center; }
+    .closing-quote p { font-family: 'Noto Serif KR', serif; font-size: 15px; font-style: italic; color: #666666; line-height: 1.9; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.8rem; }
+    .tag { font-size: 12px; color: #666666; border: 0.5px solid #cccccc; padding: 4px 10px; border-radius: 20px; }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 21px; }
+      .hero-quote p { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+  <span class="cat-tag">투자 철학</span>
+  <h1 class="blog-title">강세장이 끝날 때 청구서가 온다</h1>
+  <p class="blog-subtitle">벤자민 그레이엄이 경고한 탐욕의 역설 — 가장 많이 번 사람이 가장 많이 잃는 이유</p>
+  <div class="meta">
+    <span>2025년 5월</span>
+    <span>읽기 약 4분</span>
+    <span>가치 투자 · 리스크 관리</span>
+  </div>
+
+  <div class="hero-quote">
+    <p>"강세장에서 최대의 도박으로 최대 이익을 얻은 자는 필연적으로 뒤따르는 약세장에서 가장 큰 손실을 본다"</p>
+    <span class="hero-attr">— 벤자민 그레이엄 (Benjamin Graham, 1894–1976)</span>
+  </div>
+
+  <p class="sec-title">월스트리트의 아버지가 남긴 역설</p>
+  <p class="body-p">벤자민 그레이엄은 '가치 투자의 아버지'로 불립니다. 워런 버핏의 스승이기도 한 그는 컬럼비아 대학교에서 수십 년간 투자론을 강의하며 <strong>《현명한 투자자(The Intelligent Investor)》</strong>를 집필했습니다. 1929년 대공황을 직접 경험한 그는, 시장의 호황이 오히려 위험을 키운다는 사실을 누구보다 가슴 깊이 알았습니다.</p>
+  <p class="body-p">이 명언은 단순한 경고가 아닙니다. 강세장에서 가장 큰 수익을 올린 사람이 왜 이후 약세장에서 가장 큰 피해를 보는지, 그 구조적 이유를 담고 있습니다.</p>
+
+  <p class="sec-title">그레이엄 인물 카드</p>
+  <div class="info-card-grid">
+    <div class="info-card"><div class="ic-label">생몰연도</div><div class="ic-val">1894 – 1976</div></div>
+    <div class="info-card"><div class="ic-label">별칭</div><div class="ic-val">가치 투자의 아버지</div></div>
+    <div class="info-card"><div class="ic-label">대표 저서</div><div class="ic-val">현명한 투자자</div></div>
+    <div class="info-card"><div class="ic-label">저명한 제자</div><div class="ic-val">워런 버핏</div></div>
+    <div class="info-card"><div class="ic-label">핵심 개념</div><div class="ic-val">안전 마진(Margin of Safety)</div></div>
+  </div>
+
+  <p class="sec-title">명언이 가리키는 세 가지 구조</p>
+  <ul class="principle-list">
+    <li>
+      <div class="p-num">1</div>
+      <div class="p-text"><strong>과도한 레버리지의 귀환</strong> — 강세장에서 빚을 내 수익을 극대화한 투자자일수록, 약세장에서 반대 방향의 레버리지 효과로 손실이 배가됩니다. 수익률이 높았던 만큼 손실률도 비례해 커집니다.</div>
+    </li>
+    <li>
+      <div class="p-num">2</div>
+      <div class="p-text"><strong>심리적 기준선의 왜곡</strong> — 큰 수익을 경험하면 그 수준이 '정상'처럼 느껴집니다. 이 기준선이 높아질수록 하락장에서의 심리적 충격이 커지고, 패닉 매도로 이어지기 쉽습니다.</div>
+    </li>
+    <li>
+      <div class="p-num">3</div>
+      <div class="p-text"><strong>내재가치 무시의 대가</strong> — 강세장의 도박은 종종 기업의 내재가치와 무관한 모멘텀 베팅입니다. 약세장이 오면 내재가치와 가격 사이의 괴리가 급격히 좁아지며, 거품 구간에 산 투자자는 손실을 피하기 어렵습니다.</div>
+    </li>
+  </ul>
+
+  <p class="sec-title">지금 이 시대에 왜 더 중요한가</p>
+  <p class="body-p">유동성이 넘쳐나던 저금리 시대, AI·테마주 열풍, 단타와 레버리지 ETF의 대중화. 그레이엄이 살았던 시대와 도구는 달라졌지만, 인간의 탐욕이 만들어내는 구조는 그대로입니다.</p>
+  <p class="body-p">가장 공격적으로 베팅해서 가장 크게 번 계좌가, 다음 하락장에서 가장 먼저 청산되는 장면은 시장의 역사에서 반복됩니다. 그레이엄의 명언은 '수익의 크기'보다 '살아남는 방법'을 먼저 질문하게 만듭니다.</p>
+
+  <div class="closing-quote">
+    <p>시장에서 가장 위험한 순간은,<br>내가 가장 똑똑하다고 느끼는 바로 그때다.</p>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag">#벤자민그레이엄</span>
+    <span class="tag">#가치투자</span>
+    <span class="tag">#투자철학</span>
+    <span class="tag">#강세장약세장</span>
+    <span class="tag">#안전마진</span>
+    <span class="tag">#리스크관리</span>
+    <span class="tag">#현명한투자자</span>
+    <span class="tag">#워런버핏</span>
+  </div>
+</article>
+</body>
+</html>

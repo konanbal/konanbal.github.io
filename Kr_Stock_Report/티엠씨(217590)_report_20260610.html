@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>티엠씨(217590) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .nr { background: #e0e7ff; color: #3730a3; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">217590 · KOSPI</div>
+      <div class="company-name">티엠씨 (TMC)</div>
+      <div class="company-desc">산업용 특수 케이블 전문 업체 — 선박/해양용·원전용·광케이블 국내 M/S 약 50%</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 6월 10일</div>
+      <div class="price-display">~25,000원대</div>
+      <div class="price-change down">※ 최근 실시간 시세 확인 필요 (5월 말 25,200원 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~6,000억원대</span>
+    <span class="rating-pill">🏢 섹터: 전선·케이블 (조선기자재·광케이블)</span>
+    <span class="rating-pill">📅 상장: 2025.12.15 (코스피 신규)</span>
+    <span class="rating-pill">⚠️ 6월 락업 17.5% 해제 예정</span>
+  </div>
+</div>
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2025년 연간 매출 (연결)</div>
+      <div class="kpi-value">3,409억원</div>
+      <div class="kpi-sub">YoY -6.0%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025년 영업이익 (연결)</div>
+      <div class="kpi-value">64억원</div>
+      <div class="kpi-sub">OPM 1.9% / YoY -40.8%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026F 영업이익 (KB증권)</div>
+      <div class="kpi-value">137억원</div>
+      <div class="kpi-sub">YoY +113.2% / OPM 3.5%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 주가 범위</div>
+      <div class="kpi-value">11,600~28,950원</div>
+      <div class="kpi-sub">IPO 공모가 8,000~9,300원</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (1Q26 추정 / 2025년 연간 확정)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">1Q26 매출 (추정치)</div>
+        <div style="font-size:18px;font-weight:700;">약 798억원 <span style="font-size:12px;color:var(--muted);">케이피에프 연결 기준</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">1Q25 810억원 대비 보합 수준 · 비수기 정상 흐름</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">1Q26 영업이익 (추정치)</div>
+        <div style="font-size:18px;font-weight:700;">약 14억원 <span style="font-size:12px;color:var(--muted);">OPM 1.75%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">FY25 평균(1.9%)에 근접 · 비수기 통과 수준</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>실적 특이사항:</strong> 4Q에 해양·원전 프로젝트 매출이 집중되는 사업 구조상 1Q는 통상 매출 비중 22~24%에 그치는 비수기. 2025년 4Q는 매출 759억, 영업손실 -21억원으로 부진. 2026년은 해양케이블 프로젝트 수주 본격화 및 텍사스 공장 가동률 상승이 실적 반등의 핵심 변수.
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 주요 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">1분기보고서 (2026.03.31 기준) — 제출 예정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.15 전후</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">최대주주(케이피에프) 지분 매도 — 41.7만주 매도 (56.4% → 54.71%)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.24</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef3c7;color:#92400e;margin-right:8px;">오버행 주의</span>
+        <span style="font-size:13px;font-weight:500;">보호예수(락업) 17.5% 해제 예정 — 상장 후 6개월 도래</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.15</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 10px;background:#f9fafb;border-radius:6px;">
+      📌 <strong>투자자 주목 공시:</strong> 6월 15일 락업 17.5% 해제는 단기 오버행 리스크. 최대주주 케이피에프의 추가 매도 여부 및 자사주 매입 계획 발표 여부가 주가 방향의 핵심 변수.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.06</span>
+      </div>
+      <div class="news-title">엔비디아, 코닝에 32억달러 투자 — 광섬유 밸류체인 수혜 부각</div>
+      <div class="news-summary">엔비디아가 코닝과 전략적 협약을 맺고 노스캐롤라이나·텍사스에 광섬유 전용 공장 3곳을 추가하며 미국 내 광학 제조 역량을 10배로 확장. 티엠씨는 코닝의 데이터센터·FTTH 광케이블 위탁생산 파트너로, 엔비디아→코닝→티엠씨로 이어지는 광섬유 밸류체인 간접 수혜 포지션 확보. 광케이블 매출 가시성이 기존 보수적 가정(2026년 200억) 대비 빠르게 가속할 수 있는 근거 마련.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.28</span>
+      </div>
+      <div class="news-title">유진투자증권 현장 탐방 — "미국 공장서 확인한 건 공급 부족"</div>
+      <div class="news-summary">5월 4~8일 티엠씨 텍사스 공장 투어 결과 보고. 미국 광케이블 시장은 통신사발 FTTH 투자와 데이터센터 증설이 동시에 진행 중이나 현지 생산자는 제한적. Made in USA 선호와 BABA 요건이 더해져 미국 내 생산능력의 전략적 가치 상승. 광사업 매출을 2025년 221억→2026년 336억→2027년 461억으로 확대 전망.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.13</span>
+      </div>
+      <div class="news-title">광케이블·원전 테마 부각으로 상한가 기록</div>
+      <div class="news-summary">4월 13일 상한가 기록 이후 시장이 차익실현 국면에 진입. KB증권은 2026년 3월 Buy 임박 톤의 커버리지 자료 발간 이후 한국투자·삼성·NH증권 등 주요 하우스의 신규 커버 개시 가능성 언급. 첫 정식 Buy 의견 + TP 35,000~40,000원대가 진입할 경우 목표주가 컨센서스 형성 기대.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.06.15 예정</span>
+      </div>
+      <div class="news-title">보호예수 17.5% 해제 — 오버행 리스크 단기 부담</div>
+      <div class="news-summary">상장 6개월 보호예수 만료로 전체 발행주식의 17.5%가 6월 15일부로 유통 가능. 4월 24일에 최대주주 케이피에프가 이미 41.7만주를 시장에 매도하여 오버행 신호를 준 바 있음. 자사주 매입 결정 시 단기 리스크 완화 가능성.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.03.20</span>
+      </div>
+      <div class="news-title">KB증권 리포트 — 2026년 실적 반등 원년 전망</div>
+      <div class="news-summary">KB증권은 2026년 예상 매출액 3,965억원(+16.3% YoY), 영업이익 137억원(+113.2% YoY, OPM 3.5%)으로 실적 반등을 전망. 지연됐던 해양 플랜트향 케이블 수주 증가 및 북미 광케이블 매출 성장이 주요 근거. 북미 광케이블 매출은 2022년 0.7억→2025년 100억→2026년 200억(CAPA 기준)으로 가속 추정.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2025.10~2026</span>
+      </div>
+      <div class="news-title">텍사스 달라스 공장 완공 및 가동 — 미국 현지 생산 본격화</div>
+      <div class="news-summary">2025년 10월 TMC Texas Inc. 달라스 공장 완공. 암페놀(Amphenol)에 약 200만달러 규모 초도 물량 납품 진행. BEAD 광케이블, 데이터센터용 케이블, 미주 배전용 URD 케이블 등 복수 제품 라인 구축. 증설 여력이 남아 있어 추가 라인 투자 시 2029년 CAPA 600억원까지 확장 가능.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>엔비디아-코닝 광섬유 밸류체인 수혜</strong> — 코닝의 데이터센터·FTTH 위탁생산 파트너로서 미국 AI 인프라 수요 직접 연결. 광케이블 매출 CAGR 가속 전망.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>해양·원전 고마진 프로젝트 2026년 본격화</strong> — 2025년 매출 공백을 야기한 해양 플랜트향 케이블 수주가 2026년 재반영 예상. 고마진 매출 믹스 개선으로 OPM 1.9%→3.5% 상승 전망.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>국내 유일 원전용 광케이블 제조사</strong> — 새울 3·4호기 90% 공급 중, 신한울 3·4호기(2026~2031) 공급 예정. 원전 르네상스 정책 수혜로 장기 안정 매출 확보.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>미국 BABA·Made in USA 정책 수혜</strong> — 텍사스 현지 공장 보유로 Buy American/BABA 요건 충족. 미국 경쟁사 공급 부족 환경에서 전략적 포지션 강화.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>다수 증권사 커버 개시 기대</strong> — KB증권만 커버 중이나 광통신 섹터 주목도 상승으로 한국투자·삼성·NH 등 신규 진입 시 목표주가 컨센서스 형성 기대.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>6월 15일 락업 17.5% 해제 — 오버행 리스크</strong> — 약 421만주 유통 가능. 최대주주 케이피에프의 이미 진행한 매도로 신호가 포착된 상태. 주가 단기 변동성 확대 가능성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>낮은 영업이익률 구조</strong> — 선박용 케이블 상선향 마진 1~2% 수준으로 매출 규모 대비 수익성이 얇음. OPM 개선 속도가 예상보다 더딜 경우 밸류에이션 부담 증가.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>텍사스 공장 가동률 정상화 불확실성</strong> — 코닝·암페놀 후속 발주 규모 미공개. 1Q26 컨퍼런스콜을 통해 신규 PO 확인이 필요. 광케이블 매출 가속이 지연될 경우 리레이팅 취소.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>북미 AI 투자 심리 변화 리스크</strong> — 테마주 성격이 강해 미국 AI·데이터센터 투자 심리 냉각 시 주가 변동성 확대. 실적 기여가 아직 초기 단계인 광케이블 매출 비중.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>해양·원전 매출 집중 구조 — 실적 변동성</strong> — 4Q 집중 구조로 1~3Q 실적이 연간 가이던스 대비 낮게 나타나는 구조. 분기 실적 발표 때마다 저조한 수치가 부정적으로 해석될 위험.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">KB증권</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">정식 Buy 전환 임박 톤 · 2026.03.20 보고서</span>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge nr">NR (커버 준비)</span>
+        <span class="target-price">TP 미공개 (42,000원 추정, 알파증류소)</span>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">유진투자증권</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">미국 공장 탐방 후 기업분석 · 2026.05.28</span>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge nr">NR</span>
+        <span class="target-price">목표가 미설정</span>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 10px;background:#f9fafb;border-radius:6px;">
+      ※ 현재 정식 커버 증권사 부재. KB증권이 Buy 임박 리포트를 발간했으나 목표주가 미설정. 광통신 테마 주목도 상승으로 한국투자증권·삼성증권·NH투자증권 신규 커버 개시 가능성 언급됨.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      티엠씨는 선박/해양용 케이블 국내 M/S 50%를 바탕으로 안정적 캐시카우를 유지하면서, <strong>①북미 데이터센터향 광케이블(텍사스 공장)</strong>, <strong>②국내 유일 원전용 광케이블 제조 지위(신한울 3·4호기)</strong>라는 두 개의 고마진 성장 엔진을 장착한 구조 전환형 기업이다. 5월 엔비디아-코닝 협약으로 광섬유 밸류체인 간접 수혜가 부각되며 광케이블 매출 가시성이 한층 높아진 점은 중장기 리레이팅의 핵심 근거다. 단기적으로는 <strong>6월 15일 보호예수 17.5% 해제</strong>라는 오버행이 최대 불확실성이며, 최대주주 케이피에프의 추가 매도 여부가 주가 방향을 결정할 것이다. 2026년은 텍사스 가동률 정상화와 해양·원전 프로젝트 매출 재반영이 맞물리는 '실적 반등의 원년'이 될 것으로 시장이 평가하나, 실제 광케이블 후속 발주(코닝·암페놀 PO)가 확인되어야 멀티플 확장이 정당화된다. 증권사 커버리지 확대 여부도 주가 모멘텀의 촉매가 될 수 있다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

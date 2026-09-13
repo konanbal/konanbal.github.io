@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIME 미국나스닥100채권혼합50액티브 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Header */
+  .report-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 60%, var(--accent3) 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  /* Container */
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Holdings */
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-type { font-size: 10px; padding: 1px 6px; border-radius: 3px; margin-left: 6px; font-weight: 600; }
+  .type-bond { background: #dbeafe; color: #1e40af; }
+  .type-stock { background: #d1fae5; color: #065f46; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+  .holding-bar-bond { height: 6px; background: linear-gradient(90deg, #60a5fa, #93c5fd); border-radius: 3px; }
+
+  /* Sector */
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  /* Performance */
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+
+  /* News */
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* Bull / Bear */
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Asset alloc highlight */
+  .alloc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .alloc-box { border-radius: 8px; padding: 14px 16px; text-align: center; }
+  .alloc-box.bond { background: linear-gradient(135deg, #dbeafe, #bfdbfe); border: 1px solid #93c5fd; }
+  .alloc-box.stock { background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 1px solid #6ee7b7; }
+  .alloc-label { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  .alloc-pct { font-size: 28px; font-weight: 800; }
+  .alloc-box.bond .alloc-pct { color: #1e40af; }
+  .alloc-box.stock .alloc-pct { color: #065f46; }
+  .alloc-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Summary */
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  /* Highlight badge */
+  .highlight-badge { display: inline-block; background: linear-gradient(90deg, #f59e0b, #ef4444); color: white; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid, .alloc-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 0019K0 · KRX(코스피)</div>
+      <div class="etf-name">TIME 미국나스닥100채권혼합50액티브</div>
+      <div class="etf-index">비교지수: FnGuide 미국나스닥100 단기채권혼합 지수 | 운용사: 타임폴리오자산운용</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 11일</div>
+      <div class="nav-display">13,615원</div>
+      <div class="nav-change up">▲ YTD +19.75% (2026.01.02~05.07)</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산(AUM): 2,478억원</span>
+    <span class="pill">📋 총보수: 연 0.25%</span>
+    <span class="pill">📅 상장일: 2025.03.25</span>
+    <span class="pill">🏦 유형: 채권혼합형 액티브</span>
+    <span class="pill">🔄 퇴직연금(DC/IRP) 100% 투자가능</span>
+    <span class="pill">💼 개인연금 100% 투자가능</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">기준가(NAV)</div>
+      <div class="kpi-value">13,542원</div>
+      <div class="kpi-sub">2026.05.06 기준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순자산총액(AUM)</div>
+      <div class="kpi-value">2,478억원</div>
+      <div class="kpi-sub">2026.05.06 기준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">YTD 수익률</div>
+      <div class="kpi-value positive">+19.75%</div>
+      <div class="kpi-sub">나스닥100 대비 +6.49%p 초과</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1개월 수익률</div>
+      <div class="kpi-value positive">+12.38%</div>
+      <div class="kpi-sub">채권혼합형 중 최상위권</div>
+    </div>
+  </div>
+
+  <!-- ===== 자산 배분 구조 ===== -->
+  <div class="card">
+    <div class="card-title">핵심 자산 배분 구조 (하이브리드형)</div>
+    <div class="alloc-grid">
+      <div class="alloc-box bond">
+        <div class="alloc-label">채권 부문</div>
+        <div class="alloc-pct">≥50%</div>
+        <div class="alloc-desc">국내 단기통안채 중심<br>금리 변동성 방어 + 안정성 확보</div>
+      </div>
+      <div class="alloc-box stock">
+        <div class="alloc-label">주식 부문</div>
+        <div class="alloc-pct">&lt;50%</div>
+        <div class="alloc-desc">미국 나스닥100 기술주 액티브 운용<br>AI·반도체·소프트웨어 선별 편입</div>
+      </div>
+    </div>
+    <div style="font-size:12px; color:var(--muted); padding:8px 0; border-top:1px solid var(--border);">
+      ⚡ <strong>핵심 구조:</strong> 채권 50% 이상으로 <strong>퇴직연금 DC/IRP 및 개인연금 계좌에서 100% 투자 가능</strong>한 연금 특화 상품. 단순 5:5 기계적 분산이 아닌, 주식 부문에서 타임폴리오의 액티브 종목선별 역량을 적극 반영해 지수 대비 초과수익 추구.
+    </div>
+  </div>
+
+  <!-- ===== 구성 종목 TOP 10 ===== -->
+  <div class="card">
+    <div class="card-title">구성 종목 TOP 15 <span style="font-weight:400; font-size:11px; color:var(--muted); margin-left:4px;">(2026.05.06 기준)</span></div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">ACE 단기통안채 (190620) <span class="holding-type type-bond">채권</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">16.12%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar-bond" style="width:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">현금 <span class="holding-type type-bond">현금</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">9.04%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar-bond" style="width:56%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">메리츠 KAP 통안채 6개월 ETN (610064) <span class="holding-type type-bond">채권</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">8.68%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar-bond" style="width:54%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">KIWOOM 통안채1년 (122260) <span class="holding-type type-bond">채권</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">7.36%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar-bond" style="width:46%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">TIGER 단기채권액티브 (272580) <span class="holding-type type-bond">채권</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">6.79%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar-bond" style="width:42%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">RISE 단기통안채 (196230) <span class="holding-type type-bond">채권</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">5.54%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar-bond" style="width:34%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">7</div>
+      <div class="holding-name">Sandisk Corp/DE (SNDK) <span class="holding-type type-stock">주식</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">3.93%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">8</div>
+      <div class="holding-name">Bloom Energy Corp (BE) <span class="holding-type type-stock">주식</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">2.92%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:74%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">9</div>
+      <div class="holding-name">Intel Corp (INTC) <span class="holding-type type-stock">주식</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">2.91%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:74%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">10</div>
+      <div class="holding-name">Alphabet Inc (GOOGL) <span class="holding-type type-stock">주식</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">2.76%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:70%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">11</div>
+      <div class="holding-name">ARM Holdings PLC (ARM) <span class="holding-type type-stock">주식</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">2.38%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:61%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">12</div>
+      <div class="holding-name">Amazon.com Inc (AMZN) <span class="holding-type type-stock">주식</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">2.23%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:57%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">13</div>
+      <div class="holding-name">Lumentum Holdings Inc (LITE) <span class="holding-type type-stock">주식</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">2.14%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:54%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">14</div>
+      <div class="holding-name">NVIDIA Corp (NVDA) <span class="holding-type type-stock">주식</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">2.07%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:53%"></div></div>
+      </div>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">15</div>
+      <div class="holding-name">Seagate Technology Holdings (STX) <span class="holding-type type-stock">주식</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">1.66%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:42%"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      채권(통안채·ETN) 비중 약 53% | 미국 기술주 주식 비중 약 38% | 현금성 약 9%
+    </div>
+  </div>
+
+  <!-- ===== 섹터 배분 + 수익률 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">포트폴리오 자산 배분</div>
+      <div class="sector-item">
+        <div class="sector-name">🏦 국내 단기통안채·채권ETN</div>
+        <div class="sector-right">
+          <div class="sector-pct">~53%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:90%;background:#3b82f6;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">💾 반도체 (SNDK·INTC·NVDA·MU·STX)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~14%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:52%;background:#6366f1;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🌐 인터넷·플랫폼 (GOOGL·AMZN)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~5%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:19%;background:#f59e0b;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🤖 AI 인프라·설계 (ARM·LITE)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~4.5%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:17%;background:#10b981;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">⚡ 에너지·기타 기술주 (BE 등)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~3%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:12%;background:#ef4444;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">💵 현금</div>
+        <div class="sector-right">
+          <div class="sector-pct">~9%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:34%;background:#94a3b8;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기간별 수익률 비교</div>
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>기간</th>
+            <th>ETF</th>
+            <th>나스닥100(원화)</th>
+            <th>초과수익</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1개월</td>
+            <td class="positive">+12.38%</td>
+            <td>N/A</td>
+            <td class="positive">-</td>
+          </tr>
+          <tr>
+            <td>YTD</td>
+            <td class="positive">+19.75%</td>
+            <td>+12.86%</td>
+            <td class="positive">+6.89%p</td>
+          </tr>
+          <tr>
+            <td>3개월</td>
+            <td class="positive">N/A</td>
+            <td>N/A</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>6개월</td>
+            <td class="positive">N/A</td>
+            <td>N/A</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>상장이후</td>
+            <td class="positive">+35%↑</td>
+            <td>참고</td>
+            <td class="positive">지수 상회</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">
+        ※ 상장일 2025.03.25 기준 (약 14개월 운용) · 세전 수익률 기준
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 최근 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.08</span>
+      </div>
+      <div class="news-title">YTD 수익률 19.75%… 나스닥100 원화지수(+12.86%) 대폭 상회 <span class="highlight-badge">📈 +6.89%p 초과</span></div>
+      <div class="news-summary">타임폴리오자산운용 발표에 따르면 연초(1/2)~5/7 기간 동안 채권혼합형 ETF임에도 나스닥100 순수 지수를 큰 폭으로 아웃퍼폼. AI 인프라 확대 국면에서 핵심 기술주를 선별·집중 편입한 액티브 운용 전략이 성과 견인. (이투데이·파이낸셜뉴스·뉴스핌)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2025.05.19</span>
+      </div>
+      <div class="news-title">채권혼합형 ETF 중 1개월 수익률 1위 달성(+7.18%)</div>
+      <div class="news-summary">국내 상장 대표지수 채권혼합형 ETF 가운데 가장 뛰어난 1개월 성과 기록. 엔비디아·팔란티어·테슬라 등 미국 대표 기술주의 모멘텀을 시의적절하게 포착하는 리밸런싱 전략이 핵심 동인으로 평가됨. (파이낸셜뉴스)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2025.03.25</span>
+      </div>
+      <div class="news-title">코스피 신규 상장 — 퇴직연금·개인연금 100% 투자 가능 채권혼합 ETF</div>
+      <div class="news-summary">타임폴리오자산운용이 기존 순수 나스닥100 액티브 ETF(426030)에 이어 연금계좌 특화 채권혼합형 상품 라인업 확장. NASDAQ100(PR) 지수와 FnGuide 단기통안채 지수를 5:5로 혼합한 비교지수 대비 초과수익을 추구하는 구조로 설계됨.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04~05</span>
+      </div>
+      <div class="news-title">나스닥 급반등 + AI 빅테크 실적 서프라이즈 — 성장주 투자심리 빠른 회복</div>
+      <div class="news-summary">2026년 4월 미국 대형 기술주의 실적 개선 기대가 재점화되며 나스닥이 큰 폭으로 상승. TIME ETF의 주식 포트폴리오가 AI·반도체·광통신 등 핵심 기술주 집중 편입 전략으로 반등 국면을 효과적으로 활용. (이투데이)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">참고</span>
+        <span class="news-date">2026.05</span>
+      </div>
+      <div class="news-title">모회사 TIME 미국나스닥100액티브(426030) 상장 4년 누적 수익률 408% 돌파</div>
+      <div class="news-summary">동일 운용사의 순수 나스닥100 액티브 ETF가 AUM 1조 7,000억원을 기록하며 상장 이후 4년 만에 400%대 수익률 달성. 운용 철학과 종목 선별 역량의 트랙레코드가 채권혼합50 상품에도 직접적으로 이어지는 구조. (이투데이)</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">📈</span><span><strong>연금계좌 100% 투자 가능</strong> — DC·IRP·개인연금 한도 제한 없이 편입 가능. 연금 투자자가 나스닥100 성장성을 포기하지 않고 활용할 수 있는 유일한 구조적 강점.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🤖</span><span><strong>액티브 초과수익 검증</strong> — YTD 기준 나스닥100 원화지수 대비 약 +6.89%p 초과 달성. 타임폴리오의 종목선별 역량이 채권혼합형에서도 유효함을 실적으로 입증.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🛡️</span><span><strong>변동성 완충 구조</strong> — 포트폴리오의 50% 이상을 단기통안채로 구성해 시장 조정기 하방 리스크 방어. 순수 나스닥100 ETF 대비 낮은 최대낙폭(MDD) 기대.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💡</span><span><strong>AI·반도체 사이클 수혜</strong> — 현재 포트폴리오에 반도체·광통신·AI 인프라 관련 종목(ARM, NVDA, LITE, SNDK 등) 집중 편입. AI 지출 확대 사이클에서 지수 대비 높은 베타 가능.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💰</span><span><strong>낮은 총보수 + AUM 성장</strong> — 연 0.25%의 비교적 낮은 총보수율. 상장 14개월 만에 순자산 2,478억원으로 고속 성장, 유동성 안정화 진행 중.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><strong>운용 역량 집중 리스크</strong> — 액티브 운용 특성상 타임폴리오 운용팀의 종목 선별 실패 시 벤치마크 대비 언더퍼폼 가능. 과거 성과가 미래를 보장하지 않음.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">💱</span><span><strong>환율 노출(환노출형)</strong> — 미국 기술주에 환헤지 없이 투자하는 환노출형 구조. 원화 강세 시 주식 부문 수익률이 달러 기준보다 낮아질 수 있음.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>나스닥 급락 시 완충 한계</strong> — 채권 비중(50%)이 있어 완충 효과가 있으나, 나스닥100이 급락(-20% 이상) 시 포트폴리오도 유의미한 손실 발생 불가피.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🏦</span><span><strong>금리 상승 시 채권 부분 손실</strong> — 단기통안채 중심이지만 금리 급등 환경에서 채권 부문 평가손 발생 가능. 이중 악재(주가 하락+금리 상승) 시 손실 폭 확대 우려.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📊</span><span><strong>짧은 운용 이력(약 14개월)</strong> — 2025년 3월 상장으로 장기 운용 이력이 부족. 하락장 또는 박스권 장세에서의 성과 검증이 아직 충분하지 않음.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 분배금 현황 ===== -->
+  <div class="card">
+    <div class="card-title">분배금 / 세금 정보</div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>항목</th>
+          <th>내용</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>분배금 지급 현황</td>
+          <td>N/A (공식 분배금 이력 미확인)</td>
+          <td>상장 약 14개월, 소수 지급 추정</td>
+        </tr>
+        <tr>
+          <td>분배금 주기</td>
+          <td>정기 분배 (기준 충족 시)</td>
+          <td>집합투자업자 결정 기준</td>
+        </tr>
+        <tr>
+          <td>세금 (연금계좌 내)</td>
+          <td>과세이연 → 수령 시 연금소득세 3.3~5.5%</td>
+          <td>연금계좌의 핵심 절세 장점</td>
+        </tr>
+        <tr>
+          <td>세금 (일반계좌)</td>
+          <td>배당소득세 15.4% (보유기간 과세)</td>
+          <td>매도·분배금 수령 시 과세</td>
+        </tr>
+        <tr>
+          <td>예금자보호</td>
+          <td>비해당 (집합투자증권)</td>
+          <td>원금 손실 가능</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;">
+      ※ 연금계좌(DC·IRP·개인연금) 내 투자 시 운용 수익에 대한 과세이연 혜택 적용 → 장기 복리 효과 극대화 가능
+    </div>
+  </div>
+
+  <!-- ===== ETF 정보 요약 ===== -->
+  <div class="card">
+    <div class="card-title">ETF 기본 정보 요약</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>항목</th><th>내용</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>정식 명칭</td><td>TIME 미국나스닥100채권혼합50액티브</td></tr>
+        <tr><td>종목코드</td><td>0019K0 (KRX 코스피)</td></tr>
+        <tr><td>운용사</td><td>(주)타임폴리오자산운용 (여의도 TP Tower)</td></tr>
+        <tr><td>상장일</td><td>2025년 3월 25일</td></tr>
+        <tr><td>기초지수</td><td>FnGuide 미국나스닥100 단기채권혼합 지수</td></tr>
+        <tr><td>운용 방식</td><td>액티브 (비교지수 대비 초과수익 추구)</td></tr>
+        <tr><td>총보수(운용보수)</td><td>연 0.25% (운용보수 0.20%)</td></tr>
+        <tr><td>투자위험 등급</td><td>4등급 (보통위험)</td></tr>
+        <tr><td>연금 투자 가능 여부</td><td>퇴직연금 DC/IRP 100% · 개인연금 100%</td></tr>
+        <tr><td>환헤지</td><td>환노출형 (달러 그대로 노출)</td></tr>
+        <tr><td>판매 증권사</td><td>키움·삼성·메리츠·한국투자·미래에셋·LS·BNK증권 등</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 유사 ETF 비교 ===== -->
+  <div class="card">
+    <div class="card-title">유사 ETF 비교 (채권혼합 나스닥계열)</div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>ETF명</th>
+          <th>운용사</th>
+          <th>특징</th>
+          <th>연금 투자</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#eff6ff;">
+          <td><strong>TIME 나스닥100채권혼합50액티브 (0019K0)</strong></td>
+          <td>타임폴리오</td>
+          <td>액티브 운용 · 초과수익 추구</td>
+          <td class="positive">100%</td>
+        </tr>
+        <tr>
+          <td>TIGER 미국나스닥100채권혼합Fn</td>
+          <td>미래에셋</td>
+          <td>패시브 · 지수 추종</td>
+          <td class="positive">100%</td>
+        </tr>
+        <tr>
+          <td>KODEX 미국나스닥100채권혼합</td>
+          <td>삼성자산운용</td>
+          <td>패시브 · 지수 추종</td>
+          <td class="positive">100%</td>
+        </tr>
+        <tr>
+          <td>TIME 미국나스닥100액티브 (426030)</td>
+          <td>타임폴리오</td>
+          <td>액티브 · 채권 없음 (AUM 1.7조)</td>
+          <td class="negative">70%</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;">
+      ※ 0019K0의 핵심 차별점: ①연금 100% 투자 가능 ②액티브 운용으로 패시브 대비 초과수익 추구 ③상위 ETF 대비 높은 수익률 검증(YTD 기준)
+    </div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      <strong>TIME 미국나스닥100채권혼합50액티브(0019K0)</strong>는 2025년 3월 25일 타임폴리오자산운용이 상장한 채권혼합형 액티브 ETF로, 퇴직연금(DC/IRP) 및 개인연금 계좌에서 <strong>100% 투자가 가능</strong>하다는 구조적 강점을 지닌 연금 특화 상품입니다.<br><br>
+      이 ETF는 단순히 나스닥100에 절반만 투자하는 '방어형' 상품이 아닙니다. 채권 부문(50% 이상, 국내 단기통안채)으로 연금계좌 투자 적격성과 금리 변동성 완충을 확보하는 동시에, <strong>주식 부문(50% 미만)에서 타임폴리오의 액티브 운용 역량을 집중 발휘</strong>해 AI·반도체·광통신 등 핵심 기술주를 선별 편입하는 하이브리드 구조입니다.<br><br>
+      <strong>성과 측면</strong>에서 2026년 YTD 기준 +19.75%를 기록해 나스닥100 원화환산지수(+12.86%) 대비 약 6.89%p 초과수익을 달성하였으며, 채권혼합형 ETF 카테고리 내 최상위권 성과를 기록하고 있습니다. 이는 비교 유사 패시브 상품(TIGER·KODEX 채권혼합 시리즈)과의 명확한 차별점입니다.<br><br>
+      <strong>주요 투자 고려사항:</strong> ①연금 투자자에게는 나스닥100의 장기 성장성을 포기하지 않으면서도 계좌 내 투자 한도를 100% 활용할 수 있는 핵심 수단 ②액티브 운용 특성상 운용팀 역량에 대한 의존도가 높아 지속적인 성과 모니터링 필요 ③환노출형으로 원달러 환율 변동이 수익률에 직접 영향 ④상장 약 14개월로 장기 하락장 대응 이력이 아직 부족해 장기 추적 필요. AUM이 2,478억원으로 빠르게 성장 중이며, 타임폴리오의 모회사 상품(TIME 미국나스닥100액티브, 420%+ 누적 수익) 트랙레코드를 감안하면 연금 포트폴리오의 성장형 핵심 자산으로 검토 가치가 있습니다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 특정 투자를 권유하지 않습니다. ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다. 과거 성과가 미래 수익을 보장하지 않습니다. 투자 전 (간이)투자설명서 및 집합투자규약을 반드시 읽어보시기 바랍니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

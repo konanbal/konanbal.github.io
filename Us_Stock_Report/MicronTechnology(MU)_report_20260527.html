@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Micron Technology (MU) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0f2044 0%, #1a4a8a 60%, #0d6efd 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 36px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .highlight-banner { background: linear-gradient(90deg, #fff7ed 0%, #fef9c3 100%); border: 1px solid #fed7aa; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #92400e; display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">MU · NASDAQ</div>
+      <div class="company-name">Micron Technology, Inc.</div>
+      <div class="company-desc">세계 3대 메모리 반도체 기업 — DRAM·NAND·HBM 설계·제조·판매. AI 인프라 핵심 공급사.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 27일</div>
+      <div class="price-display">$902.88</div>
+      <div class="price-change up">▲ +$151.88 (+20.2%, 5/26 종가)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$1.01조 달러</span>
+    <span class="rating-pill">🏢 섹터: 반도체 (메모리)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy</span>
+    <span class="rating-pill">📅 다음 실적: 2026.06.23 (Q3 FY2026)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 긴급 배너 -->
+  <div class="highlight-banner">
+    🚨 <strong>역사적 이벤트 (5/26):</strong> UBS, 목표주가 $535 → $1,625 (204% 상향). MU 시가총액 $1조 첫 돌파. 트럼프 대통령 Micron 공개 지지 발언 이후 주가 +20.2%.
+  </div>
+
+  <!-- KPI 카드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q2 FY2026 매출 (최신)</div>
+      <div class="kpi-value">$23.86B</div>
+      <div class="kpi-sub" style="color:var(--green);">YoY +196% · QoQ +75%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Non-GAAP 영업이익률</div>
+      <div class="kpi-value">69.0%</div>
+      <div class="kpi-sub" style="color:var(--green);">GAAP 총이익률 74.4%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (UBS 최고)</div>
+      <div class="kpi-value">$1,625</div>
+      <div class="kpi-sub">현재가 대비 +80% 잠재 상승</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$90.93~</div>
+      <div class="kpi-sub">~$916.76 | 현재: 52주 최고</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q2 FY2026 (최신 실적, 2026.03.18 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$23.86B <span style="font-size:12px;color:var(--green);">▲ +24.3% 어닝 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $19.19B · YoY +196%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Non-GAAP EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$12.20 <span style="font-size:12px;color:var(--green);">▲ +38.8% 어닝 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $8.79 · 운영현금흐름 $11.90B</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>CEO 산제이 메흐로트라</strong>: "AI 시대에 메모리는 고객에게 전략적 자산이 됐다. Q2는 매출·총이익·EPS·잉여현금흐름 전 부문 역대 최고치. Q3에도 전 부문 역대 최고 기록 예상." 이사회, 분기배당 30% 인상($0.15/주, 2026.04.15 지급) 승인.
+    </div>
+    <!-- Q3 가이던스 -->
+    <div style="margin-top:0.75rem;background:#f5f3ff;border-radius:8px;padding:12px;border:1px solid #ddd6fe;">
+      <div style="font-size:11px;font-weight:600;color:#6d28d9;margin-bottom:8px;">🔭 Q3 FY2026 가이던스 (다음 실적 발표 2026.06.23)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:13px;">
+        <div><div style="font-size:11px;color:var(--muted);">매출 가이던스</div><div style="font-weight:700;color:#7c3aed;">$33.5B ±$800M</div></div>
+        <div><div style="font-size:11px;color:var(--muted);">Non-GAAP EPS</div><div style="font-weight:700;color:#7c3aed;">$19.15 ±$0.40</div></div>
+        <div><div style="font-size:11px;color:var(--muted);">Non-GAAP 총이익률</div><div style="font-weight:700;color:#7c3aed;">~81%</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">※ 컨센서스(EPS $19.88, 매출 $34.89B) 대비 유사 수준. Q3 단일 분기 매출이 FY2024 이전 모든 연간 매출 초과 예정.</div>
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Q2 FY2026 실적 발표 — 전 부문 역대 최고 기록</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.18</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">분기보고서 — FY2026 Q2 (종료일 2026.02.26)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요이벤트</span>
+        <span style="font-size:13px;font-weight:500;">버지니아주 매나서스 팹 $2B 확장 착공 — 1-알파 DRAM 양산 개시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.22</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#166534;margin-right:8px;">배당</span>
+        <span style="font-size:13px;font-weight:500;">이사회 분기배당 30% 인상 승인 ($0.115→$0.15/주)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.18</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#eff6ff;border-radius:6px;padding:8px 12px;color:#1e40af;">
+      📌 <strong>투자자 주목</strong>: FY2026 자본지출 $25B+ 계획 확정. 대만(Tongluo), 아이다호, 뉴욕, 일본, 싱가포르, 인도 전 세계 제조 거점 동시 확장 중. 5년 장기 공급계약(SCA) 첫 서명 완료 — 수익 가시성이 구조적으로 개선.
+    </div>
+  </div>
+
+  <!-- 뉴스 & 최근 이슈 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.26</span>
+      </div>
+      <div class="news-title">UBS, 목표주가 $1,625로 204% 상향 — MU 시가총액 $1조 첫 돌파</div>
+      <div class="news-summary">UBS 애널리스트 티머시 아르쿠리가 목표주가를 $535에서 $1,625로 대폭 올리며 "MU는 사이클 반도체가 아닌 AI 네이티브 인프라 기업"으로 재정의. 2029년까지 EPS $117 이상, 누적 자유현금흐름 $4,000억+ 전망. 하이퍼스케일러와의 장기 공급계약이 엔비디아 수준의 수익 가시성을 제공한다는 논거.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.26</span>
+      </div>
+      <div class="news-title">트럼프 대통령 "Micron은 대단하다" — 미 제조업 투자 수백억 달러 공개 칭찬</div>
+      <div class="news-summary">트럼프 대통령이 유세 행사에서 Micron의 미국 내 대규모 투자를 직접 언급하며 지지. 정치적 후광 효과와 함께 UBS 목표주가 상향이 겹쳐 주가 +20% 폭등. 온쇼어링 정책 기조와 맞물려 미국 정부의 반도체 지원 기대감 상승.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.02월</span>
+      </div>
+      <div class="news-title">HBM3e·HBM4 2026년 전체 생산분 완판 — 전례 없는 가격 결정력 확보</div>
+      <div class="news-summary">Micron이 2026년 연간 HBM 생산량 전량을 구속력 있는 계약으로 이미 판매. DRAM 계약가격 현 분기 +58~63% 전망, 연간 +125% 예상(가트너). 수요 측 불확실성이 사실상 제거된 상황으로, AI 메모리 공급 부족이 최소 2027년까지 지속될 전망.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.22</span>
+      </div>
+      <div class="news-title">버지니아 매나서스 팹 $2B 추가 확장 — 1-알파 DRAM 양산 개시</div>
+      <div class="news-summary">자동차·방산용 1-알파 DRAM 양산을 미국 본토에서 시작. CHIPS Act 보조금 수혜 예상, 미국 정부의 국내 반도체 제조 전략과 완벽 부합. 미국 내 제조 비중 확대가 장기적으로 지정학적 리스크를 헤지하는 역할.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">진행 중</span>
+      </div>
+      <div class="news-title">Netlist 특허 소송 지속 — HBM 제품 특허침해 주장</div>
+      <div class="news-summary">Netlist社가 HBM 및 DIMM 제품에 대한 특허침해 소송 다수 진행 중. 2026년 3월 텍사스 연방법원에서 델라웨어 법원으로 이송. 현재로서는 생산 중단이나 대규모 배상금 가능성 낮지만, 불확실성 요소로 상존. 독일 특허법원에서는 일부 특허 무효 판결.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>AI HBM 슈퍼사이클</strong> — HBM 시장 연 40% CAGR 전망, 2030년경 $1,000억 시장으로 성장. Micron은 공급 계약 완판으로 수혜 최전선</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>비즈니스모델 전환</strong> — 사이클형 DRAM 판매에서 장기 공급계약(LTA) 기반 예측 가능한 수익구조로 진화. UBS는 이를 엔비디아급 가시성으로 평가</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>Q3 가이던스 역대급</strong> — $33.5B 가이던스는 FY2024 이전 Micron의 모든 연간 매출을 한 분기 만에 초과하는 수치. 81% 총이익률도 역대 최고</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>DRAM 가격 급등</strong> — 현 분기 계약가 +58~63%, 연간 +125% 전망(가트너). HBM 전환으로 인한 일반 DRAM 공급 타이트도 동반 상승 촉매</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>미국 정부 지원</strong> — CHIPS Act 보조금, 트럼프 정부 온쇼어링 정책 수혜. 미국 내 팹 확장으로 지정학 리스크 헤지 + 정책 모멘텀 동시 확보</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>밸류에이션 부담</strong> — 연초 대비 주가 +178%, $1조 클럽 진입 후 주가 과열 우려. 단기 급등 이후 차익실현 매물 출현 가능성</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>SK하이닉스·삼성 경쟁</strong> — SK하이닉스는 HBM 시장에서 선두 유지. 삼성의 HBM 품질 이슈가 해소될 경우 Micron의 공급 점유율 압박 가능</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>고강도 자본지출</strong> — FY2026 설비투자 $25B+ 계획. 수요 둔화 시 레버리지가 되는 고정비 구조. 리드타임이 긴 팹 투자의 타이밍 리스크</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>AI 투자 둔화 가능성</strong> — 하이퍼스케일러의 AI 자본지출이 예상보다 줄어들 경우 HBM 수요 감소로 직결. 현재 사이클이 과거 DRAM 사이클처럼 반전될 위험</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>지정학 리스크</strong> — 대만 공장 노출, 대중국 수출 규제 강화 시 생산 및 판매 영향. 미중 기술 패권 갈등 심화 시나리오 주의</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (최신 업데이트)</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">UBS (Timothy Arcuri)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.26 — Street-high 신규 설정</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">강력매수</span><span class="target-price" style="color:#7c3aed;">$1,625 🔺</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Melius Research</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.19</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$1,100</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">HSBC</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05월</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$1,100</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Citigroup</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.19</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$840</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">CFRA</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05월</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$900</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">S&amp;P Global 컨센서스 (44개사)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">Strong Buy</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy</span><span class="target-price">평균 $640</span></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);background:#f9fafb;border-radius:6px;padding:8px;">
+      ※ 현재 주가($902.88)가 일부 기존 목표주가를 이미 상회. UBS $1,625는 현재가 대비 +80% 추가 상승 여력. 다음 주요 트리거: Q3 FY2026 실적 발표 (2026.06.23)
+    </div>
+  </div>
+
+  <!-- 사업부별 매출 (Q2 FY2026) -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📦 사업부별 매출 — Q2 FY2026 ($23.86B 기준)</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:13px;">
+      <div style="background:#eff6ff;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Cloud Memory BU</div>
+        <div style="font-size:20px;font-weight:700;color:#1d4ed8;">$7.7B</div>
+        <div style="font-size:10px;color:var(--muted);">HBM·데이터센터 DRAM</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Mobile & Client BU</div>
+        <div style="font-size:20px;font-weight:700;color:#15803d;">$7.7B</div>
+        <div style="font-size:10px;color:var(--muted);">모바일·PC용 메모리</div>
+      </div>
+      <div style="background:#faf5ff;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Core Data Center BU</div>
+        <div style="font-size:20px;font-weight:700;color:#7c3aed;">$5.7B</div>
+        <div style="font-size:10px;color:var(--muted);">서버 SSD·스토리지</div>
+      </div>
+      <div style="background:#fff7ed;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Auto & Embedded BU</div>
+        <div style="font-size:20px;font-weight:700;color:#c2410c;">$2.7B</div>
+        <div style="font-size:10px;color:var(--muted);">자동차·산업용</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Micron Technology는 2026년 현재 AI 메모리 공급 부족이라는 구조적 수혜를 가장 직접적으로 받는 기업 중 하나다. 2026년 HBM 전체 생산량이 이미 완판된 상태에서, Q2 FY2026 매출이 전년 동기 대비 196% 급증한 $23.86B을 기록하며 역대 최고치를 경신했고, Q3 가이던스($33.5B)는 여기서도 또 한 번 역대 최고를 예고한다. 특히 UBS가 목표주가를 $535에서 $1,625로 3배 이상 상향하며 Micron을 "사이클형 반도체 기업"이 아닌 "AI 네이티브 인프라 기업"으로 재정의한 점은 중요한 투자 내러티브의 전환이다. 장기 공급계약(LTA)을 통해 하이퍼스케일러로부터 예측 가능한 수익 흐름을 확보했고, 버지니아 팹 확장과 CHIPS Act 보조금 수혜로 미국 정부의 정책 바람도 등에 업었다. 다만 단기 과열 우려(연초 대비 +178%), SK하이닉스와의 HBM 경쟁, $25B+ 자본지출 부담은 명확한 리스크다. <strong>MU는 AI 인프라 확장 사이클이 2027년까지 지속된다고 보는 중장기 투자자, 특히 반도체 섹터 내 메모리 특화 비중을 늘리고자 하는 투자자에게 핵심 보유 종목으로 적합하다.</strong> 단기 변동성은 크므로 분할 매수 전략 권장.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주식 투자에는 원금 손실 위험이 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

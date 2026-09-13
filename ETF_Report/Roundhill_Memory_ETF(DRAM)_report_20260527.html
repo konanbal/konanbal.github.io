@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roundhill Memory ETF (DRAM) 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a1628;
+    --accent: #0ea5e9;
+    --accent2: #0369a1;
+    --accent3: #38bdf8;
+    --bg: #f0f8ff;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0a1628 0%, #0369a1 60%, #0ea5e9 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .record-badge { background: #f59e0b; color: #1c1917; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; margin-left: 8px; vertical-align: middle; }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent2); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-country { font-size: 10px; color: var(--muted); margin-left: 6px; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent2); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, #0369a1, #38bdf8); border-radius: 3px; }
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .summary-box { background: linear-gradient(135deg, #e0f2fe 0%, #e8f4fd 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .record-banner { background: linear-gradient(90deg, #fef9c3, #fef3c7); border: 1px solid #fde68a; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #78350f; display: flex; align-items: center; gap: 8px; }
+  .warn-banner { background: #fff1f2; border: 1px solid #fecaca; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #7f1d1d; display: flex; align-items: flex-start; gap: 8px; }
+  .geo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .geo-grid { grid-template-columns: 1fr 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · DRAM · Cboe BZX <span class="record-badge">🏆 ETF 역사상 최속 성장</span></div>
+      <div class="etf-name">Roundhill Memory ETF</div>
+      <div class="etf-index">메모리 반도체 퓨어플레이 액티브 ETF | 운용사: Roundhill Financial Inc. | 공동운용: Exchange Traded Concepts</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 27일</div>
+      <div class="nav-display">$60.16</div>
+      <div class="nav-change up">▲ +$7.34 (+13.9%, 5/26 종가) · 설정일 대비 +~90%</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산(AUM): $10B+ (사상 최속 달성)</span>
+    <span class="pill">📋 총보수: 0.65%</span>
+    <span class="pill">📅 설정일: 2026.04.02</span>
+    <span class="pill">🌍 글로벌 메모리 전종목</span>
+    <span class="pill">⚡ 액티브 운용 ETF</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 역사적 기록 배너 -->
+  <div class="record-banner">
+    🏆 <strong>ETF 역사 새로 씀:</strong> 설정 10일 만에 AUM $10억 돌파 · 27일 만에 $65억 · 30일 만에 $100억 — 비트코인 ETF(IBIT)의 기록을 경신한 인류 역사상 가장 빠른 ETF 성장. 설정 이후 누적 자금 유입 $87억 + 운용 수익 $9.5억 = 총 $100억 AUM. 2026년 미국 ETF YTD 유입 순위 TOP 10.
+  </div>
+
+  <!-- 밸류에이션 경고 -->
+  <div class="warn-banner">
+    ⚠️ <strong>모닝스타 경고 (2026.05.15):</strong> "투자자들은 매우 신중하게 접근해야 한다. 포트폴리오가 10개 미만 종목에 극단적으로 집중되어 있으며, 상위 3종목이 자산의 73% 이상을 차지한다. 메모리 산업의 극단적 집중도를 그대로 반영하는 ETF다." 단기 열풍 진입 후 출구가 좁을 수 있음.
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">설정 이후 수익률</div>
+      <div class="kpi-value" style="color:var(--green);">+90%</div>
+      <div class="kpi-sub">~2026.04.02 이후 7주간 · 5/26 하루만 +13.9%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">AUM (순자산)</div>
+      <div class="kpi-value">$10B+</div>
+      <div class="kpi-sub">30일 만에 달성 — 역대 ETF 최속 기록</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수(Expense Ratio)</div>
+      <div class="kpi-value">0.65%</div>
+      <div class="kpi-sub">테마형 ETF 평균 대비 적정 수준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$26~$60</div>
+      <div class="kpi-sub">52주 저점 = 설정 초기 | 현재 최고가 근처</div>
+    </div>
+  </div>
+
+  <!-- 구성 종목 -->
+  <div class="card">
+    <div class="card-title">📦 주요 구성 종목 (상위 보유 / 2026.05 기준)</div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">SK Hynix <span class="holding-country">🇰🇷 KRX: 000660</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">27.7%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">Micron Technology <span class="holding-country">🇺🇸 NASDAQ: MU (직접 + 스왑)</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">25.8%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:93%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">Samsung Electronics <span class="holding-country">🇰🇷 KRX: 005930</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">20.3%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:73%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">Kioxia Holdings <span class="holding-country">🇯🇵 TSE: 285A</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">5.94%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:21%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">SanDisk Corp. <span class="holding-country">🇺🇸 NASDAQ: SNDK</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">5.76%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:21%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">Seagate Technology <span class="holding-country">🇺🇸 NASDAQ: STX</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">5.57%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:20%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">7</div>
+      <div class="holding-name">Western Digital Corp. <span class="holding-country">🇺🇸 NASDAQ: WDC</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">4.85%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:17%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">8</div>
+      <div class="holding-name">Nanya Technology <span class="holding-country">🇹🇼 OTC: NNYAF</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~2%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:7%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">9</div>
+      <div class="holding-name">Winbond Electronics <span class="holding-country">🇹🇼 TWSE: 2344</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~1%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:4%"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted); background:#f8fafc; border-radius:6px; padding:8px 12px;">
+      ⚠️ <strong>집중도 경고</strong>: 상위 3종목(SK Hynix + Micron + Samsung)이 전체 자산의 <strong>73%</strong> 점유. 총 보유 종목 수: 19개 | MU는 직접 보유 + 총수익스왑(Total Return Swap) 병행 (RIC 분산 규정 준수 목적)
+    </div>
+  </div>
+
+  <!-- 지역 배분 & 수익률 성과 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🌍 지역별 배분 & 메모리 유형</div>
+      <div class="sector-item">
+        <div class="sector-name">🇰🇷 한국 (삼성 + SK하이닉스)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~49%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:98%;background:#dc2626;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🇺🇸 미국 (Micron + WDC + SNDK + STX)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~38%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:76%;background:#2563eb;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🇯🇵 일본 (Kioxia)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~6%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:12%;background:#f59e0b;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🇹🇼 대만 (Nanya, Winbond)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~5%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:10%;background:#10b981;"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;">메모리 유형별 노출</div>
+        <div class="sector-item">
+          <div class="sector-name">HBM·DRAM (고대역 메모리)</div>
+          <div class="sector-right">
+            <div class="sector-pct">~73%</div>
+            <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#7c3aed;"></div></div>
+          </div>
+        </div>
+        <div class="sector-item">
+          <div class="sector-name">NAND·SSD·HDD</div>
+          <div class="sector-right">
+            <div class="sector-pct">~22%</div>
+            <div class="sector-bar-wrap"><div class="sector-bar" style="width:30%;background:#0d9488;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 수익률 성과 비교</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>기간</th><th>DRAM</th><th>SOXX(반도체)</th><th>초과수익</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>5/26 하루</td><td class="positive">+13.9%</td><td>+약 5%</td><td class="positive">+약 9%p</td></tr>
+          <tr><td>1개월 (5월)</td><td class="positive">+약 30%</td><td>N/A</td><td>N/A</td></tr>
+          <tr><td>설정 이후 (~7주)</td><td class="positive">+~90%</td><td>+~58%</td><td class="positive">+약 32%p</td></tr>
+          <tr><td>YTD 2026</td><td>미설정(4/2 이전)</td><td>—</td><td>—</td></tr>
+          <tr><td>3년·5년</td><td colspan="3" style="color:var(--muted);font-style:italic;">설정일 2026.04.02 — 이력 없음</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px;font-size:12px;background:#f0fdf4;border-radius:6px;padding:8px 12px;color:#065f46;">
+        ✅ <strong>설정 이후 누적 수익률 ~90%</strong>는 동기간 SOXX(+58%), QQQ(+약 25%) 등 주요 반도체·기술 ETF를 모두 압도. Micron(+~100%), SK Hynix(+125%) 등 구성 종목들이 AI 메모리 사이클 수혜로 폭등한 결과.
+      </div>
+    </div>
+  </div>
+
+  <!-- AUM 성장 이력 -->
+  <div class="card">
+    <div class="card-title">💰 AUM 성장 기록 — ETF 역사 새로 쓰다</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;font-size:12px;text-align:center;">
+      <div style="background:#eff6ff;border-radius:8px;padding:10px;border:1px solid #bfdbfe;">
+        <div style="font-size:10px;color:var(--muted);">설정 10일</div>
+        <div style="font-size:18px;font-weight:700;color:#1d4ed8;">$1B</div>
+        <div style="font-size:10px;color:var(--green);">역대 최속 $1B</div>
+      </div>
+      <div style="background:#faf5ff;border-radius:8px;padding:10px;border:1px solid #ddd6fe;">
+        <div style="font-size:10px;color:var(--muted);">설정 27일</div>
+        <div style="font-size:18px;font-weight:700;color:#7c3aed;">$6.5B</div>
+        <div style="font-size:10px;color:var(--green);">비트코인 ETF 추월</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:10px;border:1px solid #86efac;">
+        <div style="font-size:10px;color:var(--muted);">설정 30일</div>
+        <div style="font-size:18px;font-weight:700;color:#15803d;">$10B</div>
+        <div style="font-size:10px;color:var(--green);">ETF 역사상 최속</div>
+      </div>
+      <div style="background:#fef9c3;border-radius:8px;padding:10px;border:1px solid #fde68a;">
+        <div style="font-size:10px;color:var(--muted);">총 자금 유입</div>
+        <div style="font-size:18px;font-weight:700;color:#b45309;">$8.7B</div>
+        <div style="font-size:10px;color:var(--muted);">5/26 단일일 $1B+</div>
+      </div>
+      <div style="background:#fff1f2;border-radius:8px;padding:10px;border:1px solid #fecaca;">
+        <div style="font-size:10px;color:var(--muted);">가격 상승분</div>
+        <div style="font-size:18px;font-weight:700;color:#dc2626;">$0.95B</div>
+        <div style="font-size:10px;color:var(--muted);">순수 운용 수익</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);">
+      ※ 이전 기록 보유자: iShares Bitcoin Trust (IBIT) — $6.5B 도달에 30 거래일 소요. DRAM은 27일 만에 달성. YTD 미국 전체 ETF 유입 순위 TOP 10 진입 (5,000개 이상 ETF 중). 소셜미디어(X/레딧)에서의 개인투자자 열풍이 유입을 증폭.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.26</span>
+      </div>
+      <div class="news-title">MU 사상 최고가 돌파 + UBS $1,625 목표주가 → DRAM ETF 단일일 +13.9%</div>
+      <div class="news-summary">Micron Technology가 ByteDance AI 칩 수주 + UBS 목표주가 $1,625 상향으로 +20%+ 급등. DRAM ETF의 MU 비중 ~26%가 직접 반영되어 ETF 단일 거래일 +13.9%의 폭발적 상승. 한국장에서 SK Hynix도 동조 급등하며 양면 수혜.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.11~12</span>
+      </div>
+      <div class="news-title">DRAM ETF AUM $60억 돌파 CNBC 생방송 보도 — "AI 빌드아웃의 가장 큰 병목" 타이틀</div>
+      <div class="news-summary">CNBC 'ETF Edge' 프로그램에서 DRAM ETF를 집중 조명. "AI 빌드아웃에서 가장 큰 병목인 메모리 칩에 투자하는 방법"으로 소개. 5/11 하루 만에 $10억 자금 유입으로 AUM $60억 돌파. 소셜미디어에서 개인투자자들 사이에서 폭발적 인기.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.13</span>
+      </div>
+      <div class="news-title">2x 레버리지 버전 준비 중 — 韓 SK하이닉스·삼성 단일종목 레버리지 ETF도 계획</div>
+      <div class="news-summary">DRAM ETF의 2배 레버리지 버전이 미국 시장에 준비 중이라는 보도. 한국에서도 SK하이닉스·삼성전자 단일종목 레버리지 ETF 출시 계획. 2x 레버리지 제품의 등장은 소매 열풍이 후기 사이클 단계에 접어들었다는 신호로도 해석됨.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.05.20</span>
+      </div>
+      <div class="news-title">한국 비중 49%의 구조적 문제 — 뉴욕 개장 중 서울 장 마감으로 '밤사이 가격 갭' 발생</div>
+      <div class="news-summary">DRAM ETF 자산의 49%인 삼성전자·SK하이닉스가 한국 시장에서만 거래된다. 서울 시간 오후 3시에 한국 주식 거래 종료 → 14시간 후 뉴욕 시장에서 ETF 거래. 한국에서 호악재 발표 시 미국 투자자들은 다음날까지 대응 불가. 구조적 오버나이트 갭 리스크 내재.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.15</span>
+      </div>
+      <div class="news-title">모닝스타 "투자자들 매우 신중해야" — 상위 3종목 73% 집중, 고평가 우려</div>
+      <div class="news-summary">모닝스타 분석가가 DRAM ETF의 급성장에도 불구하고 강력한 투자 주의를 발령. "포트폴리오가 10개 미만 종목에 극단적으로 집중되어 있으며, 상위 3종목이 73% 이상을 차지한다. 이 ETF는 구성 종목들과 함께 오르거나 내릴 것이다." SK하이닉스의 P/E 등 밸류에이션 부담도 지적.</div>
+    </div>
+  </div>
+
+  <!-- Bull/Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">📈</span><span><strong>AI 메모리 슈퍼사이클 순수 노출</strong> — AI 데이터센터는 전통 서버 대비 DRAM 6배, HBM 100% 추가 수요. 한 ETF로 HBM(SK하이닉스·마이크론)·NAND(SNDK)·HDD(WDC·STX)까지 메모리 밸류체인 전체 취득</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💡</span><span><strong>개별 종목 선택 고민 없이 메모리 섹터 전체 베팅</strong> — MU vs SNDK vs SK Hynix 중 누가 더 올라갈지 고를 필요 없이 3개를 동시에 보유. NAND 사이클과 DRAM 사이클이 동조화될수록 ETF의 강점 극대화</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌟</span><span><strong>AI 메모리 수요 구조적 성장 — 2028년까지 지속 전망</strong> — HBM 시장 연 40% CAGR, NAND 장기계약($42B+) 확산. 공급 제약(NAND·DRAM 모두)이 최소 2027~2028년까지 지속되면 ETF 구성 종목들 전반적 강세 기대</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌍</span><span><strong>글로벌 메모리 3강 동시 접근</strong> — 미국 투자자가 한국 KRX에서 SK하이닉스·삼성을 직접 매수하기 어려운 현실에서, DRAM ETF는 간편하게 글로벌 메모리 3강(SK하이닉스·삼성·마이크론)에 동시 투자하는 유일한 방법</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💰</span><span><strong>0.65% 총보수 — 테마 ETF 중 합리적</strong> — 테마형 ETF 평균(0.75~1.0%) 대비 낮은 비용. 주로 분기 리밸런싱으로 회전율 낮게 유지. 투자전략 명확성 + 비용 합리성의 조합</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><strong>극단적 종목 집중 (상위 3종목 73%)</strong> — "ETF"라는 형태이지만 실질적으로 삼성·SK하이닉스·마이크론의 3종목 바스켓. 이 3종목이 모두 동조 하락 시 분산 효과 전무. 메모리 사이클 급락 시 충격 흡수 메커니즘 없음</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>한국 주식 49% — 오버나이트 갭 리스크</strong> — 삼성+SK하이닉스가 절반. 한국 장 마감 후 뉴욕 ETF 거래까지 14시간 가격 갭 발생. 한국에서 부정적 뉴스(실적 부진, 지정학, 메모리 가격 하락) 발생 시 미국 투자자는 익일 개장 전까지 대응 불가</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🔻</span><span><strong>메모리 사이클 붐앤버스트 역사</strong> — DRAM·NAND는 반도체 중 가장 극심한 가격 변동성 보유. 2022~2023년 사이클 처럼 수급 역전 시 구성 종목 주가 60~70% 폭락 전례 존재. 현재 +90% 급등이 사이클 정점 신호일 수 있음</span></div>
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><strong>소셜미디어 열풍 주도 — 후기 사이클 경고 신호</strong> — CNBC 방송 + X(트위터)/레딧 버즈가 자금 유입 견인. 2x 레버리지 버전 준비 중이라는 소식은 전형적인 소매 열풍 후기 사이클 패턴. 센티먼트 전환 시 대규모 자금 이탈로 주가 급락 가능</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>분배금 이력 전무 — 설정 역사 7주</strong> — 2026.04.02 설정으로 배당 이력 없음. 수익률이 단기 급등에만 의존하는 구조. 중장기 배당수익률·분배금 안정성 검증 불가. 사이클 하락 시 자본 보전 수단 부재</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 배당/분배금 -->
+  <div class="card">
+    <div class="card-title">💵 배당 / 분배금 현황</div>
+    <div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:13px;background:#f9fafb;border-radius:8px;">
+      ℹ️ 설정일 2026.04.02 이후 아직 분배금 지급 이력 없음. 분기 리밸런싱 구조로 분배금 지급 예상되나 금액·일정 미확인.<br>
+      <span style="font-size:11px;margin-top:4px;display:block;">현재까지 수익은 100% 가격 상승(Capital Gain)에 의존. 배당수익률 기반 투자자보다 성장형 투자자에게 적합.</span>
+    </div>
+  </div>
+
+  <!-- 유사 ETF 비교 -->
+  <div class="card">
+    <div class="card-title">🔄 유사 ETF 비교 — DRAM vs SOXX vs SMH</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>ETF</th><th>총보수</th><th>AUM</th><th>구성 특성</th><th>메모리 집중도</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:700;color:#0369a1;">DRAM (Roundhill Memory)</td>
+          <td>0.65%</td>
+          <td class="positive">$10B+</td>
+          <td>메모리 전문 퓨어플레이</td>
+          <td class="positive">100%</td>
+        </tr>
+        <tr>
+          <td>SOXX (iShares 반도체)</td>
+          <td>0.35%</td>
+          <td>~$17B</td>
+          <td>반도체 전반 (설계·제조·장비)</td>
+          <td>~20~25%</td>
+        </tr>
+        <tr>
+          <td>SMH (VanEck 반도체)</td>
+          <td>0.35%</td>
+          <td>~$25B</td>
+          <td>반도체 전반 (시총 가중)</td>
+          <td>~15~20%</td>
+        </tr>
+        <tr>
+          <td>QQQ (Invesco 나스닥100)</td>
+          <td>0.20%</td>
+          <td>~$280B</td>
+          <td>기술주 전반</td>
+          <td>~5~8%</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);">
+      DRAM ETF는 메모리 순수 노출 면에서 독보적이지만, 비용(0.65%)이 SOXX·SMH(0.35%) 대비 거의 2배. 분산 효과는 최저. 메모리 전망에 강한 확신이 있을 때만 SOXX 대신 선택할 이유가 있음.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Roundhill Memory ETF(DRAM)는 2026년 가장 화제의 ETF다. 설정 7주 만에 +90% 수익률을 기록하며 ETF 역사상 가장 빠른 AUM $100억 달성($30일)이라는 전례 없는 성과를 냈다. "AI 데이터센터의 메모리 병목"이라는 강력한 투자 테제와, 미국 투자자가 한국 KRX를 통하지 않고 삼성·SK하이닉스에 쉽게 접근할 수 있다는 편의성이 폭발적 자금 유입의 배경이다. HBM·DRAM·NAND·HDD를 아우르는 메모리 밸류체인 전체를 단 하나의 ETF로 접근할 수 있다는 점도 큰 장점이다.
+
+      그러나 투자에 앞서 직면해야 할 구조적 현실이 있다. 첫째, 상위 3종목(SK하이닉스·마이크론·삼성)이 전체 자산의 73%를 점유하는 극단적 집중도는 "ETF"라는 형식에 비해 분산이 거의 없음을 의미한다. 둘째, 자산의 49%가 한국 주식으로, 서울 시간대에만 거래되어 미국 투자자는 오버나이트 가격 갭 리스크에 무방비 노출된다. 셋째, DRAM·NAND는 반도체 중 가장 극심한 붐앤버스트 역사를 가진 사이클 산업으로, 2022~2023년처럼 수급 역전 시 구성 종목들이 60~70% 폭락한 전례가 있다. 소셜미디어 열풍과 2x 레버리지 버전 준비 소식은 소매 사이클 정점 신호로 해석될 수 있다. <strong>DRAM ETF는 AI 메모리 사이클의 지속에 강한 확신을 가진 투자자가 개별 종목을 고르기 어렵거나 한국 주식 접근이 제한될 때 활용할 수 있는 특수 목적 투자 수단이다. 메모리 산업의 구조적 전환을 믿되, 사이클 리스크와 한국 주식 오버나이트 갭을 충분히 인지한 상태에서, 전체 포트폴리오의 일부 비중으로만 접근하는 위성 투자 전략이 적합하다.</strong>
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. ETF 투자는 원금 손실 가능성이 있으며, 특히 테마형·집중형 ETF는 일반 분산 ETF보다 변동성이 크게 높습니다. 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

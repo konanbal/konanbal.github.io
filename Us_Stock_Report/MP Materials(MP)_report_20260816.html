@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MP Materials 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">MP · NYSE</div>
+      <div class="company-name">MP Materials Corp. (MP)</div>
+      <div class="company-desc">미국 유일의 완전 수직계열화 희토류 생산업체 — 채굴(Mountain Pass)부터 NdPr 산화물·금속 정제, 영구자석 제조(Independence, 10X)까지 전체 밸류체인 보유</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 8월 16일</div>
+      <div class="price-display">$58.74</div>
+      <div class="price-change up">▲ +5.53% (전일 대비, 2026.08.15 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $10.4B</span>
+    <span class="rating-pill">🏢 섹터: 소재 · 희토류/특수광물</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy (18개사 전원 매수)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (Q2 2026)</div>
+      <div class="kpi-value">$108.5M</div>
+      <div class="kpi-sub">YoY +89%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">조정 EBITDA 마진</div>
+      <div class="kpi-value">26.3%</div>
+      <div class="kpi-sub">전분기 대비 -14.1%p (Q1 40.4%→Q2 26.3%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$75.28</div>
+      <div class="kpi-sub">현재가 대비 +28.2%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$37.81~$100.25</div>
+      <div class="kpi-sub">현재가 위치: 하위 약 34%</div>
+    </div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 — 2026년 2분기)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$108.49M <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +9.4%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $99.2M(Zacks) · YoY +89%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">조정 EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">-$0.01 <span style="font-size:12px;color:var(--red);">▼ 어닝 쇼크 -150%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $0.02(Zacks) · 전년동기 -$0.13 대비 손실폭 대폭 축소</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      실적 발표일: 2026년 8월 6일(장 마감 후). NdPr 판매량 1,006MT(YoY +127%)로 2개 분기 연속 1,000MT 상회. 경영진은 3분기 NdPr 생산량이 1,000MT를 재차 초과할 것으로 가이던스 제시했으며, PPA(가격보장) 수익은 kg당 약 $10, NdPr 산화물 가격은 kg당 $90대 후반 예상. 마그네틱스(자석) 사업은 4분기 상업 출하 개시 목표.
+    </div>
+  </div>
+
+  <!-- ④ SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 실적 발표 (Exhibit 99.1)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.06</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요계약</span>
+        <span style="font-size:13px;font-weight:500;">신규 미국 항공우주·방위 고객과 분리 가돌리늄 장기 오프테이크 계약 체결</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.06</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">IR 일정</span>
+        <span style="font-size:13px;font-weight:500;">CFO 라이언 코벳, Canaccord Genuity 46th 성장 컨퍼런스 참가</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.12</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.06~07</span></div>
+      <div class="news-title">2분기 실적 발표 후 주가 15%대 급등</div>
+      <div class="news-summary">매출이 컨센서스를 큰 폭 상회하고 EPS 손실이 전년 대비 크게 축소되면서, 조정 EPS가 예상치를 소폭 밑돌았음에도 투자자들이 이를 무시하고 매수에 나섰다. 실적 발표 이후 1주일간 주가는 약 16% 상승.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.06</span></div>
+      <div class="news-title">비공개 항공우주·방위 고객과 가돌리늄 장기 공급계약 체결</div>
+      <div class="news-summary">고객명은 비공개이나, GM·Apple·美 국방부에 이은 신규 대형 고객 확보로 해석된다. NdPr 중심에서 중희토류(HREE)로 사업을 다각화하는 신호로, Mountain Pass의 SEG+ 스트림에서 부산물로 회수 가능해 별도 채굴 없이 코프로덕트 경제성을 확보한다는 점이 긍정적.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.08.10</span></div>
+      <div class="news-title">Deutsche Bank, 목표주가 $61→$58로 하향</div>
+      <div class="news-summary">밸류에이션 부담과 조정 EPS 적자 지속을 반영해 목표가를 소폭 하향. 다만 Barclays는 같은 날 매수의견을 재확인하는 등 증권사 간 시각차가 존재.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.06(실적콜)</span></div>
+      <div class="news-title">엔지니어·건설 인력 부족 우려 — 확장 프로젝트 지연 가능성</div>
+      <div class="news-summary">실적 콜에서 애널리스트들은 인력난에 대한 우려를 제기했으며, 경영진은 GM·Apple·국방부 등과의 계약된 현금흐름이 고용 매력도를 높이고 있다고 답변했으나 근본적 리스크는 해소되지 않은 상태.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.08.06</span></div>
+      <div class="news-title">GM에 차량 탑재용 자석 인도, 4분기 상업 출하 목표</div>
+      <div class="news-summary">마그네틱스(자석) 세그먼트가 GM용 자석 인증 단계에 진입했으며, 프리커서(전구체) 생산 부문 마진은 40%를 상회. 4분기 상업 출하 개시가 예정대로 진행될 경우 매출 다각화의 중요한 변곡점이 될 전망.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>NdPr 판매량 YoY +127%로 2개 분기 연속 1,000MT 상회, 3분기 추가 성장 가이던스 — 고객 수요가 생산 증가 속도를 앞지르는 상황</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>美 국방부와 10년 가격보장(NdPr $110/kg)·자석 오프테이크 계약, GM·Apple 등 우량 고객 확보로 매출 가시성과 정책적 지원이 결합된 구조</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>마그네틱스(자석) 사업이 4분기 상업 출하를 앞두고 있으며, 프리커서 생산 마진 40%대로 향후 이익 구조 개선 기대</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>신규 항공우주·방위 고객과의 가돌리늄 공급계약 등 NdPr 외 사업 다각화가 진행 중이며, 애널리스트 18명 전원 매수의견 유지</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>밸류에이션 부담 — 선행 P/S 약 14.9배로 업종 평균(1.4배 안팎) 대비 크게 고평가된 상태이며, 밸류에이션 지표상 저평가 매력은 낮은 편</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>조정 EPS 적자 지속 — 이번 분기 5분기 연속 이어지던 어닝 서프라이즈 행진이 끊기고 어닝 쇼크(-150%) 기록, 확장 투자에 따른 수익성 변동성 상존</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>엔지니어·건설 인력 부족으로 Independence·10X 등 대규모 확장 프로젝트 일정 지연 리스크</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>베타 약 1.9로 변동성이 매우 크며, 현재 주가는 52주 고점($100.25) 대비 여전히 40% 이상 낮은 수준 — 국방부·정책 지원 재료 소멸 시 주가 조정 가능성</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Barclays (2026.08.10)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 비공개</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Deutsche Bank (2026.08.10)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립적 매수(하향)</span><span class="target-price">$58 (이전 $61)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">TipRanks 집계 애널리스트 (2026.08.07)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 재확인</span><span class="target-price">$82 (유지)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">전체 컨센서스 (18개 증권사)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy · 전원 매수</span><span class="target-price">평균 $75.28 (범위 $58~$100)</span></div>
+    </div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      MP Materials는 미국 유일의 완전 수직계열화 희토류 생산업체로, 美 국방부와의 10년 가격보장·오프테이크 계약을 축으로 GM·Apple·정부기관 등 우량 고객을 확보하며 정책 수혜와 상업적 성장이 결합된 독특한 포지션을 갖고 있다. 2026년 2분기 매출은 컨센서스를 9%대 상회했고 NdPr 판매량은 전년 대비 127% 급증했으나, 확장 투자와 마그네틱스 초기 가동비용으로 조정 EPS는 소폭의 어닝 쇼크를 기록했다. 단기적으로는 4분기 예정된 자석 상업 출하와 3분기 NdPr 생산 1,000MT 초과 가이던스 달성 여부가 핵심 변수이며, 중기적으로는 10X 시설 준공과 신규 고객(가돌리늄 등) 확대가 주가 재평가의 트리거가 될 수 있다. 다만 현재 선행 P/S가 업종 평균 대비 10배 이상 높은 수준이어서 밸류에이션 부담이 상존하고, 엔지니어·건설 인력난에 따른 프로젝트 지연 리스크와 베타 1.9대의 높은 변동성도 함께 고려해야 한다. 이 종목은 미국 공급망 재편·희토류 국산화라는 장기 정책 테마에 투자하면서 단기 실적 변동성과 고밸류에이션을 감내할 수 있는 성장주 투자자에게 적합하다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

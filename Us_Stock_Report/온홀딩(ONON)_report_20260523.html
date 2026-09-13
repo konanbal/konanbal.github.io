@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>온 홀딩 (ONON) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0a0a0a;
+    --accent: #e8ff00;
+    --accent2: #1a1a1a;
+    --bg: #f2f2f0;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --on-black: #1a1a1a;
+    --on-yellow: #c9e800;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 60%, #2d2d2d 100%);
+    color: white; padding: 2.5rem 2rem 2rem; position: relative; overflow: hidden;
+  }
+  .report-header::before {
+    content: '🏃'; position: absolute; right: 2.5rem; top: 50%;
+    transform: translateY(-50%); font-size: 110px; opacity: 0.06; pointer-events: none;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--on-yellow); color: #0a0a0a; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.72; max-width: 530px; line-height: 1.6; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.5; }
+  .price-display { font-size: 34px; font-weight: 700; margin-top: 4px; letter-spacing: -1px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.07); }
+  .rating-pill.yellow { background: var(--on-yellow); color: #0a0a0a; border-color: var(--on-yellow); }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--on-black); border-radius: 2px; }
+
+  /* 관세 경고 배너 */
+  .tariff-banner {
+    background: linear-gradient(90deg, #7c2d12, #b45309);
+    color: white; padding: 11px 18px; border-radius: 10px;
+    font-size: 13px; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 10px; line-height: 1.5;
+  }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* 지역별 성장 */
+  .region-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 0.75rem; }
+  .region-box { border-radius: 10px; padding: 1rem; text-align: center; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-ceo { background: #fef3c7; color: #78350f; }
+  .tag-product { background: #e0f2fe; color: #075985; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); color: #1a3a2e; }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); color: #3a1a1a; }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; }
+  .target-up { color: var(--green); font-size: 11px; }
+  .target-down { color: var(--red); font-size: 11px; }
+
+  .earnings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; }
+  .earnings-box { background: #fafaf9; border-radius: 10px; padding: 1rem 1.1rem; border: 1px solid #e7e5e4; }
+  .earnings-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .earnings-value { font-size: 20px; font-weight: 700; }
+  .earnings-beat { font-size: 11px; color: var(--green); font-weight: 600; margin-left: 6px; }
+  .earnings-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .filing-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .filing-row:last-child { border-bottom: none; }
+  .filing-type { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-right: 8px; white-space: nowrap; }
+  .ft-6k { background: #e0f2fe; color: #075985; }
+  .ft-6k-ceo { background: #fef3c7; color: #92400e; }
+  .ft-6k-pos { background: #d1fae5; color: #065f46; }
+  .ft-agm { background: #ede9fe; color: #4c1d95; }
+
+  /* 마진 진행 바 */
+  .margin-bar-wrap { background: #f3f4f6; border-radius: 8px; height: 12px; overflow: hidden; margin-top: 6px; }
+  .margin-bar { height: 100%; border-radius: 8px; }
+
+  .summary-box { background: linear-gradient(135deg, #f9fafb 0%, #f0fdf4 100%); border: 1px solid #e5e7eb; border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--on-black); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; line-height: 1.6; }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .earnings-grid, .region-grid { grid-template-columns: 1fr 1fr; }
+    .header-meta { text-align: left; }
+    .price-display { font-size: 26px; }
+    .company-name { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">ONON · NYSE · 프리미엄 스포츠웨어</div>
+      <div class="company-name">온 홀딩 (On Holding AG)</div>
+      <div class="company-desc">스위스 창업 프리미엄 러닝·스포츠 브랜드. CloudTec®·LightSpray™ 기술 기반 신발·의류·액세서리. 공동 창업자 복귀(Co-CEO), 아시아-태평양 급성장, 의류 카테고리 확장으로 나이키·아디다스·Hoka에 도전 중.<br>2026년 Q1 기록적 매출·마진 달성 후 관세 우려로 YTD -27% 하락.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 23일</div>
+      <div class="price-display">$37.25</div>
+      <div class="price-change down">▼ YTD -27% · 52주 고점($61.29) 대비 -39%</div>
+      <div style="font-size:11px;opacity:0.5;margin-top:4px;">기준: NYSE 5/22/2026 종가 전후</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$11.1B</span>
+    <span class="rating-pill">🏢 섹터: 프리미엄 스포츠웨어</span>
+    <span class="rating-pill yellow">⭐ 컨센서스: Strong Buy (20명)</span>
+    <span class="rating-pill">🎯 평균 목표가: $60.15 (+61.5%)</span>
+    <span class="rating-pill">📅 다음 실적: Q2 2026 (~8월)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="tariff-banner">
+    <span style="font-size:18px;">⚠️</span>
+    <span><strong>관세 최대 리스크:</strong> 신발의 약 90%, 의류의 약 65%가 베트남 소싱. Q1에만 관세 비용 $70.43M 흡수. 가이던스에 베트남 20% 추가 관세를 반영했음에도 불구하고 관세 불확실성이 지속되며 YTD 주가 -27% 하락의 핵심 원인. 관세 완화 시 가이던스 상향 여력 존재.</span>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 매출</div>
+      <div class="kpi-value">CHF 831.9M</div>
+      <div class="kpi-sub">YoY +14.5% / CC +26.4%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총이익률 (Q1 신고점)</div>
+      <div class="kpi-value" style="color:var(--green);">64.2%</div>
+      <div class="kpi-sub">전년 59.9% 대비 +430bps · 새 기준선</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">FY2026 매출 가이던스</div>
+      <div class="kpi-value" style="font-size:17px;">CHF ≥3.51B</div>
+      <div class="kpi-sub">CC +23% 이상 · 총마진 ≥64.5%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순이익 성장 (Q1)</div>
+      <div class="kpi-value" style="color:var(--green);">+82.2%</div>
+      <div class="kpi-sub">CHF 103.3M · EPS CHF 0.31</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 Q1 2026 실적 상세 (2026.05.12 발표) — 기록 경신</div>
+    <div class="earnings-grid">
+      <div class="earnings-box">
+        <div class="earnings-label">매출 (실제 vs 컨센서스)</div>
+        <div class="earnings-value">$1.07B / CHF 831.9M <span class="earnings-beat">▲ +0.9% 초과</span></div>
+        <div class="earnings-sub">컨센서스 $1.05B · CC +26.4% · 전 채널·전 지역 두 자릿수 성장</div>
+      </div>
+      <div class="earnings-box">
+        <div class="earnings-label">EPS (실제 vs 컨센서스)</div>
+        <div class="earnings-value">$0.47 / CHF 0.31 <span class="earnings-beat">▲ +32.8% 초과</span></div>
+        <div class="earnings-sub">컨센서스 $0.35 · 조정 EPS 기준 · 순이익 YoY +82.2%</div>
+      </div>
+    </div>
+    <!-- 지역별 성장 -->
+    <div class="region-grid">
+      <div class="region-box" style="background:#eff6ff;border:1px solid #bfdbfe;">
+        <div style="font-size:11px;color:#1e40af;font-weight:700;margin-bottom:6px;">🌏 아시아-태평양</div>
+        <div style="font-size:24px;font-weight:800;color:#1d4ed8;">+44.4%</div>
+        <div style="font-size:10px;color:#1e40af;margin-top:4px;">CC +61.4% · 전체 매출 20% 첫 돌파<br>중국 고두자릿수 성장</div>
+      </div>
+      <div class="region-box" style="background:#f0fdf4;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:#065f46;font-weight:700;margin-bottom:6px;">🌍 유럽·중동·아프리카</div>
+        <div style="font-size:24px;font-weight:800;color:#059669;">+22.8%</div>
+        <div style="font-size:10px;color:#065f46;margin-top:4px;">두 자릿수 성장 유지<br>주요 도시 직영점 확대 중</div>
+      </div>
+      <div class="region-box" style="background:#fafaf9;border:1px solid #e7e5e4;">
+        <div style="font-size:11px;color:#78716c;font-weight:700;margin-bottom:6px;">🌎 아메리카</div>
+        <div style="font-size:24px;font-weight:800;color:#57534e;">+3.1%</div>
+        <div style="font-size:10px;color:#78716c;margin-top:4px;">CC +17.1% · FX 헤드윈드<br>D2C 기반 확대 중</div>
+      </div>
+    </div>
+    <!-- 마진 진행 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-weight:500;">총이익률 (신고점)</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">64.2%</div>
+        <div class="margin-bar-wrap"><div class="margin-bar" style="width:64.2%;background:linear-gradient(90deg,#059669,#10b981);"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;">가이던스 ≥64.5% → 신 기준선</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-weight:500;">조정 EBITDA 마진</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">21.0%</div>
+        <div class="margin-bar-wrap"><div class="margin-bar" style="width:21%;background:linear-gradient(90deg,#2563eb,#3b82f6);"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;">전년 16.5% 대비 +450bps</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-weight:500;">의류 매출 비중(D2C)</div>
+        <div style="font-size:18px;font-weight:700;color:#7c3aed;">10%+</div>
+        <div class="margin-bar-wrap"><div class="margin-bar" style="width:10%;background:linear-gradient(90deg,#7c3aed,#8b5cf6);"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;">D2C 첫 10% 돌파 · CC +57.5%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;line-height:1.8;background:#fafaf9;border-left:3px solid var(--on-black);padding:12px 16px;border-radius:0 8px 8px 0;">
+      <strong>Co-CEO Caspar Coppetti:</strong> "Q1은 올해의 탁월한 출발이자 프리미엄 전략의 강력한 증거다. On은 더 글로벌하게, 더 다차원적으로, 더 다양한 커뮤니티에 깊이 뿌리내리고 있다. 우리는 역대 가장 강한 포지션에서 다음 성장 단계로 나아간다." 또한 "그로스 마진 상승은 일회성 정점이 아니다. 브랜드와 비즈니스 모델의 펀더멘털에서 비롯된 것이며, 이 수준이 새로운 기준선"이라고 강조.
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 및 주요 이벤트</div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-6k">6-K</span><span style="font-weight:500;">Q1 2026 실적 발표 — 매출 CHF 831.9M, 순이익 +82.2%</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.12</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-6k-ceo">6-K 경영진</span><span style="font-weight:500;">공동 창업자 Allemann·Coppetti Co-CEO 취임 (5/1) + 신임 CFO Frank Sluis</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.25</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-6k-pos">제품/기술</span><span style="font-weight:500;">LightSpray Cloudmonster Hyper 완판 · 생산 용량 30배 확대 · 일 수백 켤레 D2C 판매</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.Q1</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-6k-pos">신규 매장</span><span style="font-weight:500;">서울·선전·런던 등 주요 도시 직영점 신규 오픈 — 브랜드 빌딩 가속</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.Q1</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-agm">AGM</span><span style="font-weight:500;">2026 연간 주주총회 (5/28) — Hoffmann Class B주 소각·Class A 전환 안건</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.28</span>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#1a1a1a;background:#f9fafb;border-left:3px solid var(--on-black);padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.7;">
+      📌 <strong>투자자 주목:</strong> 5/28 주총에서 Hoffmann의 Class B주(의결권 10×) 소각 및 Class A 전환 안건이 처리될 예정. 향후 창업자 그룹의 의결권 구조 변화 확인 필요. 가이던스는 베트남 20% 추가 관세를 반영했지만 관세 환급이 실현되면 추가 업사이드 가능.
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">실적</span><span class="news-date">2026.05.12</span></div>
+      <div class="news-title">Q1 기록 경신 — EPS +33% 어닝 서프라이즈, 총마진 64.2% 신고점, 가이던스 상향</div>
+      <div class="news-summary">매출·EPS·마진 모두 컨센서스를 상회하며 Q1 사상 최고 기록을 경신했다. 가이던스도 총마진을 기존 63%에서 64.5% 이상으로, EBITDA 마진을 19.5~20.0%로 상향했다. 아시아-태평양이 처음으로 전체 매출의 20%를 돌파, 중국에서 의류가 주요 매출원으로 부상했다. 발표 당일 주가 +5.7% 반등(but 관세 우려로 일부 반납).</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-ceo">경영진</span><span class="news-date">2026.03.25 / 5.01 발효</span></div>
+      <div class="news-title">공동 창업자 Allemann·Coppetti, Co-CEO 복귀 — "기록을 깨는 최적의 타이밍"</div>
+      <div class="news-summary">13년간 CEO를 맡았던 Martin Hoffmann이 물러나고 두 창업자가 Co-CEO로 복귀했다. Allemann은 "기록을 깨고 있을 때가 게임 수준을 높일 최적의 타이밍"이라고 밝혔다. 창업자 복귀는 단기적으로 전략 연속성에 대한 신뢰를 주지만, 공동 리더십 구조의 실행 효율성이 시험대에 오른다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-product">혁신</span><span class="news-date">2026.Q1</span></div>
+      <div class="news-title">LightSpray 생산 30배 확대 — Cloudmonster Hyper 완판, 일 수백 켤레 D2C</div>
+      <div class="news-summary">On의 자동화 제조 기술 LightSpray를 적용한 Cloudmonster Hyper가 출시 즉시 완판됐다. 생산 용량을 30배 확대했음에도 수요가 공급을 초과하고 있다. LightSpray는 전통적인 신발 제조와 달리 스프레이 공법으로 갑피를 형성, 재료 낭비를 최소화하면서도 고성능을 구현하는 혁신 기술이다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">성장</span><span class="news-date">2026.Q1</span></div>
+      <div class="news-title">의류 D2C 첫 10% 돌파 · 18~24세 신규 고객 역대 최대 증가 — 브랜드 인구통계 확장</div>
+      <div class="news-summary">의류 매출이 D2C 매출의 10%를 처음으로 넘어섰고, CC 기준 +57.5% 성장했다. Q2로 이어지는 모멘텀도 가속 중이다. 특히 18~24세 고객층이 D2C 베이스에서 역대 최대 분기 증가를 기록해, 나이키·아디다스가 지배하던 젊은 층 시장으로 On의 브랜드가 빠르게 침투하고 있음을 보여준다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.05.13</span></div>
+      <div class="news-title">KeyBanc 목표가 $58→$43 하향 — 베트남 소싱 90% 관세 집중도가 핵심 리스크</div>
+      <div class="news-summary">신발 90%·의류 65%가 베트남 소싱으로 관세 집중도가 높다는 이유로 KeyBanc이 목표가를 크게 낮췄다(비중확대 유지). Q1에 관세 비용 $70.43M을 이미 흡수했으며, 가이던스에는 20% 추가 관세율을 가정했다. 관세 완화 시 상향 여력, 관세 심화 시 추가 마진 압박의 양방향 변수다.</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>아시아-태평양 제2 성장 엔진 — CC +61.4%, 중국 의류 급성장</strong> — APAC이 처음으로 전체 매출 20%를 돌파했고, 중국에서 의류가 주요 매출원으로 성장 중이다. 나이키가 중국에서 고전하는 사이 On이 프리미엄 포지셔닝으로 빈자리를 채우는 구도. 장기 성장 방정식의 핵심 변수.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>총마진 64.2% 신고점 — "새 기준선" 선언, 가이던스 상향</strong> — 관세 비용을 흡수하면서도 D2C 채널 믹스 개선·풀프라이스 판매 강도가 마진을 사상 최고로 끌어올렸다. 경영진은 "이 수준이 새 기준선"이라며 FY2026 총마진 ≥64.5% 가이던스로 즉시 상향했다.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>의류 성장 가속 + 18~24세 신규 고객 역대 최대</strong> — 의류 D2C 10% 돌파는 On이 신발 기업에서 '라이프스타일 브랜드'로 전환하고 있다는 증거. 젊은 고객층 유입 가속은 브랜드의 장기 지속 가능성과 ASP 유지 능력을 보여준다.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>LightSpray 제조 혁신 — 완판 연속, 생산 30배 확대에도 수요 초과</strong> — 자동화 스프레이 제조 방식은 원가 절감+친환경+고성능을 동시에 구현. 생산 용량 30배 확대 후에도 완판이 이어지는 것은 수요의 질이 탁월함을 의미. 경쟁사가 빠르게 모방하기 어려운 독점 기술.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>목표가 $60.15 — 현재가 대비 +61.5% 업사이드, Strong Buy 컨센서스</strong> — 20명 Strong Buy 컨센서스, 35개 기관 평균 $60.15는 관세 역풍을 반영해 크게 낮아진 현재가에서 강력한 리레이팅 잠재력을 제시. 관세 완화 + 아시아-태평양 가속이 동시에 실현되면 $60+ 재달성 가능.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>베트남 소싱 90% — 관세 집중 리스크가 구조적</strong> — 신발 90%·의류 65%의 베트남 소싱은 단기에 다각화하기 어렵다. Q1에만 관세 비용 $70.43M을 흡수했다. 관세율이 20%를 초과하거나 장기화되면 마진이 구조적으로 압박받는다. 소싱 다변화에는 2~3년 이상 소요될 전망.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>고 밸류에이션 — P/E 44.9× (피어 28.4× 대비 58% 프리미엄)</strong> — YTD -27% 낙폭에도 여전히 P/E 44.9배. Simply Wall St 공정가치 $56.41도 현재가 대비 업사이드를 제시하지만, 성장 실망 시 빠른 멀티플 압축 가능. 성장이 기대에 못 미칠 경우 추가 조정 위험.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>공동 창업자 Co-CEO 리더십 — 이중 리더십 실행 효율성 미검증</strong> — 창업자 복귀는 브랜드 정체성 강화에 유리하지만, 두 사람이 동시에 CEO를 맡는 구조는 의사결정 속도와 일관성 면에서 리스크. 신임 CFO Frank Sluis의 적응 기간도 단기 불확실성.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>FX 헤드윈드 — CHF/USD 환율이 성장률 희석</strong> — CC 기준 +26.4% 성장이 보고 기준 +14.5%로 희석됐다. 스위스 프랑 강세가 지속되면 실적 보고 수치가 지속적으로 낮아 보이는 효과를 낸다. 아메리카 CC +17.1%가 보고 기준 +3.1%로 줄어든 사례가 대표적.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>Hoka·Nike의 반격 + 프리미엄 소비 둔화</strong> — Hoka가 On과 유사한 포지셔닝에서 공격적 성장을 추구하고 있고, Nike가 구조조정 후 반격을 준비 중이다. 매크로 악화 시 프리미엄 스포츠웨어 수요가 타격을 받을 수 있으며, On의 고가 전략(할인 없는 풀프라이스 원칙)이 시험받을 수 있다.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <div style="background:#f0fdf4;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">컨센서스 (20명)</div>
+        <div style="font-size:18px;font-weight:700;color:#065f46;">Strong Buy</div>
+        <div style="font-size:11px;color:var(--muted);">83% 매수 의견 (35개 기관)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #dde8f7;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">평균 목표주가</div>
+        <div style="font-size:18px;font-weight:700;">$60.15</div>
+        <div style="font-size:11px;color:var(--green);">현재가 대비 +61.5%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #dde8f7;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">목표가 범위</div>
+        <div style="font-size:16px;font-weight:700;">$42 ~ $77</div>
+        <div style="font-size:11px;color:var(--muted);">중앙값 약 $55~60</div>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Raymond James (5월 업그레이드)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy</span><span class="target-price">$52</span><span style="font-size:11px;color:var(--muted);">↑ from Outperform</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">KeyBanc Capital</span>
+      <div class="analyst-right"><span class="opinion-badge buy">비중확대 (Overweight)</span><span class="target-price">$43</span><span style="font-size:11px;color:var(--muted);">↓ from $58 (관세 조정)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Truist</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$48</span><span style="font-size:11px;color:var(--muted);">↓ from $55</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Evercore ISI</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Outperform)</span><span class="target-price">$45</span><span style="font-size:11px;color:var(--muted);">↓ from $58</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">HSBC</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수 (Buy)</span><span class="target-price">$47</span><span style="font-size:11px;color:var(--muted);">↓ from $65</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Simply Wall St 공정가치 추정</span>
+      <div class="analyst-right"><span class="opinion-badge hold">공정가치</span><span class="target-price">$56.41</span><span class="target-up">+51.4% 저평가 추정</span></div>
+    </div>
+    <div style="margin-top:12px;padding:10px 14px;background:#f9fafb;border-radius:8px;font-size:12px;color:var(--muted);line-height:1.7;">
+      📊 Q1 어닝 비트 이후 대부분의 기관이 관세 우려로 목표가를 $10~20 하향 조정했으나 매수 의견은 유지했다. 관세 불확실성이 해소되는 시점에 목표가가 일제히 상향될 가능성이 높다. 2029년 매출 CHF 5.3B·이익 CHF 624.9M 시나리오가 컨센서스 장기 전망.
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      온 홀딩(ONON)은 나이키·아디다스가 지배하던 스포츠웨어 시장에 스위스 특유의 '기능+미학+프리미엄' 전략으로 성공적으로 침투한 성장주다. Q1 2026에서 총마진 64.2% 신고점·순이익 +82%·EPS +33% 어닝 서프라이즈를 기록하며 프리미엄 전략이 수익성으로 연결되고 있음을 입증했다. 아시아-태평양의 폭발적 성장(CC +61.4%), 의류 카테고리 가속, LightSpray 제조 혁신은 장기 성장 서사를 강화하고 있다. 공동 창업자의 Co-CEO 복귀는 브랜드 정체성과 전략 일관성에 대한 강력한 신뢰 신호다.
+      <br><br>
+      핵심 리스크는 베트남 소싱 집중(신발 90%)에 따른 관세 충격이다. Q1에만 $70.43M의 관세 비용을 흡수했고, FY2026 가이던스에는 20% 추가 관세를 이미 반영했다. 이 가정이 악화되면 마진 압박이, 관세가 완화되면 가이던스 상향이 각각 뒤따른다. FX 헤드윈드(CC +26.4% → 보고 +14.5%)도 지속 변수다.
+      <br><br>
+      <strong>결론:</strong> ONON은 연초 대비 -27% 낙폭으로 성장 펀더멘털 대비 매력적인 진입 구간에 접어든 프리미엄 성장주다. 20명 Strong Buy·평균 목표가 $60.15(+61.5%)는 관세 역풍이 가라앉으면 강력한 리레이팅을 예고한다. 1~2년 시계로 아시아-태평양 성장, 의류 카테고리 확장, LightSpray 기술 수익화를 믿는 성장주 투자자에게 적합한 구간이다. 단, P/E 44.9배라는 프리미엄과 관세 변수를 감내할 수 있는 투자자에게만 권고한다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. CHF/USD 환율 변동, 관세 정책 변화, 소비재 경기 둔화 등의 리스크가 실적에 영향을 줄 수 있습니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 데이터 기준일: 2026년 5월 23일.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

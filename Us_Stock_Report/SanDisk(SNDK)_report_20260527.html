@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SanDisk (SNDK) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0c1a0e;
+    --accent: #16a34a;
+    --accent2: #14532d;
+    --bg: #f0fdf4;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0c1a0e 0%, #14532d 55%, #15803d 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #22c55e; color: #052e16; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 540px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 36px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0fdf4 0%, #f7fef0 100%); border: 1px solid #bbf7d0; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .flash-banner { background: linear-gradient(90deg, #dcfce7 0%, #f0fdf4 100%); border: 1px solid #86efac; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #14532d; display: flex; align-items: center; gap: 8px; }
+  .warn-banner { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #9a3412; display: flex; align-items: flex-start; gap: 8px; }
+  .nbm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .nbm-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">SNDK · NASDAQ</div>
+      <div class="company-name">SanDisk Corporation</div>
+      <div class="company-desc">웨스턴디지털에서 2025년 2월 분사한 순수 NAND 플래시 메모리 기업 — 엔터프라이즈 SSD·데이터센터 스토리지 전문. 키옥시아(Kioxia)와 합작 제조. AI 인프라 스토리지 수혜 최전선.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 27일</div>
+      <div class="price-display">~$1,514</div>
+      <div class="price-change up">▲ 52주 저점 $35.79 대비 +3,600%+ · YTD +500%+</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$218.8B</span>
+    <span class="rating-pill">🏢 섹터: 반도체 (NAND 스토리지)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Strong Buy</span>
+    <span class="rating-pill">📅 다음 실적: 2026.08.12 (Q4 FY2026)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 스토리 배너 -->
+  <div class="flash-banner">
+    🌟 <strong>2026년 S&amp;P 500 최고 퍼포머:</strong> 분사 이후 1년 수익률 +3,555%, YTD +500%+. Q3 FY2026 어닝 서프라이즈 +59.7%, 하이퍼스케일러 5개사와 장기계약 $420억+ 체결. NAND 슈퍼사이클의 퓨어플레이.
+  </div>
+
+  <!-- 밸류에이션 경고 -->
+  <div class="warn-banner">
+    ⚠️ <strong>밸류에이션 괴리 주의:</strong> 시티그룹 목표가 $2,025(최고)부터 일부 모델 내재가치 $265~$875까지 극단적 분산. 현재 P/E ~51배로 NAND 사이클 정점 vs 구조적 전환 여부가 핵심 논쟁. 신규 진입 시 사이클 리스크 충분히 인지 후 접근 권장.
+  </div>
+
+  <!-- KPI 카드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q3 FY2026 매출 (최신)</div>
+      <div class="kpi-value">$5.95B</div>
+      <div class="kpi-sub" style="color:var(--green);">YoY +251% · QoQ +97% · 가이던스 대폭 초과</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Non-GAAP 총이익률</div>
+      <div class="kpi-value">78.4%</div>
+      <div class="kpi-sub" style="color:var(--green);">엔비디아(75%)보다 높은 역대 최고 수준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (최고/평균)</div>
+      <div class="kpi-value">$2,025</div>
+      <div class="kpi-sub">Citigroup Street-high · 컨센서스 평균 ~$1,493</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$35.79~$1,600</div>
+      <div class="kpi-sub">현재 $1,514 · 52주 최고권 근접</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q3 FY2026 (최신 실적, 2026.04.30 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$5.95B <span style="font-size:12px;color:var(--green);">▲ +25.8% 어닝 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">가이던스 $4.4~4.8B · YoY +251% · QoQ +97%</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #86efac;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Non-GAAP EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$23.41 <span style="font-size:12px;color:var(--green);">▲ +59.7% 어닝 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $14.66 · GAAP EPS $23.03 · 전년동기 순손실</div>
+      </div>
+    </div>
+    <!-- 세그먼트 상세 -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">데이터센터 매출</div>
+        <div style="font-weight:700;color:#15803d;">$1.47B <span style="font-size:10px;">▲ +645% YoY</span></div>
+        <div style="font-size:10px;color:var(--muted);">+233% QoQ · 핵심 성장 엔진</div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">Non-GAAP 영업이익률</div>
+        <div style="font-weight:700;color:#15803d;">70.9%</div>
+        <div style="font-size:10px;color:var(--muted);">전분기(40.4%) 대비 30.5%p 급확대</div>
+      </div>
+      <div style="background:#f8faff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">순이익 (GAAP)</div>
+        <div style="font-weight:700;color:#15803d;">$3.615B</div>
+        <div style="font-size:10px;color:var(--muted);">전년동기 순손실에서 흑자 전환</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#f0fff0;border-left:3px solid var(--green);padding:10px 14px;border-radius:0 6px 6px 0;margin-bottom:0.75rem;">
+      <strong>CEO 데이비드 고에클러</strong>: "데이터센터 매출이 하이퍼스케일러 고객 믹스 전환 및 가격 상승으로 233% 급증. Q3 말 기준 New Business Model(NBM) 계약 3건 완료, Q4에 추가 2건 서명. 이 계약들은 기존 사이클형 NAND 비즈니스와 질적으로 다른 장기 구조를 제공한다."
+    </div>
+    <!-- Q4 가이던스 -->
+    <div style="background:#dcfce7;border-radius:8px;padding:12px;border:1px solid #86efac;">
+      <div style="font-size:11px;font-weight:600;color:#14532d;margin-bottom:8px;">🔭 Q4 FY2026 가이던스 (다음 실적 발표 2026.08.12)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:12px;">
+        <div><div style="font-size:10px;color:var(--muted);">매출 가이던스</div><div style="font-weight:700;color:#15803d;">$7.75B~$8.25B</div><div style="font-size:10px;color:var(--green);">컨센서스 $7.35B 대폭 상회</div></div>
+        <div><div style="font-size:10px;color:var(--muted);">Non-GAAP EPS</div><div style="font-weight:700;color:#15803d;">$30.00~$33.00</div></div>
+        <div><div style="font-size:10px;color:var(--muted);">Q4 컨센서스 EPS</div><div style="font-weight:700;color:#6b7280;">$24.98 (가이던스 상회)</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">※ Q4 가이던스 매출 중간값 $8.0B은 Q3($5.95B)에서 35% 추가 성장. NBM 계약 총 5개 완료로 수익 가시성 대폭 향상.</div>
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 & 주요 이벤트</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K 실적</span>
+        <span style="font-size:13px;font-weight:500;">Q3 FY2026 결과 발표 — 매출·EPS·이익률 역대 최고, NBM 3건 완료</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.30</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">분기보고서 — FY2026 Q3 (종료일 2026.04.03) · 총주주자본 $13.77B · 누적이익 $2.75B</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#166534;margin-right:8px;">자사주</span>
+        <span style="font-size:13px;font-weight:500;">$60억 자사주 매입 프로그램 승인 — 무차입(Zero Debt) 재무 구조 기반</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">지수편입</span>
+        <span style="font-size:13px;font-weight:500;">나스닥100(NDX) 정식 편입 — 인덱스 자금 유입 촉매</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.20</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K 실적</span>
+        <span style="font-size:13px;font-weight:500;">Q2 FY2026 결과 — 매출 $3.03B(+31% QoQ), 데이터센터 +64% QoQ</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.01.29</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">분사 완료</span>
+        <span style="font-size:13px;font-weight:500;">웨스턴디지털 잔여 지분(5.1%) 완전 매각 완료 — 독립 상장사 완성</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.18</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#f0fdf4;border-radius:6px;padding:8px 12px;color:#14532d;">
+      📌 <strong>투자자 주목</strong>: NBM(New Business Model) 5개 계약 = 총 $420억+ 장기 확정 수주 잔고(RPO). 최소 구매 약정 + 선불 구조로 기존 NAND 스팟 가격 리스크 대폭 완충. 무차입 재무구조 + $60억 자사주 매입 = 주주가치 제고 이중 효과. Kioxia 분기실적이 SNDK 전망의 선행 지표.
+    </div>
+  </div>
+
+  <!-- NBM 설명 카드 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🔑 New Business Model (NBM) — 사이클형에서 계약형으로</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:12px;">
+      SanDisk의 가장 중요한 구조적 변화는 하이퍼스케일러(대형 클라우드·AI 업체)와의 <strong>장기 공급계약(NBM)</strong>이다. 기존 NAND는 스팟 가격에 노출된 사이클형 상품이었지만, NBM 계약은 최소 구매 약정 + 선불금 구조로 수익이 '상품'이 아닌 '계약 현금흐름'에 가까워진다. Citi가 멀티플 재평가의 근거로 삼는 핵심 논거.
+    </div>
+    <div class="nbm-grid">
+      <div style="background:#f0fdf4;border-radius:8px;padding:12px;border:1px solid #86efac;text-align:center;">
+        <div style="font-size:28px;font-weight:700;color:#15803d;">5개</div>
+        <div style="font-size:12px;color:var(--muted);">서명 완료 NBM 계약 수</div>
+        <div style="font-size:11px;color:#15803d;margin-top:4px;">Q3 말 3개 + Q4 추가 2개</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:12px;border:1px solid #86efac;text-align:center;">
+        <div style="font-size:28px;font-weight:700;color:#15803d;">$42B+</div>
+        <div style="font-size:12px;color:var(--muted);">장기 계약 확정 수주(Jefferies 추산)</div>
+        <div style="font-size:11px;color:#15803d;margin-top:4px;">최소구매약정 포함</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:12px;border:1px solid #86efac;text-align:center;">
+        <div style="font-size:28px;font-weight:700;color:#15803d;">78.4%</div>
+        <div style="font-size:12px;color:var(--muted);">Q3 Non-GAAP 총이익률</div>
+        <div style="font-size:11px;color:#15803d;margin-top:4px;">엔비디아(75%) 상회 · 역대 최고</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);background:#f9fafb;border-radius:6px;padding:8px 12px;">
+      Kioxia(도쿄 거래소: 285A)와의 합작 제조 시스템 — SanDisk의 NAND 생산 원가 및 공급 안정성의 핵심 변수. Kioxia 3월 분기 결과(매출 1.003조 엔, 영업이익률 ~60%)와 다음 분기 가이던스(매출 1.75조 엔, 이익률 74%)가 SNDK 전망을 직접적으로 검증.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.30</span>
+      </div>
+      <div class="news-title">Q3 FY2026 역대급 어닝 서프라이즈 — EPS $23.41 vs 컨센서스 $14.66 (+59.7%)</div>
+      <div class="news-summary">매출 $5.95B로 가이던스 상단($4.8B)을 $1.15B 초과. 데이터센터 매출 +645% YoY, +233% QoQ 폭발 성장. 총이익률 78.4%는 엔비디아를 상회하는 수준으로 "NAND 기업이 소프트웨어 마진을 낸다"는 평가. Q4 가이던스 $7.75~8.25B는 당시 컨센서스 대비 대폭 상회. 발표 다음날 주가 +8.25% 급등.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.19</span>
+      </div>
+      <div class="news-title">Citigroup, 목표주가 $2,025로 56% 상향 — NBM·Kioxia 실적이 구조적 전환 입증</div>
+      <div class="news-summary">Citi 애널리스트 아시야 머천트가 "NBM 계약이 사이클형 이익을 계약형 현금흐름으로 변환시킨다"며 밸류에이션 프레임을 7~8배 P/E에서 9~10배로 상향. Kioxia의 강력한 실적이 외부 검증 역할. CY2027 EPS $217.70, CY2028 EPS $215.09로 대폭 상향. Susquehanna도 $2,000 목표 유지.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.20</span>
+      </div>
+      <div class="news-title">나스닥100(NDX) 편입 완료 — 인덱스 패시브 자금 강제 유입</div>
+      <div class="news-summary">분사 14개월 만에 나스닥100 편입. QQQ 등 나스닥100 추종 ETF가 SNDK 주식을 강제 매수해야 하는 구조. 편입 후 패시브 자금의 지속적 매수 압력이 주가 하방을 지지하는 구조적 요인으로 작용.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.05.25</span>
+      </div>
+      <div class="news-title">CNBC "메모리 주식 붐앤버스트 사이클 경고" — 애널리스트들 사이클 리스크 제기</div>
+      <div class="news-summary">강세론자들의 NBM 구조적 전환 주장에 맞서 일부 전문가들이 "NAND는 역사적으로 가장 극심한 붐앤버스트 산업 중 하나"라며 경고. 현 총이익률 78.4%는 사이클 피크에서나 가능한 수치로, 공급 확대 시 급격히 정상화될 수 있다는 주장. 밸러에이션 모델에 따라 내재가치 $265~$2,025까지 극단적 분산.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.08</span>
+      </div>
+      <div class="news-title">이사 네시프 사이너, 제한주식 베스팅 관련 $87만 달러 주식 매도</div>
+      <div class="news-summary">제한주식 베스팅에 따른 정례적 매도로 보유 지분의 소량이지만 일부 시장에서 내부자 매도로 해석. 전체 내부자 지분이 0.56%로 극히 낮은 수준인 점은 회사 재무 거버넌스 관점의 점검이 필요한 부분.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>$42B+ 장기 계약 = 수익 가시성</strong> — 5개 NBM 하이퍼스케일러 계약은 최소 구매 약정 기반. 기존 NAND 스팟 사이클과 달리 예측 가능한 캐시플로우. Citi가 멀티플 재평가의 근거로 삼는 핵심 논거. AI 인프라 빌드아웃이 '스토리지 예약 전쟁' 양상으로 전환</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>AI 추론(Inference) 시대의 NAND 핵심</strong> — AI 학습(Training)에서 추론(Inference)으로 무게중심 이동. 추론 단계에서 저지연 고밀도 SSD 수요 폭증. 에이전틱 AI의 '데이터 배기(Data Exhaust)'가 NAND 용량 수요를 구조적으로 증폭</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>NAND 공급 타이트 2028년까지 지속 전망</strong> — 키옥시아·삼성·SK하이닉스 모두 공급 규율 유지. 수요(AI·에지·자동차) 증가 속도가 공급 확대를 초과. 구조적 공급 부족 지속 시 현재의 80% 근접 총이익률 유지 가능</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>무차입 + $60억 자사주 매입</strong> — 분사 후 부채 완전 상환, 무차입(Zero Debt) 재무 구조 달성. $60억 자사주 프로그램이 EPS 추가 제고. 주주환원과 성장 투자를 동시에 실행할 재무 여력 확보</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>퓨어플레이 NAND 재평가</strong> — 웨스턴디지털 내 HDD 사업부에 묻혀 저평가됐던 NAND 사업이 독립 상장 후 적정 멀티플 재평가. 나스닥100 편입으로 패시브 자금 구조적 지지. BiCS8 최신 공정 + High Bandwidth Flash(HBF) 개발 진행</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>NAND 역사적 붐앤버스트 사이클</strong> — NAND는 반도체 중에서도 가장 극심한 가격 변동성을 보인 메모리. 78.4% 총이익률은 사이클 피크의 특성. 공급이 소폭 증가하거나 AI 투자 속도가 둔화되면 2022~2023년처럼 급격한 마진 하락 가능. 일부 모델 내재가치 $265~$875</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>극단적 밸류에이션 부담</strong> — YTD +500%, 1년 +3,555%의 주가 상승 후 P/E ~51배. 컨센서스 목표가 평균(~$1,493)이 이미 현재가와 거의 일치. 추가 상승을 위해서는 Q4 가이던스를 또 대폭 초과해야 하는 부담</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>하이퍼스케일러 집중 리스크</strong> — 데이터센터 매출 급증의 이면에 소수 대형 고객 집중도 상승. Q3에 이미 소비자(Consumer) 부문 매출 10% QoQ 하락 확인. NBM 계약 중 하나라도 파기·축소되면 실적 충격 직접적</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>Kioxia 합작 의존도</strong> — NAND 생산의 상당 부분이 Kioxia와의 합작 공장(YFF, WF) 의존. Kioxia 경영권 변동이나 공장 사고, 일본 지진 등 공급망 충격 시 SanDisk 생산에 직접 영향. 단일 공급선 리스크</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>삼성·SK하이닉스·인텔 경쟁 심화</strong> — 삼성의 NAND 점유율이 여전히 세계 1위. SK하이닉스의 HBM 성공 여세로 NAND도 공격적 확장 가능. 스팟 가격 하락 시 경쟁사의 물량 공세로 가격 협상력 약화 위험</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (최신 업데이트)</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Citigroup (Asiya Merchant)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.19 — Street-high 신규 설정</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price" style="color:#7c3aed;">$2,025 🔺</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Susquehanna</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05월</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$2,000</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Bernstein (Mark Newman)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.04 — NBM 장기 안정성 강조</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$1,300~$1,500</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Barclays</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05월</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$1,200</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">24/7 Wall St. 독자 모델</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">90% 신뢰도 — NAND 가격 하락 리스크 반영</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge hold">보유</span><span class="target-price">$1,247.90</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">컨센서스 (22개사, S&amp;P Global)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">매수 13 · 보유 3 · Strong Buy 기조</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy</span><span class="target-price">평균 ~$1,493</span></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);background:#f9fafb;border-radius:6px;padding:8px;">
+      ※ 컨센서스 평균 ~$1,493은 현재가($1,514)와 거의 일치 — 추가 상승 여력은 Q4 가이던스 초과 달성 여부에 달림. 목표가 범위가 $1,200~$2,025로 극단적 분산은 NBM 구조적 전환 vs 사이클 정점 논쟁의 반영.
+    </div>
+  </div>
+
+  <!-- 회사 프로필 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏭 회사 프로필 — 웨스턴디지털 분사의 숨겨진 보석</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:14px;border:1px solid #86efac;">
+        <div style="font-size:12px;font-weight:600;color:#15803d;margin-bottom:8px;">📅 분사 히스토리</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7;">
+          • 2025.02.24: SNDK 나스닥 독립 상장<br>
+          • 2025.06: WDC 보유 지분 14.6% 공개 매각<br>
+          • 2026.02.18: WDC 잔여 지분(5.1%) 완전 청산<br>
+          • 2026.04.20: 나스닥100 편입<br>
+          • 분사가 ~$35에서 현재 ~$1,514까지 — 순수 NAND 재평가 드라마
+        </div>
+      </div>
+      <div style="background:#eff6ff;border-radius:8px;padding:14px;border:1px solid #bfdbfe;">
+        <div style="font-size:12px;font-weight:600;color:#1d4ed8;margin-bottom:8px;">🔬 핵심 기술 포트폴리오</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.7;">
+          • BiCS8 3D NAND (최신 공정)<br>
+          • QLC(쿼드레벨셀) 고밀도 엔터프라이즈 SSD<br>
+          • High Bandwidth Flash (HBF) 개발 중<br>
+          • Stargate SSD — 하이퍼스케일러 자격 1년+ 진행<br>
+          • Kioxia 합작 공장(YFF·WF) — 세계 최대 NAND 생산 시설
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      SanDisk는 2026년 글로벌 주식 시장 최고 퍼포머 중 하나로, 분사 이후 1년 수익률 +3,555%라는 전례 없는 기록을 썼다. 근간에는 두 가지 동시 발생 이벤트가 있다: ① AI 인프라 확장에 따른 구조적 NAND 수요 폭증, ② NBM(New Business Model) 장기 하이퍼스케일러 계약($42B+)으로 '사이클형 상품'에서 '계약형 캐시플로우'로의 비즈니스 모델 전환. Q3 FY2026 실적(매출 $5.95B +251% YoY, 총이익률 78.4%)은 이 테제를 극적으로 확인했고, Q4 가이던스($7.75~8.25B)는 추가 가속을 예고한다. 무차입 재무구조와 $60억 자사주 매입도 주주가치를 지지한다. 그러나 YTD +500% 이후 P/E ~51배로 밸류에이션 부담이 상당하며, NAND 역사적 붐앤버스트 패턴과 일부 모델의 내재가치($265~$875) 경고를 무시할 수 없다. <strong>SNDK는 AI 스토리지 인프라의 구조적 전환을 확신하는 고위험 중장기 투자자에게는 핵심 보유 종목이지만, 이미 주가에 상당한 낙관론이 선반영되어 있어 신규 진입 시 포지션 크기 조절과 사이클 리스크 관리가 필수다.</strong>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주식 투자에는 원금 손실 위험이 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIGER 지주회사 투자보고서</title>
+<style>
+  :root {
+    --primary: #1a1228;
+    --accent: #4a2060;
+    --accent2: #7b3fa0;
+    --accent3: #9c6bc4;
+    --gold: #c9a227;
+    --gold-light: #f0d080;
+    --bg: #f5f0fa;
+    --card: #ffffff;
+    --text: #1a1228;
+    --muted: #6b5b7b;
+    --border: #ddd0ee;
+    --green: #2e7d32;
+    --red: #c62828;
+    --amber: #e65100;
+    --teal: #00695c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #1a1228 0%, #3d1a5e 55%, #7b3fa0 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '🏛️';
+    position: absolute;
+    right: 1.5rem;
+    bottom: 0;
+    font-size: 140px;
+    opacity: 0.06;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(201,162,39,0.25); color: #f0d080; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(201,162,39,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.75; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-sub { font-size: 13px; margin-top: 2px; color: #f0d080; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); }
+  .pill-gold { border-color: rgba(201,162,39,0.5); background: rgba(201,162,39,0.15); color: #f0d080; }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* 상법 개정 타임라인 */
+  .law-timeline { display: flex; gap: 0; margin-bottom: 1rem; }
+  .law-step { flex: 1; background: white; border: 1px solid var(--border); padding: 1rem; position: relative; }
+  .law-step:not(:last-child)::after { content: '→'; position: absolute; right: -14px; top: 50%; transform: translateY(-50%); font-size: 18px; color: var(--accent2); z-index: 1; font-weight: 700; }
+  .law-step:first-child { border-radius: 10px 0 0 10px; }
+  .law-step:last-child { border-radius: 0 10px 10px 0; }
+  .law-date { font-size: 10px; font-weight: 700; color: var(--accent2); margin-bottom: 4px; }
+  .law-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 3px; }
+  .law-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .law-step.enacted { background: linear-gradient(135deg, #f3e5f5, #ede7f6); border-color: var(--accent3); }
+  .law-step.enacted .law-date { color: #7b1fa2; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 600; }
+  .holding-sub { font-size: 11px; color: var(--muted); font-weight: 400; display: block; margin-top: 1px; }
+  .holding-group { font-size: 10px; background: #ede7f6; color: #4a148c; padding: 1px 5px; border-radius: 3px; margin-left: 4px; font-weight: 600; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 800; color: var(--accent2); font-size: 15px; min-width: 52px; text-align: right; }
+  .holding-bar-wrap { width: 90px; height: 7px; background: var(--border); border-radius: 4px; }
+  .holding-bar { height: 7px; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 4px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #faf5ff; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+
+  .news-item { padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f9f0ff; border-left: 3px solid var(--accent2); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* NAV 할인 시각화 */
+  .nav-viz { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .nav-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 0.9rem; }
+  .nav-bar-group { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+  .nav-bar-item { flex: 1; min-width: 120px; text-align: center; }
+  .nav-bar-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .nav-bar-outer { width: 100%; background: #f0e8ff; border-radius: 6px; height: 24px; position: relative; overflow: hidden; }
+  .nav-bar-inner { height: 100%; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .nav-bar-pct { font-size: 11px; font-weight: 700; color: white; }
+  .nav-bar-value { font-size: 13px; font-weight: 700; margin-top: 4px; }
+
+  /* 자사주 소각 현황 */
+  .buyback-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 0.5rem; }
+  .buyback-item { background: #f9f0ff; border: 1px solid #ddd0ee; border-radius: 8px; padding: 8px 10px; }
+  .buyback-company { font-size: 13px; font-weight: 700; color: var(--primary); }
+  .buyback-status { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .buyback-pct { font-size: 14px; font-weight: 800; color: var(--accent2); margin-top: 3px; }
+
+  .perf-banner { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+  .perf-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; text-align: center; }
+  .perf-card .label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .perf-card .val { font-size: 20px; font-weight: 800; }
+  .val-up { color: var(--green); }
+  .val-hot { color: var(--accent2); }
+  .val-gold { color: var(--gold); }
+
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 4px; font-weight: 600; }
+  .badge-purple { background: #ede7f6; color: #4a148c; }
+  .badge-green { background: #c8e6c9; color: #1b5e20; }
+  .badge-gold { background: #fff9c4; color: #7d5300; }
+  .badge-red { background: #ffcdd2; color: #b71c1c; }
+
+  .unique-box { background: linear-gradient(135deg, #f3e5f5, #ede7f6); border: 1px solid #ce93d8; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .unique-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; }
+
+  .summary-box { background: linear-gradient(135deg, #f3e5f5 0%, #ede7f6 100%); border: 1px solid #ce93d8; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .perf-banner, .law-timeline { grid-template-columns: 1fr; flex-direction: column; }
+    .law-step:not(:last-child)::after { display: none; }
+    .law-step { border-radius: 8px; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 307520 · KOSPI · 국내 유일 지주회사 전문 ETF</div>
+      <div class="etf-name">TIGER 지주회사</div>
+      <div class="etf-index">추종 지수: FnGuide 지주회사 지수 (FnGuide 산출) | 운용사: 미래에셋자산운용(TIGER)</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 10일</div>
+      <div class="nav-display">약 19,000~21,000원 추정</div>
+      <div class="nav-sub">2026 YTD +28.64% 반영 추정 | 정확가는 TIGER ETF 홈피 확인</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill pill-gold">🏆 국내 유일 지주회사 ETF</span>
+    <span class="pill">💰 순자산: 2,941억원</span>
+    <span class="pill">📅 상장: 2018.11.08 (~7.5년)</span>
+    <span class="pill">💵 배당수익률: 약 1.84%</span>
+    <span class="pill">⚖️ 상법 3차 개정 최대 수혜</span>
+    <span class="pill">📋 총 ~30개 지주회사 분산</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">현재가 추정 (2026.05)</div>
+      <div class="kpi-value" style="color:var(--accent2);">~20,000원</div>
+      <div class="kpi-sub">YTD +28.64% 반영 추정치</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">순자산총액 (AUM)</div>
+      <div class="kpi-value">2,941억원</div>
+      <div class="kpi-sub">2026.01.15 기준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026 YTD 수익률</div>
+      <div class="kpi-value" style="color:var(--green);">+28.64%</div>
+      <div class="kpi-sub">코스피 대비 대폭 초과</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">배당수익률</div>
+      <div class="kpi-value" style="color:var(--gold);">1.84%</div>
+      <div class="kpi-sub">분기 분배 (안정적)</div>
+    </div>
+  </div>
+
+  <!-- ===== 수익률 배너 ===== -->
+  <div class="perf-banner">
+    <div class="perf-card">
+      <div class="label">2025 YTD (5월 말)</div>
+      <div class="val val-hot">+39.1%</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">최근 1개월 (2025.05)</div>
+      <div class="val val-up">+29.9%</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">2026 YTD (2월)</div>
+      <div class="val val-hot">+28.64%</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">52주 최저 대비</div>
+      <div class="val val-up">+86%↑</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">배당수익률</div>
+      <div class="val val-gold">1.84%</div>
+    </div>
+    <div class="perf-card">
+      <div class="label">국내 유사 ETF</div>
+      <div class="val" style="color:var(--accent2);">유일무이</div>
+    </div>
+  </div>
+
+  <!-- ===== 국내 유일 박스 ===== -->
+  <div class="unique-box">
+    <div class="unique-title">🏆 국내 유일의 지주회사 전문 ETF — 진입 장벽이 곧 경쟁 우위</div>
+    <div style="font-size:13px; line-height:1.8; color:var(--text);">
+      TIGER 지주회사는 <strong>공정거래위원회가 지정한 유가증권시장 상장 지주회사(금융지주·중간지주 제외) 약 30개</strong>에 분산 투자하는 국내 유일의 상품이다. 개별 지주사(SK, LG, 두산 등)에 직접 투자하는 대신, 하나의 ETF로 국내 주요 그룹사 지주회사 전체에 편리하게 노출되는 구조. <strong>상법 개정 + 밸류업 정책 + 자사주 소각 의무화</strong>라는 트리플 촉매가 동시에 작용하고 있어 지주사 할인(NAV 대비 30~50% 저평가) 해소 테마의 핵심 수혜 상품으로 평가받고 있다.
+    </div>
+  </div>
+
+  <!-- ===== 상법 개정 타임라인 ===== -->
+  <div class="card" style="padding: 1.25rem;">
+    <div class="card-title">⚖️ 한국 상법 3단계 개정 — 지주회사 할인 해소의 제도적 기반</div>
+    <div class="law-timeline">
+      <div class="law-step enacted">
+        <div class="law-date">✅ 2025.07 시행</div>
+        <div class="law-title">1차 개정<br>이사 충실의무 확대</div>
+        <div class="law-desc">충실의무 대상을 '회사'에서 '회사 및 주주'로 확대 → 경영진이 주주이익도 고려해야</div>
+      </div>
+      <div class="law-step enacted">
+        <div class="law-date">✅ 2025.09 시행</div>
+        <div class="law-title">2차 개정<br>주주권 강화</div>
+        <div class="law-desc">집중투표제 의무화, 감사위원 분리선출 확대 → 소수주주의 경영 참여 강화</div>
+      </div>
+      <div class="law-step enacted">
+        <div class="law-date">✅ 2026.03.06 시행</div>
+        <div class="law-title">3차 개정<br>자사주 소각 의무화</div>
+        <div class="law-desc">신규 취득 자사주 의무 소각 → SK·한화 이미 대규모 소각 결정. 지주사 핵심 수혜</div>
+      </div>
+    </div>
+    <div style="font-size:12px; color:var(--muted); margin-top:0.75rem;">
+      ※ 3차 상법 개정 이후 지주사 자사주 소각 본격화: SK(20.3%), 한화(5.9%), SK스퀘어, 티와이홀딩스, 두산 등 속속 결정 중
+    </div>
+  </div>
+
+  <!-- ===== 구성 종목 ===== -->
+  <div class="card">
+    <div class="card-title">주요 구성 종목 (2025.05 기준, ~30개 지주회사 전체)</div>
+    <div class="badge-row">
+      <span class="badge badge-purple">약 30개 종목 분산</span>
+      <span class="badge badge-gold">시가총액 가중방식</span>
+      <span class="badge badge-green">연 1회 정기변경 (1월)</span>
+      <span class="badge badge-red">금융지주·중간지주 제외</span>
+    </div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">한진칼 <span class="holding-group">한진그룹</span>
+        <span class="holding-sub">대한항공·한진해운 지주 · 2026년 경영권 방어 자사주 출연 논란 발생 (나홀로 역주행)</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">14.5%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">HD현대 <span class="holding-group">HD현대그룹</span>
+        <span class="holding-sub">HD현대중공업·현대오일뱅크 지주 · 이재명 정부 출범 후 +47.09%</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">10.0%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:69%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">SK <span class="holding-group">SK그룹</span>
+        <span class="holding-sub">SK하이닉스·SK텔레콤·SK이노베이션 지주 · 자사주 20.3% 전격 소각 결정 · 이재명 정부 후 +42.33%</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">9.1%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:63%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">두산 <span class="holding-group">두산그룹</span>
+        <span class="holding-sub">두산에너빌리티·두산밥캣 지주 · 원전·SMR 모멘텀 · 자사주 소각 준비 중</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">9.0%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:62%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">LG <span class="holding-group">LG그룹</span>
+        <span class="holding-sub">LG전자·LG화학·LG에너지솔루션 등 지주 · 안정적 배당 이력</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">7.6%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:52%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank" style="background:linear-gradient(135deg,#6a1b9a,#9c27b0);">6+</div>
+      <div class="holding-name">기타 대형 지주사 (분산)
+        <span class="holding-sub">삼성물산(+30.77%), CJ(+44.53%), 한화, 롯데지주, GS, LS, 코오롱, 동국홀딩스 등 ~25개 지주회사</span>
+      </div>
+      <div class="holding-right">
+        <div class="holding-weight">~49.8%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      ※ 비중은 2025.05.29 기준. 연 1회(1월) 정기변경. 공정거래위원회 지정 지주회사 기준 — 새로 지정되거나 해제되는 지주회사는 자동 편입·편출.
+    </div>
+  </div>
+
+  <!-- ===== 자사주 소각 현황 ===== -->
+  <div class="card">
+    <div class="card-title">자사주 소각 의무화 — 편입 지주사 대응 현황 (2026.03~ 시행)</div>
+    <div class="buyback-grid">
+      <div class="buyback-item">
+        <div class="buyback-company">SK</div>
+        <div class="buyback-status">✅ 소각 결정</div>
+        <div class="buyback-pct">기보유 24.8% 중 20.3% 소각</div>
+      </div>
+      <div class="buyback-item">
+        <div class="buyback-company">한화</div>
+        <div class="buyback-status">✅ 소각 결정</div>
+        <div class="buyback-pct">7.9% 중 5.9% 소각</div>
+      </div>
+      <div class="buyback-item">
+        <div class="buyback-company">SK스퀘어</div>
+        <div class="buyback-status">✅ 소각 결정</div>
+        <div class="buyback-pct">전략적 소각 추진</div>
+      </div>
+      <div class="buyback-item">
+        <div class="buyback-company">두산</div>
+        <div class="buyback-status">🔄 소각 준비 중</div>
+        <div class="buyback-pct">의결 예정</div>
+      </div>
+      <div class="buyback-item">
+        <div class="buyback-company">티와이홀딩스</div>
+        <div class="buyback-status">✅ 소각 결정</div>
+        <div class="buyback-pct">자사주 소각 확정</div>
+      </div>
+      <div class="buyback-item">
+        <div class="buyback-company">기타</div>
+        <div class="buyback-status">🔄 눈치보기</div>
+        <div class="buyback-pct">1년 6개월 유예기간</div>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      ※ 2027년 주총 전까지 기보유 자사주 처리 결정 필수. 2027년이 최대 이벤트 집중 구간 → 지주사 가치 재평가 지속 전망.
+    </div>
+  </div>
+
+  <!-- ===== 수익률 + 지주사 개별 성과 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">TIGER 지주회사 ETF 기간별 수익률</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>기간</th><th>TIGER 지주회사</th><th>코스피200 비교</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2025 YTD (5월말)</td><td class="positive">+39.1%</td><td>압도적 초과</td></tr>
+          <tr><td>최근 1개월 (2025.05)</td><td class="positive">+29.9%</td><td>대선 기대감</td></tr>
+          <tr><td>2026 YTD (2월 기준)</td><td class="positive">+28.64%</td><td>코스피 상회</td></tr>
+          <tr><td>52주 최저→현재</td><td class="positive">+86%↑</td><td>9,035→16,845</td></tr>
+          <tr><td>배당수익률</td><td class="positive">1.84%</td><td>코스피 평균 상회</td></tr>
+          <tr><td>순자산 (2026.01)</td><td>2,941억원</td><td>중소형 ETF</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">주요 편입 지주사 개별 주가 성과 (이재명 정부 출범 후)</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>지주사</th><th>수익률</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>HD현대</td><td class="positive">+47.09%</td><td>조선·방산 모멘텀</td></tr>
+          <tr><td>CJ</td><td class="positive">+44.53%</td><td>콘텐츠·식품 부각</td></tr>
+          <tr><td>SK</td><td class="positive">+42.33%</td><td>자사주 소각 결정</td></tr>
+          <tr><td>삼성물산</td><td class="positive">+30.77%</td><td>건설·상사 회복</td></tr>
+          <tr><td>한진칼</td><td class="negative">-15.50%</td><td>경영권 자사주 논란</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+        ※ 출처: 서울신문(2025.09). 한진칼(비중 1위, 14.5%)의 역주행이 ETF 전체 수익률을 일부 제약.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈 (2025~2026)</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.03.06</span>
+      </div>
+      <div class="news-title">3차 상법 개정 — 자사주 소각 의무화 시행 · 지주사 최대 수혜</div>
+      <div class="news-summary">자사주 소각 의무화를 골자로 한 3차 상법 개정이 2026.03.06 시행. 2025.07~09 이사 충실의무·주주권 강화에 이어 3번째 개정으로 주주환원 제도적 기반 완성. 지주사들은 늦어도 2027년 주총 전까지 기보유 자사주 처리 결정 필수. SK·한화 등 선제적 소각 결정 시장 기대 충족.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.02.16</span>
+      </div>
+      <div class="news-title">TIGER 지주회사 YTD +28.64% — 자사주 소각 랠리 2라운드</div>
+      <div class="news-summary">자사주 소각 의무화 법안 통과 기대감과 주요 지주사들의 자발적 소각 결정이 맞물리며 TIGER 지주회사 ETF가 시장 평균을 크게 상회. "밸류업 + 주주환원 = 지주사 디스카운트 해소"라는 투자 thesis 강화.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2025.05~09</span>
+      </div>
+      <div class="news-title">이재명 정부 출범 + 증시 부양책 — 지주사 일제 급등</div>
+      <div class="news-summary">이재명 대통령 취임 이후 지배구조 개선·밸류업 정책 공약이 구체화되면서 대형 지주사 주가 일제 급등. SK +42%, HD현대 +47%, CJ +45%, 삼성물산 +31%. TIGER 지주회사 ETF 2025 YTD +39.1%, 1개월 수익률 +29.9% 기록.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.04~05</span>
+      </div>
+      <div class="news-title">2026년 NAV 할인 축소 진행 — 아직 완전 해소까지 여정 남아</div>
+      <div class="news-summary">2021년 이후 확대됐던 NAV 할인율이 과거 수준으로 점차 축소 중. 1~3차 상법 개정 효과 증시 반영으로 지주사 주가 시장수익률 초과 달성. 그러나 2027년 자사주 소각 의사결정 시한까지 추가 이벤트 존재 → 모멘텀 지속 여부 불확실.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2025.09</span>
+      </div>
+      <div class="news-title">한진칼 경영권 방어 자사주 출연 — 비중 1위 종목의 역풍</div>
+      <div class="news-summary">ETF 내 최대 비중(14.5%) 종목 한진칼이 경영권 방어 목적으로 자사주를 백기사에 출연해 '주주가치 훼손' 비판을 받음. 이재명 정부 출범 후 주요 지주사 중 유일하게 -15.5% 역행. ETF 전체 수익률을 제약하는 요인으로 작용.</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">⚖️</span>
+          <span><strong>상법 3차 개정 — 제도적 지주사 할인 해소 진행 중</strong> — 자사주 소각 의무화로 지주사들이 보유 중인 대규모 자사주를 의무 소각해야 함. 주당 가치(EPS) 상승 → 밸류에이션 리레이팅. 2027년 주총까지 순차적 이벤트 지속.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🏆</span>
+          <span><strong>국내 유일의 지주회사 ETF — 대안 없음</strong> — 지주사 테마에 투자하려면 이 ETF가 유일한 선택지. 지배구조 개선·밸류업 정책의 핵심 수혜 상품. 개별 지주사 리스크를 분산하면서도 섹터 전체 상승 포착.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">📊</span>
+          <span><strong>NAV 대비 저평가 → 밸류에이션 상승 여력</strong> — 지주회사는 구조적으로 보유 자회사 가치(NAV) 대비 30~50% 할인 거래. 중복상장 원칙 금지, 낮은 주가 방치 금지 정책으로 할인율 축소 추세. 추가 리레이팅 여력 존재.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">💰</span>
+          <span><strong>배당수익률 1.84% + 자사주 소각 시너지</strong> — 안정적인 배당(지주사 특성상 자회사 배당 수취) + 자사주 소각으로 주당 가치 상승이 결합. 배당 + 가격 상승 두 채널에서 수익 창출 가능.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">🌐</span>
+          <span><strong>코리아 밸류업 + 정책 지속성</strong> — 이재명 정부의 증시 부양·지배구조 개선 정책이 상법 개정으로 법적 기반 확보. 정권 변화와 무관하게 법률로 고착화된 주주환원 원칙이 지속 효과 발휘.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">⚠️</span>
+          <span><strong>한진칼(1위 비중 14.5%) — 구조적 약점</strong> — ETF 내 최대 비중 종목 한진칼이 경영권 방어 목적 자사주 출연으로 '주주가치 역행' 대표 사례가 됨. 단일 종목이 ETF 수익률을 최대 2%p 이상 끌어내릴 수 있는 구조.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">🏦</span>
+          <span><strong>금융지주 제외 — 배당 수혜 사각지대</strong> — KB금융·신한지주·하나금융 등 대형 금융지주는 이 ETF에 편입 안 됨. 금융주 배당 랠리·밸류업 수혜를 직접 누리지 못함. 별도 고배당 ETF로 보완 필요.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">📉</span>
+          <span><strong>소규모 ETF (순자산 2,941억) — 유동성 제약</strong> — 방산·반도체 ETF 대비 순자산 규모가 작아 일중 거래 유동성이 제한적. 급격한 자금 유입/유출 시 기준가와 시장가 괴리(괴리율) 확대 가능성.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">🔄</span>
+          <span><strong>자사주 소각 의무화 유예기간 불확실성</strong> — 기보유 자사주는 1년 6개월 유예기간 적용 (2027년 주총까지). 일부 지주사가 임직원 보상 목적 등을 이유로 소각 물량을 제한할 경우 기대치 하회 우려.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">💸</span>
+          <span><strong>실적 연동 약점 — 지주사는 자체 실적 빈약</strong> — 지주사는 자회사 배당 수취가 주 수입. 직접 사업 없이 자회사 의존 구조라 그룹 전체 실적 악화 시 일반 사업회사 대비 실적 개선 모멘텀이 약함.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      TIGER 지주회사(307520)는 미래에셋자산운용이 2018년 11월 상장한 <strong>국내 유일의 지주회사 전문 ETF</strong>다. FnGuide가 산출하는 지주회사 지수를 추종하며, 공정거래위원회 지정 유가증권시장 상장 지주회사(금융지주·중간지주 제외) 약 30개에 분산 투자한다. 주요 편입 종목은 한진칼(14.5%), HD현대(10%), SK(9.1%), 두산(9%), LG(7.6%) 등이며 삼성물산·CJ·한화·롯데지주 등도 포함된다.<br><br>
+      이 ETF의 핵심 투자 논거는 <strong>코리아 밸류업 + 상법 3차 개정 + 자사주 소각 의무화</strong>라는 트리플 정책 촉매다. 2025년 7~9월 1·2차 상법 개정(이사 충실의무 확대, 주주권 강화)에 이어 2026년 3월 자사주 소각 의무화가 시행되면서, 그간 NAV 대비 30~50% 할인 거래되던 지주사들의 밸류에이션 리레이팅이 진행 중이다. SK는 보유 자사주의 82%를, 한화는 75%를 소각하기로 이미 결정했으며, 2027년 주총을 앞두고 추가 결정이 쏟아질 전망이다. 이에 힘입어 ETF는 2025 YTD +39.1%, 2026년 초 +28.64%를 달성했다.<br><br>
+      리스크 요인으로는 최대 비중 종목 한진칼의 경영권 방어 자사주 출연에 따른 역풍, 금융지주 제외로 인한 수혜 사각지대, 중소형 ETF(순자산 2,941억원)의 유동성 제약이 있다. 배당수익률 1.84%는 총보수를 상쇄하면서 보유 비용 부담을 낮추는 장점이 있다. 지주사 할인 해소라는 한국 자본시장 구조 변화의 장기 수혜를 원하는 투자자에게, 대안 없는 독점적 포지션을 가진 상품이다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 현재가는 추정치이며, 최신 데이터는 미래에셋 TIGER ETF 공식 홈페이지(tigeretf.com)에서 확인하시기 바랍니다. ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

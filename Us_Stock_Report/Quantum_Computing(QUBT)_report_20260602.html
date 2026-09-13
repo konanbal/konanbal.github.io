@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Computing (QUBT) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0f3460 0%, #533483 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .sec-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; margin-right: 8px; }
+  .sec-8k { background: #fce7f3; color: #9d174d; }
+  .sec-10q { background: #e0e7ff; color: #3730a3; }
+  .warning-box { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #92400e; margin-top: 0.75rem; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">QUBT · NASDAQ</div>
+      <div class="company-name">Quantum Computing Inc.</div>
+      <div class="company-desc">양자 광학 및 통합 포토닉스 전문 기업 — TFLN 광자 칩 파운드리, 양자 최적화·보안 솔루션 제공</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 6월 2일</div>
+      <div class="price-display">~$12.40</div>
+      <div class="price-change up">▲ 최근 52주 범위: $2.56 — $26.27</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$2.7B</span>
+    <span class="rating-pill">🏢 섹터: 양자 컴퓨팅 / 포토닉스</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (평균 목표가 $17.83)</span>
+  </div>
+</div>
+<div class="container">
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 매출</div>
+      <div class="kpi-value">$3.7M</div>
+      <div class="kpi-sub">YoY +9,387% (전년 $39K)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업손실</div>
+      <div class="kpi-value" style="color:var(--red)">-$20.6M</div>
+      <div class="kpi-sub">마이너스 영업이익률</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표가 (컨센서스)</div>
+      <div class="kpi-value">$17.83</div>
+      <div class="kpi-sub">현재가 대비 +44%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">현금 & 투자자산</div>
+      <div class="kpi-value">$1.4B</div>
+      <div class="kpi-sub">총자산 $1.62B (강한 유동성)</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q1 2026 (2026년 5월 11일 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$3.7M <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +13%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $3.27M · YoY +9,387%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">-$0.02 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 -$0.05 · 손실 폭 축소</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      CEO Yuping Huang: "Q1에 Luminar Semiconductor($110M) 및 NuCrypt($5M) 인수 완료. 계약 백로그 약 $16M. 실온 구동 포토닉 솔루션의 상업적 모멘텀이 본격화되고 있다." — 2026년 내 두 인수 법인이 $20~25M 추가 매출 기여 전망.
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 (8-K · 10-Q)</div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-badge sec-8k">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Q1 2026 실적 발표 — 매출·EPS 컨센서스 상회</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.11</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-badge sec-8k">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Luminar Semiconductor 인수 완료 ($110M, 전액 현금)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-badge sec-8k">8-K</span>
+        <span style="font-size:13px;font-weight:500;">NuCrypt LLC 인수 완료 ($5M, 현금+주식)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.05</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="sec-badge sec-8k">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Luminar LiDAR 사업부 스토킹 호스 입찰 ($22M) — 파산 법원 경매</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.01.12</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);">
+      📌 <strong>투자자 주목:</strong> Q1 중 두 건의 대형 인수 공시로 제조 수직 계열화 완성. 2026년 내 Fab 2(2차 파운드리) 건설 계획도 공시됨.
+    </div>
+  </div>
+
+  <!-- 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.21</span>
+      </div>
+      <div class="news-title">미국 정부, CHIPS법 기반 양자컴퓨팅 9개사에 $20억 투자 발표</div>
+      <div class="news-summary">상무부가 IBM, D-Wave, Rigetti 등 9개 양자 기업에 약 $20.1억 지원 예정. QUBT는 직접 수혜 대상에 포함되지 않았으나, 발표 당일 주가 +19% 급등. 섹터 전반의 투자 심리 급반전.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.11</span>
+      </div>
+      <div class="news-title">Q1 2026 어닝 서프라이즈 — 매출 YoY 9,000배 이상 폭증</div>
+      <div class="news-summary">매출 $3.7M(전년 $39K), EPS -$0.02(컨센서스 -$0.05) 모두 예상 상회. Luminar·NuCrypt 인수 효과가 즉시 반영됨. 발표 당일 주가 최대 +26% 급등.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04~05</span>
+      </div>
+      <div class="news-title">Ciena와 양자 보안 통신 공동 시연 성공 (OFC 2026)</div>
+      <div class="news-summary">QUBT의 시간-주파수 얽힘 기반 QKD(양자키분배)와 Ciena 광학 암호화 솔루션을 결합한 양자 보안 네트워크 시연. 통신·국방 고객 대상 실질적 검증이라는 점에서 투자자 신뢰 제고.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.05~06</span>
+      </div>
+      <div class="news-title">6월 5대 투자자 컨퍼런스 참가 — BofA, Rosenblatt, Benchmark, Northland</div>
+      <div class="news-summary">경영진이 주요 IB 컨퍼런스에 연속 참가 예정. 전략 업데이트·딜플로우·파운드리 가동률 관련 신규 정보 공개 가능성. 단기 모멘텀 변수.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.Q1</span>
+      </div>
+      <div class="news-title">Dirac-3, Quantum Corridor 네트워크에 배치 — NeuraWave PCIe 배포 준비 완료</div>
+      <div class="news-summary">양자 최적화 장치 Dirac-3을 북미 최초 양자 보안 상용 네트워크에 탑재. NeuraWave(포토닉 저장소 컴퓨팅 플랫폼)는 PCIe 카드 형태로 즉시 배포 가능 단계 진입.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05</span>
+      </div>
+      <div class="news-title">Wedbush, 중립(Neutral) 유지 — "소규모 매출 기반의 Show-Me 스토리"</div>
+      <div class="news-summary">실적 서프라이즈에도 불구하고 Wedbush는 목표가 $12 유지·중립 등급 고수. 마이너스 총이익률, $20.6M 영업손실, 인수 기반 성장(비유기적) 한계를 지적.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>$1.4B 현금 보유</strong> — 부채 거의 없이 막대한 실탄. 추가 인수·팹 증설에 활용 가능하며 단기 파산 리스크 없음.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>수직 계열화 완성</strong> — 광자 칩 설계(TFLN) → 제조(Luminar) → 양자통신(NuCrypt) → 최적화 하드웨어(Dirac)까지 풀스택 구축. 경쟁사 대비 차별화 포인트.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>미국 정부 양자 투자 바람</strong> — $20억 CHIPS법 지원으로 섹터 전반 정책 수혜. QUBT도 향후 추가 정부 계약 수주 가능성 상승.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>실온 구동 / 저전력</strong> — 냉각 시스템 불필요한 포토닉 방식으로 데이터센터·엣지 AI에 실용적 배포 가능. 경쟁사(초전도 방식) 대비 배포 비용 우위.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>2026년 $20~25M 추가 매출 예상</strong> — Luminar·NuCrypt 합산 기여분만으로도 2025년 대비 수십 배 성장 경로.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>음(-)의 총이익률</strong> — 매출이 늘어도 원가가 더 커서 판매할수록 손해. 스케일업 전 흑자 전환은 불투명.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>인수 의존 성장</strong> — Q1 폭발적 매출 증가의 대부분이 Luminar·NuCrypt 인수 효과. 유기적(오가닉) 성장이 검증되지 않음.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>극심한 주가 변동성</strong> — 52주 최저 $2.56 ~ 최고 $26.27. 현재 시총 ~$2.7B는 실제 매출 대비 수백 배 밸류에이션. 모멘텀 급반전 리스크.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>$20.6M 영업손실 지속</strong> — R&D·S&A 비용 급증. 비영업 이자수익(현금 운용)이 없으면 순손실 규모 더 컸을 것.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>미국 정부 직접 지원 대상 미포함</strong> — $20억 중 QUBT는 직접 수혜자 명단에 없음. 간접 수혜에 그칠 가능성.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (6명, S&P Global 집계)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 (6명 평균)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Buy</span><span class="target-price">목표가 $17.83 (+44%)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">최고 목표가 (매수 유지)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy</span><span class="target-price">$27.00</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Wedbush</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$12.00</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Cantor Fitzgerald (Troy Jensen)</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$10.00 (하방 리스크)</span></div>
+    </div>
+    <div class="warning-box">
+      ⚠️ 4 Buy / 2 Hold / 0 Sell — 낙관론 우세이나 중립 의견은 현재가($12) 대비 추가 상승 여력이 제한적임을 시사. "Show-me" 단계에서 실적 추가 검증 필요.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      QUBT는 2026년 들어 Luminar Semiconductor($110M)·NuCrypt($5M)를 잇달아 인수하며 포토닉 칩 제조 → 양자통신 → 최적화 하드웨어까지 수직 계열화를 완성했습니다. Q1 2026 매출이 전년 $39K에서 $3.7M으로 약 9,000배 급증하고 EPS도 컨센서스를 웃도는 어닝 서프라이즈를 달성하면서 주가는 발표일 기준 최대 +26% 급등했습니다.<br><br>
+      강점은 두 가지입니다. 첫째, $1.4B의 탄탄한 현금·투자자산으로 단기 자금 리스크가 없고 추가 투자 여력도 큽니다. 둘째, 실온 구동·저전력 포토닉 방식은 냉각 설비가 필요한 초전도 방식 대비 실용 배포에서 구조적 우위를 가집니다. 미국 정부의 $20억 양자 섹터 지원 발표(CHIPS법)로 업종 전반의 정책 바람도 기대됩니다.<br><br>
+      다만 여전히 음의 총이익률(-), $20.6M 영업손실, 인수 의존 성장이라는 세 가지 구조적 과제가 남아 있습니다. 현재 시가총액 ~$2.7B은 연간 매출 대비 수백 배에 달하는 프리미엄으로, 실적 검증 이전의 기대감이 가격에 상당히 반영된 상태입니다. <strong>단기 모멘텀 트레이더보다는 양자 섹터 장기 성장에 배팅하는 고위험 허용 투자자에 적합한 종목</strong>입니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공포가 절정일 때, 진짜 기회가 온다 — 존 템플턴</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f9f9f7;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .blog-wrap {
+      color: #1a1a1a;
+      max-width: 680px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 3rem 3.5rem 4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    }
+    .category-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: #1a56a0;
+      background: #e8f0fb;
+      border-radius: 20px;
+      padding: 3px 12px;
+      margin-bottom: 18px;
+    }
+    .blog-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+    }
+    .blog-subtitle {
+      font-size: 15px;
+      color: #666666;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .meta {
+      font-size: 12px;
+      color: #999999;
+      margin-bottom: 28px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid #e0e0e0;
+      margin: 0 0 28px;
+    }
+    .hero-quote {
+      border-left: 3px solid #4a8fd4;
+      background: #f6f6f4;
+      border-radius: 0 8px 8px 0;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+    }
+    .hero-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.7;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+    }
+    .hero-attr {
+      font-size: 13px;
+      color: #1a56a0;
+      font-weight: 500;
+    }
+    .section-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      margin-top: 32px;
+    }
+    .body-text {
+      font-size: 14.5px;
+      line-height: 1.85;
+      color: #444444;
+      margin-bottom: 14px;
+    }
+    .body-text strong { font-weight: 500; color: #1a1a1a; }
+    .person-card {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin: 20px 0 32px;
+    }
+    .card-item {
+      background: #f6f6f4;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .card-label {
+      font-size: 11px;
+      color: #999999;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .card-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      line-height: 1.4;
+    }
+    .principle-list { list-style: none; padding: 0; margin: 0 0 28px; }
+    .principle-list li {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .principle-list li:last-child { border-bottom: none; }
+    .num-badge {
+      min-width: 28px;
+      height: 28px;
+      background: #e8f0fb;
+      color: #1a56a0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .principle-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    .principle-desc {
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: #666666;
+    }
+    .closing-quote {
+      border-top: 1px solid #e0e0e0;
+      padding-top: 28px;
+      text-align: center;
+      margin-top: 12px;
+    }
+    .closing-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 15px;
+      font-style: italic;
+      color: #666666;
+      line-height: 1.8;
+    }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 24px;
+    }
+    .tag {
+      font-size: 12px;
+      color: #666666;
+      border: 1px solid #cccccc;
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 22px; }
+      .hero-quote p { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+  <span class="category-tag">투자 철학</span>
+  <h1 class="blog-title">공포가 절정일 때, 진짜 기회가 온다</h1>
+  <p class="blog-subtitle">시장이 무너질 때 손을 내밀었던 투자자, 존 템플턴의 역발상 철학</p>
+  <div class="meta">
+    <span>2025년 5월 15일</span>
+    <span>·</span>
+    <span>읽기 약 4분</span>
+    <span>·</span>
+    <span>역발상 투자</span>
+  </div>
+  <hr class="divider">
+
+  <div class="hero-quote">
+    <p>"최적의 매수 타이밍은 시장에 피가 낭자할 때이다.<br>그것이 당신의 피일지라도."</p>
+    <span class="hero-attr">— 존 템플턴 (Sir John Templeton, 1912–2008)</span>
+  </div>
+
+  <p class="body-text">
+    투자의 역사에서 이처럼 서늘하고 냉철한 문장은 드물다. 존 템플턴은 모두가 팔 때 사고, 모두가 살 때 팔았다. 그의 철학은 단순했지만, 그것을 실제로 실행할 수 있는 사람은 극소수였다.
+  </p>
+
+  <p class="section-title">명언의 의미 — 공포를 넘어선 기회</p>
+  <p class="body-text">
+    "피가 낭자하다"는 표현은 비유가 아니라 현실이다. 시장이 폭락할 때 투자자들은 패닉에 빠지고, 뉴스는 공포를 증폭시킨다. 바로 그 순간이 <strong>가격과 가치 사이의 괴리가 가장 극대화되는 시점</strong>이다.
+  </p>
+  <p class="body-text">
+    더 섬뜩한 것은 뒷문장이다. "그것이 당신의 피일지라도." 이미 손실을 입은 상황에서도, 공포에 무릎 꿇지 말라는 메시지다. 손실의 고통을 안고도 냉정하게 추가 매수를 결정할 수 있는가 — 그것이 템플턴이 던지는 진짜 질문이다.
+  </p>
+
+  <p class="section-title">존 템플턴, 그는 누구인가</p>
+  <div class="person-card">
+    <div class="card-item">
+      <div class="card-label">생몰연도</div>
+      <div class="card-value">1912 – 2008 (향년 95세)</div>
+    </div>
+    <div class="card-item">
+      <div class="card-label">별칭</div>
+      <div class="card-value">20세기 최고의 역발상 투자자</div>
+    </div>
+    <div class="card-item">
+      <div class="card-label">상징적 투자</div>
+      <div class="card-value">1939년 2차대전 발발 직전 104개 종목 전량 매수</div>
+    </div>
+    <div class="card-item">
+      <div class="card-label">운용 성과</div>
+      <div class="card-value">템플턴 성장 펀드 50년간 연평균 15%+ 수익률</div>
+    </div>
+  </div>
+
+  <p class="section-title">명언에서 도출한 3가지 실전 원칙</p>
+  <ul class="principle-list">
+    <li>
+      <div class="num-badge">1</div>
+      <div>
+        <div class="principle-title">공포 지수를 매수 신호로 읽어라</div>
+        <div class="principle-desc">VIX가 치솟고 공매도 잔고가 급증할 때, 시장은 오히려 저평가 구간에 진입한다. 뉴스의 공포를 소음으로 걸러내는 능력이 역발상 투자의 출발점이다.</div>
+      </div>
+    </li>
+    <li>
+      <div class="num-badge">2</div>
+      <div>
+        <div class="principle-title">손실 중에도 가치를 분리해서 보라</div>
+        <div class="principle-desc">이미 포트폴리오가 하락 중이라도, 그 기업의 본질 가치는 달라지지 않을 수 있다. 평가 손실과 실제 가치 훼손을 구분하는 눈이 필요하다.</div>
+      </div>
+    </li>
+    <li>
+      <div class="num-badge">3</div>
+      <div>
+        <div class="principle-title">현금을 미리 준비해 두어라</div>
+        <div class="principle-desc">기회는 준비된 사람에게만 온다. 시장이 평온할 때 유동성을 확보해 두지 않으면, 피가 낭자한 순간에도 손을 내밀 수 없다.</div>
+      </div>
+    </li>
+  </ul>
+
+  <p class="section-title">지금 이 시대에 왜 중요한가</p>
+  <p class="body-text">
+    AI 쇼크, 금리 급등, 지정학적 불안 — 현대 시장은 과거보다 훨씬 빠른 속도로 공포를 생산한다. SNS는 패닉을 실시간으로 증폭시키고, 알고리즘 매도는 낙폭을 순식간에 키운다.
+  </p>
+  <p class="body-text">
+    그럼에도 불구하고, 템플턴의 원칙은 변하지 않는다. <strong>공포는 가격을 만들고, 가격은 기회를 만든다.</strong> 질문은 단 하나다 — 그 순간 당신은 사는 쪽에 서 있을 수 있는가.
+  </p>
+
+  <div class="closing-quote">
+    <p>시장의 공포를 직면할 용기가 없다면,<br>초과 수익을 기대할 자격도 없다.</p>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag">#존템플턴</span>
+    <span class="tag">#역발상투자</span>
+    <span class="tag">#공포매수</span>
+    <span class="tag">#가치투자</span>
+    <span class="tag">#투자명언</span>
+    <span class="tag">#장기투자</span>
+    <span class="tag">#주식철학</span>
+  </div>
+</article>
+</body>
+</html>

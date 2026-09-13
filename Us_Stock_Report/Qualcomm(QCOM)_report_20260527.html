@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qualcomm (QCOM) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a0a2e;
+    --accent: #3b0764;
+    --accent2: #6d28d9;
+    --bg: #f5f3ff;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #1a0a2e 0%, #3b0764 55%, #6d28d9 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #f59e0b; color: #1a1a2e; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 540px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 36px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f5f3ff 0%, #fdf4ff 100%); border: 1px solid #ddd6fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .flash-banner { background: linear-gradient(90deg, #fdf4ff 0%, #f5f3ff 100%); border: 1px solid #c4b5fd; border-radius: 10px; padding: 12px 16px; margin-bottom: 1rem; font-size: 13px; color: #4c1d95; display: flex; align-items: center; gap: 8px; }
+  .segment-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 13px; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid, .segment-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">QCOM · NASDAQ</div>
+      <div class="company-name">QUALCOMM Incorporated</div>
+      <div class="company-desc">세계 1위 모바일 AP·모뎀 칩 설계사 — 스마트폰(Snapdragon)·자동차·IoT·AI 에지 컴퓨팅. 특허 라이선싱(QTL)으로 안정적 이익 구조 보유. 데이터센터 AI 칩 진출 중.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 27일</div>
+      <div class="price-display">~$247</div>
+      <div class="price-change up">▲ 사상 최고가 $247.91 경신 (5/26) · YTD +68%</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$258B</span>
+    <span class="rating-pill">🏢 섹터: 반도체 (팹리스)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Hold (상향 추세)</span>
+    <span class="rating-pill">📅 다음 실적: Q3 FY2026 (2026.07 말 예정)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 오늘의 주목 배너 -->
+  <div class="flash-banner">
+    🚀 <strong>오늘의 핵심 (5/26):</strong> ByteDance가 Qualcomm AI ASIC 수백만 개 주문 — 사상 최고가 $247.91 돌파 (+6.7%). 데이터센터 AI 칩 사업의 첫 번째 대형 고객 확보로 투자 내러티브 전환점.
+  </div>
+
+  <!-- KPI 카드 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q2 FY2026 매출 (최신)</div>
+      <div class="kpi-value">$10.60B</div>
+      <div class="kpi-sub">YoY -3% · non-GAAP EPS $2.65</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">자동차 분기 매출</div>
+      <div class="kpi-value">$1.33B</div>
+      <div class="kpi-sub" style="color:var(--green);">YoY +38% · 역대 최고 · 연환산 $5B+ 돌파</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 컨센서스</div>
+      <div class="kpi-value">$178~$280</div>
+      <div class="kpi-sub">중앙값 ~$178 · 최고 $300 (현재가 이미 상회)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">$129~$248</div>
+      <div class="kpi-sub">5/26 신고가 $247.91 · YTD +68%</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — Q2 FY2026 (2026.04.29 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f5f3ff;border-radius:8px;padding:1rem;border:1px solid #ddd6fe;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$10.60B <span style="font-size:12px;color:var(--green);">▲ 컨센서스 부합</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $10.59B · YoY -3% (핸드셋 부진)</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:1rem;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Non-GAAP EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$2.65 <span style="font-size:12px;color:var(--green);">▲ +4% 서프라이즈</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 $2.55 · 가이던스 상단 달성 · 4연속 비트</div>
+      </div>
+    </div>
+    <!-- 특이 항목 -->
+    <div style="background:#fffbeb;border-radius:8px;padding:10px 14px;border:1px solid #fde68a;margin-bottom:0.75rem;font-size:12px;color:#78350f;">
+      💡 <strong>GAAP EPS $6.88 주의</strong>: 미국 세법(CAMT) 해석 변경으로 $5.7B 비현금 세금 혜택 발생 → GAAP 순이익 $7.37B(YoY +162%). 일회성 항목으로 핵심 수익력은 Non-GAAP $2.65 기준으로 평가 권장.
+    </div>
+    <!-- 세그먼트 상세 -->
+    <div class="segment-grid" style="margin-bottom:0.75rem;">
+      <div style="background:#faf5ff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">QCT 핸드셋</div>
+        <div style="font-weight:700;">$6.0B <span style="color:var(--red);font-size:10px;">YoY -13%</span></div>
+        <div style="font-size:10px;color:var(--muted);">중국 OEM 재고 조정</div>
+      </div>
+      <div style="background:#faf5ff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">QCT 자동차</div>
+        <div style="font-weight:700;color:#059669;">$1.33B <span style="font-size:10px;">▲ +38%</span></div>
+        <div style="font-size:10px;color:var(--muted);">역대 최고 · 연환산 $5B+</div>
+      </div>
+      <div style="background:#faf5ff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">QCT IoT</div>
+        <div style="font-weight:700;">$1.73B <span style="color:var(--green);font-size:10px;">▲ +9%</span></div>
+        <div style="font-size:10px;color:var(--muted);">산업·소비자 수요</div>
+      </div>
+      <div style="background:#faf5ff;border-radius:6px;padding:8px 10px;font-size:12px;">
+        <div style="color:var(--muted);font-size:10px;">QTL 라이선싱</div>
+        <div style="font-weight:700;">$1.38B <span style="color:var(--green);font-size:10px;">▲ +5%</span></div>
+        <div style="font-size:10px;color:var(--muted);">EBT 마진 72% · 안정적</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#f8f3ff;border-left:3px solid var(--purple);padding:10px 14px;border-radius:0 6px 6px 0;margin-bottom:0.75rem;">
+      <strong>CEO 크리스티아노 아몬</strong>: "우리는 심오한 변화의 시대에 있으며, 금융 시장이 아직 충분히 인식하지 못할 수도 있다. 에이전틱 AI 워크로드의 부상이 스마트폰·자동차·로봇 전반에 걸쳐 업그레이드 사이클을 만들고 있다. 데이터센터 진출을 위한 하이퍼스케일러 커스텀 실리콘 납품이 연내 예정대로 진행 중이며, 6월 24일 Investor Day에서 상세 전략을 공개할 것이다."
+    </div>
+    <!-- Q3 가이던스 -->
+    <div style="background:#f0f9ff;border-radius:8px;padding:12px;border:1px solid #bae6fd;">
+      <div style="font-size:11px;font-weight:600;color:#0369a1;margin-bottom:8px;">🔭 Q3 FY2026 가이던스 (2026년 7월 말 예정)</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px;">
+        <div><div style="font-size:10px;color:var(--muted);">매출 가이던스</div><div style="font-weight:700;color:#0369a1;">$9.2B~$10.0B</div></div>
+        <div><div style="font-size:10px;color:var(--muted);">Non-GAAP EPS</div><div style="font-weight:700;color:#0369a1;">$2.10~$2.30</div></div>
+        <div><div style="font-size:10px;color:var(--muted);">자동차 성장률 (Q3)</div><div style="font-weight:700;color:#059669;">~50% YoY 가속</div></div>
+        <div><div style="font-size:10px;color:var(--muted);">핸드셋 (중국)</div><div style="font-weight:700;color:#dc2626;">Q3 바닥 예상</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">※ 중국 안드로이드 QCT 매출은 Q3에 바닥 후 Q4부터 순차적 회복 예상. 자동차 연환산 매출 FY2026 종료 시 $6B 상회 목표.</div>
+    </div>
+  </div>
+
+  <!-- SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 & 주요 이벤트</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">8-K 실적</span>
+        <span style="font-size:13px;font-weight:500;">Q2 FY2026 결과 발표 — 자동차 역대 최고, 하이퍼스케일러 커스텀 칩 납품 연내 확정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.29</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#166534;margin-right:8px;">자사주</span>
+        <span style="font-size:13px;font-weight:500;">신규 $20B 자사주 매입 프로그램 승인 — 상반기 이미 $5.4B 집행 완료</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.29</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">분기보고서 — FY2026 Q2 (종료일 2026.03.29) · Alphawave 인수($2.3B) 포함</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">파트너십</span>
+        <span style="font-size:13px;font-weight:500;">Stellantis 파트너십 확장 — Snapdragon Digital Chassis 다음 세대 자동차 플랫폼 공급</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05월</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">Investor Day</span>
+        <span style="font-size:13px;font-weight:500;">Qualcomm Investor Day 2026 — 데이터센터·Physical AI 전략 상세 공개 예정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.06.24</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#f5f3ff;border-radius:6px;padding:8px 12px;color:#4c1d95;">
+      📌 <strong>투자자 주목</strong>: ByteDance AI ASIC 대규모 수주(5/26 보도)로 하이퍼스케일러 커스텀 칩 전략의 '첫 번째 공개 대형 고객' 확보. Alphawave 인수($2.3B)로 데이터센터 SerDes·칩렛 인터커넥트 기술 강화. 6월 24일 Investor Day가 다음 주요 주가 촉매.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.26 (오늘)</span>
+      </div>
+      <div class="news-title">ByteDance, Qualcomm AI ASIC 수백만 개 주문 — 사상 최고가 $247.91 경신</div>
+      <div class="news-summary">블룸버그 단독 보도. TikTok 모회사 ByteDance가 자사 AI 에이전트 소프트웨어 구동을 위해 Qualcomm의 AI ASIC을 수백만 개 구매 계약. 이는 Qualcomm이 스마트폰 밖 데이터센터 AI 칩 시장에서 거둔 첫 번째 공개된 대형 수주로, CEO 아몬이 Q2 실적 발표에서 언급한 "하이퍼스케일러 커스텀 실리콘 참여"의 구체적 실체가 드러난 셈. Tigress Financial, 목표가 $280으로 즉각 상향.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.22</span>
+      </div>
+      <div class="news-title">Stellantis 파트너십 확장 — 주가 +11% 급등, Snapdragon 차량 플랫폼 강화</div>
+      <div class="news-summary">Qualcomm과 Stellantis(Jeep·RAM·Chrysler 등 14개 브랜드)가 차세대 Snapdragon Digital Chassis 플랫폼을 기반으로 파트너십 확장 발표. 자율주행·디지털 콕핏·V2X 커넥티비티 통합 솔루션 제공. 자동차 부문 연환산 매출 FY2026 말 $6B 목표에 다가서는 대형 수주. 주가 당일 +11% 폭등.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.29</span>
+      </div>
+      <div class="news-title">$20B 자사주 매입 프로그램 승인 — 시가총액의 7.7% 규모 역대급 주주환원</div>
+      <div class="news-summary">Q2 실적 발표와 동시에 이사회가 $200억 규모 신규 자사주 매입 프로그램 승인. 상반기에만 $5.4B 집행 완료. 분기 배당금 $0.89(연 $3.56, 수익률 ~1.5%), 9년 연속 배당 인상 유지. FY2025 한 해 동안 주주에게 $126억 환원. 주당 순자산가치 제고 효과와 EPS 성장 가속 예상.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.06.24 예정</span>
+      </div>
+      <div class="news-title">Investor Day 2026 — 데이터센터·Physical AI·6G 전략 전면 공개</div>
+      <div class="news-summary">CEO 아몬이 Q2 콜에서 직접 예고한 기업 설명회. 데이터센터 ASIC 로드맵, Physical AI(산업·로봇·드론용), 6G 기술 연합(60개사 이상), 에이전틱 AI 스냅드래곤 플랫폼 세부 전략 발표 예정. 현재 주가 랠리의 상당 부분이 이 이벤트에 대한 기대감 선반영이므로, 발표 내용이 기대에 미치지 못할 경우 단기 조정 리스크 존재.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">진행 중</span>
+      </div>
+      <div class="news-title">애플 모뎀 자체 개발 전환 — QCOM 핸드셋 매출 점유율 단계적 감소 불가피</div>
+      <div class="news-summary">애플이 차세대 아이폰용 인하우스 모뎀 개발에 성공하면서 Qualcomm의 프리미엄 스마트폰 모뎀 매출이 수년에 걸쳐 감소할 것으로 예상. 삼성도 자체 SoC(엑시노스) 비중 확대 중. 전체 매출의 약 55%를 차지하는 핸드셋 부문의 구조적 역풍. 중국 OEM 재고 조정까지 겹쳐 Q3 핸드셋 매출 추가 약세 전망.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>데이터센터 AI 진출 입증</strong> — ByteDance ASIC 수주로 "스마트폰 기업"에서 "AI 인프라 기업"으로의 내러티브 전환이 실체를 갖추기 시작. 엔비디아·AMD 대비 P/E 할인이 해소될 경우 대규모 밸류에이션 리레이팅 가능</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>자동차 슈퍼사이클</strong> — FY2026 말 연환산 $6B 목표, 전년比 ~50% Q3 성장 가이던스. Snapdragon Digital Chassis의 ADAS·디지털 콕핏·V2X 통합 플랫폼이 자동차 업계 표준화 가속. 자동차당 칩 컨텐츠 가치 지속 상승</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>역대급 주주환원</strong> — $20B 자사주 매입(시총의 7.7%), 9년 연속 배당 인상. FY2025 주주환원 $12.6B. P/E ~22x로 엔비디아(43x)·AMD 대비 현저한 저평가, 단기 AI 촉매 가세 시 압축 가능</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>QTL 라이선싱 안전판</strong> — 5G 특허 라이선싱 사업이 EBT 마진 72%로 경기 완충 역할. 글로벌 5G 보급 확대와 함께 안정적 반복 수익 창출, 구조적 감소 불확실성(애플 소송 등) 해소</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><strong>Alphawave 인수 + 에지 AI 강점</strong> — 데이터센터용 SerDes·칩렛 인터커넥트 기술 확보. 온디바이스 AI(NPU)에서 스마트폰·PC·XR헤드셋까지 엣지 AI 컴퓨팅 생태계 구축. 6G 60개사 연합으로 차세대 통신 표준 선점</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>애플·삼성 인소싱 리스크</strong> — 애플 자체 모뎀 전환으로 프리미엄 핸드셋 점유율 단계적 감소 불가피. 삼성도 엑시노스 채용 확대 중. 핸드셋이 매출의 ~55%인 상황에서 구조적 역풍. "데이터센터·자동차 성장이 핸드셋 감소를 얼마나 빠르게 대체하는가"가 핵심 변수</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>밸류에이션 vs 컨센서스 괴리</strong> — 현재가($247)가 컨센서스 평균 목표가($178)를 ~39% 초과. Simply Wall St는 52.7% 고평가 경고. 에어니스트 전망(향후 3년 EPS 연 3.3% 감소 예상)과 현재 주가 간 간극이 큼. Investor Day 실망 시 급조정 위험</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>중국 지정학 리스크</strong> — 매출의 약 60%가 중국 고객(핸드셋 OEM + 라이선싱). 미중 기술 통제 강화나 중국 정부의 국산 칩 대체 정책 가속 시 직격탄. ByteDance 딜도 미중 관계 악화 시 불확실성 확대</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>데이터센터 진입 불확실성</strong> — 엔비디아·AMD·Broadcom 등 기존 강자와의 경쟁, 하이퍼스케일러 자체 칩(구글 TPU, 아마존 Trainium 등) 확대 추세. ByteDance 1건이 증명이지 확실한 트렌드가 아님. 실제 반복 수주와 매출 규모가 검증돼야</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><strong>메모리 공급 변수</strong> — Q2 핸드셋 매출 부진의 주요 원인이 중국 OEM의 메모리 가격 상승 대응 재고 조정. 메모리 가격 추가 상승 시 스마트폰 빌드 플랜 재조정으로 QCOM 핸드셋 수요 압박 지속 가능</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (최신 업데이트)</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Tigress Financial (Ivan Feinseth)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.26 — ByteDance 딜 후 즉각 상향</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price" style="color:#7c3aed;">$280 🔺</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">Daiwa Securities</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">2026.05.08 — Neutral → Outperform 등급 상향</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">Outperform</span><span class="target-price">$225</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">TipRanks 컨센서스 (31개사)</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">매수 8 · 중립 19 · 매도 4</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge hold">Hold</span><span class="target-price">평균 $178.57</span></div>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">24/7 Wall St. 독자 모델</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">6~12개월 목표 범위</span>
+      </div>
+      <div class="analyst-right"><span class="opinion-badge buy">강세</span><span class="target-price">$250~$260</span></div>
+    </div>
+    <div style="margin-top:10px;background:#fffbeb;border-radius:8px;padding:10px 12px;font-size:12px;color:#78350f;border:1px solid #fde68a;">
+      ⚠️ <strong>컨센서스 vs 주가 괴리 주의</strong>: 현재가 ~$247이 컨센서스 평균 목표가 ~$178을 약 39% 상회. 이는 ByteDance 딜·Stellantis 확장 등 최근 호재가 아직 애널리스트 목표가에 충분히 반영되지 않았거나, 시장이 과도하게 선반영 중임을 의미. 6월 24일 Investor Day 후 목표주가 대거 상향 조정 기대 vs. 실망 시 급락 리스크 공존.
+    </div>
+  </div>
+
+  <!-- 사업 다각화 현황 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🔄 사업 다각화 현황 — 스마트폰에서 AI 플랫폼으로</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:13px;">
+      <div style="background:#fdf4ff;border-radius:8px;padding:14px;border:1px solid #e9d5ff;">
+        <div style="font-size:12px;font-weight:600;color:#6d28d9;margin-bottom:8px;">📱 핸드셋 (현재 ~55%)</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:6px;">Snapdragon 8 Gen 시리즈 — 삼성·샤오미·오포·비보 탑재. 5G 모뎀·AP 통합 설계 경쟁력. <span style="color:var(--red);">애플 인소싱·중국 재고 조정 역풍</span></div>
+        <div style="font-size:11px;background:#fee2e2;color:#991b1b;padding:4px 8px;border-radius:4px;">구조적 비중 감소 중</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:14px;border:1px solid #bbf7d0;">
+        <div style="font-size:12px;font-weight:600;color:#15803d;margin-bottom:8px;">🚗 자동차 (고성장, ~12%)</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:6px;">Snapdragon Digital Chassis — ADAS·디지털 콕핏·V2X. Stellantis·BMW·GM·현대 등 탑재. <span style="color:var(--green);">연환산 $5B+ 돌파, $6B 목표</span></div>
+        <div style="font-size:11px;background:#d1fae5;color:#065f46;padding:4px 8px;border-radius:4px;">+38% YoY · 최고 성장 엔진</div>
+      </div>
+      <div style="background:#eff6ff;border-radius:8px;padding:14px;border:1px solid #bfdbfe;">
+        <div style="font-size:12px;font-weight:600;color:#1d4ed8;margin-bottom:8px;">🏭 데이터센터 AI (신규)</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:6px;">Alphawave 인수 기반 ASIC. ByteDance 첫 대형 수주 확보. <span style="color:var(--blue);">2026년 말 하이퍼스케일러 납품 예정</span></div>
+        <div style="font-size:11px;background:#e0e7ff;color:#3730a3;padding:4px 8px;border-radius:4px;">검증 단계 → 수익화 가시화 중</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;background:#f9fafb;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted);">
+      ※ QTL 라이선싱(~13%): 5G 표준특허 기반 매출, EBT 마진 72%의 안정적 캐시카우. IoT(~16%): 산업·소비자·PC·XR헤드셋용 칩, +9% YoY 성장. 자동차+IoT 합산 이미 QCT의 33%.
+    </div>
+  </div>
+
+  <!-- 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      Qualcomm은 2026년 가장 극적인 내러티브 전환을 경험하고 있는 반도체주다. 연초만 해도 "애플 모뎀 인소싱에 당할 스마트폰 기업"으로 저평가받았으나, Q2 실적 발표(4/29)의 자동차 역대 최고·하이퍼스케일러 커스텀 칩 납품 확정, 이후 Stellantis 파트너십 확대(+11%), 그리고 ByteDance ASIC 대규모 수주(+6.7%)까지 연속 촉매가 쏟아지며 사상 최고가를 경신했다. 핵심은 세 가지다: ① 자동차 부문이 FY2026 말 연환산 $6B 궤도에서 입증된 성장 엔진으로 자리잡고 있고, ② 데이터센터 AI ASIC 시장 진입이 ByteDance 수주로 실체를 드러냈으며, ③ $20B 자사주 매입이 주당 가치를 강력히 뒷받침한다. 리스크로는 핸드셋의 구조적 감소(애플 인소싱), 컨센서스 목표가($178)를 39% 초과한 밸류에이션 부담, 중국 지정학 변수가 있다. <strong>QCOM은 AI 에지·자동차·데이터센터의 삼각 성장을 믿는 중장기 투자자, 그리고 6월 24일 Investor Day를 앞두고 촉매 이벤트 플레이를 노리는 투자자 모두에게 관심 종목이다. 단, 단기 과열 구간으로 신규 진입 시 분할 매수 및 Investor Day 전후 변동성 관리가 필수다.</strong>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주식 투자에는 원금 손실 위험이 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

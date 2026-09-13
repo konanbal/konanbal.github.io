@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LS ELECTRIC(010120) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, #0f2040 0%, #1a4a7a 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #e94560; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 520px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.08); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .kpi-sub.up { color: var(--green); }
+  .kpi-sub.down { color: var(--red); }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .financial-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  .financial-table th { text-align: left; font-weight: 600; color: var(--muted); font-size: 11px; padding: 6px 8px; border-bottom: 2px solid var(--border); }
+  .financial-table td { padding: 8px; border-bottom: 1px solid var(--border); }
+  .financial-table tr:last-child td { border-bottom: none; }
+  .up-val { color: var(--green); font-weight: 600; }
+  .down-val { color: var(--red); font-weight: 600; }
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin: 1.5rem 0 0.5rem; }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">010120 · KOSPI</div>
+      <div class="company-name">LS ELECTRIC</div>
+      <div class="company-desc">국내 전력기기 시장 1위 — 변압기·차단기·배전반·스마트에너지 솔루션 전문기업. AI 데이터센터 전력 인프라 수혜 최대 수혜주 중 하나.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 10일</div>
+      <div class="price-display">₩313,000</div>
+      <div class="price-change down">▼ -1.73% (5월 8일 종가 기준)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 47조원</span>
+    <span class="rating-pill">🏢 섹터: 전력기기 / 유틸리티</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 매수(Buy)</span>
+    <span class="rating-pill">📦 수주잔고: 5조6,000억원 (1Q26 말)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">1Q26 매출액</div>
+      <div class="kpi-value">1조3,766억</div>
+      <div class="kpi-sub up">YoY +33.4% · 1Q 기준 역대 최대</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">1Q26 영업이익</div>
+      <div class="kpi-value">1,266억원</div>
+      <div class="kpi-sub up">YoY +45.0% · 영업이익률 약 9.2%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026F 연간 영업이익</div>
+      <div class="kpi-value">6,376억원</div>
+      <div class="kpi-sub up">컨센서스 기준 YoY +약 50%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (상단)</div>
+      <div class="kpi-value">350,000원</div>
+      <div class="kpi-sub up">LS증권 · 현재가 대비 +11.8%</div>
+    </div>
+  </div>
+
+  <!-- 재무 테이블 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">연간 실적 추이 및 전망 (연결 기준)</div>
+    <table class="financial-table">
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>2024A</th>
+          <th>2025A</th>
+          <th>2026F</th>
+          <th>2027F</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>매출액</td>
+          <td>4조5,520억원</td>
+          <td>4조9,658억원</td>
+          <td>6조412억원</td>
+          <td>7조3,660억원</td>
+        </tr>
+        <tr>
+          <td>영업이익</td>
+          <td>3,900억원</td>
+          <td>4,264억원</td>
+          <td><strong>6,376억원</strong></td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td>영업이익 YoY</td>
+          <td>—</td>
+          <td class="up-val">+9.3%</td>
+          <td class="up-val">+약 50%</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>북미 매출</td>
+          <td>N/A</td>
+          <td>1조원 돌파</td>
+          <td>대폭 확대 예상</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px; color:var(--muted); margin-top:10px;">출처: DART 공시, FnGuide 컨센서스, 각 증권사 리포트 (2026.4~5월 기준)</p>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.05.06</span></div>
+      <div class="news-title">IEEE PES T&D 2026 참가 — 북미 직류(DC)·데이터센터 솔루션 대거 공개</div>
+      <div class="news-summary">미국 시카고에서 열린 북미 최대 전력·에너지 전시회에 30부스 규모로 참가. UL 인증 직류 배전반, 초고압 송변전, 하이퍼스케일 데이터센터 솔루션 존 운영. 북미 시장 맞춤형 핵심 전력 솔루션을 선보이며 현지 고객 확보에 속도.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.13</span></div>
+      <div class="news-title">북미 하이퍼스케일 데이터센터 전력 인프라 1,703억원 수주</div>
+      <div class="news-summary">북미 메이저 빅테크 기업 대상으로 수배전반·배전변압기 공급 계약 체결(1억1,497만 달러). 계약 기간은 2026년 12월까지로 연내 매출 직접 반영 예정. 2026년 빅테크 데이터센터 수주 누계가 5,000억원을 돌파.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.21</span></div>
+      <div class="news-title">1Q26 실적: 매출 1.38조·영업이익 1,266억 — 1분기 기준 사상 최대</div>
+      <div class="news-summary">연결 매출 1조3,766억원(YoY +33.4%), 영업이익 1,266억원(YoY +45%). 초고압 변압기 매출 YoY +83%, 북미 매출 약 3,000억원으로 분기 최대. 일회성 성과급(약 150억원) 제외 시 컨센서스 실질 부합. 이후 증권사들 목표주가 일제히 상향.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.04.06</span></div>
+      <div class="news-title">LS파워솔루션, 미국 빅테크 데이터센터 마이크로그리드 초고압 변압기 1,066억원 수주</div>
+      <div class="news-summary">자회사 LS파워솔루션이 미국 중부 빅테크 데이터센터에 345kV급 초고압 변압기 공급 계약(7,026만 달러). 납품 기간 2027년 4분기~2028년 상반기. 직류·마이크로그리드 영역까지 사업 범위 확장 확인.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">주목</span><span class="news-date">2026.04.13</span></div>
+      <div class="news-title">5대 1 액면분할 거래 재개 — 주가 연일 신고가 경신</div>
+      <div class="news-summary">액면가 5,000원→1,000원(5대 1) 분할 후 4월 13일 거래 재개. 재개 당일 환산 기준 14% 급등, 이후 7거래일 연속 52주 신고가 경신. 접근성 개선과 펀더멘털 강화 기대가 동시에 반영된 결과.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.04.22</span></div>
+      <div class="news-title">1Q26 영업이익, FnGuide 컨센서스(1,344억원) 대비 5.8% 하회</div>
+      <div class="news-summary">원자재 가격 상승 시차 반영 및 일회성 인건비 부담으로 실적이 기대치 소폭 미달. 일부 증권사(하나·삼성·NH 22만원, 대신 21.7만원) 목표가는 5월 현재 주가 313,000원에 이미 하회. 단기 밸류에이션 부담 및 이연 매출 반영 여부가 2Q 핵심 관전 포인트.</div>
+    </div>
+  </div>
+
+  <!-- Bull / Bear -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>AI 데이터센터 슈퍼사이클</strong> — 글로벌 빅테크의 AI 인프라 투자 폭증으로 수배전반·초고압변압기 수요가 중장기 구조적 성장 국면 진입. 2030년 매출 10조원 목표도 현실권으로 평가됨.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>역대급 수주잔고 5조6,000억원</strong> — 1Q26 말 기준 수주잔고가 전년 말 대비 6,000억원 추가 확대. 초고압 변압기 잔고만 3조1,000억원(55% 비중)으로 수년치 먹거리 이미 확보.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>북미 자급률 20% 수준의 공급자 우위 시장</strong> — 미국 변압기 자급률 부족으로 한국 업체에 강한 수요. LS파워솔루션 부산 공장 생산능력 2,000억→7,000억원 이상으로 대규모 증설 완료.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>배전·초고압 투트랙 성장</strong> — 배전 부문 빅테크향 수주 호조에 더해 종전 열위로 꼽히던 초고압변압기 분야에서도 대형 수주 잇따라 성공. 두 부문 동반 성장으로 실적 가시성 극대화.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><strong>데이터센터업 정관 추가 + DC 솔루션 직접 사업 확대</strong> — 전력기기 공급을 넘어 데이터센터 건설·운영과 직류(DC) 인프라까지 사업 영역 확장. 신성장 밸류에이션 프리미엄 부여 가능.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>주요 증권사 목표가 하회 현재 주가</strong> — 대신(21.7만원)·하나·삼성·NH(22만원) 목표가를 현재 주가 313,000원이 이미 크게 상회. KB증권(26만원)·LS증권(35만원)을 제외하면 단기 오버밸류 우려 존재.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>이연 매출 인식 시점 리스크</strong> — 중동 지역 지정학 이슈로 일부 프로젝트 매출 인식이 지연. 2분기 이연 매출 반영 확인 전까지 실적 불확실성이 주가 변동성을 높일 수 있음.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>경쟁사 CAPA 확대 위협</strong> — HD현대일렉트릭·효성중공업 등 국내외 경쟁사들도 생산능력 대규모 증설 중. 중장기적으로 공급 과잉 시 가격 경쟁 심화 및 마진 압박 가능성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>원자재 가격 변동 · 판가 미스매칭 리스크</strong> — 1분기에도 원자재 가격 상승분이 판가에 즉시 반영되지 못해 실적이 컨센서스 하회. 원자재(구리·실리콘) 가격 재급등 시 이익률 압박 재연 가능.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><strong>미국 관세·무역 정책 불확실성</strong> — 트럼프 행정부 상호관세 정책 변동이 북미 수출 구조에 영향 가능. 다만 LS증권은 3분기 관세 환급에 따른 영업이익 증가 가능성도 동시에 제시.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (2026년 4~5월 기준)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">LS증권 (성종화)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 350,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">KB증권 (정혜정)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 260,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">NH투자증권 (이민재)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 275,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">대신증권 (허민호)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 217,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">삼성증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 220,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">하나증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 220,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유진투자증권</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">목표가 200,000원</span></div>
+    </div>
+    <p style="font-size:11px; color:var(--muted); margin-top:10px; padding-top:8px; border-top:1px solid var(--border);">
+      ※ 5월 현재 주가 313,000원은 LS증권(35만원)·KB증권(26만원)·NH투자증권(27.5만원)을 제외한 대다수 증권사 목표가를 상회. 빠른 주가 상승에 목표가 상향이 후행하는 상황. 추가 목표가 조정 예상.
+    </p>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      LS ELECTRIC(010120)은 AI 데이터센터 확산이라는 구조적 성장 사이클의 중심에 서 있는 국내 전력기기 1위 기업이다. 2026년 1분기 사상 최대 실적(매출 1.38조, 영업이익 +45%)을 기록했으며, 5조6,000억원의 수주잔고와 올해 빅테크향 수주 누계 5,000억원 이상을 바탕으로 연간 영업이익 6,000억원 돌파가 가시권에 들어왔다. 특히 초고압 변압기 분야에서도 대형 수주에 성공하면서 배전·초고압 투트랙 성장 구조가 강화됐고, 부산공장 7,000억원 규모 생산능력 확대와 IEEE T&D 전시회 적극 참가로 북미 시장 공략을 가속화하고 있다.
+      <br><br>
+      다만 5월 현재 주가(313,000원)는 이미 상당수 증권사 목표가를 상회하고 있어 단기 밸류에이션 부담이 존재한다. 2분기 이연 매출 반영 여부와 추가 빅테크 수주 공시, 증권사의 목표가 추가 상향이 주요 모멘텀 변수다. 중장기적으로는 미국 노후 전력망 교체 수요와 AI 데이터센터 슈퍼사이클이 지속되는 한 성장 스토리는 유효하다. 단기 변동성을 감내할 수 있는 중장기 투자자에게 적합한 종목으로 판단된다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 수록된 모든 수치는 공개된 자료 기반이며 실제와 다를 수 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

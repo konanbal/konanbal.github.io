@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>우리로(046970) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">046970 · KOSDAQ</div>
+      <div class="company-name">우리로</div>
+      <div class="company-desc">광통신 핵심부품(PLC·PD·SPAD) 제조 및 SI·음향기기 유통 전문기업 — 양자암호·AI 데이터센터 수혜주</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 05월 25일</div>
+      <div class="price-display">N/A</div>
+      <div class="price-change up">※ 52주 범위: 1,068원 ~ 10,030원</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 584억원 (버틀러 기준)</span>
+    <span class="rating-pill">🏢 섹터: 광통신·양자암호·방산</span>
+    <span class="rating-pill">⭐ 애널리스트 커버리지: 스몰캡 (공식 리포트 미비)</span>
+    <span class="rating-pill">👷 임직원: 96명</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">2026 1Q 매출 (연결)</div>
+      <div class="kpi-value">145억원</div>
+      <div class="kpi-sub">YoY +63.5%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026 1Q 영업이익</div>
+      <div class="kpi-value">15억원</div>
+      <div class="kpi-sub">흑자 전환 (전년 -10억)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025 연간 영업손실</div>
+      <div class="kpi-value">-6.7억원</div>
+      <div class="kpi-sub">전년 대비 77.6% 개선</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">부채비율</div>
+      <div class="kpi-value">44.2%</div>
+      <div class="kpi-sub">업계 최고 수준 안정성</div>
+    </div>
+  </div>
+
+  <!-- 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 — 2026년 1분기 (최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 전년동기)</div>
+        <div style="font-size:18px;font-weight:700;">145억원 <span style="font-size:12px;color:var(--green);">▲ YoY +63.5%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년 1Q 약 89억원 수준</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 전년동기)</div>
+        <div style="font-size:18px;font-weight:700;">+15억원 <span style="font-size:12px;color:var(--green);">▲ 흑자 전환</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년 1Q 영업손실 -10억원 → 흑자</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <b>실적 발표일</b>: 2026년 5월 8일 (분기보고서 공시 기준) &nbsp;|&nbsp;
+      <b>경영진 코멘트</b>: "올해 1분기는 양자암호와 방산 사업의 성장 가능성이 실제 실적으로 확인된 시기. 수익성 중심의 사업 재편과 핵심 기술 경쟁력을 바탕으로 안정적인 수익 구조를 구축하겠다." — 우리로 관계자 (파이낸셜뉴스, 2026.05.08)<br>
+      <b>SPAD 부문</b>: 전년 동기 대비 +68% 증가 (실적 성장 핵심 견인) &nbsp;|&nbsp; <b>방산 부문</b>: 전년 동기 대비 +144% 급증
+    </div>
+  </div>
+
+  <!-- DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 DART 공시</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026년 1분기 분기보고서 — 매출 145억, 영업이익 15억 흑자전환 확인</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.08</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">임원변동</span>
+        <span style="font-size:13px;font-weight:500;">사외이사 최종문 신규 선임 (네이버 경영고문, 파라다이스인터내셔널 前대표이사)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.27</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">사업보고서</span>
+        <span style="font-size:13px;font-weight:500;">2025년 연결 기준 사업보고서 — 매출 424.9억원, 영업손실 6.7억원 (전년比 77.6% 개선)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.05</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;background:#f0f9ff;padding:10px 14px;border-radius:8px;color:var(--text);line-height:1.7;">
+      📌 <b>투자자 주목 공시</b>: 1분기 분기보고서에서 영업이익 흑자 전환이 공식 확인되었으며, SPAD·방산 부문이 고수익 사업 비중 확대를 주도. 사외이사로 네이버 경영고문 선임은 기업 거버넌스 강화 및 향후 ICT 생태계 연계 가능성 시사.
+    </div>
+  </div>
+
+  <!-- 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.08</span>
+      </div>
+      <div class="news-title">우리로, 2026년 1분기 영업이익 흑자 전환 — 매출 63.5% 급증</div>
+      <div class="news-summary">SPAD(양자암호용 단일광자검출기) 매출 +68%, 방산 부문 +144%로 고수익 사업 비중이 실적을 견인. 3년여 만의 분기 흑자 전환으로 턴어라운드 본격화 신호. 경영진은 수익성 중심 사업 재편의 성과로 평가.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.03.23</span>
+      </div>
+      <div class="news-title">ETRI 200Gbps 초고속 광트랜시버 기술 이전 완료 — AI 데이터센터 시장 본격 진출 선언</div>
+      <div class="news-summary">한국전자통신연구원(ETRI)으로부터 200Gbps급 광검출기 기술을 이전 완료. 기존 대비 채널당 데이터 처리 용량 2배 이상 향상. AI 인프라 핵심 부품 공급사로의 포지셔닝 강화.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.03.17~30</span>
+      </div>
+      <div class="news-title">젠슨 황 GTC 2026 '광반도체' 발언 → 7거래일 연속 상한가 (52주 최고 10,030원)</div>
+      <div class="news-summary">엔비디아 CEO 젠슨 황이 GTC 2026에서 광반도체를 AI 반도체 핵심 기술로 언급. 엔비디아는 미국 광트랜시버 업체에 약 6조원 투자 단행. 우리로는 광분배기·SPAD 보유 기업으로 국내 대표 수혜주로 급부상, 단기 급등으로 투자경고 종목 지정 경험.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">주목</span>
+        <span class="news-date">2026.03.27</span>
+      </div>
+      <div class="news-title">사외이사 최종문 신규 선임 — 네이버 경영고문·KT투자운용 사외이사 경력</div>
+      <div class="news-summary">등기이사 3→4명 확대, 거버넌스 강화 조치. ICT·투자 분야 경력의 외부 전문가 영입으로 중장기 사업 확장 준비의 일환으로 해석.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.03~04</span>
+      </div>
+      <div class="news-title">단기 주가 급등 → 투자경고종목 지정 및 거래 정지</div>
+      <div class="news-summary">3월 26일 투자경고종목 지정으로 거래 정지. 증권사 공식 커버리지 부재로 개인 매수세 중심의 급등이라는 수급 리스크 내포. 단기 변동성 극단적으로 높아 주의 필요.</div>
+    </div>
+  </div>
+
+  <!-- 투자 포인트 -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>1분기 흑자 전환 확인</b> — SPAD +68%, 방산 +144% 성장으로 수익성 중심 사업 재편 성과가 실적으로 입증. 연간 흑자 전환 가능성 가시화.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>ETRI 200Gbps 광트랜시버 기술 확보</b> — AI 데이터센터·6G 인프라 수요 폭증 국면에서 선제적 기술 내재화. 경쟁 진입장벽 강화.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>양자암호통신 시장 고성장</b> — 글로벌 시장 연평균 28.8% 성장(2032년까지), 국내 2031년 23조원 규모 전망. SK텔레콤-IDQ 생태계 핵심 부품 공급사 포지션.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>압도적 재무 안정성</b> — 부채비율 44.2%, 자산 총계 564억원. 흑자 전환 이전에도 재무적 생존력 충분. 현금성 자산 기반 기술개발 지속 가능.</div></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><div><b>방산·AI 데이터센터 이중 성장 동력</b> — 단기는 광통신 5G/AI 수요 회복, 중장기는 SPAD 기반 양자암호 상용화. 두 축이 동시에 성과를 내고 있음.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>SI 사업부 구조적 매출 감소</b> — WD HDD·SSD 유통 부문 매출이 2024년 378억원→2025년 약 198억원으로 약 48% 급감. 전체 외형 성장에 제약.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>증권사 공식 커버리지 전무</b> — 공식 목표주가 없음. 개인 중심 수급 구조로 테마 소멸 시 급락 리스크. 주가와 펀더멘털 괴리 가능성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>소형주 실행 한계</b> — 임직원 96명의 소규모 회사가 광통신·양자암호·방산 세 축을 동시 운영. 인력·자본 집중 분산에 따른 실행 리스크.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>양자암호 시장 상용화 불확실성</b> — 시장은 '개화 전 단계'. 기술 내재화는 선제적이나 대량 매출 발생 시점이 불명확. 기대 선반영 후 실망 매물 가능성.</div></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><div><b>단기 급등 후 높아진 밸류에이션</b> — 52주 저점 1,068원 대비 최고 10,030원 급등. 테마성 수급 소진 시 주가 되돌림 위험. 투자경고종목 지정 전력.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견</div>
+    <div class="analyst-row">
+      <div>
+        <span class="analyst-firm">서울평가정보</span>
+        <span style="font-size:12px;color:var(--muted);margin-left:8px;">기술분석보고서 (2025.08.14)</span>
+      </div>
+      <div class="analyst-right">
+        <span class="opinion-badge hold">분석 커버</span>
+        <span class="target-price">목표가 N/A</span>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);padding:10px 0;border-bottom:1px solid var(--border);">
+      서울평가정보 기술분석 외 국내 대형 증권사 공식 커버리지 없음. 시총 5,000억원 미만 스몰캡 특성상 리포트 부재. 향후 흑자 전환 지속 시 증권사 커버 개시 가능성 있음.
+    </div>
+    <div style="font-size:12px;color:var(--muted);padding:10px 0;">
+      ※ 2026년 3월 20일 상한가 기준 시총 약 1,188억원 (PBR 약 3.0배), 현재 주가 기준 밸류에이션 재평가 필요.
+    </div>
+  </div>
+
+  <!-- 종합 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      우리로(046970)는 광분배기(PLC)·광다이오드(PD)·단일광자검출기(SPAD) 등 광통신 핵심 부품을 생산하는 코스닥 소형주로, 2026년 1분기 매출 145억원(YoY +63.5%), 영업이익 15억원 흑자 전환에 성공하며 3년여 만의 턴어라운드를 공식 확인했다. 흑자 전환의 핵심 동력은 양자암호통신용 SPAD(+68%)와 방산 부문(+144%)의 고수익 사업 확대로, 단순 비용 절감이 아닌 사업 포트폴리오 재편에 의한 질적 개선이다. ETRI로부터 200Gbps 광트랜시버 기술을 이전받아 AI 데이터센터 시장 진출 기반도 마련했다. 부채비율 44.2%의 탁월한 재무 안정성과 SK텔레콤-IDQ 생태계 내 부품 공급사 지위는 중장기 포지션의 강점이다. 다만 SI 사업부 구조적 축소, 증권사 공식 커버리지 부재, 소규모 인력의 다사업 병행 리스크, 테마성 급등에 따른 밸류에이션 부담은 주의 사항이다. <b>이 종목은 양자암호통신·AI 광인프라 중장기 성장에 베팅하면서 실적 흑자 전환 확정 이후 안정적 진입 기회를 탐색하는 투자자에게 적합하다.</b>
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

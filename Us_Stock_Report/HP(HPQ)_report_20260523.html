@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HP Inc. (HPQ) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #0096d6;
+    --accent: #0171ad;
+    --accent2: #003f6b;
+    --bg: #f0f5f9;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #003f6b 0%, #0171ad 55%, #0096d6 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '💻';
+    position: absolute; right: 2.5rem; top: 50%;
+    transform: translateY(-50%);
+    font-size: 110px; opacity: 0.06; pointer-events: none;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #0096d6; color: white; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.75; max-width: 520px; line-height: 1.6; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.55; }
+  .price-display { font-size: 34px; font-weight: 700; margin-top: 4px; letter-spacing: -1px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); }
+  .rating-pill.urgent { background: #ef4444; border-color: #ef4444; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* 긴급 실적 발표 배너 */
+  .earnings-alert {
+    background: linear-gradient(90deg, #7c2d12 0%, #b91c1c 100%);
+    color: white; padding: 12px 18px; border-radius: 12px;
+    font-size: 13px; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 12px; line-height: 1.5;
+  }
+  .alert-countdown { font-size: 22px; font-weight: 800; min-width: 30px; text-align: center; }
+
+  /* CEO 공백 배너 */
+  .ceo-banner {
+    background: #fef3c7; border: 1px solid #fde68a;
+    color: #78350f; padding: 10px 18px; border-radius: 10px;
+    font-size: 13px; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 10px; line-height: 1.5;
+  }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-ceo { background: #fef3c7; color: #78350f; }
+  .tag-ai { background: #ede9fe; color: #4c1d95; }
+  .tag-ma { background: #dbeafe; color: #1e40af; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); color: #1a3a2e; }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); color: #3a1a1a; }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; color: var(--text); }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .target-up { color: var(--green); font-size: 11px; }
+  .target-down { color: var(--red); font-size: 11px; }
+
+  /* 세그먼트 분석 */
+  .segment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; }
+  .segment-box { border-radius: 10px; padding: 1rem 1.25rem; border: 1px solid; }
+
+  .filing-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .filing-row:last-child { border-bottom: none; }
+  .filing-type { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-right: 8px; white-space: nowrap; }
+  .ft-10q { background: #e0e7ff; color: #3730a3; }
+  .ft-8k { background: #fce7f3; color: #9d174d; }
+  .ft-8k-ceo { background: #fef3c7; color: #92400e; }
+  .ft-8k-neg { background: #fee2e2; color: #991b1b; }
+  .ft-upcoming { background: #dcfce7; color: #14532d; }
+
+  .earnings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; }
+  .earnings-box { background: #f8faff; border-radius: 10px; padding: 1rem 1.1rem; border: 1px solid #e0eaf7; }
+  .earnings-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .earnings-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .earnings-beat { font-size: 11px; color: var(--green); font-weight: 600; margin-left: 6px; }
+  .earnings-miss { font-size: 11px; color: var(--red); font-weight: 600; margin-left: 6px; }
+  .earnings-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1px solid #bfdbfe; border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #bfdbfe; line-height: 1.6; }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .earnings-grid, .segment-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+    .price-display { font-size: 26px; }
+    .company-name { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">HPQ · NYSE · PC / 프린팅 / AI</div>
+      <div class="company-name">HP Inc.</div>
+      <div class="company-desc">PC·프린터 세계 2위. Personal Systems(PC·노트북·워크스테이션·OMEN 게이밍)와 Printing(프린터·소모품·산업용) 두 세그먼트 운영. AI PC 전환 주도, 구독 서비스 확장 중.<br>CEO 교체(Lores 퇴임 → Broussard 임시) 및 관세 비용 충격이 진행 중인 전환기 기업.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 23일</div>
+      <div class="price-display">$19.88</div>
+      <div class="price-change down">▼ 52주 고점($29.55) 대비 -33%</div>
+      <div style="font-size:11px;opacity:0.55;margin-top:4px;">기준: NYSE 종가 5/22/2026</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: ~$18B</span>
+    <span class="rating-pill">🏢 섹터: IT 하드웨어 / 소비재</span>
+    <span class="rating-pill">💰 배당수익률: ~6.1%</span>
+    <span class="rating-pill">📉 P/E: 7.4× (초저평가)</span>
+    <span class="rating-pill urgent">🚨 Q2 실적 발표: 5/27 (4일 후!)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 긴급: Q2 실적 발표 임박 -->
+  <div class="earnings-alert">
+    <span class="alert-countdown">⚡</span>
+    <span><strong>Q2 FY2026 실적 발표 D-4 (5월 27일 장 마감 후)</strong> — 컨센서스 EPS $0.71, 매출 $14.07B. BofA는 "가이던스 하향 가능성 높다"며 EPS 전망 $2.60~$3.00(기존 $2.90~$3.20)으로 축소 예상. 관세 비용 충격 추가 공개 여부가 최대 관심사. 주가에 5% 이상 변동 가능성 주의.</span>
+  </div>
+
+  <!-- CEO 경고 -->
+  <div class="ceo-banner">
+    <span style="font-size:18px;">👔</span>
+    <span><strong>CEO 공석 진행 중:</strong> Enrique Lores 2026.02.03 전격 퇴임(페이팔 이직) → Bruce Broussard 이사회 멤버가 임시 CEO 역할 중. 정식 CEO 선임 작업 진행 중이나 기한 미정. 전략적 의사결정의 지연·공백이 우려 요인.</span>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 FY2026 매출</div>
+      <div class="kpi-value">$14.4B</div>
+      <div class="kpi-sub">YoY +6.9% · 상수환율 +5.2%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Q1 Non-GAAP EPS</div>
+      <div class="kpi-value">$0.81</div>
+      <div class="kpi-sub">YoY +9.5% · 가이던스 상단 달성</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">FY2026 EPS 가이던스</div>
+      <div class="kpi-value" style="font-size:16px;">$2.90~$3.20</div>
+      <div class="kpi-sub">⚠️ 5/27 하향 가능성 (관세)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">AI PC 출하 비중</div>
+      <div class="kpi-value" style="color:var(--blue);">35%+</div>
+      <div class="kpi-sub">Q4 FY2025 30% → Q1 FY2026 35%+</div>
+    </div>
+  </div>
+
+  <!-- ── Q1 실적 + Q2 예고 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 최근 실적 — Q1 FY2026 (2026.02.24 발표) + Q2 예고</div>
+    <div class="earnings-grid">
+      <div class="earnings-box">
+        <div class="earnings-label">Q1 매출 (실제)</div>
+        <div class="earnings-value">$14.4B <span class="earnings-beat">▲ YoY +6.9%</span></div>
+        <div class="earnings-sub">Personal Systems 주도 · 상수환율 +5.2%</div>
+      </div>
+      <div class="earnings-box">
+        <div class="earnings-label">Q1 Non-GAAP EPS</div>
+        <div class="earnings-value">$0.81 <span class="earnings-beat">▲ 가이던스 상단</span></div>
+        <div class="earnings-sub">가이던스 $0.78~$0.88 상단 달성 · YoY +9.5%</div>
+      </div>
+    </div>
+    <!-- 세그먼트 -->
+    <div class="segment-grid">
+      <div class="segment-box" style="background:#eff6ff;border-color:#bfdbfe;">
+        <div style="font-size:12px;font-weight:700;color:#1e40af;margin-bottom:8px;">💻 Personal Systems (~71%)</div>
+        <div style="font-size:13px;line-height:1.7;color:#1e3a5f;">
+          • AI PC 35%+ 출하 비중 (vs Q4 30%)<br>
+          • 상업용·소비자용 모두 점유율 상승<br>
+          • 더블 딜리짓 성장 · Commercial PC 가속<br>
+          <span style="color:var(--red);font-size:11px;">⚠️ 메모리(DRAM/NAND) 비용 상승으로 마진 압박</span>
+        </div>
+      </div>
+      <div class="segment-box" style="background:#fff7ed;border-color:#fed7aa;">
+        <div style="font-size:12px;font-weight:700;color:#78350f;margin-bottom:8px;">🖨️ Printing (~29%)</div>
+        <div style="font-size:13px;line-height:1.7;color:#451a03;">
+          • Q1 수익 YoY -2% (구조적 하락 중)<br>
+          • 소모품(Supplies) 판매량 감소 지속<br>
+          • 소비자 구독(Consumer Subscription) 성장<br>
+          • 산업용 프린트 긍정적 모멘텀 유지
+        </div>
+      </div>
+    </div>
+    <div style="background:#fff1f2;border-left:3px solid var(--red);padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.8;color:#3a1a1a;margin-top:4px;">
+      <strong>임시 CEO Broussard 코멘트 (Q1):</strong> "AI PC의 지속적 모멘텀 포함 강력한 분기를 보고하게 돼 기쁘다. 그러나 점점 유동적인 운영 환경을 감안해 현재로서는 FY2026 가이던스 범위 <strong>하단에 머물 것</strong>을 예상한다." 현재 미국 무역 관련 규정의 추가 비용과 관련 완화 조치를 반영. Q4 FY2026까지 관세 관련 비용을 <strong>완전 상쇄</strong>하겠다고 밝힘.
+    </div>
+  </div>
+
+  <!-- Q2 FY2026 프리뷰 -->
+  <div class="card" style="margin-bottom:1rem;border:2px solid #ef4444;">
+    <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;display:flex;align-items:center;gap:6px;">
+      <span style="display:block;width:3px;height:14px;background:var(--red);border-radius:2px;"></span>
+      🔴 Q2 FY2026 실적 발표 프리뷰 (5월 27일 — 4일 후)
+    </div>
+    <div class="earnings-grid">
+      <div class="earnings-box" style="border-color:#fca5a5;">
+        <div class="earnings-label">컨센서스 EPS 예상 (Non-GAAP)</div>
+        <div class="earnings-value">$0.71</div>
+        <div class="earnings-sub">HP 가이던스 $0.70~$0.76 · 3개월간 -4.1% 하향 조정됨</div>
+      </div>
+      <div class="earnings-box" style="border-color:#fca5a5;">
+        <div class="earnings-label">컨센서스 매출 예상</div>
+        <div class="earnings-value">$14.07B</div>
+        <div class="earnings-sub">YoY +6.3% 전망 · BofA 우려: 시장 점유율 손실</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.75rem;">
+      <div style="background:#fff1f2;border-radius:8px;padding:0.75rem 1rem;border:1px solid #fca5a5;">
+        <div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:4px;">⚠️ 리스크 시나리오</div>
+        <div style="font-size:12px;color:#3a1a1a;line-height:1.7;">BofA: 가이던스 하향 예상<br>수정 EPS $2.60~$3.00 (기존 $2.90~$3.20)<br>시장점유율 손실 데이터 확인 가능성<br>메모리 비용 지속 압박 발언 예상</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem 1rem;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:4px;">✅ 긍정 시나리오</div>
+        <div style="font-size:12px;color:#1a3a2e;line-height:1.7;">Q4까지 관세 완전 상쇄 로드맵 제시<br>AI PC 출하 비중 40% 돌파 발표<br>상업용 엔터프라이즈 수요 강화 확인<br>새 CEO 임명 발표 (서프라이즈)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SEC 공시 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 및 주요 이벤트</div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-upcoming">예정</span>
+        <span style="font-weight:600;color:#14532d;">Q2 FY2026 실적 발표 (회계분기 종료 2026.04.30) — 5/27 장 마감 후 발표</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.27</span>
+    </div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-10q">10-Q</span>
+        <span style="font-weight:500;">Q1 FY2026 분기보고서 + 실적 발표 (분기 종료 2026.01.31)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.24</span>
+    </div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-8k-ceo">8-K CEO</span>
+        <span style="font-weight:500;">Enrique Lores 전격 사임 → Bruce Broussard 임시 CEO 임명 발표</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.03</span>
+    </div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-8k-neg">8-K 리스크</span>
+        <span style="font-weight:500;">Q1 가이던스 하단 조정 공시 — 미국 관세 비용 영향 명시</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.24</span>
+    </div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-8k">8-K 제품</span>
+        <span style="font-weight:500;">HP Imagine 2026 — HP TPM Guard 등 AI PC 보안 솔루션 발표</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.24</span>
+    </div>
+    <div class="filing-row">
+      <div>
+        <span class="filing-type ft-8k">8-K 제품</span>
+        <span style="font-weight:500;">HyperX 게이밍 주변기기 생태계 확장 — Clutch Talon·Cloud Stinger 3 발표</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.30</span>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#1e3a5f;background:#eff6ff;border-left:3px solid var(--blue);padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.7;">
+      📌 <strong>투자자 주목:</strong> DEF 14A(주주총회 안내서)에서 CEO 교체 과정 및 73.6M주 규모 인센티브 플랜 상세 공개. Lores는 PayPal CEO 포지션으로 이직한 것으로 알려짐. 임시 CEO Broussard는 전 Humana CEO 출신으로 헬스케어 기업 운영 경험 보유 — IT 하드웨어 업계 전문성 의문이 제기되는 상황.
+    </div>
+  </div>
+
+  <!-- ── 주요 뉴스 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.02.03</span>
+      </div>
+      <div class="news-title">CEO Lores 전격 퇴임 — 주가 -4.1% 충격, CEO 공석 4개월째 지속</div>
+      <div class="news-summary">7년간 CEO를 맡았던 Enrique Lores가 갑작스럽게 사임하고 PayPal로 이직했다. 이사회 멤버 Bruce Broussard(전 Humana CEO)가 임시 CEO를 맡으며 정식 CEO 탐색 작업이 진행 중이다. 보고서 작성 시점(5/23) 기준 4개월째 CEO 공석 상태로, 전략 결정의 공백이 이어지고 있다. 발표 당일 주가 -4.1% 급락.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.02.24</span>
+      </div>
+      <div class="news-title">관세 충격 — FY2026 가이던스 범위 하단으로 하향, 비용 완화 조치 추진</div>
+      <div class="news-summary">트럼프 행정부의 대중국·아시아 수입 관세가 HP 비용 구조에 직접 타격을 입혔다. Q1 실적 자체는 견조했지만 가이던스를 즉시 하단으로 낮췄다. HP는 제조 거점을 멕시코 등으로 다각화해 Q4 FY2026까지 관세 비용을 완전히 상쇄하겠다는 계획을 밝혔다. 그러나 실행 리스크가 여전히 존재한다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-ai">AI PC</span>
+        <span class="news-date">2026.03.24</span>
+      </div>
+      <div class="news-title">HP Imagine 2026 — 세계 최초 하드웨어 TPM Guard 보안 솔루션 발표</div>
+      <div class="news-summary">BitLocker 보안 취약점을 하드웨어 수준에서 차단하는 HP TPM Guard를 발표, AI PC 보안 분야에서 선제적 포지셔닝을 강화했다. AI PC 비중이 35%를 돌파한 상태에서 보안 차별화가 기업 고객 수주의 핵심 경쟁 요소가 되고 있다. Windows 11 전환 사이클과 AI PC 수요가 교차하는 호황 구간을 공략 중.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-ma">M&A 루머</span>
+        <span class="news-date">2026.04.13</span>
+      </div>
+      <div class="news-title">NVIDIA의 대형 PC 제조사 인수 루머 — HPQ·DELL 각각 +5~6% 급등</div>
+      <div class="news-summary">SemiAccurate 보도로 NVIDIA가 대형 PC 제조사 인수를 협상 중이라는 루머가 퍼지며 HPQ와 DELL이 각각 5~6% 급등했다. 인수 대상 기업은 특정되지 않았으며, 루머 수준이지만 $18B 규모의 HPQ는 NVIDIA 입장에서 소화 가능한 규모다. 루머 이후 추가 확인 정보 없음.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.05.20</span>
+      </div>
+      <div class="news-title">BofA "Q2 가이던스 하향 예상" — EPS $2.60~$3.00으로 축소, $16 목표가 유지</div>
+      <div class="news-summary">BofA는 Q2 실적이 가이던스 하단 수준에 그칠 것으로 보고, 메모리 가격·관세·CEO 공석·시장점유율 손실을 이유로 FY2026 EPS 가이던스가 $2.60~$3.00으로 하향될 가능성이 높다고 전망했다. FCF 가이던스도 $2.6B~$2.8B으로 낮출 것이라고 예상. 투자의견 Neutral, 목표가 $16 유지.</div>
+    </div>
+  </div>
+
+  <!-- ── 투자 포인트 ── -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>AI PC 슈퍼사이클 + 윈도우 11 교체 수요</strong> — AI PC 출하 비중 35%+, 분기마다 상승 중. 기업 PC 교체 주기(5~7년) 도달 + Win11 전환 수요가 겹치는 구간. 이 사이클이 2026~2027년 수요를 떠받치는 구조적 지지대.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>P/E 7.4× · 배당 6.1% — 역대급 저평가 구간</strong> — 피어 대비 현저히 낮은 밸류에이션. EPS $2.64 TTM 기준 7.4×는 가치주 기준으로도 저렴하다. 배당 $1.20(6.1%)을 받으며 기다릴 수 있는 구조. FCF $2.8B+ 예상은 배당·자사주 환원 충분히 지원.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>관세 비용 Q4 FY2026 완전 상쇄 목표 — 제조 다각화 진행</strong> — 멕시코 등 비중국 제조 거점 확대로 점진적 비용 완화. 성공 시 H2 FY2026~FY2027 마진 개선 가시화. 임시 CEO도 "완전 상쇄"를 공개적으로 약속.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>NVIDIA M&A 루머 — 와일드카드 업사이드</strong> — NVIDIA가 PC 제조사 인수를 검토 중이라는 루머가 있다. HPQ 시총 $18B은 NVIDIA 입장에서 소화 가능한 규모. 현실화 가능성은 미지수이나, 하방을 지지하는 심리적 프리미엄으로 작용.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>신규 CEO 임명 시 밸류에이션 리레이팅 가능</strong> — 현재 주가 하락의 상당 부분은 CEO 불확실성에 기인. 강력한 IT 업계 CEO가 임명되면 시장의 신뢰 회복과 함께 멀티플 확장 가능. $2.8B+ 이상 FCF 창출 능력을 보여주면 더 높은 P/FCF 적용 가능.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>5/27 Q2 실적 발표 — 가이던스 추가 하향 가능성</strong> — BofA 포함 다수 분석가가 FY2026 EPS 가이던스 $2.60~$3.00 하향을 예상. 시장점유율 손실 가능성, 메모리 비용 지속 압박, 관세 완화 지연이 복합 악재. 발표 당일 큰 폭의 주가 하락 위험.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>CEO 공석 4개월+ — 전략 공백이 장기화</strong> — Lores가 구축한 AI 전환 전략이 임시 체제에서 일관되게 실행될지 불투명. 정식 CEO 임명까지 굵직한 M&A, 파트너십, 구조조정 결정이 보류될 가능성. 헬스케어 출신 Broussard의 IT 전략 역량에 대한 시장의 불신.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>PC TAM 2026년 두 자릿수 감소 전망</strong> — HP 자체 전망에서 캘린더 2026년 PC 시장 전체 단위 판매 감소 예측. 관세에 따른 소비자 가격 인상이 수요를 억제. 관세 선매(pull-forward)가 H1에 집중된 후 H2 수요 절벽 우려.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>프린팅 구조적 장기 하락 — 대체 불가능한 감소 트렌드</strong> — 프린팅 세그먼트 수익 YoY -2%, 소모품 감소 지속. 디지털화로 인한 구조적 감소는 어떤 전략으로도 역전 어렵다. 전체 수익의 29% 가운데 지속 줄어드는 부분이 성장 걸림돌.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>메모리 비용 FY2026~FY2027 내내 상승 지속</strong> — DRAM/NAND 가격 상승이 이익률을 지속 압박. "FY2026 내내, FY2027에도 변동성 지속"을 회사 스스로 경고. Personal Systems 영업이익률이 장기 범위 하단에 머무를 전망.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 애널리스트 의견 ── -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <div style="background:#fef9c3;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #fde68a;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">컨센서스</div>
+        <div style="font-size:18px;font-weight:700;color:#854d0e;">Hold</div>
+        <div style="font-size:11px;color:var(--muted);">4매수·8중립·5매도 (17명)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #dde8f7;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">평균 목표주가</div>
+        <div style="font-size:18px;font-weight:700;">$21.42</div>
+        <div style="font-size:11px;color:var(--green);">현재가 대비 +7.7%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #dde8f7;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">목표가 범위</div>
+        <div style="font-size:16px;font-weight:700;">$16 ~ $30</div>
+        <div style="font-size:11px;color:var(--muted);">격차 큼 — 의견 분산</div>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Bank of America</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립 (Neutral)</span><span class="target-price">$16</span><span class="target-down">-19.5%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Barclays</span>
+      <div class="analyst-right"><span class="opinion-badge sell">비중축소 (Underweight)</span><span class="target-price">$16</span><span style="font-size:11px;color:var(--muted);">세속적 역풍 경고</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Yahoo Finance 컨센서스</span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$19.43</span><span class="target-down">현재가 수준</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">StockAnalysis 컨센서스</span>
+      <div class="analyst-right"><span class="opinion-badge hold">Hold</span><span class="target-price">$21.42</span><span class="target-up">+7.7%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">강세 시나리오 (매수 의견)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$26~$30</span><span class="target-up">+31~+51%</span></div>
+    </div>
+    <div style="margin-top:12px;padding:10px 14px;background:#fef9f0;border-radius:8px;font-size:12px;color:#78350f;line-height:1.7;border:1px solid #fde68a;">
+      ⚠️ Q2 실적 발표(5/27) 이후 추가 목표가 하향 가능성 주의. BofA·Barclays 등 보수적 기관이 $16을 유지하는 반면, 낙관론자들은 $26~30을 제시해 의견 분산이 크다.
+    </div>
+  </div>
+
+  <!-- ── 종합 요약 ── -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      HP Inc.(HPQ)는 현재 세 가지 악재가 동시에 작용하고 있는 전형적인 "빠진 칼" 구간에 있다. CEO 공석(4개월+), 관세 비용 충격, 메모리 가격 상승이 P/E 7.4×·배당 6.1%라는 극단적 저평가를 낳았다. Q1 FY2026은 매출 $14.4B(+6.9%), 비GAAP EPS $0.81(+9.5%)로 견조했으나, 이후 관세 영향을 이유로 가이던스를 즉시 하단으로 낮추는 혼재된 메시지를 냈다.
+      <br><br>
+      AI PC 35%+ 출하 비중, 기업용 PC 교체 사이클, 보안 솔루션 강화는 장기 성장 동력이지만, 프린팅의 구조적 감소와 PC TAM의 단기 하락 전망이 균형을 깨뜨린다. 가장 긴급한 변수는 <strong>4일 후(5/27) Q2 FY2026 실적 발표</strong>다. BofA는 FY2026 EPS 가이던스가 $2.60~$3.00으로 하향될 것을 예상하며, 시장점유율 손실 데이터도 함께 공개될 수 있다고 경고했다.
+      <br><br>
+      <strong>결론:</strong> HPQ는 Q2 실적 발표 전 포지션 진입보다 발표 이후 결과를 보고 판단하는 것이 현명하다. 가이던스가 하향 조정되더라도 "Q4까지 관세 완전 상쇄" 로드맵이 구체화되고, 신임 CEO 임명 시점이 가시화된다면 역발상 가치 투자 기회가 될 수 있다. 배당 6.1%와 극단적 저밸류에이션은 장기 인컴 투자자에게 매력적이나, CEO 공석·실적 미스 가능성을 단기 위험으로 감수할 수 있어야 한다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. Q2 FY2026 실적은 2026년 5월 27일 발표 예정으로 본 보고서에 반영되지 않았습니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 데이터 기준일: 2026년 5월 23일. HP Inc. 회계연도는 10월 31일 종료 기준.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

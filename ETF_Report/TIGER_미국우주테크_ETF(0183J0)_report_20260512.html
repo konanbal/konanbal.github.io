@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIGER 미국우주테크 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a1e3a;
+    --accent: #1a4f8a;
+    --accent2: #2979d9;
+    --accent3: #00c9e4;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Header */
+  .report-header {
+    background: linear-gradient(135deg, #060e22 0%, #0d2a5c 45%, #0e4a8a 75%, #007bb5 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '🚀';
+    position: absolute;
+    right: 3rem;
+    top: 1rem;
+    font-size: 100px;
+    opacity: 0.06;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.15); color: #7dd3fc; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(125,211,252,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.75; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.down { color: #fca5a5; }
+  .nav-change.up { color: #86efac; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); }
+
+  /* Container */
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Holdings */
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+  .holding-tier { font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 3px; background: #e0f2fe; color: #0369a1; margin-left: 6px; }
+
+  /* Sector */
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  /* Performance */
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+  .neutral { color: var(--amber); font-weight: 600; }
+
+  /* News */
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  /* Bull / Bear */
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* SpaceX 특별 박스 */
+  .spacex-box {
+    background: linear-gradient(135deg, #0a1e3a 0%, #1a3a6a 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: white;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .spacex-box::after {
+    content: '🛸';
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 48px;
+    opacity: 0.15;
+  }
+  .spacex-title { font-size: 13px; font-weight: 700; color: #7dd3fc; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .spacex-content { font-size: 14px; line-height: 1.7; opacity: 0.9; }
+  .spacex-highlight { color: #38bdf8; font-weight: 700; }
+
+  /* Summary */
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  /* Caution badge */
+  .caution-badge { background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #92400e; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 8px; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+    .etf-name { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 0183J0 · KRX · 국내주식</div>
+      <div class="etf-name">TIGER 미국우주테크</div>
+      <div class="etf-index">기초지수: Akros U.S. Space Tech Index(PR)(원화환산) | 운용사: 미래에셋자산운용</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 12일</div>
+      <div class="nav-display">≈ 9,830원</div>
+      <div class="nav-change down">▼ 상장이후 누적 -5.64% (2026.05.08 기준)</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산(AUM): 5,708억원</span>
+    <span class="pill">📋 총보수: 0.49%</span>
+    <span class="pill">📅 설정일: 2026.04.14</span>
+    <span class="pill">🔄 분배 주기: 분기 (1·4·7·10월 말)</span>
+    <span class="pill">🌐 10개 종목 집중 투자</span>
+    <span class="pill">🚫 환헤지 없음 (환노출)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== 주의 배너 ===== -->
+  <div class="caution-badge">
+    ⚠️ <span><strong>신규 상장 ETF (2026.04.14 상장)</strong> — 운용 이력이 약 4주에 불과합니다. 장기 수익률·추적오차 데이터 부재, 상장가 대비 현재 약세 구간임을 유의하세요.</span>
+  </div>
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">순자산(AUM)</div>
+      <div class="kpi-value">5,708억원</div>
+      <div class="kpi-sub">상장 초기 308억 → 17배 급성장</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수(TER)</div>
+      <div class="kpi-value" style="color:var(--amber)">0.49%</div>
+      <div class="kpi-sub">동종 ETF 대비 높은 편</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">구성 종목 수</div>
+      <div class="kpi-value">10개</div>
+      <div class="kpi-sub">뉴스페이스 집중 포트폴리오</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">상장일 개인 순매수</div>
+      <div class="kpi-value" style="color:var(--green)">615억원</div>
+      <div class="kpi-sub">패시브 ETF 역대 최대 기록</div>
+    </div>
+  </div>
+
+  <!-- ===== 스페이스X 핵심 카탈리스트 ===== -->
+  <div class="spacex-box">
+    <div class="spacex-title">🚀 핵심 카탈리스트 — 스페이스X IPO</div>
+    <div class="spacex-content">
+      2026년 4월 SEC 비공개 상장 신청서 제출 완료 → <span class="spacex-highlight">5월 말 S-1 공개, 6월 나스닥 상장 유력</span>. 예상 시가총액 <span class="spacex-highlight">1조 7,500억 달러(약 2,600조원)</span> — 나스닥 시총 6위 규모. 상장 즉시 D+2 영업일 내 최대 <span class="spacex-highlight">25% 비중</span>으로 포트폴리오 편입 예정(지수방법론상). 스페이스X가 나스닥100 편입 시 추가 패시브 자금 유입 기대.
+    </div>
+  </div>
+
+  <!-- ===== 구성 종목 ===== -->
+  <div class="card">
+    <div class="card-title">구성 종목 (Akros 지수 기준 — Tier 구조)</div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">Rocket Lab USA (RKLB) <span class="holding-tier">Tier 1</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~23%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:92%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">Intuitive Machines (LUNR) <span class="holding-tier">Tier 2</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~17%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:68%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">AST SpaceMobile (ASTS) <span class="holding-tier">Tier 2</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~15%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:60%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">Planet Labs (PL) <span class="holding-tier">Tier 3</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~12%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:48%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">Firefly Aerospace <span class="holding-tier">Tier 3</span></div>
+      <div class="holding-right">
+        <div class="holding-weight">~10%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:40%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6~10</div>
+      <div class="holding-name">뉴스페이스 기업 5종목 (각 Tier 3~4)</div>
+      <div class="holding-right">
+        <div class="holding-weight">~23%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:23%"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      총 10개 종목 | Tier 구조: T1(25%) → T2(~17~15%) → T3(~12~10%) → T4(~3%) | <strong>스페이스X 상장 즉시 T1(25%) 편입 예정</strong>
+    </div>
+  </div>
+
+  <!-- ===== 섹터 배분 & 수익률 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">밸류체인 배분 (추정)</div>
+      <div class="sector-item">
+        <div class="sector-name">🚀 업스트림 — 우주 발사체</div>
+        <div class="sector-right">
+          <div class="sector-pct">~40%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#2196f3;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">📡 다운스트림 — 위성통신(D2D)</div>
+        <div class="sector-right">
+          <div class="sector-pct">~25%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:63%;background:#00c9e4;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🛰️ 다운스트림 — 위성데이터</div>
+        <div class="sector-right">
+          <div class="sector-pct">~20%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:50%;background:#9c27b0;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">🌙 우주 탐사·달착륙</div>
+        <div class="sector-right">
+          <div class="sector-pct">~15%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:38%;background:#ff9800;"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+        방산·전통 항공 기업 <strong>전면 배제</strong> — 순수 뉴스페이스 테마
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기간별 수익률 (상장 약 4주)</div>
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>기간</th>
+            <th>ETF 수익률</th>
+            <th>코스피</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>상장일 (4/14)</td>
+            <td class="positive">+5.50%</td>
+            <td>—</td>
+            <td style="font-size:11px;color:var(--muted)">역대 최대 순매수</td>
+          </tr>
+          <tr>
+            <td>1주 (~4/21)</td>
+            <td class="negative">하락 반전</td>
+            <td>—</td>
+            <td style="font-size:11px;color:var(--muted)">우주주 조정</td>
+          </tr>
+          <tr>
+            <td>저점 (4/30)</td>
+            <td class="negative">9,600원</td>
+            <td>—</td>
+            <td style="font-size:11px;color:var(--muted)">상장가比 -7.8%</td>
+          </tr>
+          <tr>
+            <td>상장이후 누적</td>
+            <td class="negative">-5.64%</td>
+            <td class="positive">+30%↑</td>
+            <td style="font-size:11px;color:var(--muted)">5/8 기준</td>
+          </tr>
+          <tr>
+            <td>재유입 (4/23~30)</td>
+            <td colspan="3" style="font-size:11px;color:var(--muted);">2,465억 순유입 (주식형 ETF 4위)</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:0.75rem; font-size:11px; color:var(--muted);">
+        ⚠️ 상장 이력 4주 미만 — 벤치마크 대비 장기 추적오차 데이터 없음
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 최근 뉴스 & 이슈 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.04.14</span>
+      </div>
+      <div class="news-title">상장 첫날 개인 순매수 615억 — 패시브 ETF 역대 최대 기록</div>
+      <div class="news-summary">초기 설정 물량 300억은 상장 1시간 만에 완판. 이후 12영업일 만에 순자산 5,000억 돌파 — 국내 해외주식형 ETF 최단 기간 달성. 스페이스X IPO 선점 수요가 폭발적으로 집중됨.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.04.24~30</span>
+      </div>
+      <div class="news-title">상장 5거래일 연속 하락 — 상장가 하회 (9,600원)</div>
+      <div class="news-summary">미국 우주주 전반 조정. 경영진 자사주 매도 및 기술력 불확실성 부각. 같은 기간 코스피가 30% 급등하며 상대적 부진 심화. 단기 차익실현 매물도 가세.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05.01</span>
+      </div>
+      <div class="news-title">4월 23~30일 한 주간 2,465억 순유입 — 스페이스X 기대감 재점화</div>
+      <div class="news-summary">스페이스X SEC 비공개 상장 신청서 제출 확인, 5월 말 S-1 공개 예상 소식에 투자자 재매수. 전체 우주 테마 개인 순매수의 71%가 이 ETF로 집중. 순자산 5,708억(5/8 기준).</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.05.11</span>
+      </div>
+      <div class="news-title">상장이후 수익률 -5.64% 기록 — 우주 ETF 전반 부진</div>
+      <div class="news-summary">KODEX 미국우주항공(-5.64%), TIGER 미국우주테크(-5.64%) 등 우주 ETF 한 달 수익률 마이너스. 거래대금은 412억으로 여전히 높은 관심 유지. IPO 이벤트 전 변동성 구간으로 해석.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.05월 전망</span>
+      </div>
+      <div class="news-title">스페이스X 6월 나스닥 상장 시나리오 구체화</div>
+      <div class="news-summary">5월 말 공개 S-1 제출 후 6월 일론 머스크 생일(6/28) 전후 상장 관측 우세. 목표 기업가치 1.5~1.75조 달러. 상장 시 TIGER 미국우주테크 ETF는 D+2영업일 내 스페이스X를 25% 비중으로 즉시 편입 예정.</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">🚀</span><span><strong>스페이스X IPO 직접 수혜:</strong> 상장 즉시 D+2일 내 25% 편입. 글로벌 역대 최대급 IPO의 선제 포지셔닝 가능. 패시브 자금 유입 기대.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🛰️</span><span><strong>뉴스페이스 구조적 성장:</strong> 재사용 로켓 확산으로 발사 비용 급락. 저궤도 위성 통신(D2D) 시장 본격 개화. 2034년까지 연평균 7.9% 성장 전망(Precedence Research).</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💥</span><span><strong>집중 투자 구조로 알파 극대화 가능:</strong> 10종목 집중형으로 우주 테마 내 승자독식 구조에 올라탈 경우 지수 대비 초과 수익 가능. 방산·전통 항공 배제로 순도 높음.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">📈</span><span><strong>국내 AUM 급성장:</strong> 상장 12영업일 만에 5,000억 돌파. 운용사 규모 확대 → 유동성 및 괴리율 안정화 기대. 미래에셋 브랜드 파워 뒷받침.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><strong>극단적 집중 리스크:</strong> 10종목, 상위 3종목 비중 ~55%. 로켓랩·인튜이티브 머신스 등 소형주 변동성 매우 높음. 종목 하나의 악재가 ETF 전체에 직결.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">💱</span><span><strong>환율 리스크 (환헤지 없음):</strong> 원/달러 환율 하락 시 수익률 직격. 달러 약세 구간에서 원화 환산 수익 축소. 현재 원화 강세 기조가 부담.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><strong>스페이스X IPO 지연 or 기대 이하:</strong> IPO 시점 지연, 공모가 실망 시 우주 테마 전반 급락 가능. "Sell on news" 현상으로 상장 후 차익실현 압력 경계.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">💸</span><span><strong>높은 총보수 0.49%:</strong> 동종 미국 우주 ETF 대비 상대적으로 높은 비용. 장기 보유 시 복리로 누적됨. 비슷한 테마의 경쟁 ETF 다수 출시 중.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🔻</span><span><strong>신규 상장 단기 급등 후 조정 패턴:</strong> 상장가 하회 경험. 유사 신규 우주 ETF들도 상장 후 10~12% 하락. 테마 거품 여부 점검 필요.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 배당/분배금 ===== -->
+  <div class="card">
+    <div class="card-title">배당 / 분배금 현황</div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>분배 기준일</th>
+          <th>분배금(주당)</th>
+          <th>배당수익률(환산)</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>2026.07.31 (예정)</td><td>N/A</td><td>N/A</td><td>첫 분배 예정</td></tr>
+        <tr><td colspan="4" style="font-size:12px;color:var(--muted);padding:10px 12px;">
+          📌 분기 배당(1·4·7·10월 마지막 영업일). 2026년 4월 14일 상장으로 아직 분배금 지급 이력 없음. 구성 종목(로켓랩 등) 대부분 성장주로 배당 낮음 → 배당 목적 투자에는 부적합.
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 유사 ETF 비교 ===== -->
+  <div class="card">
+    <div class="card-title">유사 우주 ETF 비교</div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>ETF명</th>
+          <th>운용사</th>
+          <th>전략</th>
+          <th>총보수</th>
+          <th>차별점</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>TIGER 미국우주테크 (0183J0)</strong></td>
+          <td>미래에셋</td>
+          <td>패시브·집중(10종목)</td>
+          <td class="negative">0.49%</td>
+          <td>스페이스X 즉시 25% 편입</td>
+        </tr>
+        <tr>
+          <td>ACE 미국우주테크액티브 (0180V0)</td>
+          <td>한국투자</td>
+          <td>액티브·분산</td>
+          <td>N/A</td>
+          <td>운용 재량 있음, 방산 배제</td>
+        </tr>
+        <tr>
+          <td>KODEX 미국우주항공 (0167Z0)</td>
+          <td>삼성자산</td>
+          <td>패시브·우주+방산</td>
+          <td>N/A</td>
+          <td>방산 포함, 분산도 높음</td>
+        </tr>
+        <tr>
+          <td>SOL 미국우주항공TOP10</td>
+          <td>신한자산</td>
+          <td>패시브·10종목</td>
+          <td>N/A</td>
+          <td>상장 후 -12% (4/21~30)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      <strong>TIGER 미국우주테크(0183J0)</strong>는 2026년 4월 14일 미래에셋자산운용이 출시한 순수 뉴스페이스 집중형 패시브 ETF다. 핵심 투자 thesis는 하나다 — 스페이스X IPO다. 지수방법론상 스페이스X가 상장하면 D+2 영업일 내 최대 25% 비중으로 즉시 편입되는 구조를 갖춰, 글로벌 역대 최대 IPO가 될 스페이스X에 선제적으로 투자하려는 수요를 흡수하며 상장 첫날 개인 순매수 615억(패시브 ETF 역대 최대), 12영업일 만에 순자산 5,000억 돌파라는 폭발적 반응을 이끌어냈다.<br><br>
+      현재 구성은 로켓랩(~23%), 인튜이티브 머신스(~17%), AST 스페이스모바일(~15%) 등 뉴스페이스 핵심 10종목에 집중 투자한다. 방산·전통 항공 기업을 배제한 것이 기존 우주 ETF와의 가장 큰 차별점이다. 재사용 로켓 확산에 따른 발사 비용 하락, 저궤도 위성 직접통신(D2D) 시장 개화, 위성데이터 수익화 등 구조적 성장 스토리도 탄탄하다.<br><br>
+      다만 상장 이후 수익률은 -5.64%로 부진하다. 상장 직후 조정, 코스피 대비 큰 폭의 언더퍼폼, 환헤지 미적용(환노출), 총보수 0.49%의 비용 부담이 단기 리스크다. 10종목 집중 구조는 양날의 검 — 우주 테마 랠리에서는 초과 성과를 낼 수 있지만, 개별 종목 악재 시 낙폭도 크다.<br><br>
+      투자 시사점: 스페이스X IPO 전후 단기 이벤트 플레이로 접근하거나, 뉴스페이스 시대의 장기 성장에 베팅하는 위성 투자처로 소액 분산 편입을 고려할 수 있다. 단, 변동성이 극단적으로 높은 고위험 테마형 ETF임을 명심하고, 포트폴리오 내 비중 관리(5~10% 이내)와 손절 기준을 사전에 설정할 것을 권장한다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. ETF 투자는 원금 손실 가능성이 있으며, 특히 집중형 테마 ETF는 변동성이 매우 높습니다. 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다. 데이터 출처: 미래에셋자산운용, 한국거래소, Investing.com, 각종 언론사 (2026.05 기준)
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

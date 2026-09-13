@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>온다스 홀딩스 (ONDS) 분석 보고서</title>
+<style>
+  :root {
+    --accent: #1a2e4a;
+    --accent2: #1e40af;
+    --army: #3d5a00;
+    --bg: #f0f4f0;
+    --card: #ffffff;
+    --text: #0f1c2e;
+    --muted: #6b7280;
+    --border: #c7d7c7;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --olive: #4d7c0f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header {
+    background: linear-gradient(135deg, #0f1c2e 0%, #1a2e4a 45%, #1e40af 100%);
+    color: white; padding: 2.5rem 2rem 2rem; position: relative; overflow: hidden;
+  }
+  .report-header::before {
+    content: '🤖';
+    position: absolute; right: 2.5rem; top: 50%;
+    transform: translateY(-50%);
+    font-size: 120px; opacity: 0.07; pointer-events: none;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: #3b82f6; color: white; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.75; max-width: 530px; line-height: 1.6; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.55; }
+  .price-display { font-size: 34px; font-weight: 700; margin-top: 4px; letter-spacing: -1px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); }
+  .rating-pill.hot { background: #16a34a; border-color: #16a34a; }
+  .rating-pill.buy-pill { background: #2563eb; color: white; border-color: #2563eb; }
+  .rating-pill.warn { background: #ef4444; border-color: #ef4444; }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--army); border-radius: 2px; }
+
+  /* 실적 서프라이즈 배너 */
+  .surprise-banner {
+    background: linear-gradient(90deg, #14532d 0%, #166534 100%);
+    color: white; padding: 12px 18px; border-radius: 12px;
+    font-size: 13px; margin-bottom: 1rem;
+    display: flex; align-items: flex-start; gap: 12px; line-height: 1.7;
+  }
+
+  /* 리스크 배너 */
+  .risk-banner {
+    background: #fef3c7; border: 1px solid #fde68a;
+    color: #78350f; padding: 10px 18px; border-radius: 10px;
+    font-size: 13px; margin-bottom: 1rem; line-height: 1.7;
+  }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* 사업부문 */
+  .segment-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .seg-box { border-radius: 10px; padding: 1rem; border: 1px solid; }
+
+  /* 인수 타임라인 */
+  .acq-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 0.75rem; }
+  .acq-box { border-radius: 10px; padding: 0.875rem 1rem; border: 1px solid; }
+  .acq-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .acq-detail { font-size: 11px; line-height: 1.6; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .tag-acq { background: #dbeafe; color: #1e40af; }
+  .tag-defense { background: #d1fae5; color: #065f46; }
+  .tag-partner { background: #ede9fe; color: #4c1d95; }
+  .tag-warn { background: #fef3c7; color: #78350f; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); color: #1a3a2e; }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); color: #3a1a1a; }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; color: var(--text); }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .target-up { color: var(--green); font-size: 11px; }
+  .target-down { color: var(--red); font-size: 11px; }
+
+  .earnings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; }
+  .earnings-box { background: #f0f4f0; border-radius: 10px; padding: 1rem 1.1rem; border: 1px solid var(--border); }
+  .earnings-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .earnings-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .earnings-beat { font-size: 11px; color: var(--green); font-weight: 600; margin-left: 6px; }
+  .earnings-miss { font-size: 11px; color: var(--red); font-weight: 600; margin-left: 6px; }
+  .earnings-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .filing-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .filing-row:last-child { border-bottom: none; }
+  .filing-type { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-right: 8px; white-space: nowrap; }
+  .ft-10q { background: #e0e7ff; color: #3730a3; }
+  .ft-8k { background: #fce7f3; color: #9d174d; }
+  .ft-8k-pos { background: #d1fae5; color: #065f46; }
+  .ft-8k-acq { background: #dbeafe; color: #1e40af; }
+  .ft-8k-jv { background: #ede9fe; color: #4c1d95; }
+  .ft-8k-partner { background: #ccfbf1; color: #115e59; }
+
+  .summary-box { background: linear-gradient(135deg, #f0f9f0 0%, #eff6ff 100%); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.9; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); line-height: 1.6; }
+
+  @media (max-width: 640px) {
+    .grid-2, .kpi-grid, .earnings-grid, .acq-grid, .segment-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+    .price-display { font-size: 26px; }
+    .company-name { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">ONDS · NASDAQ · 방산 드론·자율시스템</div>
+      <div class="company-name">온다스 홀딩스 (Ondas Holdings)</div>
+      <div class="company-desc">자율 공중·지상 로봇 인텔리전스(OAS) + 민간 무선 솔루션(Ondas Networks)으로 구성된 방산·보안 기술 기업. Iron Drone(C-UAS)·Sentrycs·American Robotics·World View(성층권 ISR)·Mistral(방산 프라임)·4M Defense·INDO Earth 등 멀티 자산 보유. Palantir·ONBERG(하이델베르크) 전략 파트너십. CEO Eric Brock.</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 5월 23일</div>
+      <div class="price-display">$9.18</div>
+      <div class="price-change down">▼ 52주 고점($15.28) 대비 -40%</div>
+      <div style="font-size:11px;opacity:0.55;margin-top:4px;">기준: NASDAQ 5/22/2026 · 52주 저점 $0.86</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시총: ~$4.6B</span>
+    <span class="rating-pill">💵 현금+투자: $1.48B</span>
+    <span class="rating-pill hot">🚀 Q1 매출 +1,065% YoY</span>
+    <span class="rating-pill">📦 백로그: $457M</span>
+    <span class="rating-pill buy-pill">⭐ Strong Buy (8/8 매수)</span>
+    <span class="rating-pill">🎯 목표가 $20.13 (+119%↑)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 실적 서프라이즈 배너 -->
+  <div class="surprise-banner">
+    <span style="font-size:20px;flex-shrink:0;">🚀</span>
+    <span><strong>Q1 2026 역대 최대 실적 — 매출 $50.1M(+1,065% YoY), 가이던스 상단 +25% 초과, EPS $0.81(예상 -$0.05)</strong><br>
+    FY2026 가이던스 최소 $390M(+670% YoY)으로 상향. 백로그 $457M(전년말 $68.3M 대비 +569%). 현금 $1.48B. 제품 부문 EBITDA 흑자 전환 — 목표보다 6개월 선행. M&A 여력 최대 $4.2B(연 $1~1.8B 매출 추가 가능 추정).</span>
+  </div>
+
+  <!-- 리스크 배너 -->
+  <div class="risk-banner">
+    ⚠️ <strong>핵심 리스크:</strong> 공격적 M&A로 운영비 급증(Q1 운영비 $67.3M, 전분기 $36M 대비 87%↑). 조정 EBITDA 손실 -$10.9M 지속. 주가 $0.86(52주 저점) → $9.18의 급등 이후 현재가가 52주 고점($15.28) 대비 -40%. FY2026 가이던스 $390M 달성을 위해 분기 평균 $85M 이상 수익 인식이 필요. 다수 M&A 통합 리스크 동시 진행.
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Q1 2026 매출</div>
+      <div class="kpi-value" style="color:var(--green);">$50.1M</div>
+      <div class="kpi-sub">YoY +1,065% · 가이던스 상단 $40M 대비 +25%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">FY2026 가이던스</div>
+      <div class="kpi-value" style="font-size:17px;">≥$390M</div>
+      <div class="kpi-sub">기존 $375M → 상향 · +670% YoY</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">프로포마 백로그</div>
+      <div class="kpi-value" style="color:var(--green);">$457M</div>
+      <div class="kpi-sub">전년말 $68.3M → +569% · 매출 가시성 강화</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">현금+단기투자</div>
+      <div class="kpi-value">$1.48B</div>
+      <div class="kpi-sub">M&A 여력 최대 $4.2B 추정</div>
+    </div>
+  </div>
+
+  <!-- ── Q1 실적 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 Q1 2026 실적 (2026.05.14 발표) — 전방위 어닝 서프라이즈</div>
+    <div class="earnings-grid">
+      <div class="earnings-box">
+        <div class="earnings-label">매출 (실제 vs 가이던스·컨센서스)</div>
+        <div class="earnings-value">$50.1M <span class="earnings-beat">▲ +25~31% 초과</span></div>
+        <div class="earnings-sub">가이던스 $38~40M · 컨센서스 $39.6M · YoY +1,065%</div>
+      </div>
+      <div class="earnings-box">
+        <div class="earnings-label">EPS (실제 vs 컨센서스)</div>
+        <div class="earnings-value">$0.81 <span class="earnings-beat">▲ 1,643% 서프라이즈</span></div>
+        <div class="earnings-sub">컨센서스 -$0.05 · GAAP 순이익 $361.2M(비현금 포함)</div>
+      </div>
+    </div>
+    <!-- 수익성 지표 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:0.75rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;text-align:center;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:#065f46;">총이익률</div>
+        <div style="font-size:20px;font-weight:700;color:#059669;">49%</div>
+        <div style="font-size:10px;color:#065f46;">전년 35% → 개선</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;text-align:center;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:#065f46;">제품부문 EBITDA</div>
+        <div style="font-size:18px;font-weight:700;color:#059669;">흑자전환</div>
+        <div style="font-size:10px;color:#065f46;">목표 6개월 선행</div>
+      </div>
+      <div style="background:#fff7ed;border-radius:8px;padding:0.75rem;text-align:center;border:1px solid #fed7aa;">
+        <div style="font-size:11px;color:#78350f;">조정 EBITDA</div>
+        <div style="font-size:20px;font-weight:700;color:#b45309;">-$10.9M</div>
+        <div style="font-size:10px;color:#78350f;">전사 수준 적자</div>
+      </div>
+      <div style="background:#fff7ed;border-radius:8px;padding:0.75rem;text-align:center;border:1px solid #fed7aa;">
+        <div style="font-size:11px;color:#78350f;">운영 손실</div>
+        <div style="font-size:20px;font-weight:700;color:#dc2626;">-$42.7M</div>
+        <div style="font-size:10px;color:#78350f;">운영비 $67.3M</div>
+      </div>
+    </div>
+    <!-- 가이던스 경로 -->
+    <div style="background:#f0f4f0;border-radius:10px;padding:0.875rem 1.1rem;border:1px solid var(--border);margin-bottom:0.75rem;font-size:12px;">
+      <div style="font-weight:700;color:var(--accent);margin-bottom:8px;">📈 수익성 달성 로드맵 (경영진 가이던스)</div>
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+        <div><span style="color:#059669;font-weight:700;">현재(Q1 2026)</span>: 제품부문 EBITDA 흑자 (6개월 선행)</div>
+        <div><span style="color:#2563eb;font-weight:700;">Q1 2027</span>: OAS 세그먼트 EBITDA 흑자 (기존 Q3 2027→선행)</div>
+        <div><span style="color:#d97706;font-weight:700;">Q1 2028</span>: 전사 EBITDA 흑자</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.8;background:#f0f4f0;border-left:3px solid var(--army);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:4px;">
+      <strong>CEO Eric Brock:</strong> "1분기에 $50.1M 이상의 매출을 창출했으며, 이는 전년 대비 10배 이상이자 가이던스 상단을 25% 이상 초과하는 수치다. 백로그가 $457M으로 급증해 2026 목표 달성에 강한 가시성을 제공한다. 전사 가이던스를 최소 $390M으로 상향하는 동시에 수익성 달성 시점을 앞당길 수 있다는 자신감을 갖게 됐다. 우리는 방산 로보틱스와 카운터-UAS 시장에서 강력한 수요 테일윈드를 경험하고 있다."
+    </div>
+  </div>
+
+  <!-- ── 주요 인수 현황 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏗️ 2026년 핵심 M&A — 방산 프라임 + ISR 플랫폼 구축</div>
+    <div class="acq-grid">
+      <div class="acq-box" style="background:#f0fdf4;border-color:#86efac;">
+        <div class="acq-name" style="color:#065f46;">World View Enterprises</div>
+        <div class="acq-detail" style="color:#14532d;">
+          완료: 2026.04.01 · 성층권 고고도 기구 ISR·원격 감지<br>
+          140회+ 비행 실적 · 탑재중량 최대 10,000kg<br>
+          고객: NASA·NOAA·국방부·공군<br>
+          Palantir SkyWeaver 플랫폼 통합 예정(Q4 2026)<br>
+          <strong>전략:</strong> 성층권↔항공↔지상 멀티도메인 ISR 완성
+        </div>
+      </div>
+      <div class="acq-box" style="background:#eff6ff;border-color:#93c5fd;">
+        <div class="acq-name" style="color:#1e40af;">Mistral Inc. ($175M)</div>
+        <div class="acq-detail" style="color:#1e3a5f;">
+          완료: 2026.04.24 · 미국 방산 프라임 컨트랙터<br>
+          美 육군·특수작전 IDIQ 계약 차량 직접 접근<br>
+          기존 포획 프로그램 $1B+ 가치<br>
+          백로그 $264M 추가(현재 $457M의 핵심)<br>
+          <strong>전략:</strong> 미국 국방부 대형 프로그램 직접 참여
+        </div>
+      </div>
+      <div class="acq-box" style="background:#fdf4ff;border-color:#c4b5fd;">
+        <div class="acq-name" style="color:#4c1d95;">ONBERG JV (하이델베르크)</div>
+        <div class="acq-detail" style="color:#4c1d95;">
+          완료: 2026.03월 · HD Advanced Technologies(하이델베르크 100%)<br>
+          독일·우크라이나·유럽 자율 드론 방어·보안 시스템<br>
+          유럽 현지 제조·엔지니어링·고객 참여 플랫폼<br>
+          핵심 인프라·국경·국가 안보 자산 보호<br>
+          <strong>전략:</strong> NATO/유럽 고객 현지화된 공급망
+        </div>
+      </div>
+    </div>
+    <div style="font-size:12px;background:#eff6ff;border-left:3px solid var(--blue);padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.7;color:#1e3a5f;">
+      💡 <strong>M&A 역량:</strong> 현금 $1.48B 기반으로 2.5~4배 인수 멀티플 적용 시 추가 $4.2B 규모 인수 가능 추정 → 연 $1B~$1.8B 추가 매출 잠재. 경영진은 방산·자율시스템 분야에서 계속 전략적 인수를 추진할 것이라고 명시.
+    </div>
+  </div>
+
+  <!-- ── 사업부문 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🏢 사업 구조 — OAS(성장 엔진) + Networks(안정적 수익)</div>
+    <div class="segment-grid">
+      <div class="seg-box" style="background:#f0f4f0;border-color:#86efac;">
+        <div style="font-size:12px;font-weight:700;color:#1a2e4a;margin-bottom:8px;">⚙️ Ondas Autonomous Systems (OAS) — 핵심 성장 부문</div>
+        <div style="font-size:12px;color:#1a2e4a;line-height:1.8;">
+          <div>• <strong>Iron Drone</strong> — 대드론(C-UAS) 요격 시스템</div>
+          <div>• <strong>Sentrycs CoRF</strong> — RF 기반 드론 탐지·차단 (수요 폭발)</div>
+          <div>• <strong>American Robotics</strong> — 자율 상업 드론 스카우트 시스템</div>
+          <div>• <strong>World View</strong> — 성층권 ISR 고고도 기구 플랫폼</div>
+          <div>• <strong>4M Defense</strong> — 지상 로봇·자율 차량</div>
+          <div>• <strong>INDO Earth</strong> — 지뢰 제거·엔지니어링 차량</div>
+          <div>• <strong>Iron Wave</strong> (신규) — 자율 시스템 오브 시스템즈</div>
+          <div>• <strong>SkyWeaver</strong> — Palantir AI와 통합 에이전틱 방산 플랫폼</div>
+        </div>
+      </div>
+      <div class="seg-box" style="background:#fff7ed;border-color:#fed7aa;">
+        <div style="font-size:12px;font-weight:700;color:#78350f;margin-bottom:8px;">📡 Ondas Networks — 철도 무선망</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.8;">
+          <div>• 철도 네트워크용 무선 시스템</div>
+          <div>• 안정적이지만 성장 제한적</div>
+          <div>• 철도망 구축 타임라인 불확실</div>
+          <div>• 매출 기여도 점차 감소 중</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#1a2e4a;line-height:1.7;background:#f0f4f0;padding:10px 14px;border-radius:8px;border:1px solid var(--border);">
+      📊 <strong>백로그 $457M 세부 구성:</strong> 항공보안 $82M · ISR $116M · 지상로봇(UGV) $30M · 치명적무인시스템(LMS) $229M | 지역: 미국·캐나다 $292M · 중동 $75M · 유럽·아시아 $90M
+    </div>
+  </div>
+
+  <!-- ── SEC 공시 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 SEC 공시 및 주요 이벤트</div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k">8-K</span><span style="font-weight:500;">Q1 2026 실적 발표 — 매출 $50.1M(+1,065%), 백로그 $457M, FY26 가이던스 ≥$390M</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.14</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-acq">8-K M&A</span><span style="font-weight:500;">Mistral Inc. $175M 합병 완료 — 프로그램 $1B+ 확보, 백로그 $264M 추가</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.24</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-acq">8-K M&A</span><span style="font-weight:500;">World View Enterprises 인수 완료 — AI 기반 멀티도메인 ISR 플랫폼 구축</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.04.01</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-jv">8-K JV</span><span style="font-weight:500;">ONBERG Autonomous Systems JV 공식 출범 — 하이델베르크와 유럽 자율 드론 방어</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.03월</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k-partner">파트너십</span><span style="font-weight:500;">Palantir·World View 3자 ISR 전략 동맹 — SkyWeaver AI 플랫폼 개발</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.12</span>
+    </div>
+    <div class="filing-row">
+      <div><span class="filing-type ft-8k">8-K 투자</span><span style="font-weight:500;">World View $10M 전략 투자·파트너십 (인수 선행)</span></div>
+      <span style="font-size:11px;color:var(--muted);">2026.03.02</span>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#1e3a5f;background:#eff6ff;border-left:3px solid var(--blue);padding:10px 14px;border-radius:0 6px 6px 0;line-height:1.7;">
+      📌 <strong>투자자 주목:</strong> Palantir SkyWeaver 플랫폼 완전 통합은 Q4 2026 예정. 백로그 $457M 중 상당 부분이 2026~2027년 매출 인식 예정. 다음 실적 발표: 2026.08.17. 4M Defense·INDO Earth $220M 계약 낙찰이 2026년 초 이루어져 LMS($229M) 백로그의 핵심.
+    </div>
+  </div>
+
+  <!-- ── 주요 뉴스 ── -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📰 최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">어닝 비트</span><span class="news-date">2026.05.14</span></div>
+      <div class="news-title">Q1 사상 최대 $50.1M — 가이던스 25% 초과·EPS $0.81(vs 예상 -$0.05) · 주가 +13~19%</div>
+      <div class="news-summary">매출이 10배 이상 성장하며 모든 가이던스를 압도했다. 총이익률 49%(전년 35%)와 제품부문 EBITDA 흑자 전환(6개월 선행 달성)이 구조적 개선을 입증했다. 백로그가 $457M으로 급증해 FY2026 가이던스 ≥$390M 달성에 강한 가시성을 확보했다. GAAP 순이익 $361.2M은 비현금 투자평가이익이 포함됐다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-partner">파트너십</span><span class="news-date">2026.03.12</span></div>
+      <div class="news-title">Palantir·World View와 3자 AI-ISR 동맹 — SkyWeaver 플랫폼으로 차세대 방어 아키텍처</div>
+      <div class="news-summary">팔란티르의 AI 인프라, World View의 성층권 Stratollite 플랫폼, Ondas의 자율 시스템이 결합해 SkyWeaver를 개발한다. 3가지 핵심 프로젝트: Palantir Warp Speed(물류), AI Flight Director(운영), SkyWeaver(엣지 처리). Q4 2026 전면 통합 예정. "다음 세대 방어·국토 안보 아키텍처의 중심"으로 포지셔닝.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-defense">방산</span><span class="news-date">2026.Q1 초</span></div>
+      <div class="news-title">4M Defense·INDO Earth $220M 계약 수주 — LMS 백로그 $229M의 핵심 구성</div>
+      <div class="news-summary">지상 기반 자율 시스템 자회사 4M Defense와 INDO Earth가 2026년 초 합산 약 $220M 규모의 대형 계약을 수주했다. 치명적 무인 시스템(LMS)과 지능형 기동 시스템 분야의 주요 낙찰로, 백로그 $457M에서 LMS 세그먼트 $229M의 핵심 구성 요소다. 미국·중동 정부 고객 대상.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-defense">C-UAS</span><span class="news-date">2026.Q1</span></div>
+      <div class="news-title">Sentrycs CoRF 수요 폭발 — C-UAS 시장 글로벌 확장 가속</div>
+      <div class="news-summary">RF 기반 드론 탐지·차단 시스템 Sentrycs CoRF가 기존 기대치를 크게 상회하는 수요를 보이며 생산량을 증대하고 있다. 우크라이나 전쟁과 글로벌 안보 위협 고조로 각국 정부의 C-UAS 투자가 폭발적으로 증가하는 가운데 Ondas의 시스템이 수혜를 받고 있다. Iron Drone 요격 시스템도 동반 강세.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-warn">리스크</span><span class="news-date">2026.Q1</span></div>
+      <div class="news-title">운영비 $67.3M 급증(+87% QoQ) — M&A 통합·인력 확장 비용 압박</div>
+      <div class="news-summary">전분기 $36M 대비 운영비가 87% 급증했다. World View·Mistral 통합 비용, 제조·공급망·현장서비스 인프라 구축, 글로벌 영업망 확장이 복합 원인이다. 조정 EBITDA는 -$10.9M으로 여전히 전사 적자 상태이며, OAS 세그먼트의 단독 흑자 전환 목표(Q1 2027)까지 운영비 압박이 지속될 전망이다.</div>
+    </div>
+  </div>
+
+  <!-- ── 투자 포인트 ── -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 상승 기대 요인 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>FY2026 $390M(+670%) + 백로그 $457M — 매출 가시성 압도적</strong> — 백로그 $457M은 가이던스 $390M의 117%에 달해 이미 연간 매출을 초과하는 수주잔고. 4M Defense·INDO Earth $220M, Mistral $264M 등 구체적 계약으로 뒷받침. Q2 컨센서스 $66.5M으로 성장 모멘텀 지속 확인 중.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>Palantir AI + 멀티도메인 ISR — "방산 AI 플랫폼 기업"으로 재포지셔닝</strong> — 단순 드론 제조사에서 Palantir AI + World View 성층권 + 지상 자율시스템이 통합된 "AI 방어 아키텍처" 공급자로 진화. SkyWeaver 플랫폼이 Q4 2026 완전 통합되면 서비스 단가와 반복수익이 급상승 가능.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>C-UAS·방산 로봇 메가트렌드 — Sentrycs·Iron Drone 직접 수혜</strong> — 우크라이나 전쟁이 드론 위협을 현실화했고 각국 정부의 C-UAS 예산이 폭발적으로 증가하고 있다. Sentrycs CoRF는 기대치를 크게 상회하는 수요를 기록 중. 이 트렌드는 2026~2030년 지속될 구조적 성장 동력.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>$1.48B 현금 → $4.2B M&A 여력 — 연 $1~1.8B 추가 매출 잠재</strong> — 현금 $1.48B에 2.5~4× 인수 멀티플 적용 시 $4.2B 규모 추가 인수 가능. 성공적 통합이 반복된다면 FY2027~2028 매출이 $1B+로 급성장할 경로 존재. 경쟁사 인수를 통한 시장 지배력 강화 전략.</span>
+        </div>
+        <div class="factor-item bull">
+          <span class="factor-icon">✓</span>
+          <span><strong>수익성 경로 가속 — 제품부문 6개월 조기 EBITDA 흑자, Q1 2028 전사 흑자</strong> — 각 사업 단위가 순차적으로 흑자화되는 로드맵이 예상보다 빠르게 실행되고 있다. 총이익률 49%→50%+ 목표, 장기 60% 목표도 설정. 매출이 계속 증가하면 운영레버리지가 급격히 개선될 수 있다.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📉 주의해야 할 리스크 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>FY2026 $390M 달성 = 남은 3분기 분기당 ~$113M 필요</strong> — Q1 $50.1M 이후 나머지 $339.9M을 3분기에 걸쳐 인식해야 한다. Q2 가이던스 $66.5M은 합리적이지만 Q3·Q4는 분기당 $135M+ 급증이 필요. 백로그 구성의 실제 매출 인식 타이밍이 예상을 벗어날 수 있다.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>다수 M&A 동시 통합 — 실행 위험 최대 수준</strong> — World View(4월)·Mistral(4월)·ONBERG(3월)가 동시 진행 중이며 각각 다른 기술·문화·계약 체계를 갖는다. 통합 지연·비용 초과·시너지 미실현 시 가이던스가 크게 하회할 수 있다. 운영비 급증($67.3M)이 이를 이미 반영.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>P/S ~12배(forward) — 이미 많은 성공이 가격에 반영</strong> — 시총 $4.6B ÷ FY2026 가이던스 $390M = P/S 11.8배. 방산 테크 회사로서 합리적이지만, 가이던스 달성 실패 시 멀티플이 급격히 압축될 수 있다. 52주 저점 $0.86에서 현재 $9.18로 이미 10배 이상 상승.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>Ondas Networks(철도 무선) — 성장 둔화, 사업 타임라인 불확실</strong> — 원래 Ondas의 주력 사업이었던 철도 무선망이 OAS의 폭발적 성장에 가려져 있다. 철도망 구축 타임라인이 불확실하고 기여도가 감소 추세. 전체 사업에서 '잊혀진 세그먼트'가 되고 있어 디포커스 우려.</span>
+        </div>
+        <div class="factor-item bear">
+          <span class="factor-icon">!</span>
+          <span><strong>지속적 주식 희석 + 경쟁 심화</strong> — M&A를 주식 발행으로 조달하는 구조로 기존 주주 희석 지속. Red Cat(RCAT)·Kratos·Draganfly 등 드론 방산 경쟁사들의 시장 참여 증가. 특히 RCAT가 유사 C-UAS·방산 드론 세그먼트에서 직접 경쟁.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 애널리스트 의견 ── -->
+  <div class="card" style="margin-top:1rem;margin-bottom:1rem;">
+    <div class="card-title">🏦 애널리스트 의견 (2026년 5월 기준)</div>
+    <div style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <div style="background:#f0fdf4;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">컨센서스 (8명)</div>
+        <div style="font-size:18px;font-weight:700;color:#065f46;">Strong Buy</div>
+        <div style="font-size:11px;color:var(--muted);">8/8 전원 매수 · 0 매도</div>
+      </div>
+      <div style="background:#f0f4f0;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">평균 목표주가</div>
+        <div style="font-size:18px;font-weight:700;">$20.13</div>
+        <div style="font-size:11px;color:var(--green);">현재가 대비 +119%</div>
+      </div>
+      <div style="background:#f0f4f0;border-radius:10px;padding:0.875rem 1.25rem;flex:1;min-width:140px;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">목표가 범위</div>
+        <div style="font-size:16px;font-weight:700;">$16 ~ $25</div>
+        <div style="font-size:11px;color:var(--muted);">중앙값 ~$20</div>
+      </div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Investing.com 컨센서스 (8명)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">Strong Buy</span><span class="target-price">$20.13</span><span class="target-up">+119%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">강세 목표가 (상단)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">강세</span><span class="target-price">$25</span><span class="target-up">+172%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">약세 목표가 (하단)</span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$16</span><span class="target-up">+74%</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Q2 2026 컨센서스</span>
+      <div class="analyst-right"><span class="opinion-badge buy">—</span><span class="target-price">$66.53M 매출</span><span style="font-size:11px;color:var(--muted);">EPS -$0.09 예상</span></div>
+    </div>
+    <div style="margin-top:12px;padding:10px 14px;background:#f0f4f0;border-radius:8px;font-size:12px;color:#1a2e4a;line-height:1.7;border:1px solid var(--border);">
+      📊 <strong>밸류에이션 맥락:</strong> 8명 전원 매수, 평균 목표 $20.13은 현재가 대비 +119%의 업사이드. P/S(TTM) 대신 FY2026 forward P/S ~11.8배 기준. 방산 AI·자율시스템 기업으로 재평가될 경우 더 높은 멀티플 정당화 가능. 다음 실적(8/17)이 가이던스 달성 경로를 재확인하는 핵심 검증 시점.
+    </div>
+  </div>
+
+  <!-- ── 종합 요약 ── -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      온다스 홀딩스(ONDS)는 2026년 들어 방산 드론·자율시스템·AI-ISR 분야에서 가장 공격적인 성장을 실현하고 있는 소형주다. Q1 2026에서 매출 $50.1M(+1,065% YoY)으로 가이던스를 25% 상회했고, 제품부문 EBITDA 흑자 전환을 6개월 앞당겼다. WorldView(성층권 ISR)와 Mistral(방산 프라임) 인수로 백로그가 $457M으로 폭증했으며, Palantir와의 SkyWeaver AI 플랫폼은 단순 드론 제조사에서 "AI 방어 아키텍처 공급자"로의 전환을 상징한다. $1.48B 현금과 $4.2B 추가 M&A 여력은 성장 가속의 발판이다.
+      <br><br>
+      그러나 FY2026 $390M 목표 달성을 위해서는 남은 3분기 평균 $113M 이상이 필요해 실행 압박이 크다. 동시 진행 중인 다수 M&A 통합, Q1 운영비 $67.3M 급증, 조정 EBITDA 전사 적자(-$10.9M)는 단기 수익성 위험을 높인다. 주가도 52주 저점 $0.86에서 $9.18으로 이미 10배 이상 상승했다.
+      <br><br>
+      <strong>결론:</strong> ONDS는 방산 AI·자율시스템 테마에서 실질적 매출 성장을 보여주는 소형주다. 8명 전원 매수, 평균 목표 $20.13(+119%)은 현재가 대비 상당한 업사이드를 제시한다. 그러나 $390M 가이던스 달성 여부와 M&A 통합 리스크가 핵심 변수다. 8월 17일 Q2 실적 발표에서 Q2 가이던스 $66.5M 달성과 백로그 전환 속도가 확인되면 주가 재평가가 본격화될 수 있다. 포트폴리오 내 2~5% 비중의 고성장 방산 소형주 포지션으로 적합하다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성된 개인 분석 자료이며, 투자 권유가 아닙니다. GAAP 순이익/손실은 비현금 투자 평가 변동의 영향을 크게 받습니다. 소형주 투자는 일반 대형주보다 변동성·유동성 리스크가 높습니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 데이터 기준일: 2026년 5월 23일.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

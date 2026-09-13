@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수중의 돈으로만 움직여라 — 고레카와 긴조의 절제 철학</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f9f9f7;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .blog-wrap {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #1a1a1a;
+      max-width: 680px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 3rem 3.5rem 4rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    }
+
+    .category-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #1a56a0;
+      background: #e8f0fb;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 1.2rem;
+    }
+
+    .blog-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 0 0 0.5rem;
+      color: #1a1a1a;
+    }
+
+    .blog-subtitle {
+      font-size: 15px;
+      color: #666666;
+      line-height: 1.7;
+      margin: 0 0 1.5rem;
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: #666666;
+      padding-bottom: 1.5rem;
+      border-bottom: 0.5px solid #e0e0e0;
+      margin-bottom: 2rem;
+    }
+
+    .meta-dot { opacity: 0.4; }
+
+    .hero-quote {
+      background: #f6f6f4;
+      border-left: 3px solid #4a8fd4;
+      border-radius: 0 8px 8px 0;
+      padding: 1.4rem 1.6rem;
+      margin: 0 0 2.2rem;
+    }
+
+    .hero-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.7;
+      margin: 0 0 0.4rem;
+      color: #1a1a1a;
+    }
+
+    .hero-quote .hero-attr {
+      font-size: 13px;
+      color: #666666;
+      font-weight: 400;
+    }
+
+    .body-text {
+      font-size: 15.5px;
+      line-height: 1.9;
+      color: #1a1a1a;
+      margin: 0 0 1.4rem;
+    }
+
+    .section-heading {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 19px;
+      font-weight: 700;
+      margin: 2.5rem 0 0.9rem;
+      color: #1a1a1a;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin: 1.4rem 0 2rem;
+    }
+
+    .info-card {
+      background: #ffffff;
+      border: 0.5px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+    }
+
+    .info-card .card-icon {
+      font-size: 20px;
+      color: #1a56a0;
+      margin-bottom: 8px;
+    }
+
+    .info-card .card-label {
+      font-size: 12px;
+      color: #666666;
+      margin-bottom: 4px;
+    }
+
+    .info-card .card-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      line-height: 1.5;
+    }
+
+    .highlight-box {
+      background: #f6f6f4;
+      border-radius: 12px;
+      padding: 1.4rem 1.6rem;
+      margin: 1.4rem 0 2rem;
+    }
+
+    .highlight-box p {
+      font-size: 15px;
+      line-height: 1.85;
+      color: #1a1a1a;
+      margin: 0;
+    }
+
+    .principle-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 2rem;
+    }
+
+    .principle-list li {
+      display: flex;
+      gap: 12px;
+      padding: 0.9rem 0;
+      border-bottom: 0.5px solid #e0e0e0;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #1a1a1a;
+    }
+
+    .principle-list li:last-child { border-bottom: none; }
+
+    .principle-num {
+      font-size: 12px;
+      font-weight: 500;
+      color: #1a56a0;
+      background: #e8f0fb;
+      min-width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .closing-quote {
+      border-top: 0.5px solid #e0e0e0;
+      padding-top: 1.8rem;
+      margin-top: 2.5rem;
+      text-align: center;
+    }
+
+    .closing-quote p {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 16px;
+      color: #666666;
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 1.8rem;
+    }
+
+    .tag {
+      font-size: 12px;
+      color: #666666;
+      border: 0.5px solid #cccccc;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .blog-wrap { padding: 2rem 1.5rem 2.5rem; border-radius: 12px; }
+      .blog-title { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+<article class="blog-wrap">
+  <span class="category-tag">투자 철학</span>
+  <h1 class="blog-title">수중의 돈으로만 움직여라<br>— 고레카와 긴조의 절제 철학</h1>
+  <p class="blog-subtitle">과욕은 시장에서 가장 빠르게 자본을 갉아먹는다. 일본 최고의 투자 현인이 평생을 통해 얻은 한 문장.</p>
+  <div class="meta">
+    <span><i class="ti ti-calendar" style="font-size:15px;vertical-align:-2px;margin-right:4px"></i>2026년 5월 8일</span>
+    <span class="meta-dot">·</span>
+    <span><i class="ti ti-clock" style="font-size:15px;vertical-align:-2px;margin-right:4px"></i>약 5분 읽기</span>
+    <span class="meta-dot">·</span>
+    <span>투자 철학 · 리스크 관리</span>
+  </div>
+
+  <div class="hero-quote">
+    <p>"과도한 욕심은 부리지 말고,<br>늘 수중의 자금만으로 행동하라."</p>
+    <span class="hero-attr">— 고레카와 긴조 (是川銀蔵), 일본의 전설적 투자가</span>
+  </div>
+
+  <p class="body-text">
+    고레카와 긴조는 1897년 태어나 95세까지 주식시장에서 활약하며 세 번의 파산을 딛고 수백억 엔의 자산을 일군 인물이다. 그가 남긴 투자 원칙 중 가장 핵심적인 것이 바로 이 한 문장이다. 단순해 보이지만, 이 문장 안에는 수십 년의 손실과 회복이 응축되어 있다.
+  </p>
+
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="card-icon"><i class="ti ti-user"></i></div>
+      <div class="card-label">연도</div>
+      <div class="card-value">1897 — 1992 (향년 95세)</div>
+    </div>
+    <div class="info-card">
+      <div class="card-icon"><i class="ti ti-chart-line"></i></div>
+      <div class="card-label">별칭</div>
+      <div class="card-value">일본 주식의 神, 마지막 상승파</div>
+    </div>
+    <div class="info-card">
+      <div class="card-icon"><i class="ti ti-refresh"></i></div>
+      <div class="card-label">파산 횟수</div>
+      <div class="card-value">세 번, 그리고 세 번 모두 재기</div>
+    </div>
+  </div>
+
+  <h2 class="section-heading">왜 '수중의 자금'이 핵심인가</h2>
+  <p class="body-text">
+    많은 투자자가 레버리지를 통해 '더 크게' 벌고자 한다. 빌린 돈으로 주식을 사고, 신용으로 포지션을 키우고, 미래 수익을 담보로 현재를 당긴다. 이 전략이 맞을 때는 수익이 배가 되지만, 틀릴 때는 원금 이상을 잃는다.
+  </p>
+  <p class="body-text">
+    고레카와 긴조가 말하는 '수중의 자금'이란 단순히 현금을 의미하지 않는다. 그것은 <strong style="font-weight:500">잃어도 생활이 무너지지 않는 돈</strong>이다. 투자에서 감정을 분리하려면 먼저 돈과 생존을 분리해야 한다. 생존 자금이 투자에 들어가는 순간, 시장의 작은 흔들림도 공포가 되고 공포는 최악의 타이밍에 매도를 부른다.
+  </p>
+
+  <div class="highlight-box">
+    <p>레버리지는 수익률을 증폭시키는 것이 아니라, 실수의 결과를 증폭시키는 도구다. 옳을 때 더 벌게 해주지만, 틀릴 때 복구 불가능한 손실을 만든다. 수중의 자금만으로 움직이는 투자자는 틀려도 살아남는다.</p>
+  </div>
+
+  <h2 class="section-heading">세 번의 파산이 가르쳐준 것</h2>
+  <p class="body-text">
+    고레카와 긴조의 생애는 역설적이게도 이 원칙을 어긴 결과로 시작된다. 그는 젊은 시절 과도한 포지션으로 세 차례나 전 재산을 잃었다. 그러나 그는 그 경험을 통해 재기의 법칙을 몸으로 익혔다.
+  </p>
+  <p class="body-text">
+    세 번의 파산은 그에게 '손실이 곧 수업료'임을 알려줬고, 80대의 나이에 일본 역대 최고의 수익을 올린 노인이 될 수 있었던 것은 바로 그 오랜 절제의 훈련 덕분이었다. 1990년 버블 붕괴를 앞두고 그는 대부분의 투자자가 흥분에 빠져있을 때 조용히 차익을 실현했다.
+  </p>
+
+  <h2 class="section-heading">절제의 3원칙</h2>
+  <ul class="principle-list">
+    <li>
+      <span class="principle-num">1</span>
+      <div><strong style="font-weight:500">투자 원금은 잃어도 생활에 지장이 없는 금액으로 한정하라.</strong> 전 재산을 시장에 넣는 순간, 당신은 투자자가 아니라 도박사가 된다.</div>
+    </li>
+    <li>
+      <span class="principle-num">2</span>
+      <div><strong style="font-weight:500">신용 거래와 레버리지는 경험이 쌓이기 전까지 멀리하라.</strong> 이익이 나도 구조를 이해하지 못한 채 쓰는 레버리지는 언젠가 반드시 배신한다.</div>
+    </li>
+    <li>
+      <span class="principle-num">3</span>
+      <div><strong style="font-weight:500">욕심이 올라오는 순간, 포지션을 절반으로 줄이는 것을 고려하라.</strong> 탐욕이 최고조에 달할 때가 시장이 꺾이기 직전이다.</div>
+    </li>
+  </ul>
+
+  <h2 class="section-heading">오늘의 투자자에게 던지는 질문</h2>
+  <p class="body-text">
+    2020년대의 투자 환경은 그 어느 때보다 레버리지를 쉽게 쓸 수 있게 만들었다. 해외 주식 신용, 암호화폐 선물, CFD, 고위험 ETF — 소매 투자자도 클릭 몇 번으로 원금의 수십 배를 굴릴 수 있다. 수익 사례는 SNS에 넘쳐나고, 손실 사례는 조용히 사라진다.
+  </p>
+  <p class="body-text">
+    고레카와 긴조의 원칙은 새로운 것이 없다. 다만 지키는 사람이 드물다. 시장에 오래 살아남는 것, 그것이 최고의 전략이다. 수익을 극대화하는 것보다 파멸을 피하는 것이 먼저다.
+  </p>
+
+  <div class="closing-quote">
+    <p>투자에서 가장 중요한 단어는 '수익률'이 아니라<br>'생존'이다. 살아남는 자만이 복리를 누린다.</p>
+  </div>
+
+  <div class="tag-row">
+    <span class="tag"># 고레카와 긴조</span>
+    <span class="tag"># 투자 철학</span>
+    <span class="tag"># 리스크 관리</span>
+    <span class="tag"># 레버리지</span>
+    <span class="tag"># 절제</span>
+    <span class="tag"># 주식 명언</span>
+  </div>
+</article>
+</body>
+</html>
