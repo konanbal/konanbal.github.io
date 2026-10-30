@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LG에너지솔루션(373220) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">373220 · KOSPI</div>
+      <div class="company-name">LG에너지솔루션</div>
+      <div class="company-desc">전기차(EV)·에너지저장장치(ESS)·소형 배터리를 만드는 글로벌 2차전지 제조사 (LG화학 물적분할, 2020.12 설립)</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 10월 29일</div>
+      <div class="price-display">373,500원</div>
+      <div class="price-change down">▼ 9,000원 (-2.35%) (전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.10.28 종가 · 출처: 알파스퀘어(KRX 시세)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 87.4조원 (종가×2.34억주)</span>
+    <span class="rating-pill">🏢 섹터: 2차전지 · 전기장비</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 매수 우세 (Investing.com 30명 중 매수 25)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (3Q26 잠정)</div>
+      <div class="kpi-value">9조 6,434억원</div>
+      <div class="kpi-sub">YoY +59.0% · QoQ +27.6% · 분기 사상 최대</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">7.8%</div>
+      <div class="kpi-sub">전분기(1.5%) 대비 +6.3%p · AMPC 제외 3.7%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (10월 발표 6개사 평균)</div>
+      <div class="kpi-value">494,500원</div>
+      <div class="kpi-sub">현재가 대비 +32.4% (개별 39.7만~55만원)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">290,500~527,000원</div>
+      <div class="kpi-sub">현재가 위치: 35%</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: 알파스퀘어(시세·52주 범위·PER/PBR), 머니투데이·더밸류뉴스·스트레이트뉴스(잠정실적), 스톡허브·이데일리·파이낸셜뉴스·이투데이(목표주가) (기준일 2026.10.28). 목표주가 평균은 본 보고서 하단 6개사의 단순평균이며, Investing.com 30명 집계 평균은 507,333원(2026.07.16 기준)입니다. 시가총액은 종가×2.34억주로 산출했고 알파스퀘어 표기(89.5조원)와 다릅니다. PER은 순손실로 의미 없음(알파스퀘어 -80.4배), PBR 4.27배.</div>
+
+  <!-- ②-1 주가 추이 차트 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📉 주가 추이 (최근 구간 + 52주 최고/최저 기준선)</div>
+    <div style="padding:4px 0;">
+      <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dc2626" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="10" y1="27.3" x2="870" y2="27.3" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="23.3" font-size="9" fill="#6b7280" text-anchor="end">52주 최고 527,000원</text><line x1="10" y1="160.7" x2="870" y2="160.7" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="171.7" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 290,500원</text>
+  <path d="M10.0,174 L10.0,87.7 L96.0,102.9 L182.0,97.0 L268.0,82.9 L354.0,92.4 L440.0,91.9 L526.0,103.7 L612.0,109.4 L698.0,112.2 L784.0,107.1 L870.0,113.9 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,87.7 96.0,102.9 182.0,97.0 268.0,82.9 354.0,92.4 440.0,91.9 526.0,103.7 612.0,109.4 698.0,112.2 784.0,107.1 870.0,113.9" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="113.9" r="3.5" fill="#dc2626"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-10-14</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-10-28</text>
+</svg>
+
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;">
+      <span>2026.10.14~10.28 (11거래일) 수익률: -11.1%</span>
+      <span>해당 구간 내 최고 428,500원(10.19) · 최저 373,500원(10.28)</span>
+    </div>
+    <div class="source-note">※ 실선 출처: 알파스퀘어 일별 종가 · 점선(52주 최고/최저)은 위 KPI와 동일 출처이며 기록일은 확인하지 못했습니다 · 10/27 종가는 알파스퀘어 일별표 385,500원이나 당일 등락 계산·언론(WOWTV) 기준은 382,500원으로 출처 간 차이가 있습니다 · 기준일 2026.10.28</div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">9조 6,434억원 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 약 +9% 상회</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 약 8.8조원 · YoY +59.0%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 예상) — EPS는 잠정공시에 없어 N/A</div>
+        <div style="font-size:18px;font-weight:700;">7,560억원 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +135%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 3,217억원 (출처별 1,883~3,275억원) · YoY +25.7%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      2026.10.08 잠정실적 공시(최신 실적). 영업이익에는 미국 생산세액공제(AMPC) 4,169억원과 EV 고객사 보상금(증권가 추정 약 3,200억~4,000억원)이 포함됐습니다. AMPC 제외 매출은 9조 2,265억원, 영업이익은 3,391억원(3.7%)으로 2분기 적자에서 흑자로 돌아섰습니다. 1~9월 누적 영업이익은 6,616억원으로 전년 대비 -54.9%입니다. 증권가는 4분기 영업이익을 5,000억~6,000억원대로 보고 있어 3분기보다 낮을 전망이며, 회사의 올해 ESS 신규 수주 목표는 약 90GWh입니다(상반기까지 확정분은 약 30GWh로 추정). 10/28 확정실적·컨퍼런스콜 상세는 이번 검색에서 확인하지 못했습니다.
+    </div>
+    <div class="source-note">※ 출처: 머니투데이(2026.10.08, 컨센서스 3,217억원), iM증권 리포트(이투데이 2026.10.12, 매출 컨센서스·보상금 추정), 스트레이트뉴스(2026.10.12), 핀포인트뉴스(삼성증권), 더밸류뉴스(누적 실적)</div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART / SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">지분 처분</span>
+        <span style="font-size:13px;font-weight:500;">LG화학, LG엔솔 보통주 약 654만주(약 2.5조원) PRS 방식 처분 결정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.10.28 · LG화학 공시(언론 보도)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">잠정실적</span>
+        <span style="font-size:13px;font-weight:500;">연결재무제표기준 영업(잠정)실적(공정공시) — 3분기 매출 9조6,434억·영업이익 7,560억원</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.10.08 · DART</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">공급계약</span>
+        <span style="font-size:13px;font-weight:500;">한화큐셀 미국법인과 ESS 배터리 1조2,813억원 공급계약(매출 대비 3.8%) — 계약기간 표기는 원문 확인 필요</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.10.01 · DART(노잉애셋 요약)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">잠정실적</span>
+        <span style="font-size:13px;font-weight:500;">2분기 영업(잠정)실적 — 영업이익 1,133억원(컨센서스 약 2,107억원 하회)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.07 · DART(스톡허브 속보)</span>
+    </div>
+    <div class="source-note">※ DART 원문 직접 조회는 하지 못했고, 위 항목은 언론·공시 요약 사이트 기준입니다. 자기주식 취득·유상증자 등 공시는 확인되지 않았습니다.</div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.08</span><span class="news-source">· 머니투데이</span></div>
+      <div class="news-title">LG엔솔, 예상치 2배 넘는 3분기 '깜짝 실적'…매출 9.6조 분기 최대</div>
+      <div class="news-summary">북미 ESS 출하와 유럽 EV 물량 회복으로 영업이익 7,560억원을 기록해 컨센서스(3,217억원)를 두 배 넘게 웃돌았습니다. 발표 직전까지 증권가가 예상하지 못한 결과여서 이차전지 업종 전체가 동반 상승했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.10.12~14</span><span class="news-source">· 스트레이트뉴스 · 인더뉴스</span></div>
+      <div class="news-title">보상금 빼면? 증권가 "일회성 제외해도 호실적"이나 4분기는 감소 전망</div>
+      <div class="news-summary">보상금 약 3,200억~4,000억원이 일회성으로 반영돼 4분기 영업이익은 5,000억~6,000억원대로 낮아질 전망입니다. 이익의 지속 가능성은 ESS 수익성과 신규 수주가 좌우한다는 평가입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.12~15</span><span class="news-source">· 파이낸셜뉴스 · 이데일리</span></div>
+      <div class="news-title">메리츠·유진·삼성 등 목표주가 상향…"ESS 가동률 상승, 4분기도 AMPC 제외 흑자"</div>
+      <div class="news-summary">메리츠증권 44만→51만원, 유진투자증권 47만→53만원 등 실적 추정 상향이 이어졌습니다. 3분기 가동률이 약 65%까지 올라 고정비 부담이 줄었다는 분석이 근거입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.10.28</span><span class="news-source">· 서울경제 · 매일경제 · WOWTV</span></div>
+      <div class="news-title">LG화학, LG엔솔 지분 2.5조원어치 PRS로 처분…지분율 79%→76.6%</div>
+      <div class="news-summary">처분가는 전일 종가 기준 주당 382,500원이며 매각 대금은 11월 27일 수취합니다. 약 4,000억원은 주주환원에 쓰이지만, 매수 측 물량이 시장에 나올 수 있다는 오버행 우려가 따릅니다. 이날 주가는 2.35% 하락했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.01~15</span><span class="news-source">· 노잉애셋 · 중앙이코노미뉴스 · 이데일리</span></div>
+      <div class="news-title">한화큐셀 1.28조 ESS 계약, 제3차 ESS 중앙계약시장(1,180MW)이 연말 모멘텀</div>
+      <div class="news-summary">제3차 ESS 중앙계약시장은 육지 1,100MW·제주 80MW 규모로 2차(565MW)의 두 배 이상입니다. 메리츠증권은 국산화(핵심 소재 포함)를 선언한 LG엔솔에 수주 확정 시 긍정적이라고 봤습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.10.05</span><span class="news-source">· 마이데일리바이트</span></div>
+      <div class="news-title">1~8월 글로벌 EV 배터리 시장 중국 점유율 73.3%…K배터리 북미 공급량 전년 대비 40% 감소</div>
+      <div class="news-summary">북미 EV 보조금 종료와 중국 업체 확대가 겹쳐 EV 부문 부담이 이어지고 있습니다. LG엔솔이 ESS로 무게중심을 옮기는 이유이기도 합니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>ESS 고성장 — 3분기 ESS 출하는 전분기 대비 50~60% 늘었고, 올해 ESS 매출이 EV를 처음 넘어설 것이라는 전망이 나옵니다(iM증권은 2027년 ESS 매출 17.7조원 추정).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>수익 구조 개선 — AMPC 제외 영업이익이 3,391억원 흑자로 돌아섰고, 보상금 약 3,000억원을 추가로 빼도 흑자라는 분석(유진투자증권)이 있습니다. 가동률도 60%대로 올랐습니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>수주 모멘텀 — 연간 ESS 수주 목표 90GWh 대비 확정분이 약 30GWh라 4분기 대형 수주 기대가 큽니다. 제3차 ESS 중앙계약시장과 11월 3일 미국 중간선거 전후 단기 매수 전략(메리츠)도 거론됩니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>이익의 질 — 3분기에는 일회성 보상금이 섞여 있고 1~9월 누적 영업이익은 전년 대비 -54.9%입니다. 4분기 영업이익은 3분기보다 낮을 전망이며, 순이익은 올해 EPS 컨센서스가 마이너스(-1,816원)라 PER 평가가 어렵습니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>수급·오버행 — LG화학의 2.5조원 PRS 처분(11월 27일 대금 수취)이 진행 중이고, 10/28 외국인은 94,411주 순매도했으며 최근 공매도 거래 비중은 20%대(10/27 22.3%)입니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>EV 부진·중국 경쟁 — 북미 EV 보조금 종료로 EV 물량이 약하고 중국 점유율이 확대되는 중입니다. ESS도 파우치형이라 각형 대비 단가 부담이 있고 ESS 팩 병목이 반복돼 왔습니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 (3분기 잠정실적 이후)</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">iM증권 <span style="color:var(--muted);font-weight:400;">(2026.10.12)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">550,000원 (유지)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유진투자증권 <span style="color:var(--muted);font-weight:400;">(2026.10.12)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">530,000원 (47만→53만)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">메리츠증권 <span style="color:var(--muted);font-weight:400;">(2026.10.15)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">510,000원 (44만→51만)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">삼성증권 <span style="color:var(--muted);font-weight:400;">(2026.10.15)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">500,000원 (46만→50만)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">하나증권 <span style="color:var(--muted);font-weight:400;">(2026.10.12)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold" style="background:#f3f4f6;color:#4b5563;">의견 미확인</span><span class="target-price">480,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">LS증권 <span style="color:var(--muted);font-weight:400;">(2026.10.12 목표가 유지)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">397,000원</span></div>
+    </div>
+    <div class="source-note">※ 출처: 이투데이·스트레이트뉴스(iM증권·LS증권), 파이낸셜뉴스·비즈니스포스트(유진), 이데일리·파이낸셜뉴스(메리츠), 핀포인트뉴스·스톡허브(삼성·하나), alphadistill(LS증권 중립 의견). 하나증권 투자의견은 이번에 확인하지 못했습니다. 이 6곳은 전체 증권사의 일부이며 Investing.com 집계(30명)는 매수 25·보유 3·매도 2, 목표주가 최고 62만원·최저 30만원입니다.</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">LG에너지솔루션은 북미 EV 보조금 종료와 중국 업체의 점유율 확대로 EV 부문이 약해진 가운데, 북미 공장을 ESS용으로 빠르게 돌려 성장축을 옮기고 있습니다. 2026년 3분기 잠정실적은 매출 9조6,434억원(분기 최대), 영업이익 7,560억원으로 컨센서스(3,217억원)의 두 배를 넘었습니다. 다만 이 중 AMPC가 4,169억원이고 일회성 보상금이 약 3,200억~4,000억원이라, 보조금을 제외한 3,391억원(3.7%)을 실질 체력으로 보는 편이 안전합니다. 1~9월 누적 영업이익은 여전히 전년 대비 -54.9%이고 순이익은 적자 구간이라 밸류에이션 부담이 남아 있습니다. 주가는 실적 발표 후 40만원대(10월 19일 종가 428,500원)까지 올랐다가 LG화학의 2.5조원 PRS 처분이 알려진 10월 28일 37만3,500원으로 내려왔고, 최근 11거래일 수익률은 -11.1%입니다. 앞으로의 핵심 변수는 ① 4분기 대규모 ESS 신규 수주(올해 목표 90GWh 대비 확정 약 30GWh), ② 제3차 ESS 중앙계약시장 결과, ③ 11월 3일 미국 중간선거 이후 정책 환경, ④ PRS 물량의 수급 영향입니다. 이 종목은 일회성 이익이 아닌 ESS 수주 확대를 보고 중기(1~2년)로 접근할 수 있고 단기 변동성(최근 11거래일 중 하루 변동폭이 5%를 넘은 날도 있었습니다)을 감내할 수 있는 투자자에게 적합하며, 단기 실적 모멘텀만 노리는 투자자에게는 변동성과 수급 부담이 큽니다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+
+</body>
+</html>

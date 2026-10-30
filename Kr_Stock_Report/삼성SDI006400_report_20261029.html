@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>삼성SDI 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">006400 · KOSPI</div>
+      <div class="company-name">삼성SDI</div>
+      <div class="company-desc">전기차·ESS·소형 배터리와 반도체·디스플레이 전자재료를 만드는 삼성그룹 계열 배터리 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 10월 29일</div>
+      <div class="price-display">548,000원</div>
+      <div class="price-change up">▲ +2.62% (전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.10.29 09:22 장중가 (종가 아님) · 출처: 한국경제</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 44조원</span>
+    <span class="rating-pill">🏢 섹터: 2차전지(배터리)·전자재료</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 매수 10 / 중립 0 / 매도 0</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (2026.3Q)</div>
+      <div class="kpi-value">4조 6,856억원</div>
+      <div class="kpi-sub">YoY +52.6%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률 (2026.3Q)</div>
+      <div class="kpi-value">8.7%</div>
+      <div class="kpi-sub">전분기(5.4%) 대비 +3.3%p</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스 평균)</div>
+      <div class="kpi-value">829,700원</div>
+      <div class="kpi-sub">현재가 대비 +51.4% (3Q 발표 전 리포트 기준)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">259,000~723,000원</div>
+      <div class="kpi-sub">현재가 위치: 약 62%</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: 매출·영업이익은 삼성SDI 3분기 잠정실적 공시 보도(뉴스웨이·아주경제, 2026.10.29), 영업이익률은 이를 토대로 산출(전분기 2,038억원/3조 7,688억원 기준), 목표가 평균·52주 범위는 StockHub(2026.10.27 기준), 현재가는 한국경제(10.29 09:22). 시가총액은 현재가 × 발행주식 80,586천주(한화투자증권 리포트)로 산출한 추정치이며, 52주 범위는 사이트별로 최저가가 다르게 집계됩니다.</div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 · 2026.10.29 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">4조 6,856억원 <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 약 +16%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 4조 388억원 · YoY +52.6%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 예상) · EPS는 미확인</div>
+        <div style="font-size:18px;font-weight:700;">4,078억원 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +73% (연합인포맥스 기준)</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 2,354억원 (ZDNet Korea 집계는 1,913억원) · 전년 동기 영업손실 5,913억원 → 흑자전환</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      10월 29일 발표(연결 기준): 매출 4조 6,856억원, 영업이익 4,078억원(2023년 3분기 이후 최대, 전분기 2,038억원의 약 2배), 당기순이익 3,422억원. 배터리 부문은 매출 4조 4,099억원(+55.3%)·영업이익 3,619억원으로 흑자전환했고, 전자재료 부문은 매출 2,757억원·영업이익 459억원입니다. 가이던스: 회사는 4분기에도 ESS와 소형 배터리 성장이 이어져 흑자 기조를 유지할 것으로 전망했습니다. 참고로 이번 분기에는 미국 AMPC(생산세액공제) 1,225억원이 반영됐고, GM 합작법인 정산금 등 일회성 이익의 포함 여부는 확인하지 못했습니다(사전 전망에서는 1,500억원 내외로 추정).
+    </div>
+    <div class="source-note">※ 출처: 뉴스웨이·아주경제·스페셜타임스(실적 수치, 2026.10.29), 미디어파인(연합인포맥스 컨센서스 2,354억원), ZDNet Korea(컨센서스 매출·영업이익, AMPC 1,225억원, 4분기 전망), NH투자증권 리포트 인용 기사(아시아경제, 2026.09.15)</div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">잠정실적</span>
+        <span style="font-size:13px;font-weight:500;">연결재무제표기준 영업(잠정)실적(공정공시) — 2026년 3분기</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.10.29 · DART(아주경제 보도)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">금전대여결정</span>
+        <span style="font-size:13px;font-weight:500;">계열사 StarPlus Energy LLC에 시설투자 자금 1조 4,294억원 한도 대여 (종료일 2028.12.31로 연장, 이율 5.01%)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.09.09 · DART(딜사이트 보도)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">잠정실적</span>
+        <span style="font-size:13px;font-weight:500;">연결 영업(잠정)실적 — 2026년 2분기 (매출 3조 7,688억원 · 영업이익 2,038억원, AMPC 1,077억원 포함)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.30 · DART(전자공시 요약 knowingasset)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">대량보유</span>
+        <span style="font-size:13px;font-weight:500;">국민연금공단 5% 대량보유 변동 보고 — 보유율 7.97% (▲1.10%p)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.07.01 · DART(StockHub 집계)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">분기보고서(2026.03) — 1분기 매출 3조 5,764억원 · 영업손실 1,556억원</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.15(접수번호 기준) · DART(StockHub)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">지분매각 추진</span>
+        <span style="font-size:13px;font-weight:500;">삼성디스플레이 지분(15.2%) 등 매각 추진 이사회 보고 — 투자재원 확보·재무구조 개선 목적</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.02.19 · DART(아시아경제 보도)</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.29</span><span class="news-source">· 뉴스웨이</span></div>
+      <div class="news-title">삼성SDI, 3분기 영업익 4078억···ESS 타고 흑자 전환</div>
+      <div class="news-summary">AI 데이터센터 확산으로 미국 ESS와 배터리백업유닛(BBU) 판매가 늘어 2분기 연속 흑자를 냈습니다. 영업이익이 전분기의 두 배로 커져 "턴어라운드가 일회성이 아니라 추세"라는 기대를 키웠고, 발표 당일 주가는 장 초반 2%대 상승했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.29</span><span class="news-source">· 스페셜타임스, ZDNet Korea</span></div>
+      <div class="news-title">삼성SDI 3분기 영업익 4078억원…2028년까지 ESS 수주 확보</div>
+      <div class="news-summary">올해 들어 미국 ESS 수주가 60GWh를 넘었고, 이달 미국 SPE 공장에서 LFP 각형 배터리 양산이 시작됐습니다. GM 합작이 끝나 단독 운영 중인 시너지셀즈도 ESS를 만들 예정이어서, 수주가 매출로 이어질 생산 기반이 갖춰지고 있다는 점이 핵심입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.14</span><span class="news-source">· 비즈니스포스트</span></div>
+      <div class="news-title">신한투자 "삼성SDI 목표주가 상향, ESS 중심으로 실적 개선세 지속 전망"</div>
+      <div class="news-summary">신한투자증권이 목표주가를 62만원에서 74만원으로 올렸습니다. 다만 3분기 이익에는 GM 합작사업 종료 정산금 등 일회성 요인이 컸다고 짚어, 실적의 '질'은 4분기부터 확인해야 한다는 점을 시사합니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.09.09</span><span class="news-source">· 딜사이트</span></div>
+      <div class="news-title">삼성SDI, 계열사에 1조4294억 금전대여 결정</div>
+      <div class="news-summary">미국 합작법인 StarPlus Energy의 시설투자를 위한 대여 한도(기존 결정의 기간 연장)입니다. 북미 생산 확대에 계속 자금이 들어간다는 뜻이어서, 성장과 현금 부담을 함께 보게 만드는 공시입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.08.16</span><span class="news-source">· 디지털데일리</span></div>
+      <div class="news-title">새 판 짜기 돌입한 삼성SDI…불붙는 韓 ESS 3차 입찰 [위클리배터리]</div>
+      <div class="news-summary">GM과의 미국 합작공장 시너지셀즈를 단독 운영으로 전환해 전기차뿐 아니라 ESS도 만들 수 있게 했습니다. 회사는 2분기 실적발표에서 2028년부터 ESS 생산능력이 부족해질 수 있다고 밝혀 추가 증설을 검토하고 있습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.10.26 기준</span><span class="news-source">· StockHub (KRX 확정 수급)</span></div>
+      <div class="news-title">수급 동향: 외국인 5거래일 연속 순매도, 개인 순매수</div>
+      <div class="news-summary">최근 5거래일 누적으로 외국인 약 1,960억원, 기관 약 1,134억원 순매도, 개인 약 3,159억원 순매수였습니다. 실적 발표 전 차익실현성 수급일 수 있으나, 주가가 큰 폭으로 오른 뒤여서 변동성이 커질 수 있다는 신호로 볼 만합니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>ESS 수주 가시성 — 올해만 미국 ESS 60GWh 이상 수주, 2028년까지 물량 확보. LFP 각형 양산이 시작돼 매출 전환 속도가 빨라질 수 있음</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>실적 모멘텀 — 분기 영업이익이 2분기 2,038억원에서 3분기 4,078억원으로 두 배 늘고 컨센서스를 크게 상회. 회사는 4분기도 흑자 기조를 전망</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>재무·기술 옵션 — 삼성디스플레이 지분(15.2%) 매각 추진으로 투자 재원 확보 여지, 2027년 하반기 전고체 배터리 양산 목표, 피지컬 AI·로봇용 배터리 등 신규 응용처</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>보조금·일회성 의존 — 3분기 AMPC 1,225억원은 영업이익의 약 30%에 해당(2분기엔 1,077억원으로 약 53%). 미국 정책 변화나 GM 정산금 같은 일회성 이익이 빠질 때 이익 체력을 다시 검증해야 함</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>전기차 수요 둔화 — 회사도 미국 전기차 수요는 당분간 약세로 전망. 미국 EV 보조금 종료·규제 조정이 EV 배터리 회복을 늦출 수 있음(사업보고서 요약)</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>밸류에이션·수급·투자 부담 — 12개월 후행 이익은 아직 적자라 PER 산출이 어렵고(PBR 1.85배), 컨센서스 목표가 평균이 최근 소폭 낮아졌으며 베타 1.75로 변동성이 큼. 북미 증설·계열사 대여 등 대규모 투자 지출도 계속됨</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">신한투자증권 <span style="color:var(--muted);font-weight:400;">(2026.10.14)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">740,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">DS투자증권 <span style="color:var(--muted);font-weight:400;">(2026.10.08)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">940,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">삼성증권 <span style="color:var(--muted);font-weight:400;">(2026.09.23)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">640,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">iM증권 <span style="color:var(--muted);font-weight:400;">(2026.09.21)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">800,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">NH투자증권 <span style="color:var(--muted);font-weight:400;">(2026.09.15)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">730,000원</span></div>
+    </div>
+    <div class="source-note">※ 출처: StockHub 증권사 리포트 집계(최근 6개월 10건, 2026.10.27 기준 — 평균 829,700원·중앙값 820,000원, 매수 10·중립 0·매도 0), 비즈니스포스트(신한투자), 아시아경제(NH투자증권), 파이낸셜뉴스(iM증권). 모두 3분기 실적 발표 전 리포트라, 발표 이후 목표가 조정은 반영되지 않았습니다.</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">삼성SDI는 2024년 3분기부터 이어진 영업적자를 2026년 2분기에 끊은 데 이어, 3분기에 영업이익 4,078억원(2023년 3분기 이후 최대)과 매출 4조 6,856억원을 기록하며 시장 예상을 크게 웃돌았습니다. 성장을 이끈 축은 AI 데이터센터 수요에 힘입은 미국 ESS와 BBU, 전동공구·원통형 배터리이고, 올해 60GWh 이상의 ESS 수주와 LFP 각형 양산 개시로 이 흐름이 4분기에도 이어질 것이라는 회사 가이던스가 제시됐습니다. 증권사 10곳 모두 매수 의견이며 목표주가 평균은 약 83만원으로 현재가보다 50% 이상 높지만, 이 수치는 3분기 발표 전 리포트 기준이라 발표 이후 조정 내용을 확인해야 합니다. 주의할 점은 이익의 질입니다. 3분기에는 AMPC 1,225억원이 반영됐고 GM 합작 종료 정산금 같은 일회성 이익도 사전에 거론됐으며, 미국 전기차 수요 약세와 투자 부담, 외국인 순매도 같은 수급 변수도 남아 있습니다. 따라서 이 종목은 ESS 성장 스토리와 흑자 지속 여부를 몇 분기에 걸쳐 확인하며 중기로 지켜볼 수 있고 주가 변동폭(베타 1.75)을 감내할 수 있는 투자자에게 관심 대상이 될 수 있는 반면, 단기 안정성이나 배당 수익(배당수익률 0%)을 우선하는 투자자에게는 맞지 않을 수 있습니다. 다음 점검 포인트는 4분기 AMPC·일회성 제외 영업이익, 신규 ESS 장기 공급계약 공시, 삼성디스플레이 지분 매각 진행 상황입니다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 현재가는 2026.10.29 장중(09:22) 기준이며 종가가 아닙니다. 일부 수치(컨센서스·52주 범위 등)는 출처별로 다를 수 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>
