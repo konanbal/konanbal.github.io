@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KODEX 증권 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 60%, var(--accent3) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .nav-change.down { color: #fca5a5; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-name small { color: var(--muted); font-weight: 400; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; width: 56px; text-align: right; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-name small { display: block; color: var(--muted); font-size: 11px; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+  .note { margin-top: 0.75rem; font-size: 11px; color: var(--muted); }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .summary-text p + p { margin-top: 0.75rem; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .disclaimer a { color: var(--accent); }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+    .holding-bar-wrap { display: none; }
+    .perf-table th, .perf-table td { padding: 7px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 102970 · KRX</div>
+      <div class="etf-name">KODEX 증권</div>
+      <div class="etf-index">추종 지수: KRX 증권 | 운용사: 삼성자산운용</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 1일 (데이터 기준 10.30 종가)</div>
+      <div class="nav-display">15,090원</div>
+      <div class="nav-change down">▼ 3.89% 전일 대비</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산: 약 5,671억원</span>
+    <span class="pill">📋 총보수: 0.45%</span>
+    <span class="pill">📅 상장일: 2008.05.29</span>
+    <span class="pill">💵 분배율(12개월): 약 3.2%</span>
+    <span class="pill">🔄 분배 주기: 연 1~2회(4월·7월말)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">순자산가치(NAV, 10.30)</div>
+      <div class="kpi-value">N/A</div>
+      <div class="kpi-sub">직전 기준가 15,775원 — 공시된 괴리율 -4.34%는 전일 NAV와 비교한 값으로 실제 괴리 아님</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">연초 이후 수익률(YTD, 가격)</div>
+      <div class="kpi-value negative">-4.49%</div>
+      <div class="kpi-sub">벤치마크 대비: N/A · 2월엔 +53% 수준</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수</div>
+      <div class="kpi-value">0.45%</div>
+      <div class="kpi-sub">합성 0.46% · 실부담 0.50% | TIGER 증권 0.40%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">거래량 (10.30)</div>
+      <div class="kpi-value">28만주</div>
+      <div class="kpi-sub">52주 고/저: 34,170 / 14,120원 (고점 대비 -56%)</div>
+    </div>
+  </div>
+
+  <!-- ===== 구성 종목 ===== -->
+  <div class="card">
+    <div class="card-title">상위 10개 구성 종목 (2026년 10월 PDF)</div>
+
+    <div class="holding-row"><div class="holding-rank">1</div><div class="holding-name">삼성증권 <small>(016360)</small></div><div class="holding-right"><div class="holding-weight">21.10%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">2</div><div class="holding-name">한국금융지주 <small>(071050)</small></div><div class="holding-right"><div class="holding-weight">19.28%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:91%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">3</div><div class="holding-name">미래에셋증권 <small>(006800)</small></div><div class="holding-right"><div class="holding-weight">16.70%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:79%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">4</div><div class="holding-name">NH투자증권 <small>(005940)</small></div><div class="holding-right"><div class="holding-weight">16.27%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:77%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">5</div><div class="holding-name">키움증권 <small>(039490)</small></div><div class="holding-right"><div class="holding-weight">16.12%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:76%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">6</div><div class="holding-name">대신증권 <small>(003540)</small></div><div class="holding-right"><div class="holding-weight">2.54%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:12%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">7</div><div class="holding-name">신영증권 <small>(001720)</small></div><div class="holding-right"><div class="holding-weight">2.48%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:12%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">8</div><div class="holding-name">한화투자증권 <small>(003530)</small></div><div class="holding-right"><div class="holding-weight">2.45%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:12%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">9</div><div class="holding-name">유안타증권 <small>(003470)</small></div><div class="holding-right"><div class="holding-weight">1.30%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:6%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">10</div><div class="holding-name">현대차증권 <small>(001500)</small></div><div class="holding-right"><div class="holding-weight">1.12%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:5%"></div></div></div></div>
+
+    <div class="note" style="font-size:12px;">
+      상위 10개 합산 99.36% · 총 11종목(기타 1종목 0.64%) | 상위 5개 대형사 89.47% — 대형 증권사 5곳이 거의 균등하게 16~21%씩
+    </div>
+  </div>
+
+  <!-- ===== 업종 배분 / 수익률 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">사업모델별 배분 (금융 100%)</div>
+      <div class="sector-item">
+        <div class="sector-name">대형 종합증권사<small>삼성증권, 한국금융지주, 미래에셋증권, NH투자증권</small></div>
+        <div class="sector-right">
+          <div class="sector-pct">73.4%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#ff9800;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">리테일·온라인 브로커리지<small>키움증권</small></div>
+        <div class="sector-right">
+          <div class="sector-pct">16.1%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:22%;background:#2196f3;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">중소형 증권사<small>대신, 신영, 한화투자, 유안타, 현대차 외 1종목</small></div>
+        <div class="sector-right">
+          <div class="sector-pct">10.5%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:14%;background:#607d8b;"></div></div>
+        </div>
+      </div>
+      <div class="note">※ GICS 기준 전 종목 금융. 위 구분은 보고서 자체 분류이며, 모든 종목이 거래대금·금리에 공통으로 민감함</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기간별 수익률 (10.30 기준)</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>기간</th><th>ETF</th><th>KRX 증권</th><th>차이</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1개월</td><td class="negative">-14.36%</td><td>N/A</td><td>-</td></tr>
+          <tr><td>3개월</td><td>N/A</td><td>N/A</td><td>-</td></tr>
+          <tr><td>6개월</td><td>N/A</td><td>N/A</td><td>-</td></tr>
+          <tr><td>YTD(가격)</td><td class="negative">-4.49%</td><td>N/A</td><td>-</td></tr>
+          <tr><td>1년</td><td class="negative">-3.4% ~ -6.4%</td><td>N/A</td><td>-</td></tr>
+          <tr><td>52주 고점 대비</td><td class="negative">-55.8%</td><td>-</td><td>-</td></tr>
+          <tr><td>연초~2월 초</td><td class="positive">+52.94%</td><td>-</td><td>-</td></tr>
+        </tbody>
+      </table>
+      <div class="note">운용사(FunETF) 페이지 접속 실패로 기초지수 대비 수익률·3/6개월 수치는 확인하지 못함. 1년 수익률은 출처별 산출 기준이 달라 범위로 표기. 9월 초 기준 1년 수익률은 +40%대였음(stockanalysis).</div>
+    </div>
+  </div>
+
+  <!-- ===== 최근 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.10.28</span>
+      </div>
+      <div class="news-title">증시 열기 식자 증권사 3분기 순익 일제히 감소</div>
+      <div class="news-summary">10월 넷째 주 일평균 주식 거래대금은 38.7조원으로 5월 고점(106.2조원) 대비 약 64% 줄며 5개월 연속 감소했습니다. 금리 상승으로 채권운용도 손실로 돌아섰습니다. NH투자증권 순이익은 전분기 대비 21.6% 줄었지만 영업이익은 컨센서스를 7.3% 웃돌았고, 하나·신한·우리 등은 70~90%대 급감했습니다. (전자신문)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.10.14</span>
+      </div>
+      <div class="news-title">5대 증권사 3분기 순익 전망, 2분기 대비 -58.6% — 미래에셋은 적자 추정</div>
+      <div class="news-summary">미래에셋·한국금융·삼성·NH·키움 합산 전망은 약 1.9조원입니다. 3분기 거래대금이 전분기 대비 42% 줄며 수탁수수료가 34% 감소할 것으로 추정됐습니다. 미래에셋증권(비중 16.7%)은 스페이스X 주가 하락과 환율 하락에 따른 평가손실로 지배주주순이익 적자가 예상됐습니다. (비즈니스워치)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.10.26</span>
+      </div>
+      <div class="news-title">코스피 3분기 거래대금 33% 감소… 증권 업종지수 3분기 약 20% 하락 예상</div>
+      <div class="news-summary">키움증권 3분기 순이익 전망은 전분기 대비 약 46%, NH투자증권은 약 25% 하향 조정됐습니다. 실적 눈높이가 내려가면서 증권주 전반이 약세를 보였습니다. (뉴스1)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.10.14</span>
+      </div>
+      <div class="news-title">증권가 "실적 감소 우려 상당 부분 반영… 높은 배당이 하방 지지"</div>
+      <div class="news-summary">KB증권은 업종에 대한 긍정적 의견을 유지했고, 다올투자증권도 하반기 실적 감소가 주가에 이미 많이 반영됐다고 봤습니다. 4분기 5사 합산 순이익은 미래에셋 회복으로 3분기보다 소폭 늘 전망이지만, 나머지 4사만 보면 추가 감소가 예상됩니다. (비즈니스워치)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.02.09</span>
+      </div>
+      <div class="news-title">증시 불장에 증권 ETF 연초 이후 50%대 수익률</div>
+      <div class="news-summary">1월 일평균 거래대금이 62조원을 넘으며 전월보다 89% 늘자 KODEX 증권은 한 달여 만에 약 53% 올랐습니다. 거래대금이 늘 때 이 ETF가 얼마나 민감하게 반응하는지를 보여주는 사례로, 지금의 하락은 같은 메커니즘의 역방향입니다. (헤럴드경제)</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">💵</span><span>최근 12개월 분배금 489원으로 현재가 대비 약 3.2%. 테마 ETF 중에서는 드물게 배당이 하방을 받쳐 주는 구조입니다.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">📉</span><span>52주 고점 대비 -56%, 1개월 -14%로 실적 둔화가 상당 부분 가격에 반영됐다는 평가. 주요 증권사가 업종 긍정 의견을 유지하고 있습니다.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">⚡</span><span>거래대금에 대한 민감도가 매우 높은 '시장 레버리지' 업종. 올해 1월처럼 거래대금이 다시 늘면 가장 먼저, 가장 크게 반응합니다.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🏛️</span><span>2008년 상장한 대표 증권 ETF로 순자산 5천억원대, 대형 5사가 고르게 16~21%씩 편입돼 특정 종목 쏠림이 상대적으로 작습니다.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">📊</span><span>거래대금이 5월 고점 대비 약 64% 줄며 5개월 연속 감소. 브로커리지 수수료가 실적의 핵심인 만큼 증시 회복 전까지 이익 감소가 이어질 수 있습니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📈</span><span>시장금리 상승으로 채권운용 손익 악화. 금리 방향이 바뀌지 않으면 운용 부문도 실적을 끌어내립니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🚀</span><span>해외 비상장 투자 평가 리스크: 미래에셋증권의 스페이스X 평가손실처럼 해외 자산 가격·환율에 따라 대규모 손익 변동이 생깁니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🔻</span><span>4분기도 미래에셋을 제외한 4사는 순이익이 20%대 추가 감소할 전망. 실적 바닥 확인이 아직 이릅니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">💸</span><span>총보수 0.45%로 같은 업종의 TIGER 증권(0.40%)보다 다소 높습니다.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 배당/분배금 ===== -->
+  <div class="card">
+    <div class="card-title">배당 / 분배금 현황</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>분배 기준일</th><th>지급일</th><th>분배금(주당)</th><th>현재가 대비</th><th>비고</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2026.07.31</td><td>2026.08.04</td><td>149원</td><td>0.99%</td><td>올해 처음 7월 분배</td></tr>
+        <tr><td>2026.04.30</td><td>2026.05.06</td><td>340원</td><td>2.25%</td><td>정기 분배</td></tr>
+        <tr><td>2025.04.30</td><td>2025.05.07</td><td>372원</td><td>-</td><td>정기 분배</td></tr>
+        <tr><td>2024.04.30</td><td>2024.05.03</td><td>245원</td><td>-</td><td>정기 분배</td></tr>
+        <tr><td>2023.04.28</td><td>2023.05.03</td><td>210원</td><td>-</td><td>정기 분배</td></tr>
+      </tbody>
+    </table>
+    <div class="note">최근 12개월 합계 489원 ÷ 현재가 15,090원 ≈ 3.24%. (일부 사이트의 '분배율 0.99%'는 7월 1회분만 반영한 값) 분배금은 15.4% 원천징수, 매매차익은 국내 주식형이라 비과세.</div>
+  </div>
+
+  <!-- ===== 동종 ETF ===== -->
+  <div class="card">
+    <div class="card-title">동종 ETF 비교</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>ETF</th><th>총보수</th><th>순자산</th><th>비고</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>KODEX 증권 (102970)</b></td><td>0.45%</td><td>약 5,671억원</td><td>2008년 상장, KRX 증권 지수</td></tr>
+        <tr><td>TIGER 증권 (157500)</td><td>0.40%</td><td>1,699억원</td><td>올해 2월 연초 수익률 100% 돌파로 전체 ETF 1위 기록</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      <p>KODEX 증권은 KRX 증권 지수를 추종해 국내 상장 증권사 11곳에 투자하는 ETF입니다. 삼성증권·한국금융지주·미래에셋증권·NH투자증권·키움증권 5개 대형사가 16~21%씩 고르게 담겨 합계 89%를 차지하므로, 사실상 '국내 대형 증권사 5곳 바스켓'입니다. 증권사 이익은 증시 거래대금(브로커리지), 금리(채권운용), 해외·대체투자 평가손익에 크게 좌우되기 때문에, 이 ETF는 증시 거래 활력과 금리 방향에 대한 레버리지 베팅에 가깝습니다.</p>
+      <p>올해 흐름이 이를 잘 보여줍니다. 1월 거래대금이 89% 급증하자 2월 초까지 +53% 올랐고, 52주 고점은 34,170원까지 갔습니다. 그러나 5월 일평균 106조원이던 거래대금이 10월 말 38.7조원으로 64% 줄고 금리가 오르자, 3분기 대형 5사 순이익 전망이 2분기 대비 반 토막 이하로 내려갔습니다. 미래에셋증권은 스페이스X 평가손실로 적자까지 거론됐습니다. 그 결과 현재가는 고점 대비 -56%, 연초 대비로도 소폭 마이너스입니다.</p>
+      <p>긍정적인 면은 최근 12개월 분배금 기준 약 3.2%의 배당이 하방을 받치고, 증권가가 실적 둔화가 상당 부분 반영됐다고 본다는 점입니다. 반면 4분기에도 미래에셋을 제외한 대형사의 이익 감소가 예상돼 실적 바닥은 아직 확인되지 않았습니다. 따라서 핵심 관찰 지표는 ① 일평균 거래대금 반등 여부(월간 감소세 중단), ② 시장금리 안정, ③ 4분기 실적과 연말 배당 정책입니다. 거래대금 회복 신호를 확인한 뒤 분할 진입하는 전략이 합리적이며, 비용을 중시한다면 총보수가 낮은 TIGER 증권도 비교해 볼 만합니다. 유동성과 운용 이력은 KODEX 증권이 앞섭니다.</p>
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 작성자는 투자자문업자가 아닙니다.
+      ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다.<br><br>
+      데이터 주의: 운용사 FunETF 페이지 접속이 되지 않아 가격·구성·분배 정보는 ETF쇼핑·stockhub(10.30 기준)를 사용했고, 출처 간 수치가 다른 항목은 범위 또는 N/A로 표기했습니다.<br>
+      주요 출처: <a href="https://etfshopping.com/etf/102970">ETF쇼핑</a> ·
+      <a href="https://etfshopping.com/etf/102970/dividend">ETF쇼핑 분배 이력</a> ·
+      <a href="https://stockhub.kr/etf/102970">stockhub</a> ·
+      <a href="https://www.etnews.com/20261028000207">전자신문</a> ·
+      <a href="https://news.bizwatch.co.kr/article/market/2026/10/13/0014">비즈니스워치</a> ·
+      <a href="https://www.news1.kr/finance/general-stock/6331103">뉴스1</a> ·
+      <a href="https://www.heraldk.com/article/2026020914553918195">헤럴드경제</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KODEX AI전력핵심설비 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 60%, var(--accent3) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .nav-change.down { color: #fca5a5; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-name small { color: var(--muted); font-weight: 400; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; width: 48px; text-align: right; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+  .holding-wk { font-size: 11px; width: 62px; text-align: right; }
+
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-name small { display: block; color: var(--muted); font-size: 11px; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+  .note { margin-top: 0.75rem; font-size: 11px; color: var(--muted); }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .summary-text p + p { margin-top: 0.75rem; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .disclaimer a { color: var(--accent); }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+    .holding-bar-wrap, .holding-wk { display: none; }
+    .perf-table th, .perf-table td { padding: 7px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · 487240 · KRX</div>
+      <div class="etf-name">KODEX AI전력핵심설비</div>
+      <div class="etf-index">추종 지수: iSelect AI전력핵심설비 지수(Price Return) | 운용사: 삼성자산운용</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 1일 (데이터 기준 10.30 종가)</div>
+      <div class="nav-display">24,540원</div>
+      <div class="nav-change up">▲ 1,310원 (+5.07%) 전일 대비</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산: 2조 2,504억원</span>
+    <span class="pill">📋 총보수: 0.39%</span>
+    <span class="pill">📅 상장일: 2024.07.09</span>
+    <span class="pill">💵 분배율(1년): 0.17%</span>
+    <span class="pill">🔄 분배 주기: 비정기(4월·7월말)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">추정 순자산가치(iNAV)</div>
+      <div class="kpi-value">24,703원</div>
+      <div class="kpi-sub">괴리율: 약 -0.66% (종가 기준)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">연초 이후 수익률(YTD, NAV)</div>
+      <div class="kpi-value positive">+7.73%</div>
+      <div class="kpi-sub">기초지수 대비: +0.55%p</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수</div>
+      <div class="kpi-value">0.39%</div>
+      <div class="kpi-sub">운용보수 0.359% · 카테고리 평균 N/A</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">거래량 (10.30)</div>
+      <div class="kpi-value">228만주</div>
+      <div class="kpi-sub">52주 고/저: N/A</div>
+    </div>
+  </div>
+
+  <!-- ===== 구성 종목 ===== -->
+  <div class="card">
+    <div class="card-title">구성 종목 전체 (12종목 · 2026.10.30 PDF)</div>
+
+    <div class="holding-row"><div class="holding-rank">1</div><div class="holding-name">LS ELECTRIC <small>(010120)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -1.9%</div><div class="holding-weight">22.3%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">2</div><div class="holding-name">효성중공업 <small>(298040)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -0.7%</div><div class="holding-weight">19.0%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:85%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">3</div><div class="holding-name">HD현대일렉트릭 <small>(267260)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -10.1%</div><div class="holding-weight">13.8%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:62%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">4</div><div class="holding-name">LS <small>(006260)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -4.5%</div><div class="holding-weight">12.6%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:57%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">5</div><div class="holding-name">대한전선 <small>(001440)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -6.8%</div><div class="holding-weight">8.2%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:37%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">6</div><div class="holding-name">산일전기 <small>(062040)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -9.8%</div><div class="holding-weight">7.3%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:33%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">7</div><div class="holding-name">가온전선 <small>(000500)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -0.2%</div><div class="holding-weight">4.8%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:22%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">8</div><div class="holding-name">일진전기 <small>(103590)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -6.0%</div><div class="holding-weight">4.7%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:21%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">9</div><div class="holding-name">LS에코에너지 <small>(229640)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -10.3%</div><div class="holding-weight">2.0%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:9%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">10</div><div class="holding-name">대원전선 <small>(006340)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -3.9%</div><div class="holding-weight">1.9%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:9%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">11</div><div class="holding-name">LS마린솔루션 <small>(060370)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -11.3%</div><div class="holding-weight">1.5%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:7%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">12</div><div class="holding-name">제룡전기 <small>(033100)</small></div><div class="holding-right"><div class="holding-wk negative">1주 -4.7%</div><div class="holding-weight">1.4%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:6%"></div></div></div></div>
+
+    <div class="note" style="font-size:12px;">
+      상위 10개 합산 96.6% · 전체 12종목 99.5% (현금 0.4%) | 상위 4종목 67.7% · LS그룹 계열 5종목(LS ELECTRIC·LS·가온전선·LS에코에너지·LS마린솔루션) 43.2%
+    </div>
+  </div>
+
+  <!-- ===== 업종 배분 / 수익률 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">세부 업종 배분</div>
+      <div class="sector-item">
+        <div class="sector-name">변압기·차단기·배전기기<small>LS ELECTRIC, 효성중공업, HD현대일렉트릭, 산일전기, 제룡전기</small></div>
+        <div class="sector-right">
+          <div class="sector-pct">63.8%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#9c27b0;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">전선·케이블(해저 포함)<small>대한전선, 가온전선, 일진전기, LS에코에너지, 대원전선, LS마린솔루션</small></div>
+        <div class="sector-right">
+          <div class="sector-pct">23.1%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:36%;background:#ff9800;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">지주회사<small>LS (LS전선·LS ELECTRIC 등 지배)</small></div>
+        <div class="sector-right">
+          <div class="sector-pct">12.6%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:20%;background:#607d8b;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">현금성 자산</div>
+        <div class="sector-right">
+          <div class="sector-pct">0.4%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:1%;background:#2196f3;"></div></div>
+        </div>
+      </div>
+      <div class="note">※ 전 종목이 GICS 기준 산업재. 위 구분은 운용사 공식 분류가 아닌 주력 제품 기준 보고서 자체 분류이며, 일진전기는 변압기 사업도 영위함</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기간별 수익률 비교 (10.30 기준)</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>기간</th><th>ETF(NAV)</th><th>기초지수</th><th>차이</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1개월</td><td class="negative">-31.84%</td><td>-31.91%</td><td class="positive">+0.07p</td></tr>
+          <tr><td>3개월</td><td class="negative">-2.99%</td><td>-2.92%</td><td class="negative">-0.07p</td></tr>
+          <tr><td>6개월</td><td class="negative">-53.13%</td><td>-53.33%</td><td class="positive">+0.20p</td></tr>
+          <tr><td>YTD</td><td class="positive">+7.73%</td><td>+7.18%</td><td class="positive">+0.55p</td></tr>
+          <tr><td>1년</td><td class="negative">-0.21%</td><td>-0.98%</td><td class="positive">+0.77p</td></tr>
+          <tr><td>3년(연환산)</td><td>N/A</td><td>N/A</td><td>-</td></tr>
+          <tr><td>상장 이후</td><td class="positive">+140.77%</td><td>+137.24%</td><td class="positive">+3.53p</td></tr>
+        </tbody>
+      </table>
+      <div class="note">NAV는 분배금 재투자 기준, 기초지수는 PR(가격) 지수라 장기로 갈수록 ETF가 소폭 앞섬 — 실질 추적오차는 작음. 5월 초 고점 이후 6개월 반토막, 8~9월 회복분을 10월에 대부분 반납한 흐름.</div>
+    </div>
+  </div>
+
+  <!-- ===== 최근 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.10.27</span>
+      </div>
+      <div class="news-title">전력기기 3대장 한 달 새 25~30%대 급락, 증권사 목표가 줄하향</div>
+      <div class="news-summary">HD현대일렉트릭·효성중공업은 한 달간 30% 넘게, LS ELECTRIC은 약 25% 하락했습니다. HD현대일렉트릭 3분기 영업이익은 2,845억원으로 컨센서스를 6.7% 밑돌고 이익률도 떨어졌습니다. 증권사들은 장기 전망은 유지하면서도 할인율 상승, 업종 멀티플 하락, 미국 데이터센터 공사 불확실성을 이유로 목표가를 내렸습니다. (인베스트조선)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.10 (3분기 실적)</span>
+      </div>
+      <div class="news-title">1위 종목 LS ELECTRIC, 3분기 영업이익 역대 최대</div>
+      <div class="news-summary">영업이익 2,335억원으로 전년 대비 131.7% 늘었고, 북미 매출은 약 5,000억원, 수주잔고는 7조원 안팎을 유지했습니다. 다만 실적 발표일 7% 오른 주가는 며칠 만에 상승분을 반납했습니다. (인베스트조선)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.10.28</span>
+      </div>
+      <div class="news-title">미국 데이터센터 설비주도 고점 대비 23% 하락 — 12개사 시총 3,000억달러 증발</div>
+      <div class="news-summary">GE 버노바·콴타서비스 등 미국 데이터센터 건설·전력 공급 기업 주가가 S&amp;P500 고점 대비 중간값 23% 빠졌습니다. 빅테크 실제 설비투자 감소폭은 그보다 작았고, 14개 주에서 데이터센터 건설을 한시 제한하는 안이 나오는 등 지역 반발도 커지고 있습니다. (토큰포스트)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.07.15</span>
+      </div>
+      <div class="news-title">뉴욕주, 전기요금 인상 우려로 1년간 대형 데이터센터 신축 중단</div>
+      <div class="news-summary">미국 첫 데이터센터 건설 중단 사례로, 전력·환경 부담이 정치 이슈로 떠올랐습니다. 이후 텍사스 등에서도 규제 움직임이 이어지며 'AI 전력 수요' 스토리의 속도 조절 리스크가 부각됐습니다. (파이낸셜뉴스, 한국일보)</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.06.19</span>
+      </div>
+      <div class="news-title">5~6월 30%대 급락 후 반등 — 초고압 변압기 수출은 견조</div>
+      <div class="news-summary">5월 초~6월 초 주요 종목이 31~37% 빠진 뒤 저가 매수로 급반등했습니다. 전체 변압기 수출은 부진했지만 대형사 주력인 초고압 변압기 수출은 4월 +41.5%, 5월 +23.3% 늘었습니다. 올해 들어 '급락 후 반등'이 반복되는 패턴을 보여주는 사례입니다. (서울경제)</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">🔌</span><span>북미 노후 전력망 교체 + AI 데이터센터라는 장기 수요는 훼손되지 않았다는 데 증권가 시각이 일치. 목표가는 내렸어도 투자의견은 대부분 유지됐습니다.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">📦</span><span>매출이 수주를 후행하는 업종 특성상, LS ELECTRIC 수주잔고 7조원 등 쌓인 일감이 향후 1~3년 실적을 받쳐 줍니다. 1위 종목은 3분기 역대 최대 이익을 냈습니다.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🔄</span><span>올해 5~6월에도 30%대 급락 후 빠르게 회복한 전례. 6개월 -53%로 상반기 과열은 상당 부분 해소됐습니다.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🏦</span><span>순자산 2.25조원으로 국내 전력기기 ETF 중 최대급 → 유동성·호가가 양호하고 괴리율이 작음. 국내 주식형이라 매매차익 비과세.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span>밸류에이션 디레이팅: 실적이 좋아도 할인율 상승·업종 멀티플 하락으로 주가가 빠지는 국면. "수주잔고만으로는 추가 상승을 정당화하기 어렵다"는 평가가 나옵니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🏗️</span><span>미국 데이터센터 규제·건설 지연(뉴욕주 중단, 14개 주 제한안)과 미국 동종 설비주 급락. 수요의 '속도'가 꺾이면 신규 수주 모멘텀이 약해집니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🎯</span><span>집중도: 상위 4종목 67.7%, LS그룹 계열 43.2%. 특정 그룹·종목 이슈가 ETF 전체를 흔들 수 있습니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">⏳</span><span>실적 변동: HD현대일렉트릭 이익률 하락, 효성중공업 고마진 프로젝트 매출 인식 지연, 원화 강세 등으로 분기 실적의 질이 고르지 않습니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🎢</span><span>극심한 변동성: 1년 전 대비 +400%대(4월 기준)에서 6개월 만에 반토막. 단기 매매 자금 비중이 높아 쏠림이 큽니다.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 배당/분배금 ===== -->
+  <div class="card">
+    <div class="card-title">배당 / 분배금 현황</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>분배 기준일</th><th>지급일</th><th>분배금(주당)</th><th>비고</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2026.07.31</td><td>2026.08.04</td><td>5원</td><td>당시 분배율 0.02%</td></tr>
+        <tr><td>2026.04.30</td><td>2026.05.06</td><td>39원</td><td>전년 대비 -67%</td></tr>
+        <tr><td>2025.04.30</td><td>2025.05.07</td><td>119원</td><td>상장 후 첫 분배</td></tr>
+      </tbody>
+    </table>
+    <div class="note">최근 1년 분배금 합계 44원 → 현재가 기준 분배율 약 0.17~0.18%. 구성종목 배당을 모아 주는 수준이라 인컴 목적에는 맞지 않음.</div>
+  </div>
+
+  <!-- ===== 동종 ETF ===== -->
+  <div class="card">
+    <div class="card-title">비교할 만한 전력 ETF</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>ETF</th><th>투자 대상</th><th>특징</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>KODEX AI전력핵심설비</b></td><td>국내</td><td>변압기·전선 12종목, LS그룹 비중 높음</td></tr>
+        <tr><td>TIGER 코리아AI전력기기TOP3플러스</td><td>국내</td><td>대형 3사 집중형 (4월 기준 1년 수익률은 KODEX보다 낮았음)</td></tr>
+        <tr><td>RISE AI전력인프라</td><td>국내</td><td>전력 인프라 전반</td></tr>
+        <tr><td>KODEX 미국AI전력핵심인프라</td><td>미국</td><td>같은 운용사의 미국 버전 — 국내 종목과 함께 보유 시 분산 효과</td></tr>
+      </tbody>
+    </table>
+    <div class="note">경쟁 ETF의 총보수·최신 수익률은 이번 조사에서 확인하지 못해 생략함.</div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      <p>KODEX AI전력핵심설비는 AI 데이터센터와 북미 전력망 교체 수요의 수혜를 받는 국내 변압기·차단기·전선 기업 12곳에 투자하는 ETF입니다. 순자산 2조 2,504억원, 총보수 0.39%로 국내 전력기기 ETF 가운데 규모와 유동성이 가장 큰 편이고, 지수 추적도 양호합니다. 다만 LS ELECTRIC·효성중공업·HD현대일렉트릭·LS 4종목이 68%를 차지하고 LS그룹 계열만 43%라, 사실상 '대형 전력기기 3사 + LS그룹' 바스켓입니다.</p>
+      <p>성과는 극단적이었습니다. 상장 이후 +141%, 4월 말 기준 1년 수익률은 400%를 넘었지만, 5월 초 고점 이후 6개월간 -53%로 반토막이 났습니다. 현재 연초 대비로는 +7.7%이고 1년 수익률은 보합권입니다. 10월 하락은 실적 쇼크보다는 <b>밸류에이션 재평가</b>의 성격이 강합니다. LS ELECTRIC이 역대 최대 이익을 냈는데도 주가가 밀린 데서 보이듯, 시장은 이미 높은 기대를 반영한 상태에서 할인율 상승, 미국 데이터센터 규제·공사 지연 우려, 미국 동종주 급락을 함께 반영하고 있습니다.</p>
+      <p>중기적으로 수주잔고가 실적으로 넘어오는 구조는 유효하고, 올해 5~6월에도 30%대 급락 후 반등한 전례가 있어 조정은 분할 매수 관점에서 볼 여지가 있습니다. 반면 업종 멀티플이 내려가는 국면에서는 좋은 실적만으로 주가가 오르기 어렵다는 점도 분명합니다. 앞으로 볼 변수는 ① 미국 하이퍼스케일러의 설비투자 가이던스, ② 미국 주별 데이터센터 규제 확산 여부, ③ 4분기 신규 대형 수주와 효성중공업의 지연 매출 인식, ④ 원/달러 환율입니다. 변동성이 매우 큰 테마이므로 포트폴리오의 위성 자산으로 비중을 제한하고, 국내·미국 전력 ETF를 섞는 식의 분산을 고려하는 것이 합리적입니다.</p>
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 작성자는 투자자문업자가 아닙니다.
+      ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다.<br><br>
+      주요 출처: <a href="https://www.funetf.co.kr/product/etf/view/KR7487240004">삼성자산운용 FunETF</a> (가격·수익률·PDF·분배, 10.30 기준) ·
+      <a href="https://etfshopping.com/etf/487240/dividend">ETF쇼핑</a> (분배 이력) ·
+      <a href="https://www.investchosun.com/site/data/html_dir/2026/10/27/2026102780137.html">인베스트조선</a> ·
+      <a href="https://www.tokenpost.kr/news/ai/428272">토큰포스트</a> ·
+      <a href="https://www.fnnews.com/news/202607150854110549">파이낸셜뉴스</a> ·
+      <a href="https://www.sedaily.com/article/20057688">서울경제</a> ·
+      <a href="https://www.mt.co.kr/stock/2026/04/27/2026042713532526296">머니투데이</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
