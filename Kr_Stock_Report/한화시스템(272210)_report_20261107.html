@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한화시스템 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">272210 · KOSPI</div>
+      <div class="company-name">한화시스템</div>
+      <div class="company-desc">레이다·위성·지휘통제 등 방산전자와 ICT(SI)를 영위하는 한화그룹 방산·우주 기업</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 07일</div>
+      <div class="price-display">50,500원</div>
+      <div class="price-change down">▼ 6.31% (전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.11.06 종가(전일 종가 53,900원) · 출처: StockHub</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 9.5조원</span>
+    <span class="rating-pill">🏢 섹터: 우주항공/국방</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (매수 9 · 중립 1)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (2026년 3Q)</div>
+      <div class="kpi-value">8,316억원</div>
+      <div class="kpi-sub">YoY +30.1% (필리조선소 제외 계속사업 기준)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">11.9%</div>
+      <div class="kpi-sub">전분기 대비 -1.9%p (13.8% → 11.9%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스 평균)</div>
+      <div class="kpi-value">약 100,222원</div>
+      <div class="kpi-sub">현재가 대비 +98.5% (리포트 9건, 73,000~121,000원)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">44,750~184,000원</div>
+      <div class="kpi-sub">현재가 위치: 4% (52주 최고가 대비 -72.6%)</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: StockHub(주가·52주 범위·컨센서스), StockHub 인사이트/DART 잠정실적 공시(분기 실적) (기준일 2026.11.06). 영업이익률은 공시 수치로 계산한 값이며 직전 분기는 재작성 기준 13.82%.</div>
+
+  <!-- ②-1 주가 추이 차트: 일별 시세 데이터를 확보하지 못해 임의 수치로 채우지 않고 생략함 -->
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기 · 2026년 3Q, 10월 27일 발표 — 최신 실적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">8,316억원 <span style="font-size:12px;color:var(--muted);">컨센서스 대비 확인 불가</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 확인 불가 · YoY +30.1%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (실제 vs 예상) — EPS는 확인 불가</div>
+        <div style="font-size:18px;font-weight:700;">991억원 <span style="font-size:12px;color:var(--green);">▲ 어닝 서프라이즈 +50.8%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 658억원(연합인포맥스) · YoY +60.5% · 연결 순이익 38억원(YoY -97.5%)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      영업이익은 컨센서스를 크게 웃돌았지만(키움증권 인용 시장 기대치는 618억원), 필리조선소 지분 매각 결정에 따른 중단영업손실이 반영되어 연결 순이익은 38억원에 그쳤고 지배주주 귀속 순이익은 386억원이었습니다(다올투자증권은 컨센서스 576억원 대비 34.0% 하회로 집계). 3Q말 수주잔고는 8조8,653억원(방산 8조3,956억원, ICT 4,697억원)입니다. 회사는 올해 방산·ICT 수주가 모두 전년 대비 20%대 늘 것으로 보며, 자체투자개발비는 전년의 3~4배 가이던스 중 3Q 누적 380억원이 집행되어 4분기에 집중될 것이라고 밝혔습니다. 다음 실적(4분기)은 2027년 2월 전후로 예상됩니다(전년 4Q 공시는 2026.02.06).
+    </div>
+    <div class="source-note">※ 출처: DART 잠정실적 공시 요약(StockHub 인사이트), 연합뉴스(연합인포맥스 집계), 딜사이트, MTN, 키움증권·다올투자증권 리포트(StockHub 요약). 전년 3Q 비교치는 중단영업 분리로 재작성됨(영업이익 225억원 → 618억원).</div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART / SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">잠정실적</span>
+        <span style="font-size:13px;font-weight:500;">연결재무제표기준영업(잠정)실적 — 3Q26 매출 8,316억원 / 영업이익 991억원</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.10.27 · DART</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">투자판단관련주요경영사항 — 초소형위성체계 SAR 군집위성 개발 우선협상대상자 선정(3,349.7억원, VAT 제외)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.10.30 · DART</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">타법인주식및출자증권처분결정(종속회사) — 필리조선소 지분 전량 3,251억원 처분, 예정일 10/31 → 12/7 변경</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.11.02 · DART</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항</span>
+        <span style="font-size:13px;font-weight:500;">한화오션 잔여 지분 7.24%(2,216만9,660주) 1조3,834억원 처분 + PRS 계약(기준가 62,400원, 1년)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.10.16(이사회) · DART</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">지분변동</span>
+        <span style="font-size:13px;font-weight:500;">국민연금공단 5% 대량보유 변동 — 보유율 7.19% → 6.17%(1.02%p 축소, 192.2만주 매도)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.10.02 · DART</span>
+    </div>
+    <div class="source-note">※ 공시 요약은 StockHub(DART 공시 요약), 인사이트·SBS Biz 보도 기준이며 원문은 DART(dart.fss.or.kr)에서 확인하세요. 국민연금 보유율 이력은 StockHub 5%룰 공시 이력(2025.10.01 7.19% → 2026.10.02 6.17%) 기준입니다.</div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.30</span><span class="news-source">· DART 공시(StockHub 요약)</span></div>
+      <div class="news-title">초소형위성체계 SAR 군집위성 개발 사업 우선협상대상자 선정</div>
+      <div class="news-summary">국방과학연구소 발주 사업으로 계약금액 3,349.7억원(VAT 제외)이며 최근 매출의 9.1% 규모입니다. 방산 매출의 우주 비중을 키울 첫 대형 수주여서 우주 사업 가치 재평가의 근거가 됩니다. DS투자증권도 11월 2일 이 사업의 1순위로 분석했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.27</span><span class="news-source">· 딜사이트 · MTN</span></div>
+      <div class="news-title">3분기 영업이익 991억원 — 중동 방산 수출·KF-21 레이다 양산으로 컨센서스 상회</div>
+      <div class="news-summary">중동 천궁-II 다기능레이다 수출과 국내 양산 사업이 매출·영업이익을 끌어올렸습니다. 필리조선소를 중단영업으로 분리하면서 본업의 수익성이 선명해졌다는 점이 중요합니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.10.20</span><span class="news-source">· SBS Biz</span></div>
+      <div class="news-title">한화오션 잔여 지분까지 PRS로 처분…유동성 확보와 정산 리스크 병존</div>
+      <div class="news-summary">4월(1.7조원)에 이어 이번 1조3,834억원 처분으로 한화오션 지분이 0%가 됐고 필리조선소 매각대금(3,251억원)까지 더해 투자 재원을 확보합니다. 다만 정산 시점의 한화오션 주가가 기준가를 밑돌면 추가 현금 부담이 생길 수 있어 한국신용평가가 모니터링 대상으로 언급했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.10.28</span><span class="news-source">· 토요경제 · 딜사이트</span></div>
+      <div class="news-title">영업이익은 늘었는데 순이익은 97.5% 급감…필리조선소 중단영업손실 반영</div>
+      <div class="news-summary">3분기 연결 순이익이 38억원으로 줄었고 누적 순손익은 -392억원으로 적자 전환했습니다(StockHub 인사이트). 매각이 끝나도 이미 인식한 손실이 사라지지는 않는다는 점에서 확정 실적과 현금흐름 확인이 필요합니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.05~06</span><span class="news-source">· 중앙이코노미뉴스 · StockHub</span></div>
+      <div class="news-title">방산주 동반 약세 속 한화시스템 이틀 연속 급락 — 11/5 종가 53,900원, 11/6 50,500원</div>
+      <div class="news-summary">11월 5일 동일업종이 -8%대로 밀리는 가운데 한화시스템은 전일 종가 62,400원 대비 약 -13.6%(53,900원)로 마감했고, 6일에는 -6.31% 추가 하락해 52주 최저가(44,750원)와의 거리가 가까워졌습니다. 회사 고유의 단일 악재는 확인되지 않았고, 한화에어로스페이스 3Q 어닝 쇼크 헤드라인(10/30)과 방산·조선 계열 목표가 하향(LS·KB·메리츠·대신 등)이 겹친 업종 전반의 약세로 보입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.11.02</span><span class="news-source">· 연합뉴스 · 머니투데이</span></div>
+      <div class="news-title">2명이 조종하는 스마트전투함 '콕핏형 IBS' 핵심기술 국산화 추진</div>
+      <div class="news-summary">함정 통합함교체계 국산화를 추진한다는 보도로, 세부 계약 규모는 확인되지 않았습니다. 해양 분야까지 방산전자 라인업을 넓히는 전략을 보여줍니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>중동 M-SAM(천궁-II) 레이다 수출이 본격 매출로 인식되는 구간 — 2Q 영업이익 1,037억원(YoY +218.8%), 3Q 991억원으로 컨센서스 상회, 수주잔고 8.87조원. 신한투자증권은 중동 매출 본격화를 2027년으로 봄</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>적자 필리조선소가 연결에서 빠지면(12/7 처분 예정) 방산·ICT 중심 이익 구조가 선명해지고, 필리 매각·한화오션 지분 유동화로 확보한 재원이 우주·AI 투자에 투입 가능</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>우주·신사업 파이프라인 — 초소형 SAR 군집위성 우선협상(3,349.7억원), 제주우주센터, 레이저 대공무기 '천광' 해외 전시 공개(WDS 2026)</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>컨센서스 목표주가 평균 약 100,222원으로 현재가 대비 괴리가 매우 크고, 의견은 매수 9·중립 1·매도 0</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>높은 밸류에이션 — PER 70.7배·선행 PER 80.5배, PBR 2.68배, ROE 7.62% (StockHub). 순이익이 영업이익 성장을 따라오지 못함</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>PRS 정산·재무 부담 — 한화오션 주가가 기준가(10월분 62,400원, 4월분 122,100원)를 밑돌면 추가 현금 유출 가능, 상반기 말 총차입금 3조3,911억원(스마트투데이), 우주·AI 대규모 투자 부담(다올투자증권)</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>단기 실적 모멘텀 — 4분기 자체투자개발비 집중, 중동 매출 본격화는 2027년(신한 중립), 3Q 영업이익률 전분기 대비 하락</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>높은 변동성과 업종 수급 — 베타 약 1.9, 방산주 동반 급락 국면, 52주 최고가(184,000원) 대비 -72.6%, 최근 20거래일 외국인 순매도·기관 순매수 엇갈림</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">키움증권 <span style="color:var(--muted);font-weight:400;">(2026.10.28)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">121,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">SK증권 <span style="color:var(--muted);font-weight:400;">(2026.10.28)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">100,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유진투자증권 <span style="color:var(--muted);font-weight:400;">(2026.10.28)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">100,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">대신증권 <span style="color:var(--muted);font-weight:400;">(2026.10.19, 목표가 4.9% 하향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">98,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">다올투자증권 <span style="color:var(--muted);font-weight:400;">(2026.10.28, 하향)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">73,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">신한투자증권 <span style="color:var(--muted);font-weight:400;">(2026.10.28)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">N/A</span></div>
+    </div>
+    <div class="source-note">※ 출처: StockHub 증권사 리포트 집계(최근 90일 9건 평균 100,222원, 최고 121,000원·최저 73,000원), 각 리포트 요약. 신한투자증권 목표가는 확인 불가. 컨센서스는 10/28 전후 발간분이 대부분이라 11/5~6 급락은 반영되지 않았을 수 있습니다.</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">한화시스템은 3분기에 매출 8,316억원(+30.1%), 영업이익 991억원(+60.5%)을 기록해 컨센서스(658억원)를 50% 넘게 웃돌며 본업의 이익 체력을 확인시켰습니다. 중동 천궁-II 다기능레이다 수출과 KF-21 등 국내 양산이 성장을 이끌고 있고, 수주잔고는 8조8,653억원으로 두터우며, 10월 30일에는 3,349.7억원 규모 초소형 SAR 군집위성 사업의 우선협상대상자로 선정되어 우주 사업의 가시성도 높아졌습니다. 적자 사업이던 필리조선소는 12월 7일 매각 완료 예정이고 한화오션 지분 유동화까지 더해 우주·AI 투자 재원을 마련했지만, 이 과정에서 3분기 연결 순이익은 38억원(-97.5%)으로 급감했고 PRS 정산에 따른 현금 유출 가능성과 3.4조원대 총차입금은 계속 점검해야 할 부담입니다. 주가는 11월 5~6일 이틀 연속 급락해 50,500원으로 52주 저점(44,750원) 근처까지 내려왔으며, 증권가 목표주가 평균(약 10만원) 대비 괴리는 크지만 컨센서스가 급락 이전에 형성됐고 PER이 70배를 웃돌아 밸류에이션 부담과 방산주 전반의 높은 변동성이 남아 있습니다. 4분기는 자체투자개발비가 집중되고 중동 매출의 본격화는 2027년으로 예상되므로, 이 종목은 단기 실적보다 2027년 이후 수출·우주 사업의 실현을 보고 변동성을 감내할 수 있는 중장기 투자자에게 적합하고, 단기 수익을 노리는 투자자에게는 업종 수급과 PRS·차입금 변수를 확인하며 접근하는 편이 안전합니다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다. 주가 추이 차트는 일별 시세 데이터를 확보하지 못해 포함하지 않았습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>
