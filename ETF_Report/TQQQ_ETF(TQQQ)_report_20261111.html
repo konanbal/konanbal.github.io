@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProShares UltraPro QQQ (TQQQ) 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Header */
+  .report-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 60%, var(--accent3) 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .nav-change.down { color: #fca5a5; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  /* Container */
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Holdings */
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+
+  /* Sector */
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  /* Performance */
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+
+  /* News */
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* Bull / Bear */
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Summary */
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  /* 추가: 출처 표기 */
+  .src-note { font-size: 10.5px; color: var(--muted); margin-top: 0.6rem; line-height: 1.5; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · TQQQ · NASDAQ</div>
+      <div class="etf-name">ProShares UltraPro QQQ</div>
+      <div class="etf-index">추종 지수: 나스닥100 일일 수익률의 3배(300%) | 운용사: ProShares</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 11일</div>
+      <div class="nav-display">$56.56</div>
+      <div class="nav-change down">▼ -1.77% (전일 대비)</div>
+      <div class="report-date" style="margin-top:2px;">2026.11.10 종가 · ProShares·Yahoo Finance</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산(AUM): $318억</span>
+    <span class="pill">📋 총보수: 0.78% (총비용 0.94%)</span>
+    <span class="pill">📅 설정일: 2010.02.09</span>
+    <span class="pill">💵 배당수익률: 0.86% (TTM)</span>
+    <span class="pill">🔄 분배 주기: 분기</span>
+    <span class="pill">⚡ 레버리지: 3배 · 매일 재조정</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">순자산가치(NAV)</div>
+      <div class="kpi-value">$56.56</div>
+      <div class="kpi-sub">괴리율: 약 0.00% (11/10 종가 = NAV)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">연초 이후 수익률(YTD, 10/31)</div>
+      <div class="kpi-value positive">+18.3%</div>
+      <div class="kpi-sub">나스닥100 대비 +5.3%p · 11/6 기준 -0.3%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수(Expense Ratio)</div>
+      <div class="kpi-value">0.78%</div>
+      <div class="kpi-sub">카테고리 평균: 0.96% · 총비용 0.94%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">일평균 거래량 (3개월)</div>
+      <div class="kpi-value">57.9M</div>
+      <div class="kpi-sub">52주 고/저: $88.09 / $37.32</div>
+    </div>
+  </div>
+  <div class="src-note">※ NAV·순자산·보수·수익률: ProShares 공식 페이지(가격 11/10, 수익률 10/31 월말 NAV 기준). 순보수 0.78%는 운용사 보수면제(웨이버)를 반영한 값이며, 페이지상 면제 기한이 2026.9.30로 표기돼 있어 갱신 여부 확인이 필요합니다. 카테고리 평균: AAII / 거래량·52주 범위: Investing.com / 11/6 YTD: TotalRealReturns.</div>
+
+  <!-- ===== 상위 구성 종목 ===== -->
+  <div class="card">
+    <div class="card-title">상위 구성 · 노출 (펀드 대비 %, 2026.11.10)</div>
+
+    <div class="holding-row">
+      <div class="holding-rank">1</div>
+      <div class="holding-name">나스닥100 총수익스와프 (10개 거래상대방 합산 · JP모건 27.50% ~ 모건스탠리 12.78%)</div>
+      <div class="holding-right">
+        <div class="holding-weight">≈233%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">2</div>
+      <div class="holding-name">나스닥100 E-mini 선물 (2026년 12월물, NQZ6)</div>
+      <div class="holding-right">
+        <div class="holding-weight">12.25%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:5.3%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">3</div>
+      <div class="holding-name">Apple (AAPL)</div>
+      <div class="holding-right">
+        <div class="holding-weight">4.63%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:2.0%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">4</div>
+      <div class="holding-name">NVIDIA (NVDA)</div>
+      <div class="holding-right">
+        <div class="holding-weight">3.71%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:1.6%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">5</div>
+      <div class="holding-name">Microsoft (MSFT)</div>
+      <div class="holding-right">
+        <div class="holding-weight">3.61%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:1.5%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">6</div>
+      <div class="holding-name">Amazon (AMZN)</div>
+      <div class="holding-right">
+        <div class="holding-weight">2.66%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:1.1%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">7</div>
+      <div class="holding-name">Advanced Micro Devices (AMD)</div>
+      <div class="holding-right">
+        <div class="holding-weight">2.11%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:0.9%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">8</div>
+      <div class="holding-name">Micron Technology (MU)</div>
+      <div class="holding-right">
+        <div class="holding-weight">2.06%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:0.9%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">9</div>
+      <div class="holding-name">Tesla (TSLA)</div>
+      <div class="holding-right">
+        <div class="holding-weight">1.82%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:0.8%"></div></div>
+      </div>
+    </div>
+    <div class="holding-row">
+      <div class="holding-rank">10</div>
+      <div class="holding-name">Meta Platforms (META)</div>
+      <div class="holding-right">
+        <div class="holding-weight">1.74%</div>
+        <div class="holding-bar-wrap"><div class="holding-bar" style="width:0.7%"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      총 보유 종목 수: 126개 (주식·스와프·선물·현금 포함) | 목표 실질 노출: 순자산의 300% — 주식 직접 보유분에 스와프와 선물을 더해 3배를 맞추는 구조
+    </div>
+    <div class="src-note">※ 출처: ProShares 공식 페이지(2026.11.10 보유 내역), 보유 종목 수는 stockanalysis.com. 막대 길이는 스와프(233%)를 100%로 놓은 상대 크기입니다. ProShares 페이지에는 주식 8개만 표시돼 있어 상위 10개는 스와프·선물을 포함해 구성했습니다.</div>
+  </div>
+
+  <!-- ===== 섹터 배분 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">섹터 배분 (나스닥100 기준 · 실질 노출은 ×3)</div>
+      <div class="sector-item">
+        <div class="sector-name">정보기술 (IT)</div>
+        <div class="sector-right">
+          <div class="sector-pct">58.2%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#2196f3;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">커뮤니케이션 서비스</div>
+        <div class="sector-right">
+          <div class="sector-pct">12.2%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:21%;background:#607d8b;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">경기소비재</div>
+        <div class="sector-right">
+          <div class="sector-pct">10.5%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:18%;background:#e91e63;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">필수소비재</div>
+        <div class="sector-right">
+          <div class="sector-pct">6.0%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:10%;background:#e91e63;opacity:.6;"></div></div>
+        </div>
+      </div>
+      <div class="sector-item">
+        <div class="sector-name">헬스케어</div>
+        <div class="sector-right">
+          <div class="sector-pct">3.0%</div>
+          <div class="sector-bar-wrap"><div class="sector-bar" style="width:5%;background:#4caf50;"></div></div>
+        </div>
+      </div>
+      <div class="src-note">※ 출처: MarketXLS(QQQ 섹터 배분, 기준일 미표기). TQQQ는 같은 지수를 3배로 추종하므로 IT 실질 노출은 순자산의 약 175% 수준입니다(추정치). 반도체 비중은 QQQM 기준 30.2%입니다(MarketBeat).</div>
+    </div>
+
+    <!-- ===== 수익률 성과 ===== -->
+    <div class="card">
+      <div class="card-title">기간별 수익률 비교 (2026.10.31 월말 · NAV)</div>
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>기간</th>
+            <th>TQQQ</th>
+            <th>나스닥100(1배)</th>
+            <th>차이</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1개월</td><td class="negative">-20.51%</td><td>-6.63%</td><td class="negative">-13.9p</td></tr>
+          <tr><td>3개월</td><td class="negative">-3.82%</td><td>+0.54%</td><td class="negative">-4.4p</td></tr>
+          <tr><td>6개월</td><td class="negative">-2.08%</td><td>+3.72%</td><td class="negative">-5.8p</td></tr>
+          <tr><td>YTD</td><td class="positive">+18.30%</td><td>+12.98%</td><td class="positive">+5.3p</td></tr>
+          <tr><td>1년</td><td class="positive">+6.95%</td><td>+10.47%</td><td class="negative">-3.5p</td></tr>
+          <tr><td>3년(연환산)</td><td class="positive">+57.45%</td><td>N/A</td><td>N/A</td></tr>
+          <tr><td>10년(연환산)</td><td class="positive">+38.29%</td><td>N/A</td><td>N/A</td></tr>
+          <tr><td>설정이후(연환산)</td><td class="positive">+41.02%</td><td>N/A</td><td>N/A</td></tr>
+        </tbody>
+      </table>
+      <div class="src-note">※ TQQQ: ProShares(NAV 기준). 나스닥100: NEOS(QQQI) 공시 지수 성과(10/31). '차이'는 1배 지수 대비 단순 차이로, 3배 목표와의 괴리를 보려면 지수×3과 비교해야 합니다(예: YTD 지수×3 = +38.9% vs 실제 +18.3%).</div>
+    </div>
+  </div>
+
+  <!-- ===== 최근 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.11.05 · Yahoo Finance(ETF 사례 분석), BigGo Finance</span>
+      </div>
+      <div class="news-title">나스닥100 하루 -6.36% → TQQQ 종가 -18.92%, 순자산 하루 만에 $335억 → $271억</div>
+      <div class="news-summary">AI 데이터센터 투자 둔화 우려로 반도체가 폭락한 날, TQQQ의 NAV는 19.10% 떨어졌습니다. 3배 노출을 다시 맞추기 위해 장 마감 무렵 스와프 노출을 대규모로 줄여야 했고, 레버리지 ETF 전체가 그날 하락을 키웠다는 분석도 나왔습니다. 거래량은 2.3억 주로 전일의 두 배를 넘었습니다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-negative">리스크</span>
+        <span class="news-date">2026.10.30~11.02 · BigGo Finance, Yahoo Finance(24/7 Wall St.)</span>
+      </div>
+      <div class="news-title">10월 -20.5% 급락 후 저가매수 $9.9억 유입 — 다음 거래일 다시 -4.1%</div>
+      <div class="news-summary">10월 30일 하루 유입액 $9.93억은 2025년 4월 이후 최대였지만, 11월 2일 기술주 매도가 재개되며 매수자들이 곧바로 손실 구간에 들어갔습니다. 레버리지 ETF에서는 '떨어질 때 사기'가 지수 ETF보다 훨씬 위험하다는 점을 보여준 사례입니다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.11.06 · Benzinga, TotalRealReturns</span>
+      </div>
+      <div class="news-title">"3배 레버리지의 복리 함정" — 2026년 TQQQ, 1배 QQQ보다 뒤처져</div>
+      <div class="news-summary">11월 6일까지 연초 이후 총수익률은 TQQQ -0.31%, QQQ +7.17%입니다. 일일 재조정 구조 탓에 변동성이 큰 장에서는 장기 수익률이 지수×3에 크게 못 미치며, 6월 2일 고점 대비 낙폭도 -39.8%에 이릅니다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-positive">호재</span>
+        <span class="news-date">2026.11.06~09 · Yahoo Finance, CNBC</span>
+      </div>
+      <div class="news-title">반도체 반등에 이틀간 +14% 회복 — 11/9 나스닥 +2.74%, 반도체 ETF(SOXX) +7%대</div>
+      <div class="news-summary">유가 급락과 낙폭 과대 인식으로 AMD(+13%)·브로드컴(+9%) 중심의 반등이 나오며 TQQQ는 11/5 종가 $50.47에서 11/9 $57.58로 회복했습니다. 다만 11/10에는 예상보다 높은 CPI와 엔비디아 약세로 다시 -1.77% 밀렸습니다.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta">
+        <span class="news-tag tag-neutral">중립</span>
+        <span class="news-date">2026.11.04 · Yahoo Finance(보유 변동 데이터)</span>
+      </div>
+      <div class="news-title">TQQQ, 하루 $3.5억어치 주식 순매수 — 97개 종목 비중 확대</div>
+      <div class="news-summary">자금 유입과 리밸런싱으로 애플($2,960만)·엔비디아($2,800만)·마이크로소프트($2,390만) 순으로 매수했습니다. 3배 구조 특성상 상위 10개 종목 집중도는 약 47.2%로, 나스닥100 지수(47.8%, ChartRow)와 비슷한 수준입니다.</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">📈</span><span>꾸준히 오르는 상승장에서는 복리가 오히려 유리하게 작용합니다. 설정 이후 연환산 +41.0%, 10년 연환산 +38.3%(NAV)로 장기 성과 자체는 압도적이었습니다.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💡</span><span>순자산 $318억, 일평균 거래량 약 5,800만 주로 레버리지 ETF 중 가장 크고 유동성이 좋습니다. 괴리율도 사실상 0%여서 단기 매매 비용이 낮습니다.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌟</span><span>11월 초 급락으로 6월 고점 대비 약 -40%까지 빠진 상태입니다. AI 투자 우려가 진정되고 반도체 반등이 이어지면 반등 탄력이 지수의 약 3배로 나타납니다(11/6~9 이틀 +14%).</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🧮</span><span>마진 대출 없이 3배 노출을 얻을 수 있고, 최대 손실이 투자 원금으로 제한됩니다. 마진콜이나 추가 증거금 위험이 없습니다.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><b>변동성 손실:</b> 올해 YTD 지수×3은 +38.9%였지만 실제 TQQQ는 +18.3%로, 약 20%p를 일일 재조정 비용으로 잃었습니다. 6개월 기준으로는 지수가 올랐는데도 TQQQ는 마이너스입니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><b>꼬리 위험:</b> 지수가 하루 -6% 빠지면 TQQQ는 -19%가 됩니다. 2022년 최대 낙폭은 -81.7%였고, 지수가 하루 -33% 이상 빠지면 이론상 원금 전액 손실도 가능합니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🔻</span><span><b>매크로 역풍:</b> 11/10 CPI가 예상보다 높아 12월 금리 인상 가능성이 크게 반영됐고, AI 설비투자 정점론과 엔비디아 CEO 조사 등 기술주 악재가 겹쳐 있습니다.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">💸</span><span><b>비용:</b> 순보수 0.78%(총 0.94%)에 스와프 금융비용이 더해집니다. 고금리일수록 레버리지 유지 비용이 커지며, 보수면제 기한(9/30) 이후 실제 보수도 확인이 필요합니다.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 배당/분배금 ===== -->
+  <div class="card">
+    <div class="card-title">배당 / 분배금 현황</div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>분배 기준일(Ex)</th>
+          <th>분배금(주당)</th>
+          <th>연환산 수익률(현재가 기준)</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>2026.09.23</td><td>$0.1561</td><td>1.10%</td><td>9/29 지급</td></tr>
+        <tr><td>2026.06.24</td><td>$0.1712</td><td>1.21%</td><td>6/30 지급</td></tr>
+        <tr><td>2026.03.25</td><td>$0.0716</td><td>0.51%</td><td>3/31 지급</td></tr>
+        <tr><td>2025.12.24</td><td>$0.0855</td><td>0.60%</td><td>12/31 지급</td></tr>
+      </tbody>
+    </table>
+    <div class="src-note">※ 최근 4회 합계 $0.484 → 현재가 대비 TTM 수익률 0.86%. 다음 기준일은 2026.12.24 전후로 추정(Dividend Vision 추정, 공식 발표 아님). 출처: Dividend Vision, StockScan, stockanalysis.com. 분배금은 주로 보유 현금·국채 이자에서 나오며 금액 변동이 큽니다.</div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      TQQQ는 나스닥100의 '하루' 수익률 3배를 목표로 하는 세계 최대 레버리지 ETF입니다(순자산 $318억). 실제 노출은 주식 직접 보유에 10개 은행과의 총수익스와프(약 233%), 나스닥100 선물(약 12%)을 더해 순자산의 300%를 맞추고, 이 비율을 매일 장 마감 때 다시 조정합니다. 상위 노출은 애플·엔비디아·마이크로소프트 순이고 IT 비중이 약 58%여서, 사실상 '미국 대형 기술주·반도체를 3배로 사는 상품'입니다.<br><br>
+      2026년 성과는 이 구조의 양면을 그대로 보여줍니다. 10월 말까지 YTD +18.3%로 지수(+13.0%)보다는 높지만 지수×3(+38.9%)에는 크게 못 미쳤습니다. 10월 한 달 -20.5%, 11월 5일 하루 -18.9% 같은 급락이 이어지며 11월 6일 기준 연초 대비 수익률은 사실상 0%로 내려왔고, 6월 고점 대비 낙폭은 약 40%입니다. 지수가 오르내리며 제자리걸음을 하면 TQQQ는 계속 깎이는 '변동성 손실'이 올해 가장 큰 리스크로 드러났습니다.<br><br>
+      단기적으로 주목할 변수는 ① 12월 FOMC 금리 인상 여부(11/10 CPI 쇼크), ② AI 설비투자 둔화 논란과 엔비디아 이슈, ③ 반도체 반등이 이어지는지입니다. 추세가 분명한 상승장이 오면 3배 탄력이 크게 작동하지만, 지금처럼 하루 변동폭이 큰 장에서는 방향을 맞혀도 손실이 날 수 있습니다.<br><br>
+      비용(순 0.78%)은 동종 평균(0.96%)보다 낮고 유동성은 최상급이어서, 단기 방향성 매매나 포트폴리오 일부의 전술적 레버리지 수단으로는 가장 효율적인 선택지입니다. 반면 장기 적립식 '보유용'으로는 1배 QQQ나 2배 QLD와 비교해 변동성 손실을 감내할 수 있는지 먼저 따져봐야 합니다. 비중을 작게 유지하고, 리밸런싱이나 손절 원칙을 미리 정할 수 있는 숙련 투자자에게 적합합니다.
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다.
+      ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다.
+      레버리지 ETF는 하루 단위로 목표 배율을 추구하므로 보유 기간이 길어질수록 지수 배율과 수익률이 크게 달라질 수 있습니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

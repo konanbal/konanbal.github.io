@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOXL 투자보고서</title>
+<style>
+  :root {
+    --primary: #0a2342;
+    --accent: #1e6091;
+    --accent2: #2196f3;
+    --accent3: #00b4d8;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 60%, var(--accent3) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .etf-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; border: 1px solid rgba(255,255,255,0.4); }
+  .etf-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .etf-index { font-size: 13px; opacity: 0.8; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .nav-display { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .nav-change { font-size: 13px; margin-top: 2px; }
+  .nav-change.up { color: #86efac; }
+  .nav-change.down { color: #fca5a5; }
+  .meta-pills { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .holding-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .holding-row:last-child { border-bottom: none; }
+  .holding-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .holding-name { flex: 1; margin-left: 10px; font-weight: 500; }
+  .holding-right { display: flex; align-items: center; gap: 12px; }
+  .holding-weight { font-weight: 700; color: var(--accent); font-size: 14px; }
+  .holding-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .holding-bar { height: 6px; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 3px; }
+
+  .sector-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .sector-item:last-child { border-bottom: none; }
+  .sector-name { flex: 1; }
+  .sector-right { display: flex; align-items: center; gap: 10px; }
+  .sector-pct { font-weight: 700; width: 48px; text-align: right; }
+  .sector-bar-wrap { width: 100px; height: 6px; background: var(--border); border-radius: 3px; }
+  .sector-bar { height: 6px; border-radius: 3px; }
+
+  .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .perf-table th { background: var(--primary); color: white; padding: 8px 12px; font-size: 11px; text-align: center; }
+  .perf-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table tr:nth-child(even) td { background: #f8fafc; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+  .note { font-size: 11.5px; color: var(--muted); margin-top: 0.75rem; line-height: 1.6; }
+
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .warn-box { background: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid var(--amber); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 13px; line-height: 1.7; }
+  .warn-box b { color: #92400e; }
+
+  .summary-box { background: linear-gradient(135deg, #e8f4fd 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .summary-text p + p { margin-top: 0.75rem; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .sources { font-size: 11px; color: var(--muted); margin-top: 0.75rem; line-height: 1.7; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="etf-badge">ETF · SOXL · NYSE ARCA · 3X LEVERAGED</div>
+      <div class="etf-name">Direxion Daily Semiconductor Bull 3X Shares</div>
+      <div class="etf-index">추종 지수: NYSE Semiconductor Index (일간 +300%) | 운용사: Direxion (Rafferty Asset Management)</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 11일 (11/10 종가 기준)</div>
+      <div class="nav-display">$56.06</div>
+      <div class="nav-change down">▼ -0.25% (전일 대비) · 52주 고점 대비 -81.4%</div>
+    </div>
+  </div>
+  <div class="meta-pills">
+    <span class="pill">💰 순자산(AUM): 약 $11.3B (11/6 기준)</span>
+    <span class="pill">📋 총보수: 0.75% (순)</span>
+    <span class="pill">📅 설정일: 2010.03.11</span>
+    <span class="pill">💵 배당수익률: 약 0.17% (TTM)</span>
+    <span class="pill">🔄 분배 주기: 분기</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== KPI ===== -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">시장가격 (11/10 종가)</div>
+      <div class="kpi-value">$56.06</div>
+      <div class="kpi-sub">괴리율: 통상 ±0.1% 이내 (최근 공시 NAV N/A)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">연초 이후 수익률(YTD)</div>
+      <div class="kpi-value positive">+33.5%</div>
+      <div class="kpi-sub">연초가 $42.03 · 1개월 -59.9%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">총보수(Expense Ratio)</div>
+      <div class="kpi-value">0.75%</div>
+      <div class="kpi-sub">카테고리 평균: 1.12% · TER 0.89~0.91%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">일평균 거래량</div>
+      <div class="kpi-value">140.7M</div>
+      <div class="kpi-sub">52주 고/저: $302.00 / $28.12</div>
+    </div>
+  </div>
+
+  <!-- ===== 레버리지 구조 경고 ===== -->
+  <div class="warn-box">
+    <b>⚠️ 구조 이해가 먼저입니다.</b> SOXL은 반도체 주식을 직접 3배로 사는 펀드가 아니라, 스왑 계약·현금·일부 주식으로 <b>“하루” 수익률의 3배</b>를 맞추고 매일 장 마감에 재조정합니다.
+    그래서 여러 날 보유하면 수익률이 3배와 크게 달라집니다. 실제로 11월 5일 기준 같은 지수를 1배로 추종하는 SOXX는 연초 대비 <b>+31.6%</b>였지만, SOXL은 같은 날 <b>-2.5%</b>(종가 $40.99)였습니다. 상반기 급등 후 급락이 반복되며 변동성 손실(volatility decay)이 수익을 거의 다 갉아먹은 셈입니다.
+  </div>
+
+  <!-- ===== 상위 구성 종목 ===== -->
+  <div class="card">
+    <div class="card-title">상위 10개 구성 종목 (기초지수 노출 기준)</div>
+
+    <div class="holding-row"><div class="holding-rank">1</div><div class="holding-name">Advanced Micro Devices (AMD)</div><div class="holding-right"><div class="holding-weight">10.1%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:100%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">2</div><div class="holding-name">NVIDIA (NVDA)</div><div class="holding-right"><div class="holding-weight">8.7%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:86%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">3</div><div class="holding-name">Micron Technology (MU)</div><div class="holding-right"><div class="holding-weight">7.8%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:77%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">4</div><div class="holding-name">Broadcom (AVGO)</div><div class="holding-right"><div class="holding-weight">7.3%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:72%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">5</div><div class="holding-name">Texas Instruments (TXN)</div><div class="holding-right"><div class="holding-weight">5.0%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:50%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">6</div><div class="holding-name">TSMC ADR (TSM)</div><div class="holding-right"><div class="holding-weight">5.0%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:50%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">7</div><div class="holding-name">Analog Devices (ADI)</div><div class="holding-right"><div class="holding-weight">4.9%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:49%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">8</div><div class="holding-name">Applied Materials (AMAT)</div><div class="holding-right"><div class="holding-weight">4.2%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:42%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">9</div><div class="holding-name">Monolithic Power Systems (MPWR)</div><div class="holding-right"><div class="holding-weight">4.2%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:42%"></div></div></div></div>
+    <div class="holding-row"><div class="holding-rank">10</div><div class="holding-name">NXP Semiconductors (NXPI)</div><div class="holding-right"><div class="holding-weight">4.1%</div><div class="holding-bar-wrap"><div class="holding-bar" style="width:41%"></div></div></div></div>
+
+    <div style="margin-top:0.75rem; font-size:12px; color:var(--muted);">
+      상위 10개 합산 비중: 61.3% | 지수 구성 종목 수: 30개<br>
+      ※ 비중은 2026.07.31 SEC 공시 보유내역을 이후 주가로 환산한 추정치(ChartRow)이며, 주식 노출분 내 비중입니다.
+      펀드 실제 장부는 ICE 반도체지수 스왑(복수 계약, 합계 200%대), 단기국채 MMF(Dreyfus·Goldman) 등으로 구성되어 상위 10개 합이 100%를 크게 넘습니다.
+    </div>
+  </div>
+
+  <!-- ===== 섹터 배분 + 수익률 ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">세부 업종 배분 (상위 10 기준)</div>
+      <div class="sector-item"><div class="sector-name">GPU·CPU 로직 (AMD·NVDA)</div><div class="sector-right"><div class="sector-pct">18.8%</div><div class="sector-bar-wrap"><div class="sector-bar" style="width:49%;background:#2196f3;"></div></div></div></div>
+      <div class="sector-item"><div class="sector-name">아날로그·전력 (TXN·ADI·MPWR·NXPI)</div><div class="sector-right"><div class="sector-pct">18.2%</div><div class="sector-bar-wrap"><div class="sector-bar" style="width:47%;background:#9c27b0;"></div></div></div></div>
+      <div class="sector-item"><div class="sector-name">메모리 (MU)</div><div class="sector-right"><div class="sector-pct">7.8%</div><div class="sector-bar-wrap"><div class="sector-bar" style="width:20%;background:#f44336;"></div></div></div></div>
+      <div class="sector-item"><div class="sector-name">네트워크·커스텀칩 (AVGO)</div><div class="sector-right"><div class="sector-pct">7.3%</div><div class="sector-bar-wrap"><div class="sector-bar" style="width:19%;background:#ff9800;"></div></div></div></div>
+      <div class="sector-item"><div class="sector-name">파운드리 (TSM)</div><div class="sector-right"><div class="sector-pct">5.0%</div><div class="sector-bar-wrap"><div class="sector-bar" style="width:13%;background:#4caf50;"></div></div></div></div>
+      <div class="sector-item"><div class="sector-name">반도체 장비 (AMAT)</div><div class="sector-right"><div class="sector-pct">4.2%</div><div class="sector-bar-wrap"><div class="sector-bar" style="width:11%;background:#e91e63;"></div></div></div></div>
+      <div class="sector-item"><div class="sector-name">기타 (11~30위 종목)</div><div class="sector-right"><div class="sector-pct">38.7%</div><div class="sector-bar-wrap"><div class="sector-bar" style="width:100%;background:#607d8b;"></div></div></div></div>
+      <div class="note">GICS 기준으로는 100% 정보기술(반도체). 지역 노출은 북미 약 86%, 유럽 약 8%, 아시아 약 5% 수준(TradingView 과거 집계).</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">기간별 수익률 비교</div>
+      <table class="perf-table">
+        <thead>
+          <tr><th>기간</th><th>SOXL</th><th>SOXX(1배)</th><th>3배 단순환산 대비</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1개월</td><td class="negative">-59.9%</td><td class="negative">-26.8%</td><td class="positive">+20.4p</td></tr>
+          <tr><td>3개월</td><td class="negative">-59.9%</td><td class="negative">-23.3%</td><td class="positive">+10.0p</td></tr>
+          <tr><td>YTD (11/5)</td><td class="negative">-2.5%</td><td class="positive">+31.6%</td><td class="negative">-97.3p</td></tr>
+          <tr><td>YTD (11/10)</td><td class="positive">+33.5%</td><td>N/A</td><td>-</td></tr>
+          <tr><td>1년</td><td class="positive">+24.8%</td><td class="positive">+35.6%</td><td class="negative">-82.0p</td></tr>
+          <tr><td>5년(누적)</td><td class="negative">-0.2%</td><td class="positive">+134.8%</td><td class="negative">-404.6p</td></tr>
+          <tr><td>10년(연환산)</td><td class="positive">+35.3%</td><td>N/A</td><td>-</td></tr>
+          <tr><td>설정이후(연환산)</td><td class="positive">+30.9%</td><td>N/A</td><td>-</td></tr>
+        </tbody>
+      </table>
+      <div class="note">SOXX는 SOXL과 같은 NYSE 반도체지수를 1배로 추종하는 현물 ETF로, 벤치마크 대용으로 사용. “3배 단순환산 대비” = SOXL − (SOXX×3). 하락 추세에선 복리 효과로 3배보다 덜 빠지지만, 등락이 반복된 구간(YTD·1년·5년)에서는 3배에 크게 못 미칩니다. 기준일이 소스마다 하루 이틀 차이 날 수 있습니다.</div>
+    </div>
+  </div>
+
+  <!-- ===== 최근 뉴스 ===== -->
+  <div class="card">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.05</span></div>
+      <div class="news-title">필라델피아 반도체지수 하루 -12.25%, 역대 두 번째 최대 낙폭</div>
+      <div class="news-summary">SOX가 10,268.65에서 9,011.14로 급락하며 2020년 3월 이후 최대 하락. 반도체주 시총 약 1.5조 달러가 하루에 증발했고, 장비·메모리주 낙폭이 가장 컸음. SOXL은 이날 $40.99로 마감.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.05</span></div>
+      <div class="news-title">마이크론 -17.5%… 대만 45억 달러 메모리 공장 계획 보류 보도</div>
+      <div class="news-summary">중간선거 이후 AI 인프라 투자 둔화 우려가 커진 가운데 블룸버그가 마이크론의 대만 신규 공장 보류를 보도. 마이크론은 한 달간 약 40% 하락했으며, 메모리 가격 상승 지속성에 대한 의구심이 업종 전반으로 확산.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.11.09</span></div>
+      <div class="news-title">SOXL 하루 +22.25% 급반등, $56.20 마감</div>
+      <div class="news-summary">투매 이후 저가 매수세 유입으로 AMD(+13.3%) 등 대형 반도체주가 반등. 다음 날(11/10)은 -0.25%로 숨고르기. 단, 20일 이동평균선(약 $141) 대비로는 여전히 크게 낮은 수준.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.10.26</span></div>
+      <div class="news-title">하락장 속 1개월 +85억 달러 순유입… 연간 기준으로는 -29억 달러 유출</div>
+      <div class="news-summary">10월 급락 구간에 개인 투자자들의 ‘물타기성’ 매수가 대거 유입. 그러나 이후 추가 급락으로 해당 자금 상당수가 손실 구간에 놓임. 자금 유입 자체가 바닥 신호는 아니라는 점에 유의.</div>
+    </div>
+
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.09</span></div>
+      <div class="news-title">“6월 30일 이후 -83%” 셀(Sell) 의견 유지 (Seeking Alpha)</div>
+      <div class="news-summary">SOXX·QQQ·SPY 대비 압도적 언더퍼폼을 지적. 기술적으로도 10월 12일 50일선 이탈, 10월 19일 10일·50일선 데드크로스가 발생해 하락 추세 신호가 이어지는 중(Tickeron).</div>
+    </div>
+  </div>
+
+  <!-- ===== Bull / Bear ===== -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">투자 매력 포인트 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">📈</span><span><b>펀더멘털은 아직 견조.</b> 마이크론 FY26 4분기 매출 542억 달러(전년비 +379%). SK하이닉스는 이번 10년 내내 생산능력 제약을 언급했고, 마이크론도 고객이 중기 수요의 50~66%만 공급받는 상황이라고 밝힘.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💡</span><span><b>지수는 ‘봄 수준’으로 되돌림.</b> 11/5 급락으로 SOX는 4월 중순 수준으로 돌아갔을 뿐 신저가는 아님. 밸류에이션 부담이 상당 부분 해소됐다는 시각도 존재.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">🌟</span><span><b>추세 반전 시 복리 가속.</b> 일간 3배 구조는 한 방향으로 꾸준히 오르는 장에서 3배 이상을 냄(2026년 6월 기준 1년 +938%). 11/9 하루 +22%처럼 반등 탄력도 큼.</span></div>
+        <div class="factor-item bull"><span class="factor-icon">💧</span><span><b>비용·유동성 경쟁력.</b> 순보수 0.75%로 레버리지 카테고리 평균(1.12%)보다 저렴하고, 일평균 1억 4천만 주 거래로 매매 비용(호가 스프레드)이 매우 낮음.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">⚠️</span><span><b>변동성 손실이 실제로 발생 중.</b> 11/5 기준 1배 ETF는 +31.6%인데 SOXL은 -2.5%. 5년 누적은 -0.2%로, 같은 기간 1배(+135%)와 정반대. 2022년에는 고점 대비 -91%까지 하락한 이력.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">📉</span><span><b>AI 설비투자 회의론.</b> 중간선거 이후 데이터센터 투자 둔화 우려, 메모리 공장 보류, 메모리 압축 기술(TurboQuant) 등 수요 둔화 논리가 부각. BofA는 반도체주 추가 10% 하락 가능성을 경고.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🔻</span><span><b>하락 추세 진행형.</b> 1개월 -60%, 52주 고점 대비 -81%. 이동평균 역배열과 모멘텀 지표 음전환으로 기술적 바닥 확인 전 단계.</span></div>
+        <div class="factor-item bear"><span class="factor-icon">🧩</span><span><b>집중·구조 리스크.</b> 30종목, 상위 10개가 약 61%로 소수 대형주 의존도가 높음. 노출 대부분이 스왑이라 거래상대방 리스크와 스왑 금융비용(TER 0.9%대)이 추가로 존재.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 배당/분배금 ===== -->
+  <div class="card">
+    <div class="card-title">배당 / 분배금 현황</div>
+    <table class="perf-table">
+      <thead>
+        <tr><th>분배 기준일(배당락)</th><th>분배금(주당)</th><th>배당수익률(환산)</th><th>비고</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2026.09.22</td><td>$0.0929</td><td>0.17% (TTM)</td><td>지급 09.29 · 최근 12개월 유일한 분배</td></tr>
+        <tr><td>2025.09.23</td><td>$0.0101</td><td>-</td><td>지급 09.30</td></tr>
+        <tr><td>2025.06.24</td><td>$0.0680</td><td>-</td><td>지급 07.01</td></tr>
+        <tr><td>2025.03.25</td><td>$0.0648</td><td>-</td><td>지급 04.01</td></tr>
+        <tr><td>2024.12.23</td><td>$0.0768</td><td>-</td><td>지급 12.31</td></tr>
+      </tbody>
+    </table>
+    <div class="note">TTM 수익률 = 최근 12개월 분배금 $0.0929 ÷ 11/10 종가 $56.06. 분배 주기는 분기이나 2025.12~2026.06 사이에는 분배 기록이 없음. 분배금은 사실상 의미 없는 수준으로, 인컴 목적에는 맞지 않음.</div>
+  </div>
+
+  <!-- ===== 종합 요약 ===== -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      <p>SOXL은 미국 상장 대형 반도체 30종목으로 구성된 NYSE 반도체지수의 <b>하루 수익률 3배</b>를 목표로 하는 레버리지 ETF입니다. 2026년 상반기 AI·메모리 슈퍼사이클에 힘입어 반도체지수가 6개월 만에 두 배가 되자 SOXL은 6월 말 $302까지 치솟았지만, 이후 지수가 고점 대비 30% 안팎 조정을 받는 동안 SOXL은 -80% 넘게 무너졌습니다. 특히 11월 5일 지수가 하루 -12.25% 급락하면서, 연초 대비로는 1배 ETF가 +31.6%인데 SOXL은 마이너스로 돌아서는 상황까지 나왔습니다. 이것이 일간 리셋 레버리지 ETF의 본질적인 경로 의존성입니다.</p>
+      <p>비용 면에서는 순보수 0.75%로 동종 레버리지 상품 중 저렴하고, 거래량이 압도적이라 단기 매매 도구로서의 완성도는 높습니다. 반면 펀더멘털 측면의 반론도 분명합니다. 메모리 공급은 여전히 빠듯하고 마이크론 등 주요 기업 실적은 사상 최대 수준이며, 지수 자체는 봄 수준으로 되돌아간 것이라 “과열 해소”로 볼 여지도 있습니다. 다만 중간선거 이후 AI 설비투자 회의론, 메모리 가격 정점 논쟁, 12월 마이크론 실적이라는 굵직한 변수가 남아 있어 단기 변동성은 매우 높게 유지될 가능성이 큽니다.</p>
+      <p>정리하면, SOXL은 반도체 업황에 대한 <b>장기 보유 수단이 아니라 단기 방향성 베팅 도구</b>입니다. 반도체 장기 투자가 목적이라면 같은 지수를 1배로 추종하는 SOXX(보수 0.33%)나 SMH가 구조적으로 유리합니다. SOXL을 활용한다면 ① 전체 자산 중 소액으로 제한하고, ② 진입 전 손절·익절 기준을 정하며, ③ 추세(이동평균 회복 여부)와 12월 마이크론 실적, AI 설비투자 가이던스를 확인한 뒤 접근하는 것이 바람직합니다. 고점 대비 -81%라는 ‘싸 보이는 가격’은 레버리지 ETF에서는 반등 시 원금 회복을 보장하지 않는다는 점을 반드시 기억해야 합니다.</p>
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다.
+      ETF 투자는 원금 손실 가능성이 있으며, 모든 투자 결정과 그 책임은 투자자 본인에게 있습니다.
+      레버리지 ETF는 하루 단위 목표 수익률을 추구하므로 장기 보유 시 기초지수 수익률의 3배와 크게 다를 수 있습니다.
+    </div>
+    <div class="sources">
+      주요 출처: ChartRow(가격·수익률·보유종목 추정), Stock Analysis(보수·분배금 내역), Fox Business(11/6 가격·AUM·거래량), ETF Central(자금흐름·TER),
+      ETF Database(카테고리 평균 보수), iShares·AlphaMaven·Simply Wall St(SOXX 성과), 24/7 Wall St(11/5 SOX 급락), Trefis(마이크론), Tickeron·Seeking Alpha(기술적 분석·의견), TheStreet(SK하이닉스 코멘트).
+      수치는 소스별 기준일이 조금씩 다를 수 있습니다.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IREN 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">IREN · NASDAQ</div>
+      <div class="company-name">IREN Limited</div>
+      <div class="company-desc">비트코인 채굴에서 AI 클라우드(GPU 임대·데이터센터)로 전환 중인 수직계열화 ‘네오클라우드’ — 마이크로소프트·엔비디아 등 15개 고객</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 11일</div>
+      <div class="price-display">$19.73</div>
+      <div class="price-change down">▼ $1.68 (-7.85%) (전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.11.10 미국 정규장 종가(한국시간 11.11 새벽) · 출처: Yahoo Finance, Nasdaq</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 $8.4B</span>
+    <span class="rating-pill">🏢 섹터: AI 인프라 · 네오클라우드 / 비트코인 채굴</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Moderate Buy (22명 중 매수 16·보유 5·매도 1)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출</div>
+      <div class="kpi-value">$228M</div>
+      <div class="kpi-sub">YoY -5.0% · QoQ +66% (Q1 FY27)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">29%</div>
+      <div class="kpi-sub">조정 EBITDA 마진 · 전분기 대비 +15.1%p (GAAP 순손실률 -116%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">$64.57</div>
+      <div class="kpi-sub">현재가 대비 +227% (집계처별 $56.69~64.57, 하향 갱신 중)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value" style="font-size:19px;">$17.16~$70.71</div>
+      <div class="kpi-sub">현재가 위치: 5% (저점 2026.11.05 장중 · 고점일 확인 불가)</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: 실적 — IREN Q1 FY27 실적발표(SEC 8-K), stockhub(YoY) · 목표주가 — MarketBeat(11.10), Yahoo Finance · 52주 범위·시총 — Yahoo Finance, Morningstar (기준일 2026.11.10)</div>
+
+  <!-- ②-1 주가 추이 차트 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📉 주가 추이 (최근 구간 + 52주 최고/최저 기준선)</div>
+    <div style="padding:4px 0;">
+      <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dc2626" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="10" y1="27.3" x2="870" y2="27.3" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="23.3" font-size="9" fill="#6b7280" text-anchor="end">52주 최고 $70.71</text><line x1="10" y1="160.7" x2="870" y2="160.7" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="171.7" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 $17.16(장중) (2026.11.05)</text>
+  <path d="M10.0,174 L10.0,99.1 L27.2,104.3 L44.4,98.3 L61.6,104.8 L78.8,102.5 L96.0,115.1 L113.2,111.0 L130.4,111.7 L147.6,104.8 L164.8,99.7 L182.0,92.1 L199.2,86.5 L216.4,90.4 L233.6,94.7 L250.8,94.3 L268.0,95.9 L285.2,99.9 L302.4,97.3 L319.6,95.1 L336.8,87.2 L354.0,85.8 L371.2,82.5 L388.4,86.2 L405.6,88.5 L422.8,93.5 L440.0,99.5 L457.2,100.4 L474.4,101.6 L491.6,102.2 L508.8,99.4 L526.0,102.6 L543.2,100.6 L560.4,107.1 L577.6,114.5 L594.8,115.8 L612.0,116.7 L629.2,116.7 L646.4,127.3 L663.6,127.7 L680.8,136.2 L698.0,134.3 L715.2,137.1 L732.4,134.1 L749.6,139.9 L766.8,141.4 L784.0,140.1 L801.2,135.1 L818.4,131.6 L835.6,138.0 L852.8,143.8 L870.0,148.6 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,99.1 27.2,104.3 44.4,98.3 61.6,104.8 78.8,102.5 96.0,115.1 113.2,111.0 130.4,111.7 147.6,104.8 164.8,99.7 182.0,92.1 199.2,86.5 216.4,90.4 233.6,94.7 250.8,94.3 268.0,95.9 285.2,99.9 302.4,97.3 319.6,95.1 336.8,87.2 354.0,85.8 371.2,82.5 388.4,86.2 405.6,88.5 422.8,93.5 440.0,99.5 457.2,100.4 474.4,101.6 491.6,102.2 508.8,99.4 526.0,102.6 543.2,100.6 560.4,107.1 577.6,114.5 594.8,115.8 612.0,116.7 629.2,116.7 646.4,127.3 663.6,127.7 680.8,136.2 698.0,134.3 715.2,137.1 732.4,134.1 749.6,139.9 766.8,141.4 784.0,140.1 801.2,135.1 818.4,131.6 835.6,138.0 852.8,143.8 870.0,148.6" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="148.6" r="3.5" fill="#dc2626"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-08-21</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-02</text>
+</svg>
+      <!-- assets/generate_price_chart.py 실행 결과(SVG 전체)를 이 자리에 그대로 붙여넣는다.
+           데이터를 확보하지 못한 경우 이 카드 전체를 생략한다 (임의 수치로 채우지 않음). -->
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.21~11.02 (51거래일) 수익률: -47.4%</span>
+      <span>해당 구간 내 최고 $48.55(09.22) · 최저 $22.02(11.02) — 종가 기준</span>
+    </div>
+    <div class="source-note">※ 실선 출처: stockanalysis.com 일별 종가(08.21~10.30) + Schwab(11.02 종가) · 점선은 KPI와 동일 출처 · 11.03~11.04 종가를 확인하지 못해 연속 구간인 11.02까지만 표시. 이후 확인된 종가: 11.06 $21.64 · 11.09 $21.41 · 11.10 $19.73 (Nasdaq·Yahoo)</div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">$228M <span style="font-size:12px;color:var(--green);">▲ 컨센서스 초과 +3.2%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 약 $221M · YoY -5.0% (AI 클라우드 $200M vs 예상 약 $185M)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">-$0.62 <span style="font-size:12px;color:var(--red);">▼ 어닝 쇼크 -26.5%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 -$0.49 (GAAP) · 순손실 $2.63억 (전분기 -$6.84억)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      <strong>최신 실적 — 2026.11.05 발표 (Q1 FY27, 9월 분기)</strong>. AI 클라우드 매출 $2억(전분기 대비 +182%), 비트코인 채굴 $2,800만(전분기 $6,700만), AI 클라우드 매출총이익률 86%, 조정 EBITDA $6,600만. 수주잔고 $203억(+22%, 약 2/3가 투자등급 고객). <strong>가이던스</strong>: 수치 가이던스는 없고, 계약·자금이 확보된 <strong>연환산 매출(ARR) $40억 이상 목표 시점을 2026년 말에서 2027년 1월 31일(최대 2월 말)로 연기</strong>했습니다(마이크로소프트 요청에 따른 네트워크 설계 변경·공급 일정). 2027년 말 0.8GW 용량 목표, Q2 현금 영업비용 증가 예고. 다음 실적은 2027년 2월 4일 전후(추정).
+    </div>
+    <div class="source-note">※ 출처: IREN Q1 FY27 실적발표(SEC EDGAR 8-K, GlobeNewswire) · 매출 컨센서스 Finviz · EPS 컨센서스 Earnings Whispers · YoY stockhub · 다음 실적일 Yahoo Finance</div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART / SEC)</div>
+    <!-- 공시 행 반복: 유형 배지 색상은 아래 작성 지침 참고 -->
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">8-K</span>
+        <span style="font-size:13px;font-weight:500;">Q1 FY27 실적 발표 — 매출 $2.28억, 순손실 $2.63억, ARR $40억 목표 2027.1월로 연기 (당일 문구 정정 포함)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.11.05 · SEC EDGAR</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">10-Q</span>
+        <span style="font-size:13px;font-weight:500;">Q1 FY27 분기보고서 (2026.09.30 기준) — 총자산 $206억, 순부채 $44.3억, 잔여 FY27 설비투자 $150억</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.11.05 · SEC EDGAR (FinanceFeeds 인용)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">DEFA14A / ARS</span>
+        <span style="font-size:13px;font-weight:500;">정기 주주총회 추가 위임장 자료 및 연차보고서(6월 결산)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.10~11 (정확한 일자 확인 불가) · SEC EDGAR (Schwab 목록)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">SC 13G/A</span>
+        <span style="font-size:13px;font-weight:500;">Bank of America 지분 보고 변경</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.11 (정확한 일자 확인 불가) · SEC EDGAR (Schwab 목록)</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <!-- 뉴스 아이템 반복 (최소 3개, 최대 6개) -->
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.05</span><span class="news-source">· Bloomberg(Reuters 인용)</span></div>
+      <div class="news-title">마이크로소프트, IREN·Nebius·Nscale 네오클라우드 프로젝트 감독 강화…IREN 장중 -16%</div>
+      <div class="news-summary">마이크로소프트가 텍사스 IREN 캠퍼스의 케이블링 문제를 점검하고 완공 일정을 수주~수개월 늦추는 수정안에 합의한 것으로 보도됐습니다. 위험하다고 판단한 프로젝트에서 물러나고 신규 네오클라우드 계약 여부를 내부 검토 중이라는 내용이 업종 전체를 흔들었고, IREN은 장중 52주 최저가 $17.16까지 밀렸습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.11.05~06</span><span class="news-source">· SEC 8-K · Gotrade · Finviz</span></div>
+      <div class="news-title">Q1 FY27: AI 클라우드 매출 3배 가까이 증가…다음 날 주가 +20% 반등</div>
+      <div class="news-summary">AI 클라우드 매출이 $2억으로 예상(약 $1.85억)을 넘었고, Horizon 1이 엔비디아 Exemplar 인증을 받으며 마이크로소프트 서비스에 들어갔습니다. 분기 후에는 GPU 설비투자의 90%를 고객이 선납하는 5년 계약도 맺었습니다. 지연이 ‘고객 요청에 따른 일정 변경’이라는 설명이 나오면서 11월 6일 종가 $21.64로 반등했습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.07~09</span><span class="news-source">· 24/7 Wall St · Investing.com</span></div>
+      <div class="news-title">실적 후 목표가 줄하향…골드만 $30, JP모건 $55, 캔터 $47, 컴퍼스포인트 $55</div>
+      <div class="news-summary">애널리스트들은 ARR 목표 연기와 FY27 자금 공백($150억 설비투자 중 약 $60억 미확보), 수주잔고의 절반 가까이가 마이크로소프트에 몰린 점을 하향 이유로 꼽았습니다. 투자의견은 대부분 유지됐지만 목표가 폭이 크게 낮아졌습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.10</span><span class="news-source">· MarketBeat · Investing.com</span></div>
+      <div class="news-title">CCB Int'l ‘중립’ 하향(목표가 $40)·10월 CPI 상회…하루 -7.85%</div>
+      <div class="news-summary">투자의견 하향에 인플레이션 재가속에 따른 위험회피가 겹쳐 종가 $19.73을 기록했습니다. 한 달 사이 낙폭이 45%에 이르러 베타(4.3)가 높은 종목의 특성이 그대로 드러났습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.04</span><span class="news-source">· TIKR</span></div>
+      <div class="news-title">미 중간선거 후 텍사스에 ‘데이터센터 모라토리엄’ 지지 주지사 당선…IREN -9%</div>
+      <div class="news-summary">IREN 용량의 약 절반이 텍사스에 있어 정책 리스크가 부각됐습니다. 이미 계약된 FY27 물량보다는 FY28 이후 신규 증설에 더 영향을 줄 수 있다는 분석입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.28</span><span class="news-source">· MarketBeat</span></div>
+      <div class="news-title">Wingspire 등 6개 대주단과 $3.63억 AI 컴퓨팅 장비 금융 체결</div>
+      <div class="news-summary">GPU 등 장비를 담보로 한 자금 조달 경로를 넓힌 사례입니다. 대규모 설비투자를 계속 외부 자금으로 메워야 하는 구조에서 조달 조건이 곧 주가의 핵심 변수입니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>AI 클라우드 고성장·고마진</strong> — AI 클라우드 매출이 한 분기 만에 $7,100만→$2억(+182%)으로 늘었고 매출총이익률 86%를 유지했습니다. 신규 3년·5년 계약 단가도 각각 11%·12% 올라 가격 결정력이 확인됩니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>계약·자금이 확보된 ARR $40억</strong> — 현재 운영 ARR 약 $10억에서 2027년 1~2월 $40억 이상으로 늘어날 물량이 이미 계약과 자금 조달을 마쳤다고 회사가 밝혔습니다. 수주잔고 $203억 중 약 2/3가 투자등급 고객입니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>땅·전력·데이터센터 직접 보유</strong> — 3만 에이커 이상의 부지와 5GW 넘는 확보 전력, 2GW 스위트워터 허브를 보유해 GPU만 빌려주는 경쟁사보다 확장 여력이 큽니다. 분기 후 GPU 설비투자의 90%를 고객이 선납하는 계약 구조도 만들었습니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><strong>밸류에이션 하단</strong> — TIKR 기준 선행 주가매출비율(P/S) 약 3.1배(11.04)로 3년 평균 5.2배, 2025년 11월 고점 17배를 크게 밑돌고 주가는 52주 범위의 하단 5%에 있습니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>마이크로소프트 의존·일정 지연</strong> — 수주잔고의 절반 가까이가 마이크로소프트 물량인데, 감독 강화와 설계 변경으로 Horizon 2~4 일정이 밀렸습니다. 남은 텍사스 용량 승인이 다음 관문입니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>대규모 자금 공백</strong> — 9월 말 이후 남은 FY27 설비투자 $150억 중 $90억만 확보됐고 약 $60억은 시장 상황에 따라 조달해야 합니다. 순부채는 한 분기 만에 $2억대에서 $44억으로 불었고 현금은 $59억→$35억으로 줄었습니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>적자 지속</strong> — 순손실 $2.63억, GAAP EPS -$0.62로 컨센서스(-$0.49)에 못 미쳤습니다. 이자 등 금융비용(분기 약 $7,300만)과 감가상각이 커지는 단계라 흑자 전환 시점이 불확실합니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><strong>정책·변동성 리스크</strong> — 텍사스 데이터센터 모라토리엄 논의, 네오클라우드 업종의 ‘AI 버블’ 논쟁으로 한 달 새 45% 하락했습니다. 52주 고점 $70.71 대비 70% 넘게 빠진 상태로 베타가 4를 넘습니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <!-- 행 반복: opinion-badge 클래스는 buy / hold / sell 중 선택 -->
+    <div class="analyst-row">
+      <span class="analyst-firm">Northland <span style="color:var(--muted);font-weight:400;">(2026.11, 실적 후)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">아웃퍼폼</span><span class="target-price">$74 (←$90)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">BTIG <span style="color:var(--muted);font-weight:400;">(2026.11, 실적 후)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$65 (←$80)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">B. Riley <span style="color:var(--muted);font-weight:400;">(2026.10.30)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$64 (←$91)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">HC Wainwright <span style="color:var(--muted);font-weight:400;">(2026.11, 실적 후)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$56</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">JPMorgan <span style="color:var(--muted);font-weight:400;">(2026.11.09)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">비중확대</span><span class="target-price">$55 (←$65)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Compass Point <span style="color:var(--muted);font-weight:400;">(2026.11, 실적 후)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">$55 (←$85)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Cantor Fitzgerald <span style="color:var(--muted);font-weight:400;">(2026.11, 실적 후)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">비중확대</span><span class="target-price">$47 (←$99)</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">CCB Int'l <span style="color:var(--muted);font-weight:400;">(2026.11.10)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립(하향)</span><span class="target-price">$40</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">Goldman Sachs <span style="color:var(--muted);font-weight:400;">(2026.11.07)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">$30 (←$50)</span></div>
+    </div>
+    <div class="source-note">※ 출처: stockanalysis.com·Yahoo Finance(목표가 변경 목록), 24/7 Wall St(골드만·JP모건), Investing.com(CCB·컴퍼스포인트), Defense World(HC Wainwright·캔터), MarketBeat(B. Riley, 컨센서스 $64.57). 실적 후 목표가가 계속 낮아지고 있어 컨센서스 평균은 시차를 두고 더 내려갈 수 있습니다.</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">IREN은 비트코인 채굴 회사에서 땅·전력·데이터센터·GPU를 모두 직접 보유한 AI 클라우드 사업자로 탈바꿈하는 중이며, 이번 분기 매출의 88%($2억/$2.28억)가 이미 AI 클라우드에서 나왔습니다. 성장 지표는 강합니다. AI 클라우드 매출이 한 분기 만에 거의 3배가 됐고 매출총이익률 86%, 수주잔고 $203억, 계약·자금이 확보된 ARR $40억 이상이라는 숫자는 펀더멘털이 꺾였다는 신호로 보기 어렵습니다. 그러나 주가는 한 달 새 45% 빠져 52주 범위의 하단 5%까지 내려왔는데, 이는 최대 고객인 마이크로소프트의 네오클라우드 감독 강화와 일정 지연, 약 $60억에 달하는 미확보 설비투자 자금, 늘어나는 순부채와 지속되는 적자가 한꺼번에 가격에 반영됐기 때문입니다. 단기적으로는 ARR $40억 달성 시점(2027년 1~2월)과 마이크로소프트의 남은 텍사스 용량 승인, 금리·AI 투자심리가 주가를 좌우하고, 중기적으로는 자금 조달 조건과 비(非)마이크로소프트 고객 확대가 핵심 변수입니다. 애널리스트 다수는 여전히 매수 의견이지만 목표가를 빠르게 낮추고 있습니다. 이 종목은 AI 인프라 사이클의 회복에 베팅하면서 하루 10~20% 등락과 추가 희석 가능성을 감내할 수 있는 고위험·고변동성 투자자에게 적합하며, 안정적 이익이나 낮은 변동성을 원하는 투자자에게는 맞지 않습니다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>
