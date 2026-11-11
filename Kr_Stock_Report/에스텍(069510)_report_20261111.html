@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에스텍 (069510) 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">069510 · KOSDAQ</div>
+      <div class="company-name">에스텍 (ESTec)</div>
+      <div class="company-desc">차량용 스피커 중심의 음향부품 제조사 · 1999년 LG이노텍에서 분사, 일본 포스타전기(Foster Electric)가 최대주주 · 상장폐지 목적 공개매수 진행 중</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 11일</div>
+      <div class="price-display">19,820원</div>
+      <div class="price-change up">▲ +29.97% 상한가 (전일 대비 +4,570원)</div>
+      <div class="data-asof">데이터 기준: 2026.11.11 · 출처: 뉴스투데이·중기이코노미(KRX 시세 인용)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 2,162억원 (발행주식 1,091만주 × 종가)</span>
+    <span class="rating-pill">🏢 섹터: 자동차 부품 / 음향기기</span>
+    <span class="rating-pill">⭐ 공개매수가 24,000원 · 현재가 대비 +21.1% · 증권사 커버리지 없음</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">공개매수가</div>
+      <div class="kpi-value">24,000원</div>
+      <div class="kpi-sub">전일 종가 대비 +57.4% · 1개월 평균 대비 +66.8%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">현재가와의 차이 (스프레드)</div>
+      <div class="kpi-value">+21.1%</div>
+      <div class="kpi-sub">결제일 12.15까지 약 5주</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">공개매수가 기준 PBR</div>
+      <div class="kpi-value">0.78배</div>
+      <div class="kpi-sub">BPS 30,813원 · PER 4.67배</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026 상반기 영업이익</div>
+      <div class="kpi-value">179억원</div>
+      <div class="kpi-sub">YoY -33.7% · 상반기 매출 2,323억원</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: 공개매수 조건·할증률·BPS·PBR·PER — DART 공개매수신고서(2026.11.11, 공개매수자 에프에프이케이) 및 중기이코노미 보도 / 스프레드 — 24,000 ÷ 19,820 − 1 직접 계산 / 상반기 실적 — 중기이코노미·네이트 뉴스 보도(연결 기준) / 시총 — 발행주식 10,910,000주 × 종가</div>
+
+  <!-- ②-1 주가 추이 차트 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📉 주가 추이 (최근 구간 + 52주 최고 기준선)</div>
+    <div style="padding:4px 0;">
+      <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#059669" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#059669" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="10" y1="27.3" x2="870" y2="27.3" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="23.3" font-size="9" fill="#6b7280" text-anchor="end">52주 최고 19820.00 (2026-11-11)</text>
+  <path d="M10.0,174 L10.0,154.4 L27.6,154.0 L45.1,152.0 L62.7,149.9 L80.2,160.7 L97.8,157.1 L115.3,159.3 L132.9,153.3 L150.4,155.0 L168.0,150.4 L185.5,152.3 L203.1,152.7 L220.6,150.4 L238.2,147.0 L255.7,149.4 L273.3,151.8 L290.8,152.7 L308.4,151.1 L325.9,152.0 L343.5,144.6 L361.0,146.3 L378.6,149.8 L396.1,151.8 L413.7,146.0 L431.2,146.5 L448.8,149.1 L466.3,150.4 L483.9,150.8 L501.4,150.8 L519.0,152.0 L536.5,152.1 L554.1,144.5 L571.6,141.9 L589.2,144.8 L606.7,145.0 L624.3,145.5 L641.8,145.8 L659.4,143.8 L676.9,142.6 L694.5,144.3 L712.0,146.0 L729.6,144.6 L747.1,143.4 L764.7,142.8 L782.2,141.9 L799.8,138.7 L817.3,140.0 L834.9,142.9 L852.4,140.4 L870.0,137.3 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,154.4 27.6,154.0 45.1,152.0 62.7,149.9 80.2,160.7 97.8,157.1 115.3,159.3 132.9,153.3 150.4,155.0 168.0,150.4 185.5,152.3 203.1,152.7 220.6,150.4 238.2,147.0 255.7,149.4 273.3,151.8 290.8,152.7 308.4,151.1 325.9,152.0 343.5,144.6 361.0,146.3 378.6,149.8 396.1,151.8 413.7,146.0 431.2,146.5 448.8,149.1 466.3,150.4 483.9,150.8 501.4,150.8 519.0,152.0 536.5,152.1 554.1,144.5 571.6,141.9 589.2,144.8 606.7,145.0 624.3,145.5 641.8,145.8 659.4,143.8 676.9,142.6 694.5,144.3 712.0,146.0 729.6,144.6 747.1,143.4 764.7,142.8 782.2,141.9 799.8,138.7 817.3,140.0 834.9,142.9 852.4,140.4 870.0,137.3" fill="none" stroke="#059669" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="137.3" r="3.5" fill="#059669"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-07-22</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-10-02</text>
+</svg>
+
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;">
+      <span>2026.07.22~10.02 수익률: +8.1%</span>
+      <span>해당 구간 내 최고 13,370원 (10.02, 종가) · 최저 12,000원 (07.28, 종가)</span>
+    </div>
+    <div class="source-note">※ 실선 출처: stockanalysis.com 일별 종가(2026.07.22~10.02). 10.05~11.09 일별 데이터는 확보하지 못해 제외했습니다. 11.10 종가 15,250원(공개매수신고서), 11.11 상한가 19,820원은 언론 보도 기준입니다. 공개매수 발표 전 3개월간 하루 거래량이 대부분 1만 주 미만이었던 저유동성 종목입니다. · 점선(52주 최고 19,820원, 2026.11.11 신고가)은 뉴스투데이 · 52주 최저가는 확인하지 못했습니다 · 기준일 2026.11.11</div>
+  </div>
+
+  <!-- ③ 실적 속보 → 공개매수 조건 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 핵심 이벤트 — 상장폐지 목적 공개매수 (2026.11.11 공시) · 최신 실적: 2026 상반기</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">공개매수 조건</div>
+        <div style="font-size:18px;font-weight:700;">301만 9,087주 × 24,000원 <span style="font-size:12px;color:var(--green);">▲ 총 724.6억원</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">기간 11.11~12.11 (31일) · 결제 12.15 · 최소 응모 조건 없음(응모분 전량 매수)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">최근 실적 (2026 상반기, 연결)</div>
+        <div style="font-size:18px;font-weight:700;">영업이익 179억원 <span style="font-size:12px;color:var(--red);">▼ YoY -33.7%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">매출 2,323억원 · 2025년 연매출 4,682억원(-8.1%)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      포스타전기가 100% 지분을 가진 국내 특수목적법인 에프에프이케이(FFEK, 10.13 설립)가 자사주를 뺀 유통주식 전부(27.67%)를 사들입니다. 자금은 포스타전기 차입금으로 충당합니다. 전량 응모 시 포스타전기 측 지분은 77.09%가 되고, 자사주(22.91%)를 빼면 사실상 100%가 됩니다. <strong>응모가 부족하면</strong> 추가 공개매수, 장내외 매수, 주식의 포괄적 교환(주총 특별결의)을 검토합니다. 상장폐지 후에도 정리매매 기간과 이후 6개월 동안 같은 가격(24,000원)으로 사들이겠다고 밝혔습니다. <strong>상장폐지 사유</strong>로는 전기차·SDV 전환 과정에서 중국 업체와의 원가 경쟁 심화, 일본·한국 모자회사 동시상장에 따른 의사결정 제약, 3월 개정 상법에 따른 자사주 소각 의무화, 상장 유지 비용을 들었습니다.
+    </div>
+    <div class="source-note">※ 출처: DART 공개매수신고서(2026.11.11), 중기이코노미·뉴스토마토·스톡플러스·뉴스투데이(2026.11.11). 3분기 실적은 아직 공시되지 않았습니다(분기보고서 제출 기한 11.16 전후).</div>
+  </div>
+
+  <!-- ④ DART 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">공개매수</span>
+        <span style="font-size:13px;font-weight:500;">공개매수신고서 — 에프에프이케이, 보통주 3,019,087주 주당 24,000원 · 상장폐지·완전자회사화 목적</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.11.11 · DART</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">반기보고서</span>
+        <span style="font-size:13px;font-weight:500;">반기보고서(2026.06) — 상반기 연결 매출 2,323억·영업이익 179억</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08 · DART</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">사업보고서</span>
+        <span style="font-size:13px;font-weight:500;">2025 사업보고서 — 최대주주 Foster Electric 49.41%, 소액주주 3,794명(지분 약 24%)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.03 · DART (etfshopping 경유)</span>
+    </div>
+    <div class="source-note">※ 향후 예상 공시: 대상회사(에스텍)의 공개매수 의견표명서, 3분기 분기보고서, 공개매수 결과보고서(12월), 상장폐지 신청 관련 공시. 주주 구성: 포스타전기 5,390,913주(49.41%) · 자기주식 2,500,000주(22.91%) · 유통주식 3,019,087주(27.67%).</div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.11.11</span><span class="news-source">· 뉴스투데이 / 스톡플러스</span></div>
+      <div class="news-title">포스타전기 공개매수·상장폐지 추진에 상한가 직행, 52주 신고가</div>
+      <div class="news-summary">장 초반부터 상한가에 묶여 거래량이 약 6만 주에 그쳤습니다. 가격제한폭(30%) 때문에 공개매수가까지 하루에 다 오르지 못해, 다음 거래일에도 매수가 쪽으로 가격이 수렴할 가능성이 큽니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.11.11</span><span class="news-source">· 중기이코노미</span></div>
+      <div class="news-title">할증률 57.4%로 이례적으로 높지만 PBR 0.78배 — "비싸 보이지만 장부가보다는 싸다"</div>
+      <div class="news-summary">2023년 이후 상장폐지 목적 공개매수 30건의 평균 할증률(26.1%)의 약 2.2배이고, 2011년 이후 최고 종가(19,050원)보다도 26% 높습니다. 반면 주당순자산(30,813원)보다는 낮아, 포스타전기는 자본총계 2,591억원 회사의 나머지 지분을 724억원에 확보하는 셈입니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.11.11</span><span class="news-source">· 뉴스토마토</span></div>
+      <div class="news-title">중복상장 규제·자사주 소각 의무화가 촉발한 '공개매수 후 자진상폐' 확산</div>
+      <div class="news-summary">에스텍은 자사주 22.91%를 보유하고 있어, 소각하면 포스타전기 지분이 49.41%에서 64.1%로 오릅니다. 올해 SK의 SK시그넷 공개매수(7월)처럼 상장폐지 목적의 공개매수가 잇따르고 있습니다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026 상반기</span><span class="news-source">· 공개매수신고서 / 중기이코노미</span></div>
+      <div class="news-title">본업 실적 둔화 — 2025년 매출 -8.1%, 2026 상반기 영업이익 -33.7%</div>
+      <div class="news-summary">전기차 전환 과정에서 중국계 부품사와의 원가 경쟁이 심해졌다고 회사가 직접 밝혔습니다. 공개매수가 없었다면 주가를 끌어올릴 재료가 마땅치 않았다는 점에서, 이번 가격은 소액주주에게 탈출 기회의 성격이 큽니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span>현재가 19,820원과 공개매수가 24,000원 사이에 21.1%의 차이가 있습니다. 결제일(12.15)까지 약 5주라 기간 대비 기대수익이 큰 '이벤트 차익' 구간입니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>최소 응모 조건이 없고 유통주식 전부를 사기 때문에 응모분이 안분(비례 배분)되지 않고 전량 매입됩니다. 일부만 사주는 공개매수보다 확실성이 높습니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>매수자는 도쿄증시 상장사 포스타전기의 100% 자회사이고 자금 조달 방식(모회사 차입)도 공시됐습니다. 응모하지 못해도 상장폐지 후 6개월간 같은 가격에 사주겠다고 밝혀 출구가 열려 있습니다.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span>할증률(57.4%)이 국내 상장폐지 목적 공개매수 평균의 2배를 넘어, 가격이 낮다는 반발로 거래가 무산될 가능성은 상대적으로 작습니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span>공개매수가가 장부가치(PBR 0.78배)보다 낮아, 장기 보유 주주 입장에서는 자산가치 대비 싸게 넘기는 셈입니다. 가격 인상 가능성은 공시상 언급되지 않았습니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>공개매수 응모는 장외 양도라 소액주주도 양도소득세 대상이 될 수 있습니다. 장내 매도와 세후 수익을 비교해야 하며, 세부 사항은 증권사·세무 상담으로 확인이 필요합니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>응모가 적어 상장폐지 요건을 못 채우면 절차가 길어질 수 있습니다. 그 사이 주가는 매수가보다 낮게 머물 수 있고, 상장폐지 후에는 장내 매도가 불가능해집니다.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span>공개매수가 24,000원보다 높은 가격에 사면 손실이 확정적입니다. 다음 거래일 급등 시 추격 매수는 기대수익이 빠르게 줄어듭니다. 본업 실적도 둔화 중이라 거래 무산 시 하방이 큽니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견 / 가격 기준점</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">공개매수자 에프에프이케이 <span style="color:var(--muted);font-weight:400;">(2026.11.11, 공개매수가)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">기준가</span><span class="target-price">24,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">주당순자산(BPS) <span style="color:var(--muted);font-weight:400;">(공개매수신고서 기재)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">장부가</span><span class="target-price">30,813원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">2011년 이후 최고 종가 <span style="color:var(--muted);font-weight:400;">(2025년)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">역사적 고점</span><span class="target-price">19,050원</span></div>
+    </div>
+    <div class="source-note">※ 에스텍을 커버하는 증권사 리포트는 확인되지 않았습니다. 공개매수 진행 중에는 공개매수가가 사실상 주가의 상한 기준점 역할을 합니다. 출처: 공개매수신고서, 중기이코노미, 한국투자증권 집계(상폐 목적 공개매수 평균 할증률 26.1%).</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">
+      에스텍은 차량용 스피커를 주력으로 하는 음향부품 회사로, 일본 포스타전기가 49.41%를 가진 자회사입니다. 11월 11일 포스타전기의 100% 자회사 에프에프이케이가 자사주를 뺀 유통주식 전부(301만 9,087주)를 주당 24,000원에 사들이는 공개매수를 공시했고, 주가는 상한가 19,820원으로 직행했습니다. 기간은 12월 11일까지, 결제는 12월 15일이며 최소 응모 조건 없이 응모분을 전량 매입합니다.<br><br>
+      이 종목은 더 이상 실적이나 업황으로 움직이는 주식이 아닙니다. 주가는 공개매수가 24,000원을 향해 수렴하는 '이벤트 드리븐' 구간에 들어섰습니다. 가격제한폭 때문에 첫날에는 21.1%의 차이가 남았지만, 이 차이는 다음 거래일부터 빠르게 좁혀질 가능성이 큽니다. 할증률(57.4%)은 국내 평균의 2배를 넘지만, 공개매수가가 장부가치(PBR 0.78배)를 밑돌아 '비싸 보이지만 장부가보다는 싸다'는 평가도 공존합니다.<br><br>
+      주목할 변수는 ① 다음 거래일 시가와 공개매수가 사이 남은 스프레드, ② 응모율과 자진 상장폐지 요건 충족 여부(12월 결과 공시), ③ 에스텍 이사회의 의견표명서 내용, ④ 응모 시 양도소득세 등 세후 수익입니다. 상장폐지 후에도 6개월간 같은 가격에 사주겠다고 밝혀 출구가 막힐 위험은 낮은 편입니다.<br><br>
+      이 종목은 기존 보유자에게는 '공개매수 응모 vs 장내 매도'를 세후 기준으로 비교해 정리하는 것이 합리적인 국면입니다. 신규 투자는 24,000원과의 차이 내에서만 수익이 나는 차익거래 성격이라, 낮은 위험으로 짧은 기간의 확정적 수익을 원하는 투자자에게 적합합니다. 장기 성장이나 추가 상승을 기대하는 투자자에게는 맞지 않으며, 24,000원 이상에서의 매수는 피해야 합니다.
+    </div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>
