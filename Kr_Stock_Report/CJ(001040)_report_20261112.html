@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CJ 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">001040 · KOSPI</div>
+      <div class="company-name">CJ</div>
+      <div class="company-desc">CJ그룹 순수 지주회사 — 핵심 비상장 자회사 CJ올리브영, 상장 자회사 CJ제일제당·대한통운·ENM·CGV</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 12일</div>
+      <div class="price-display">112,400원</div>
+      <div class="price-change up">▲ +0.36% (전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.11.10 기준 · 출처: MSN 금융</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 3조 2,795억원 (보통주 29,176,998주 × 현재가 계산)</span>
+    <span class="rating-pill">🏢 섹터: 지주회사</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 매수 (8월 하향 후 18~21.5만원)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (2Q26)</div>
+      <div class="kpi-value">11조 5,281억원</div>
+      <div class="kpi-sub">YoY +3.7%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률 (2Q26)</div>
+      <div class="kpi-value">4.6%</div>
+      <div class="kpi-sub">전년 동기 대비 -1.0%p (전분기 확인 불가)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (8월 이후)</div>
+      <div class="kpi-value">180,000~215,000원</div>
+      <div class="kpi-sub">현재가 대비 +60.1%~+91.3%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">107,300~235,000원</div>
+      <div class="kpi-sub">현재가 위치: 4.0%</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: CJ IR(2026년 2분기 경영실적, 2026.08.14), 목표가 한경코리아마켓(2026.08.19 5개사), 52주·현재가 MSN 금융(2026.11.10). 2Q25 영업이익률은 IR 수치로 계산</div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (직전 분기 2Q26 (2026.08.14) — 3Q26 미발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">11조 5,281억원 <span style="font-size:12px;color:var(--muted);">컨센서스 확인 불가</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +3.7%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (EPS 대용)</div>
+        <div style="font-size:18px;font-weight:700;">5,318억원 <span style="font-size:12px;color:var(--red);">▼ 키움 추정 5,956억 대비 -10.7%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY -14.1% · 순이익 1,556억(YoY -57.2%)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      매출원가율은 70.1%로 0.9%p 낮아졌지만 판관비가 12% 늘며 영업이익이 줄었다. 올리브영 2분기 매출은 23% 늘었지만 순이익은 6.1% 줄어 순이익률 7.5%에 그쳤다(블로터·하나증권). 3분기 자회사 실적: CJ제일제당 연결 영업이익 3,091억(-7.4%), CJ대한통운 1,105억(-25.3%), CJ CGV 736억(+215.2%).
+    </div>
+    <div class="source-note">※ 출처: CJ IR 자료(2026.08.14), 블로터(2026.08.24), 더파워(하나증권 2026.08.18), 이데일리(키움 추정), 한국경제·디지털투데이(자회사 3Q)</div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART / SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">실적 IR</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 경영실적 — 매출 11.5조·영업이익 5,318억·순이익 1,556억</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.14 · CJ IR(irplus)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">반기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026 반기보고서 (연결 판관비 2조 9,123억, +12%)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08 (블로터 08.24 인용) · DART(블로터 보도)</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.11.10</span><span class="news-source">· 한국경제</span></div>
+      <div class="news-title">CJ제일제당 3Q 영업익 2,030억(+6.9%)…대한통운 포함 연결은 -7.4%</div>
+      <div class="news-summary">K푸드 해외 판매와 바이오 소재가 버팀목. 다만 대한통운까지 합친 연결 영업이익은 3,091억원으로 줄었다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.10</span><span class="news-source">· 디지털투데이</span></div>
+      <div class="news-title">CJ대한통운 3Q 영업이익 1,105억, 25.3% 감소</div>
+      <div class="news-summary">매출은 9.5% 늘었지만 이익은 크게 줄었다. 지주사 연결 실적에 부담.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.11.06</span><span class="news-source">· 디지털투데이</span></div>
+      <div class="news-title">CJ CGV 3Q 영업이익 736억, 215% 증가·순이익 흑자전환</div>
+      <div class="news-summary">부진했던 상장 자회사 중 뚜렷한 개선 사례.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.19</span><span class="news-source">· 한경코리아마켓</span></div>
+      <div class="news-title">2Q 후 주가 8.11% 급락…5개 증권사 목표가 일제히 하향(18만~21.5만)</div>
+      <div class="news-summary">제일제당·대한통운 수익성 악화에 핵심 자산인 올리브영까지 해외 투자로 이익률이 떨어진 영향.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.08.18</span><span class="news-source">· 더파워</span></div>
+      <div class="news-title">하나證 "올리브영 성장해도 수익성 흔들"…목표가 20만원</div>
+      <div class="news-summary">올리브영 2분기 매출 1.8조원(+23%), 순이익률 7.5%. 2027년 영업이익 3.3조원(+21%)으로 성장 재개를 전망.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>올리브영 성장</b> — 2Q 매출 +23%, NAV의 60~74%를 차지하는 핵심 자산(대신·유안타).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>중복상장 규제 수혜</b> — 올리브영 IPO 가능성이 낮아지며 가치가 지주사에 귀속(대신증권).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>2027년 이익 성장 전망</b> — 연결 영업이익 3.3조원(+21%)(하나증권).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>낮은 주가 위치</b> — 52주 범위 하단 약 4%, 고점 대비 -52%.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>올리브영 수익성 둔화</b> — 북미·웰니스 투자로 순이익률 7.5%, 상반기 7.95%(-2.07%p)(블로터).</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>상장 자회사 부진</b> — 대한통운 3Q 영업이익 -25.3%, 제일제당 연결 -7.4%.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>2Q 순이익 -57.2%</b> — 판관비 12% 증가와 전년 일회성 이익 기저.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>3Q 실적 미발표</b> — 연결 실적 확인 전까지 불확실성.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">하나증권 <span style="color:var(--muted);font-weight:400;">(2026.08.18)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">200,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">한국투자·대신·한화·흥국 외 (5개사) <span style="color:var(--muted);font-weight:400;">(2026.08.19)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">180,000~215,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">SK증권 (하향 전) <span style="color:var(--muted);font-weight:400;">(2026.05.19)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">230,000원</span></div>
+    </div>
+    <div class="source-note">※ 출처: 더파워(하나증권), 한경코리아마켓(5개사 일괄 하향), SK증권 리포트. SK증권의 하향 여부는 확인하지 못함.</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">CJ는 CJ올리브영이 기업가치의 대부분을 차지하는 지주회사입니다. 올리브영은 2분기에도 매출이 23% 늘었지만, 북미·웰니스 투자로 <b>이익률이 낮아지면서 "성장하지만 덜 남는" 국면</b>에 들어섰습니다. 여기에 CJ제일제당·대한통운 등 상장 자회사의 수익성 악화가 겹쳐 2분기 연결 영업이익은 14% 줄었고, 발표 직후 주가가 8% 급락하자 증권사 5곳이 목표가를 18만~21.5만원으로 낮췄습니다. 11월 나온 자회사 3분기 실적도 대한통운 -25%, 제일제당 연결 -7%로 엇갈렸고 CGV만 크게 개선됐습니다. 주가는 52주 저점 근처로 고점 대비 절반 아래이며, 목표가 하단과도 60% 넘게 차이가 납니다. 11월 중순 나올 CJ 3분기 연결 실적에서 올리브영의 마진 회복 여부가 핵심입니다. <b>이 종목은 지주사 할인을 감수하고 올리브영의 장기 가치에 투자하려는 가치·배당형 투자자에게 적합합니다.</b></div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

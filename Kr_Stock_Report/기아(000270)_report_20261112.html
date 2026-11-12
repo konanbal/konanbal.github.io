@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기아 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">000270 · KOSPI</div>
+      <div class="company-name">기아</div>
+      <div class="company-desc">현대차그룹 완성차 업체 — 하이브리드·전기차 확대 중, 미국 점유율 분기 최고치</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 12일</div>
+      <div class="price-display">100,300원</div>
+      <div class="price-change down">▼ -0.50% (전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.11.06 종가 · 출처: IR 시세 페이지(ir.gsifn.io) — 11.12 장중 95,000원대 거래(아시아뉴스통신)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 39조 1,584억원</span>
+    <span class="rating-pill">🏢 섹터: 자동차</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 매수 (11월 리포트 목표가 13~18만원)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (3Q26)</div>
+      <div class="kpi-value">31조 5,974억원</div>
+      <div class="kpi-sub">YoY +10.1% (3분기 기준 최대)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률 (3Q26)</div>
+      <div class="kpi-value">5.8%</div>
+      <div class="kpi-sub">전분기 대비 -2.2%p (YoY +0.7%p)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (11월 리포트)</div>
+      <div class="kpi-value">130,000~180,000원</div>
+      <div class="kpi-sub">현재가 대비 +29.6%~+79.5%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">93,400~212,500원</div>
+      <div class="kpi-sub">현재가 위치: 5.8%</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: 기아 IR·ZDNet·테크월드(2026.10.30 실적), 목표가 이투데이(삼성증권)·더파워(미래에셋), 52주 범위 Investing.com·트레이딩메인, 현재가·시총 IR 시세 페이지(2026.11.06)</div>
+
+  <!-- ②-1 주가 추이 차트 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📉 주가 추이 (최근 구간 + 52주 최고/최저 기준선)</div>
+    <div style="padding:4px 0;">
+      <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dc2626" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="10" y1="27.3" x2="870" y2="27.3" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="23.3" font-size="9" fill="#6b7280" text-anchor="end">52주 최고 212,500원</text><line x1="10" y1="160.7" x2="870" y2="160.7" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="171.7" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 93,400원</text>
+  <path d="M10.0,174 L10.0,120.1 L27.6,120.1 L45.1,116.3 L62.7,115.7 L80.2,114.2 L97.8,113.5 L115.3,114.9 L132.9,113.4 L150.4,111.4 L168.0,106.6 L185.5,111.6 L203.1,116.3 L220.6,118.5 L238.2,118.7 L255.7,118.0 L273.3,114.2 L290.8,118.1 L308.4,124.1 L325.9,121.9 L343.5,118.6 L361.0,118.3 L378.6,126.0 L396.1,122.6 L413.7,123.6 L431.2,121.5 L448.8,124.8 L466.3,123.3 L483.9,123.1 L501.4,123.5 L519.0,126.2 L536.5,128.9 L554.1,130.1 L571.6,129.9 L589.2,128.8 L606.7,130.9 L624.3,132.6 L641.8,136.0 L659.4,133.6 L676.9,135.4 L694.5,138.9 L712.0,138.4 L729.6,138.8 L747.1,139.2 L764.7,142.5 L782.2,145.7 L799.8,144.2 L817.3,144.0 L834.9,143.7 L852.4,146.7 L870.0,141.9 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,120.1 27.6,120.1 45.1,116.3 62.7,115.7 80.2,114.2 97.8,113.5 115.3,114.9 132.9,113.4 150.4,111.4 168.0,106.6 185.5,111.6 203.1,116.3 220.6,118.5 238.2,118.7 255.7,118.0 273.3,114.2 290.8,118.1 308.4,124.1 325.9,121.9 343.5,118.6 361.0,118.3 378.6,126.0 396.1,122.6 413.7,123.6 431.2,121.5 448.8,124.8 466.3,123.3 483.9,123.1 501.4,123.5 519.0,126.2 536.5,128.9 554.1,130.1 571.6,129.9 589.2,128.8 606.7,130.9 624.3,132.6 641.8,136.0 659.4,133.6 676.9,135.4 694.5,138.9 712.0,138.4 729.6,138.8 747.1,139.2 764.7,142.5 782.2,145.7 799.8,144.2 817.3,144.0 834.9,143.7 852.4,146.7 870.0,141.9" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="141.9" r="3.5" fill="#dc2626"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-08-03</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-10-16</text>
+</svg>
+
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.03~10.16 수익률: -15.0%</span>
+      <span>해당 구간 내 최고 141,700원(08.14) · 최저 105,900원(10.15)</span>
+    </div>
+    <div class="source-note">※ 실선 출처: stockanalysis.com 일별 종가 (확보 가능한 마지막 거래일 2026.10.16까지 — 이후 일별 데이터는 확보하지 못해 표시하지 않음, 최신 주가는 헤더 참조) · 점선(52주 최고/최저)은 위 KPI와 동일 출처 · 기준일 2026.11.06</div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최신 실적 — 3Q26, 2026.10.30 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">31조 5,974억원 <span style="font-size:12px;color:var(--red);">▼ 미달 -1.1%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 31조 9,587억 · YoY +10.1%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (EPS 대용)</div>
+        <div style="font-size:18px;font-weight:700;">1조 8,183억원 <span style="font-size:12px;color:var(--red);">▼ 어닝 쇼크 -25.5%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 2조 4,417억(에프앤가이드) · YoY +24.3% · QoQ -30.8%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      미국 관세율 25%→15% 기저효과(+5,300억)·물량(+4,420억)·환율(+5,290억)이 더해졌지만, EV 점유율 확대를 위한 인센티브(-7,270억)와 원재료(-3,680억)·중동 분쟁(-2,090억)이 이익을 깎았다. 삼성증권은 예상보다 큰 약 6,000억원 판매보증 충당금도 지목. 발표 당일 주가는 11.73% 급락.
+    </div>
+    <div class="source-note">※ 출처: ZDNet Korea·테크월드·미디어데일(기아 IR), 한국경제(2026.10.30), 이투데이(삼성증권 2026.11.02)</div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART / SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">잠정실적</span>
+        <span style="font-size:13px;font-weight:500;">연결재무제표기준영업(잠정)실적 — 3Q26 매출 31.6조·영업이익 1.82조</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.10.30 · DART(ZDNet 보도)</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.10.30</span><span class="news-source">· 한국경제</span></div>
+      <div class="news-title">3분기 최대 매출에도 영업이익 쇼크…주가 11.73% 급락</div>
+      <div class="news-summary">영업이익이 컨센서스를 20% 넘게 밑돌았다. 중국 저가 EV 공세에 맞서 가격 인하·판매장려금을 늘린 영향이 컸다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.02</span><span class="news-source">· 이투데이</span></div>
+      <div class="news-title">삼성증권 "신뢰 회복에 시간 필요"…목표가 15만→13만원</div>
+      <div class="news-summary">미국·유럽 인센티브와 판매보증 충당금이 쇼크의 원인. 미래 모빌리티 투자 확대로 순현금이 정점을 지나 배당 여력이 줄 수 있다는 우려도 제기.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.11.02</span><span class="news-source">· 더파워</span></div>
+      <div class="news-title">미래에셋 목표가 24만→18만원, 배당수익률 7%대 전망</div>
+      <div class="news-summary">단기 실적 부담을 반영해 목표가를 낮췄지만 높은 배당수익률과 중장기 EV 경쟁력을 근거로 매수 유지.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.11.03</span><span class="news-source">· 리틀빗(mydailybyte)</span></div>
+      <div class="news-title">10월 글로벌 판매 29만1,219대, 10.3% 증가</div>
+      <div class="news-summary">8개월 연속 판매 성장. 다만 1~9월 중동 신차 수출은 26.0% 줄었다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.30</span><span class="news-source">· 아시아경제</span></div>
+      <div class="news-title">미국 점유율 5.8%·국내 36.8%, 모두 분기 최고</div>
+      <div class="news-summary">미국 산업수요가 줄어든 가운데 하이브리드 중심으로 현지판매 7.8% 증가. 판매 체력 자체는 견조하다는 근거.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>판매 성장 지속</b> — 3Q 도매 +7.9%, EV 판매 +75.4%, 10월 판매 +10.3%(기아·리틀빗).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>시장 점유율 최고치</b> — 미국 5.8%, 국내 36.8% 분기 최고(아시아경제).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>배당 매력</b> — 미래에셋은 올해 배당수익률 7%대를 전망.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>낮은 주가 위치</b> — 52주 범위 하단 약 6% 수준, 실적 쇼크가 상당 부분 반영.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>가격 경쟁 심화</b> — EV 인센티브만 7,270억원 감익, 중국 업체와의 원가 경쟁은 "불가능"하다는 평가(삼성증권).</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>원가·지정학 부담</b> — 원재료 3,680억·중동 2,090억 감익, 매출원가율 84.1%(+3.0%p).</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>배당 여력 축소 우려</b> — 순현금 피크아웃 평가(삼성증권).</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>목표가 줄하향</b> — 하나·신한·미래에셋·삼성 모두 하향.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">미래에셋증권 <span style="color:var(--muted);font-weight:400;">(2026.11.02)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">180,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">삼성증권 <span style="color:var(--muted);font-weight:400;">(2026.11.02)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">130,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">하나증권 <span style="color:var(--muted);font-weight:400;">(2026.10.07)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">170,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">신한투자증권 <span style="color:var(--muted);font-weight:400;">(2026.09.29)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">195,000원</span></div>
+    </div>
+    <div class="source-note">※ 출처: 더파워, 이투데이, 아시아경제, PPSS. 11월 리포트 기준 목표가 범위 13~18만원.</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">기아는 3분기에 매출 31.6조원으로 3분기 기준 최대를 썼고 미국·국내 점유율도 분기 최고를 기록했지만, <b>영업이익이 컨센서스를 25% 밑도는 어닝 쇼크</b>로 발표 당일 주가가 12% 가까이 빠졌습니다. 원인은 판매 부진이 아니라 수익성입니다. 중국 저가 EV와 경쟁하느라 인센티브를 늘렸고, 원재료·중동 리스크와 판매보증 충당금이 겹쳤습니다. 증권가는 모두 매수를 유지했지만 목표가를 13~18만원으로 낮췄고, 삼성증권은 순현금 피크아웃에 따른 배당 여력 축소를 경고했습니다. 반대로 미래에셋은 7%대 배당수익률을 근거로 매수 매력을 강조합니다. 주가는 52주 저점 부근이라 4분기 인센티브 추이와 원가 안정 여부, 연말 배당·주주환원 발표가 반등의 조건이 됩니다. <b>이 종목은 단기 이익 변동성을 감수하고 높은 배당과 판매 경쟁력에 베팅하는 중장기 배당·가치 투자자에게 적합합니다.</b></div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

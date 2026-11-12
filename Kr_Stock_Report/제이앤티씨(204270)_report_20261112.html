@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제이앤티씨 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">204270 · KOSDAQ</div>
+      <div class="company-name">제이앤티씨</div>
+      <div class="company-desc">3D 커버글라스·커넥터 제조사에서 반도체용 TGV 유리기판·HDD 유리플래터 소재 기업으로 전환 중</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 12일</div>
+      <div class="price-display">19,870원</div>
+      <div class="price-change up">▲ +12.32% (전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.11.12 장 마감 · 출처: 일일 시장 리포트 엑셀(kr_market_report_20261112)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 1조 1,494억원</span>
+    <span class="rating-pill">🏢 섹터: IT부품 · 유리기판(TGV)</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 매수 (커버리지 1곳)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (2Q26)</div>
+      <div class="kpi-value">388억원</div>
+      <div class="kpi-sub">YoY -30.8% (2Q25 561억)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률 (2Q26)</div>
+      <div class="kpi-value">-64.4%</div>
+      <div class="kpi-sub">전분기 대비 -35.9%p (1Q26 -28.5%)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">26,000원</div>
+      <div class="kpi-sub">현재가 대비 +30.9%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value">11,140~30,100원</div>
+      <div class="kpi-sub">현재가 위치: 46.0%</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: 매출 Investing.com(2Q26 38.83B)·FnGuide(2Q25), 2Q26 영업손실 잡포스트, 1Q26 치킨스탁(DART 기준), 목표가 한경코리아마켓 컨센서스, 52주 범위 한경코리아마켓 (기준일 2026.10.01, 최고가는 매체별 29,600~30,100원) · 현재가 일일 시장 리포트 엑셀(kr_market_report_20261112) (2026.11.12). 영업이익률·YoY는 위 수치로 계산</div>
+
+  <!-- ②-1 주가 추이 차트 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📉 주가 추이 (최근 구간 + 52주 최고/최저 기준선)</div>
+    <div style="padding:4px 0;">
+      <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dc2626" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="10" y1="27.3" x2="870" y2="27.3" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="23.3" font-size="9" fill="#6b7280" text-anchor="end">52주 최고 30,100원</text><line x1="10" y1="160.7" x2="870" y2="160.7" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="171.7" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 11,140원 (2026.07.29 장중)</text>
+  <path d="M10.0,174 L10.0,106.3 L27.6,104.5 L45.1,105.4 L62.7,108.4 L80.2,96.6 L97.8,94.5 L115.3,91.3 L132.9,96.6 L150.4,98.4 L168.0,99.5 L185.5,106.9 L203.1,109.6 L220.6,104.5 L238.2,93.8 L255.7,97.3 L273.3,89.9 L290.8,81.1 L308.4,77.6 L325.9,84.6 L343.5,89.2 L361.0,87.5 L378.6,81.5 L396.1,73.4 L413.7,61.8 L431.2,62.8 L448.8,71.6 L466.3,77.6 L483.9,76.9 L501.4,82.5 L519.0,84.6 L536.5,85.4 L554.1,77.6 L571.6,57.6 L589.2,54.4 L606.7,59.0 L624.3,80.1 L641.8,93.4 L659.4,111.2 L676.9,95.2 L694.5,96.6 L712.0,96.6 L729.6,93.4 L747.1,104.7 L764.7,105.4 L782.2,113.5 L799.8,108.4 L817.3,105.4 L834.9,113.7 L852.4,122.8 L870.0,119.2 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,106.3 27.6,104.5 45.1,105.4 62.7,108.4 80.2,96.6 97.8,94.5 115.3,91.3 132.9,96.6 150.4,98.4 168.0,99.5 185.5,106.9 203.1,109.6 220.6,104.5 238.2,93.8 255.7,97.3 273.3,89.9 290.8,81.1 308.4,77.6 325.9,84.6 343.5,89.2 361.0,87.5 378.6,81.5 396.1,73.4 413.7,61.8 431.2,62.8 448.8,71.6 466.3,77.6 483.9,76.9 501.4,82.5 519.0,84.6 536.5,85.4 554.1,77.6 571.6,57.6 589.2,54.4 606.7,59.0 624.3,80.1 641.8,93.4 659.4,111.2 676.9,95.2 694.5,96.6 712.0,96.6 729.6,93.4 747.1,104.7 764.7,105.4 782.2,113.5 799.8,108.4 817.3,105.4 834.9,113.7 852.4,122.8 870.0,119.2" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="119.2" r="3.5" fill="#dc2626"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-08-19</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-02</text>
+</svg>
+
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.19~11.02 수익률: -9.8%</span>
+      <span>해당 구간 내 최고 26,250원(10.08) · 최저 16,530원(10.30)</span>
+    </div>
+    <div class="source-note">※ 실선 출처: stockanalysis.com 일별 종가 (확보 가능한 마지막 거래일 2026.11.02까지 — 이후~11.12 일별 데이터는 확보하지 못해 표시하지 않음, 11.12 종가는 헤더 참조) · 점선(52주 최고/최저)은 위 KPI와 동일 출처 · 기준일 2026.11.12</div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (직전 분기 2Q26 — 3Q26 분기보고서 법정 기한 11.16)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">388억원 <span style="font-size:12px;color:var(--muted);">컨센서스 확인 불가</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 N/A · YoY -30.8% (1H26 누적 YoY -24.3%)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">-431원 <span style="font-size:12px;color:var(--muted);">컨센서스 확인 불가</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">컨센서스 N/A · 2Q26 영업손실 약 250억원</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      2Q26 실적은 2026.08.14 반기보고서로 공시. 강화유리 부문은 중화권 고객사 Chip 수급 이슈로 매출이 줄었고 커넥터는 방수형 C-Type 중심으로 유지됐다(WISEreport). 회사는 씨게이트향 HDD 유리플래터를 내년 1분기 양산·2분기 본격 공급해 연 수천억원 신규 매출을 기대한다고 밝혔다(디일렉, 11.12). 3Q26 실적은 11월 16일까지 공시 예정.
+    </div>
+    <div class="source-note">※ 출처: Investing.com 실적 페이지(2026.08.14 발표분), 잡포스트(2026.09.21), WISEreport 기업실적코멘트(2026.09.02), 치킨스탁(법정 제출 기한), 디일렉</div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART / SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">신규시설투자</span>
+        <span style="font-size:13px;font-weight:500;">TGV 유리기판 김천 공장 신설 3,470억원 (자기자본 대비 140.08%, 투자기간 2027.01~2030.06)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.09.21 · DART(치킨스탁 요약)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">종속회사 유상증자</span>
+        <span style="font-size:13px;font-weight:500;">유상증자결정(종속회사의 주요경영사항) · 타법인주식및출자증권취득결정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.09.10 · DART(IRGO 목록)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fef9c3;color:#854d0e;margin-right:8px;">지분공시</span>
+        <span style="font-size:13px;font-weight:500;">주식등의대량보유상황보고서(일반)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.09.30 · DART(IRGO 목록)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">반기보고서</span>
+        <span style="font-size:13px;font-weight:500;">반기보고서 (2026.06) 및 기재정정</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.08.14 · DART(IRGO 목록)</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.11.12</span><span class="news-source">· 디일렉</span></div>
+      <div class="news-title">제이앤티씨, 日호야 독점 깬다…씨게이트에 HDD 유리플래터 첫 공급</div>
+      <div class="news-summary">베트남 비엣찌 3공장을 약 550억원 들여 유리플래터 라인으로 전환했고 내년 1분기 가동, 2분기 본격 공급 예정. 씨게이트 물량의 약 40%를 맡을 것으로 추정돼, 그간 호야가 독점한 시장에 진입한다는 점에서 첫 대형 신사업 매출원이 된다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.11.06</span><span class="news-source">· 디일렉</span></div>
+      <div class="news-title">제이앤티씨, 엔비디아 유리기판 공급사 등록</div>
+      <div class="news-summary">지난달 엔비디아 구매 공급사 명단에 올라 2mm 글래스코어를 포함한 TGV 유리기판을 유상 샘플로 공급 중. 브로드컴에 이은 두 번째 미국 대형 반도체 고객이지만 유리기판 매출은 아직 별도로 잡히지 않는다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.10.07</span><span class="news-source">· 비즈니스포스트</span></div>
+      <div class="news-title">유리기판 핵심 공정(구리 충진) 시간 단축 기술 확보</div>
+      <div class="news-summary">510×515㎜·2㎜ 두께 기판에서 반나절~하루 걸리던 TGV 구리 충진을 분 단위로 줄였다고 발표. 양산 생산성·수율과 직결되는 기술이라 주가가 장중 16%대 올랐다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.10.02</span><span class="news-source">· 딜사이트</span></div>
+      <div class="news-title">현금 482억원으로 3,470억원 투자…재원 조달 부담</div>
+      <div class="news-summary">김천 공장 투자액은 자기자본의 140%인데 현금성자산은 투자금의 13.9% 수준. 부족분은 금융권 대출과 최대주주 지분 담보 주식담보대출 등으로 충당할 계획이라 재무 부담·오버행 우려가 따른다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.09.21</span><span class="news-source">· 경북일보</span></div>
+      <div class="news-title">김천시와 3,470억원 TGV 유리기판 공장 투자협약</div>
+      <div class="news-summary">2027~2030년 김천1일반산업단지에 생산시설을 구축하고 430여 명을 고용할 계획. 유리기판을 장기 성장축으로 확정한 이벤트지만 실제 투자 집행은 2027년 하반기부터다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.09.02</span><span class="news-source">· WISEreport</span></div>
+      <div class="news-title">상반기 매출 24.3% 감소, 적자 지속</div>
+      <div class="news-summary">강화유리 부문이 중화권 고객사 Chip 수급 이슈로 부진. 신사업 매출이 본격화되기 전까지 기존 사업 적자가 이어지는 구간이다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>HDD 유리플래터 첫 고객 확보</b> — 씨게이트 공급으로 내년 2분기부터 본격 매출, 회사는 연 수천억원 신규 매출을 기대(디일렉).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>빅테크 유리기판 공급망 진입</b> — 브로드컴에 이어 엔비디아 공급사 등록, 2mm 두께 등 0.3~2.0mm 라인업 확보(디일렉·한국경제).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>증설 로드맵</b> — 월 1만장 파일럿 CAPA에서 국내 연 12만장·베트남 36만장으로 연 50만장 체제를 목표, 장기 유리기판 매출 1조원 목표 제시(스몰인사이트리서치/뉴시스).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>낮아진 주가 위치</b> — 52주 범위 중간(약 46%) 수준으로, 10월 고점(26,250원) 대비 조정을 거친 상태.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>본업 적자 지속</b> — 2025년 영업손실 780억원에 이어 2Q26에도 약 250억원 영업손실, 상반기 매출 -24.3%.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>투자 재원 부담</b> — 3,470억원 투자 대비 현금 482억원, 최대주주 주식담보대출 활용 계획(딜사이트) → 담보 비율·추가 조달 리스크.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>매출 인식 시점 불확실</b> — 유리기판은 아직 유상 샘플 단계로 별도 매출 없음(디일렉), 양산 수율·고객 인증이 관건.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>높은 변동성</b> — 1년 베타 1.63(FnGuide), 10월 고점 이후 한 달 새 30% 넘게 밀렸다가 재급등하는 등 뉴스 의존적 흐름.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">유진투자증권 <span style="color:var(--muted);font-weight:400;">(2026.04 보도 기준)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">26,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">스몰인사이트리서치 (독립리서치) <span style="color:var(--muted);font-weight:400;">(2026.05.11)</span></span>
+      <div class="analyst-right"><span class="opinion-badge" style="background:#f3f4f6;color:#4b5563;">NR</span><span class="target-price">목표가 미제시</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 (한경코리아마켓) <span style="color:var(--muted);font-weight:400;">(2026.11.05 기준)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">26,000원</span></div>
+    </div>
+    <div class="source-note">※ 출처: 데일리인베스트(유진투자증권 리포트 인용), 이투데이·뉴시스(스몰인사이트리서치), 한경코리아마켓 컨센서스. 커버리지 증권사가 사실상 1곳이라 컨센서스 신뢰도는 낮음.</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">제이앤티씨는 스마트폰 커버글라스 회사에서 <b>HDD 유리플래터와 반도체 TGV 유리기판</b>을 앞세운 유리 소재 플랫폼으로 체질을 바꾸는 중입니다. 11월 12일 씨게이트 공급 소식과 그 일주일 전 엔비디아 공급사 등록은 그동안 "기대"에 머물던 신사업이 실제 고객과 양산 일정으로 구체화되고 있다는 점에서 의미가 큽니다. 다만 숫자는 아직 따라오지 못했습니다. 2분기에도 약 250억원 영업손실을 냈고, 김천 공장 3,470억원 투자는 보유 현금의 7배가 넘어 대출과 주식담보에 기대야 합니다. 단기적으로는 11월 16일까지 나올 3분기 실적과 4분기 적자 축소 여부, 중기적으로는 2027년 상반기 유리플래터 매출 인식 속도와 유리기판 첫 양산 계약이 핵심 변수입니다. 목표가 26,000원은 커버리지 1곳 기준이라 참고 수준으로 보는 것이 맞습니다. <b>이 종목은 신사업 실현 시점까지의 적자·자금조달 리스크와 큰 변동성을 감내할 수 있는, AI 반도체 소재 테마의 중장기 투자자에게 적합합니다.</b></div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

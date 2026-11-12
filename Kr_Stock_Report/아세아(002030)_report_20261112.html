@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아세아 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">002030 · KOSPI</div>
+      <div class="company-name">아세아</div>
+      <div class="company-desc">아세아시멘트·아세아제지를 거느린 시멘트·제지 지주회사</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 12일</div>
+      <div class="price-display">226,500원</div>
+      <div class="price-change up">▲ +12.69% (전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.09.10 종가 (이후 시세는 확보하지 못함) · 출처: stockanalysis.com 일별 시세</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 약 4,354억원 (치킨스탁 2026.09.15 기준)</span>
+    <span class="rating-pill">🏢 섹터: 지주회사 · 시멘트·제지</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: 커버리지 확인 불가</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출 (1Q26)</div>
+      <div class="kpi-value">4,594억원</div>
+      <div class="kpi-sub">YoY +6.1%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률 (1Q26)</div>
+      <div class="kpi-value">5.2%</div>
+      <div class="kpi-sub">전분기 대비 확인 불가</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">N/A</div>
+      <div class="kpi-sub">증권사 커버리지 확인 불가</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위 (참고)</div>
+      <div class="kpi-value">159,000~402,000원</div>
+      <div class="kpi-sub">2026.06.11 기준 수치 — 현재 위치 산정 불가</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: 1Q26 치킨스탁(DART 분기보고서 2026.05.15), 52주 피플로(2026.06.11 기준), 현재가 stockanalysis.com(2026.09.10). 2Q26(반기) 실적 수치는 이번 조사에서 확인하지 못함</div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (구 실적 1Q26 — 반기 실적 미확인 · 3Q26 분기보고서 법정 기한 11.16)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">4,594억원 <span style="font-size:12px;color:var(--muted);">컨센서스 없음</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +6.1%</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">영업이익 (EPS 대용)</div>
+        <div style="font-size:18px;font-weight:700;">237억원 <span style="font-size:12px;color:var(--muted);">컨센서스 없음</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">당기순이익 167억원</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      실적 미확인 구간이 큼: 2026년 반기 실적은 이번 검색에서 수치를 찾지 못했고, 3분기 분기보고서는 11월 16일까지 공시된다. 자회사 아세아시멘트는 11월 18일 실적 발표 예정(Investing.com). 연간 기준으로는 2025년 매출 1조 8,845억·영업이익 1,110억원으로 2024년(1,724억)보다 35.6% 줄었다(피플로, 계산).
+    </div>
+    <div class="source-note">※ 출처: 치킨스탁(DART 기준), Investing.com(아세아시멘트 일정), 피플로(연간 실적)</div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART / SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">분기보고서</span>
+        <span style="font-size:13px;font-weight:500;">2026 1분기보고서 — 매출 4,594억·영업이익 237억</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);">2026.05.15 · DART(치킨스탁)</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 &amp; 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026 (연간 데이터)</span><span class="news-source">· 피플로</span></div>
+      <div class="news-title">2025년 영업이익 1,110억원, 전년 대비 35.6% 감소</div>
+      <div class="news-summary">시멘트 내수 출하 감소와 제지 원가 부담이 겹친 결과로, 업황 회복 전까지 이익 반등이 제한적.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2025~2026</span><span class="news-source">· FnGuide</span></div>
+      <div class="news-title">건설경기 침체로 실적 하락</div>
+      <div class="news-summary">착공면적 감소와 건설 PF 리스크로 시멘트 내수가 줄고 제지는 원재료·에너지 비용이 늘었다는 평가.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.09.15</span><span class="news-source">· 치킨스탁</span></div>
+      <div class="news-title">PER 15.66배·PBR 0.37배 — 저PBR과 낮은 ROE 공존</div>
+      <div class="news-summary">PBR은 낮지만 ROE 2.6%로 수익성이 약해 저평가가 지속되는 구조라는 AI 브리핑.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.11.18 예정</span><span class="news-source">· Investing.com</span></div>
+      <div class="news-title">자회사 아세아시멘트 3분기 실적 발표 예정</div>
+      <div class="news-summary">지주사 가치에 직결되는 핵심 자회사 실적 확인 일정.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>자산가치 대비 저평가</b> — PBR 0.37배(치킨스탁).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>1분기 외형 회복</b> — 매출 +6.1%.</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>배당</b> — 2025년 말 기준 배당수익률 3.07%, 분기배당 1,400원(Google Finance, 2025.12 기준).</div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><b>업황 바닥 통과 시 레버리지</b> — 시멘트·골판지 업황 회복 시 지주사 이익 탄력.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>낮은 수익성</b> — ROE 2.6%, 2025년 영업이익 -35.6%.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>건설경기 의존</b> — 착공 감소·PF 리스크(FnGuide).</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>낮은 유동성</b> — 일 거래량 수천 주 수준(stockanalysis 일별 시세), 커버리지 부재.</div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><b>정보 공백</b> — 반기 실적·최신 주가를 이번에 확보하지 못함.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <div style="margin-top:1rem;"></div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">아세아는 아세아시멘트와 아세아제지를 자회사로 둔 시멘트·제지 지주회사입니다. 건설 경기 침체로 시멘트 내수가 줄고 제지 원가가 오르면서 <b>2025년 영업이익이 35% 넘게 줄었고</b>, 2026년 1분기 매출은 6% 늘었지만 수익성 지표(ROE 2.6%)는 여전히 낮습니다. PBR 0.37배로 자산가치 대비 싸지만, 낮은 이익률과 적은 거래량 때문에 저평가가 오래 이어지는 구조입니다. 이번 보고서는 정보 공백이 큽니다. 2026년 반기 실적 수치와 9월 10일 이후 주가를 확보하지 못했고, 증권사 커버리지도 확인되지 않았습니다. 따라서 11월 16일까지 나올 3분기 분기보고서와 11월 18일 아세아시멘트 실적이 판단의 출발점이 되어야 합니다. <b>이 종목은 유동성이 낮아도 자산가치와 배당을 보고 오래 기다릴 수 있는 장기 가치 투자자에게 적합하며, 매수 전 최신 공시 확인이 필수입니다.</b></div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>

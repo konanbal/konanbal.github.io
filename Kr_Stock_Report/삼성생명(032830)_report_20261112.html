@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>삼성생명 분석 보고서</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #0f3460;
+    --bg: #f8f9fc;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: white; padding: 2.5rem 2rem 2rem; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .ticker-badge { background: var(--accent); color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 1px; margin-bottom: 8px; display: inline-block; }
+  .company-name { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .company-desc { font-size: 14px; opacity: 0.8; max-width: 500px; }
+  .header-meta { text-align: right; }
+  .report-date { font-size: 12px; opacity: 0.6; }
+  .price-display { font-size: 32px; font-weight: 700; margin-top: 4px; }
+  .price-change { font-size: 14px; margin-top: 2px; }
+  .price-change.up { color: #4ade80; }
+  .price-change.down { color: #f87171; }
+  .rating-row { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .rating-pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+  .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .news-item { padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .news-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+  .tag-positive { background: #d1fae5; color: #065f46; }
+  .tag-negative { background: #fee2e2; color: #991b1b; }
+  .tag-neutral { background: #f3f4f6; color: #4b5563; }
+  .news-date { font-size: 11px; color: var(--muted); }
+  .news-source { font-size: 11px; color: var(--muted); }
+  .news-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; }
+  .news-summary { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .data-asof { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+  .source-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.8; }
+  .factor-list { display: flex; flex-direction: column; gap: 8px; }
+  .factor-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .factor-item.bull { background: #f0fdf4; border-left: 3px solid var(--green); }
+  .factor-item.bear { background: #fff1f2; border-left: 3px solid var(--red); }
+  .factor-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .analyst-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .analyst-row:last-child { border-bottom: none; }
+  .analyst-firm { font-weight: 500; }
+  .analyst-right { display: flex; align-items: center; gap: 12px; }
+  .opinion-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .buy { background: #d1fae5; color: #065f46; }
+  .hold { background: #fef9c3; color: #854d0e; }
+  .sell { background: #fee2e2; color: #991b1b; }
+  .target-price { font-weight: 600; color: var(--text); }
+  .summary-box { background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+  .summary-title { font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { .grid-2, .kpi-grid { grid-template-columns: 1fr; } .header-meta { text-align: left; } }
+</style>
+</head>
+<body>
+
+<!-- ① 헤더 — 종목 기본 정보 -->
+<div class="report-header">
+  <div class="header-top">
+    <div>
+      <div class="ticker-badge">032830 · KOSPI</div>
+      <div class="company-name">삼성생명</div>
+      <div class="company-desc">국내 1위 생명보험사 — CSM 14.3조원, 삼성전자 지분(약 8.5%) 보유로 지분가치·배당 수혜</div>
+    </div>
+    <div class="header-meta">
+      <div class="report-date">보고서 작성일: 2026년 11월 12일</div>
+      <div class="price-display">250,000원</div>
+      <div class="price-change up">▲ +2,500원 (+1.01%) (전일 대비)</div>
+      <div class="data-asof">데이터 기준: 2026.11.12 종가 · 출처: stockanalysis.com(지연 시세)</div>
+    </div>
+  </div>
+  <div class="rating-row">
+    <span class="rating-pill">📊 시가총액: 44.89조원</span>
+    <span class="rating-pill">🏢 섹터: 금융 · 생명보험</span>
+    <span class="rating-pill">⭐ 애널리스트 컨센서스: Buy (stockanalysis 집계)</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ② KPI 4개 — 핵심 재무 지표 -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">최근 분기 매출</div>
+      <div class="kpi-value">8조6,710억원</div>
+      <div class="kpi-sub">YoY +15.8%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">영업이익률</div>
+      <div class="kpi-value">10.8%</div>
+      <div class="kpi-sub">전분기 3.3% 대비 +7.5%p (매출 대비, 참고치)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">목표주가 (컨센서스)</div>
+      <div class="kpi-value">392,971원</div>
+      <div class="kpi-sub">현재가 대비 +57.2%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">52주 범위</div>
+      <div class="kpi-value" style="font-size:16px;white-space:nowrap;letter-spacing:-0.3px;">144,000~516,500원</div>
+      <div class="kpi-sub">현재가 위치: 28.5%</div>
+    </div>
+  </div>
+  <div class="source-note">※ 위 지표 출처: 분기 실적 — 디지털타임스·SR타임스(2026.11.12 발표), 2Q 수치 etfshopping. 보험사 매출·영업이익률은 참고치 / 목표주가·52주 범위 — stockanalysis.com (기준일 2026.11.12)</div>
+
+  <!-- ②-1 주가 추이 차트 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📉 주가 추이 (최근 구간 + 52주 최고/최저 기준선)</div>
+    <div style="padding:4px 0;">
+      <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dc2626" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="10" y1="27.3" x2="870" y2="27.3" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="23.3" font-size="9" fill="#6b7280" text-anchor="end">52주 최고 516500.00</text><line x1="10" y1="160.7" x2="870" y2="160.7" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="171.7" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 144000.00</text>
+  <path d="M10.0,174 L10.0,102.7 L27.6,101.4 L45.1,107.0 L62.7,103.8 L80.2,105.7 L97.8,100.5 L115.3,102.0 L132.9,103.6 L150.4,101.4 L168.0,102.1 L185.5,105.5 L203.1,110.0 L220.6,110.7 L238.2,111.8 L255.7,110.7 L273.3,108.0 L290.8,108.0 L308.4,106.8 L325.9,106.3 L343.5,108.2 L361.0,111.3 L378.6,110.6 L396.1,108.8 L413.7,110.2 L431.2,111.6 L448.8,115.9 L466.3,116.5 L483.9,120.6 L501.4,124.0 L519.0,130.6 L536.5,126.8 L554.1,124.7 L571.6,127.4 L589.2,124.5 L606.7,125.8 L624.3,124.5 L641.8,124.0 L659.4,120.9 L676.9,112.9 L694.5,112.7 L712.0,115.4 L729.6,114.9 L747.1,118.6 L764.7,119.1 L782.2,124.7 L799.8,128.3 L817.3,127.4 L834.9,124.7 L852.4,123.6 L870.0,122.7 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,102.7 27.6,101.4 45.1,107.0 62.7,103.8 80.2,105.7 97.8,100.5 115.3,102.0 132.9,103.6 150.4,101.4 168.0,102.1 185.5,105.5 203.1,110.0 220.6,110.7 238.2,111.8 255.7,110.7 273.3,108.0 290.8,108.0 308.4,106.8 325.9,106.3 343.5,108.2 361.0,111.3 378.6,110.6 396.1,108.8 413.7,110.2 431.2,111.6 448.8,115.9 466.3,116.5 483.9,120.6 501.4,124.0 519.0,130.6 536.5,126.8 554.1,124.7 571.6,127.4 589.2,124.5 606.7,125.8 624.3,124.5 641.8,124.0 659.4,120.9 676.9,112.9 694.5,112.7 712.0,115.4 729.6,114.9 747.1,118.6 764.7,119.1 782.2,124.7 799.8,128.3 817.3,127.4 834.9,124.7 852.4,123.6 870.0,122.7" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="122.7" r="3.5" fill="#dc2626"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-08-31</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-12</text>
+</svg>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.31~11.12 수익률: -18.3%</span>
+      <span>해당 구간 내 최고 312,000원(09.07) · 최저 228,000원(10.15)</span>
+    </div>
+    <div class="source-note">※ 실선 출처: stockanalysis.com 일별 종가 · 점선(52주 최고/최저)은 위 KPI와 동일 출처 · 기준일 2026.11.12</div>
+  </div>
+
+  <!-- ③ 실적 속보 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">📣 실적 속보 (최근 분기) — 최신 실적 (3Q26, 2026.11.12 발표)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">매출 (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">8조6,710억원 <span style="font-size:12px;color:var(--muted);">컨센서스 비교 N/A</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">YoY +15.8% · 영업이익 9,377억(+14.9%)</div>
+      </div>
+      <div style="background:#f8faff;border-radius:8px;padding:1rem;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">EPS (실제 vs 예상)</div>
+        <div style="font-size:18px;font-weight:700;">약 3,962원 <span style="font-size:12px;color:var(--green);">▲ EPS 컨센서스 대비 약 +10.5%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">지배순이익 7,924억 ÷ 발행주식 2억주로 산출 · 컨센서스 3,585원(3곳 평균, etfshopping)</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;background:#fffbf0;border-left:3px solid var(--amber);padding:10px 14px;border-radius:0 6px 6px 0;">
+      지배주주 순이익 7,924억원(YoY +9.6%, QoQ +14.9%), 연결 순이익 8,239억원. 이번 분기는 보험 본업이 이끌었다. 보험서비스손익이 5,295억원으로 두 배(+102%)가 됐는데, 예실차가 1,366억원 이익으로 돌아섰고 통상임금 소송 1심 승소로 퇴직충당금 약 520억원이 환입됐다. 반면 투자손익은 5,405억원으로 21.9% 줄었다(처분손익 적자 전환). 1~3분기 누적 지배순이익 2조6,859억원(+26.9%), CSM 잔액 14.3조원, 누적 신계약 CSM 2조6,259억원(+14.3%), K-ICS 비율 209%.
+    </div>
+    <div class="source-note">※ 출처: SR타임스·비즈니스포스트·파이낸셜뉴스·디지털타임스(2026.11.12), etfshopping(컨센서스)</div>
+  </div>
+
+  <!-- ④ DART / SEC 공시 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">🗂️ 최근 공시 (DART / SEC)</div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">실적 발표</span>
+        <span style="font-size:13px;font-weight:500;">2026년 3분기 경영실적 — 지배순이익 7,924억·누적 2조6,859억</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);white-space:nowrap;margin-left:8px;">2026.11.12 · 회사 IR(SR타임스 보도)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#fce7f3;color:#9d174d;margin-right:8px;">주요사항보고서</span>
+        <span style="font-size:13px;font-weight:500;">자본으로 인정되는 채무증권(해외 신종자본증권) 15억달러(약 1조9,865억원) 발행, 금리 6.875% 확정 (기재정정)</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);white-space:nowrap;margin-left:8px;">2026.10.27 · DART(knowingasset 요약)</span>
+    </div>
+    <div class="analyst-row">
+      <div>
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:#e0e7ff;color:#3730a3;margin-right:8px;">실적 발표</span>
+        <span style="font-size:13px;font-weight:500;">2026년 2분기 실적 — 순이익 7,274억</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);white-space:nowrap;margin-left:8px;">2026.08.13 · DART(etfshopping 집계)</span>
+    </div>
+  </div>
+
+  <!-- ⑤ 최근 뉴스 -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-title">최근 주요 뉴스 & 이슈</div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-positive">호재</span><span class="news-date">2026.11.12</span><span class="news-source">· SR타임스</span></div>
+      <div class="news-title">3분기 순익 7,924억 9.6%↑…보험서비스손익 두 배로</div>
+      <div class="news-summary">예실차 흑자 전환과 CSM 손익 증가로 본업 이익이 크게 늘었다. 누적 순이익은 이미 작년 연간치를 넘어섰다(한국경제).</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.11.12</span><span class="news-source">· 비즈니스포스트</span></div>
+      <div class="news-title">보험손익 2배로 투자손익 감소 메워…투자손익 -21.9%</div>
+      <div class="news-summary">일반계정 투자손익이 64% 줄고 처분손익이 적자로 돌아섰다. 보험 이익 일부는 충당금 환입 등 일회성 성격이다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-neutral">중립</span><span class="news-date">2026.10.27</span><span class="news-source">· 스마트투데이</span></div>
+      <div class="news-title">첫 해외 신종자본증권 15억달러 발행…보험업계 최대</div>
+      <div class="news-summary">약 2조원 자본 확충으로 K-ICS가 4~5%p 개선될 전망(SR타임스). 6.875%의 높은 금리는 이자비용 부담이다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.08.14</span><span class="news-source">· 스마트투데이</span></div>
+      <div class="news-title">NH투자증권 "삼성전자 주가에 좌지우지"…목표가 39만원으로 하향</div>
+      <div class="news-summary">당분간 주가가 삼성전자와 동조화할 것이라며 빠른 밸류업 정책 발표를 권고했다.</div>
+    </div>
+    <div class="news-item">
+      <div class="news-meta"><span class="news-tag tag-negative">리스크</span><span class="news-date">2026.10.15</span><span class="news-source">· 서울신문</span></div>
+      <div class="news-title">코스피·코스닥 7%대 폭락, 서킷브레이커…하루 시총 410조 증발</div>
+      <div class="news-summary">미국발 물가 충격과 AI 수익성 불안으로 외국인 매도가 쏟아지며 지수가 5,554까지 밀렸다. 업종을 가리지 않은 급락이라 개별 실적과 무관한 하방 압력이 이어졌다.</div>
+    </div>
+  </div>
+
+  <!-- ⑥ Bull / Bear Case -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📈 투자 기회 (Bull Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><b>본업 회복</b> — 3Q 보험서비스손익 +102%, 예실차 흑자 전환. CSM 잔액 14.3조원, 신계약 CSM +14.3%로 미래 이익 기반이 늘고 있다 (SR타임스·파이낸셜뉴스).</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><b>삼성전자 배당·지분가치</b> — 삼성전자가 3분기 약 30조원 규모 현금배당을 의결했고, 내년 1월 잔여재원 주주환원 방안을 발표할 예정(택스넷). 지분 약 8.5%를 보유한 삼성생명의 투자이익·배당 재원으로 이어진다 (키움증권).</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><b>자본 여력</b> — K-ICS 209%에 신종자본증권 약 2조원 확충. 주주환원과 해외 보험사 인수 재원 확보 (뉴스토마토).</span></div>
+        <div class="factor-item bull"><span class="factor-icon">✓</span><span><b>주주환원 로드맵</b> — 2028년까지 배당성향 50% 목표 제시 (딜사이트). Forward PER 9.5배 (stockanalysis).</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 리스크 요인 (Bear Case)</div>
+      <div class="factor-list">
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><b>삼성전자 의존도</b> — 주가가 삼성전자와 동조화하는 구조. 삼성전자 약세 시 지분가치·K-ICS·심리가 함께 흔들린다 (NH투자증권).</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><b>투자손익 변동성</b> — 3Q 투자손익 -21.9%, 처분손익 적자. 시장 급락기 운용 손익이 부진하다 (비즈니스포스트).</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><b>이익의 질</b> — 3Q 본업 개선에 퇴직충당금 환입(약 520억) 등 일회성 요인이 섞여 있다 (비즈니스포스트).</span></div>
+        <div class="factor-item bear"><span class="factor-icon">!</span><span><b>주주환원 속도</b> — 2025년 결산 배당성향 41%는 시장 기대에 못 미쳤다는 평가. 50% 로드맵 가시성이 관건 (딜사이트).</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 애널리스트 의견 -->
+  <div class="card" style="margin-top:1rem; margin-bottom:1rem;">
+    <div class="card-title">애널리스트 의견</div>
+    <div class="analyst-row">
+      <span class="analyst-firm">컨센서스 평균 (stockanalysis) <span style="color:var(--muted);font-weight:400;">(2026.11.12)</span></span>
+      <div class="analyst-right"><span class="opinion-badge buy">매수</span><span class="target-price">392,971원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">NH투자증권 <span style="color:var(--muted);font-weight:400;">(2026.08.14)</span></span>
+      <div class="analyst-right"><span class="opinion-badge" style="background:#f3f4f6;color:#4b5563;">의견 미기재</span><span class="target-price">390,000원</span></div>
+    </div>
+    <div class="analyst-row">
+      <span class="analyst-firm">한화투자증권 <span style="color:var(--muted);font-weight:400;">(2026.05.15)</span></span>
+      <div class="analyst-right"><span class="opinion-badge hold">중립</span><span class="target-price">312,000원</span></div>
+    </div>
+    <div class="source-note">※ 출처: stockanalysis.com, 스마트투데이(NH투자증권), 한화투자증권 리포트(네이버 리서치 게재). 2Q 리뷰 시점 증권사 목표가 범위 33.6만~45만원(리스크웨더 집계). 3Q 발표(11/12) 직후라 이후 리포트는 아직 확인되지 않음</div>
+  </div>
+
+  <!-- ⑧ 종합 투자 요약 -->
+  <div class="summary-box">
+    <div class="summary-title">📋 종합 투자 요약</div>
+    <div class="summary-text">삼성생명은 국내 1위 생명보험사이자 삼성전자 지분 약 8.5%를 가진 삼성그룹 금융 계열의 중심 회사다. 오늘(11월 12일) 발표한 3분기 지배순이익은 7,924억원(+9.6%)으로 EPS 컨센서스를 웃돈 것으로 추정되며, 이번엔 보험 본업이 실적을 이끌었다. 보험서비스손익이 두 배로 늘고 예실차가 흑자로 돌아섰지만, 퇴직충당금 환입 같은 일회성 요인이 섞여 있고 투자손익은 22% 줄었다. 누적 순이익은 이미 지난해 연간치를 넘어섰고 CSM 잔액 14.3조원, K-ICS 209%로 체력은 견조하다. 주가는 삼성전자 주가와 연동되며 52주 고점(516,500원) 대비 절반 아래인 250,000원까지 조정을 받았다. 앞으로는 삼성전자의 내년 1월 주주환원 발표, 배당성향 50% 로드맵 이행 속도, 신종자본증권으로 확보한 2조원의 활용처(해외 M&A·주주환원)가 주가 방향을 정할 것이다. 이 종목은 삼성전자 지분가치와 배당 확대를 함께 노리면서 반도체 사이클에 따른 변동성을 감내할 수 있는 중장기 투자자에게 적합하다.</div>
+    <div class="disclaimer">⚠️ 본 보고서는 투자 참고 목적으로 작성되었으며, 투자 권유가 아닙니다. 모든 투자 결정과 그에 따른 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+</body>
+</html>
