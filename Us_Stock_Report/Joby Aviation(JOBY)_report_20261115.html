@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joby Aviation (JOBY) 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">JOBY · NYSE</div>
+        <div class="company-name">Joby Aviation</div>
+        <div class="company-desc">전기 수직이착륙(eVTOL) 에어택시 개발사 · 헬기 승객운송 Blade 인수로 매출 발생 · FAA 형식 인증 마지막 단계</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$5.08</div>
+        <div class="chg down">▼ 4.87% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.13 종가 · Yahoo Finance · 작성 2026.11.15</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>약 $5.2B</b></span>
+      <span>섹터 <b>산업재 · eVTOL(에어택시)</b></span>
+      <span>52주 범위 <b>$4.43 ~ $17.10</b> (현재 위치 5%)</span>
+      <span>컨센서스 <b>중립(Hold)</b> · 목표가 <b>$8.84</b> (+74%)</span>
+    </div>
+    <div class="verdict">적자라 PER 비교는 불가, P/S 약 35배의 미래 기대주 — 3분기 매출 서프라이즈는 헬기(Blade) 덕이며, 2027년 상반기로 밀린 FAA 인증 비행 일정이 지켜지는지가 관건</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">적자</div><div class="m-sub">EPS(TTM) 음수 · 비교 불가</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">적자</div><div class="m-sub">2026E EPS -$0.77</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">2.95배</div><div class="m-sub">BPS $1.72 · FY25 8.54배</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">-52.1%</div><div class="m-sub">TTM 기준 · FY25 -80.1%</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">-$0.73</div><div class="m-sub">FY25 -$1.13 → 손실 축소</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">43%</div><div class="m-sub">D/E 0.43 · 현금성 $22억</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">-658%</div><div class="m-sub">TTM · FY25 -1,347%</div></div>
+    </div>
+    <div class="val-comment">이익이 없어 PER로는 평가할 수 없고, P/S 약 35배(TTM 매출 $1.49억 기준)로 현재 매출 대비 큰 프리미엄입니다. 다만 PBR은 FY25 말 8.54배 → 2.95배로, 선행 P/S도 1년 평균(약 84배)의 절반 수준(약 45배)으로 내려와 거품은 상당 부분 빠졌습니다. 남은 프리미엄의 근거는 아직 시작되지 않은 에어택시 유상 운항입니다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com (statistics·ratios, 기준일 2026.11.06) · PBR·P/S·시가총액은 2026.11.13 종가 기준 재계산 · 선행 P/S: TIKR · 비교기준: 업종 PER 대신 자사 FY25 PBR·1년 평균 P/S (적자로 PER 비교 불가)</div>
+  </div>
+
+  <!-- ③ 주가 추이 (데이터 미확보 시 카드 전체 생략) -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="34.4" y1="142.3" x2="868" y2="142.3" stroke="#e2e8f0" stroke-width="1"/><text x="28.4" y="145.3" font-size="9" fill="#94a3b8" text-anchor="end">5.00</text><line x1="34.4" y1="100.0" x2="868" y2="100.0" stroke="#e2e8f0" stroke-width="1"/><text x="28.4" y="103.0" font-size="9" fill="#94a3b8" text-anchor="end">6.00</text><line x1="34.4" y1="57.6" x2="868" y2="57.6" stroke="#e2e8f0" stroke-width="1"/><text x="28.4" y="60.6" font-size="9" fill="#94a3b8" text-anchor="end">7.00</text><line x1="34.4" y1="15.3" x2="868" y2="15.3" stroke="#e2e8f0" stroke-width="1"/><text x="28.4" y="18.3" font-size="9" fill="#94a3b8" text-anchor="end">8.00</text>
+  <line x1="34.4" y1="166.5" x2="868" y2="166.5" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="866" y="162.5" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 4.43 (2026-10-15)</text>
+  <path d="M34.4,172 L34.4,30.1 L47.8,27.2 L61.3,33.1 L74.7,35.2 L88.2,49.6 L101.6,48.3 L115.1,51.7 L128.5,51.3 L142.0,58.5 L155.4,64.4 L168.9,70.8 L182.3,65.3 L195.7,63.2 L209.2,68.7 L222.6,64.4 L236.1,82.2 L249.5,86.9 L263.0,83.5 L276.4,87.3 L289.9,94.5 L303.3,96.6 L316.7,91.9 L330.2,94.9 L343.6,82.6 L357.1,81.4 L370.5,89.4 L384.0,87.3 L397.4,86.4 L410.9,95.3 L424.3,100.4 L437.8,97.9 L451.2,101.7 L464.6,102.1 L478.1,109.3 L491.5,109.3 L505.0,110.6 L518.4,110.6 L531.9,123.7 L545.3,136.4 L558.8,144.4 L572.2,158.8 L585.7,150.4 L599.1,156.7 L612.5,158.8 L626.0,157.1 L639.4,157.6 L652.9,155.0 L666.3,152.5 L679.8,155.4 L693.2,141.9 L706.7,138.9 L720.1,138.9 L733.5,146.6 L747.0,150.4 L760.4,148.7 L773.9,140.2 L787.3,129.6 L800.8,102.9 L814.2,92.4 L827.7,103.4 L841.1,105.1 L854.6,127.9 L868.0,138.9 L868.0,172 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="34.4,30.1 47.8,27.2 61.3,33.1 74.7,35.2 88.2,49.6 101.6,48.3 115.1,51.7 128.5,51.3 142.0,58.5 155.4,64.4 168.9,70.8 182.3,65.3 195.7,63.2 209.2,68.7 222.6,64.4 236.1,82.2 249.5,86.9 263.0,83.5 276.4,87.3 289.9,94.5 303.3,96.6 316.7,91.9 330.2,94.9 343.6,82.6 357.1,81.4 370.5,89.4 384.0,87.3 397.4,86.4 410.9,95.3 424.3,100.4 437.8,97.9 451.2,101.7 464.6,102.1 478.1,109.3 491.5,109.3 505.0,110.6 518.4,110.6 531.9,123.7 545.3,136.4 558.8,144.4 572.2,158.8 585.7,150.4 599.1,156.7 612.5,158.8 626.0,157.1 639.4,157.6 652.9,155.0 666.3,152.5 679.8,155.4 693.2,141.9 706.7,138.9 720.1,138.9 733.5,146.6 747.0,150.4 760.4,148.7 773.9,140.2 787.3,129.6 800.8,102.9 814.2,92.4 827.7,103.4 841.1,105.1 854.6,127.9 868.0,138.9" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="47.8" cy="27.2" r="3" fill="#fff" stroke="#2f6db5" stroke-width="1.5"/><text x="47.8" y="20.2" font-size="9.5" font-weight="600" fill="#475569" text-anchor="start">7.72</text><circle cx="572.2" cy="158.8" r="3" fill="#fff" stroke="#2f6db5" stroke-width="1.5"/><text x="572.2" y="172.8" font-size="9.5" font-weight="600" fill="#475569" text-anchor="middle">4.61</text>
+  <circle cx="868.0" cy="138.9" r="3.5" fill="#2f6db5"/>
+  <text x="34.4" y="187" font-size="10" fill="#6b7280">2026-08-18</text>
+  <text x="451.2" y="187" font-size="10" fill="#6b7280" text-anchor="middle">2026-10-01</text>
+  <text x="868.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-13</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.18~11.13 수익률 -33.6%</span>
+      <span>구간 최고 $7.72 · 최저 $4.61 (종가) · 점선은 52주 최저 (52주 최고 $17.10은 축 범위 밖)</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 52주 고점 대비 -70%. 10월에 Aerosonic 영업비밀 소송 $1.17억 배상 평결(10.06), Barclays 매도 하향·목표가 $4(10.08), CPI 쇼크(10.14, 하루 -6.9%)가 겹쳐 10.15 52주 최저 $4.43까지 밀렸습니다. 11.04 실적 서프라이즈 뒤 11.09까지 +22% 반등했지만, 11.12 엔비디아발 기술주 급락에 Archer·Eve와 함께 하루 -9.2% 내렸습니다. (Trefis·TIKR·Tickeron)</div>
+    <div class="source-note">※ 출처: stockanalysis.com·Yahoo Finance 일별 시세 · 차트는 11.13까지 (헤더 가격과 같은 날) · 52주 최고 $17.10: Motley Fool</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 (최근 3년 + 추정 1년) -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>1.0</td><td>0.1</td><td>53.4</td></tr>
+          <tr><td>영업이익</td><td>-472.1</td><td>-596.8</td><td>-719.6</td></tr>
+          <tr><td>영업이익률</td><td>N/M</td><td>N/M</td><td>-1,346.9%</td></tr>
+          <tr><td>순이익</td><td>-513.1</td><td>-608.0</td><td>-929.8</td></tr>
+          <tr><td>EPS</td><td>-$0.79</td><td>-$0.87</td><td>-$1.13</td></tr>
+          <tr><td>PER</td><td>적자</td><td>적자</td><td>적자</td></tr>
+          <tr><td>ROE</td><td>-46.7%</td><td>-62.5%</td><td>-80.1%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">2026E 컨센서스: 매출 $120.8M · EPS -$0.77 (11명) — 회사 가이던스는 매출 $135~140M으로 컨센서스보다 높음</div>
+    <div class="source-note">※ 출처: stockanalysis.com (financials·ratios·forecast) · N/M = 매출이 미미해 이익률이 의미 없음 · 2025년 매출은 Blade 인수 반영 · 컨센서스는 10.19 집계(가이던스 상향 전)</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 (각 3개, 한 줄씩) -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>Blade 매출 급증·가이던스 3연속 상향</b> — 3분기 매출 $55.1M(+144%), 연간 전망 $1.35~1.40억으로 상향</li>
+          <li><b>FAA 인증 마지막 5단계 진행</b> — 'for credit' 시험 착수, 인증용 기체 17대 생산 중, 공장 산출 +37%</li>
+          <li><b>국방 사업 확대</b> — 공군 자율비행 계약 약 $3,700만, EBITDA 흑자 Resonant(매출 $1억+) 인수 예정</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>인증·상용화 일정 지연</b> — FAA 조종사 TIA 비행이 2026년 → 2027년 상반기로, 두바이 첫 승객 일정도 불투명</li>
+          <li><b>소송·매도 의견</b> — Aerosonic 소송 $1.17억 배상 평결, Barclays $4·Goldman $7 매도 의견</li>
+          <li><b>현금 소진·지분 희석</b> — 분기 현금 사용 약 $1.95억, 3분기 ATM $1.28억 조달, 희석 주식수 1년 +15.9%</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">2026년 3분기 · 최신 실적 · 매출 서프라이즈 +36~46%</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$55.1M</td><td>$37.6~40.4M</td><td>+36~46%</td><td>+144%</td></tr>
+            <tr><td>순이익</td><td>-$211.8M</td><td>N/A</td><td>N/A</td><td>손실 47% 축소</td></tr>
+            <tr><td>조정 EBITDA</td><td>-$207.9M</td><td>N/A</td><td>N/A</td><td>손실 $75.1M 확대</td></tr>
+            <tr><td>EPS (조정)</td><td>-$0.22</td><td>-$0.25~-0.26</td><td>+12~15%</td><td>-$0.26 → -$0.22</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">2026.11.04 장 마감 후 발표. 매출은 거의 전부 Blade(3분기 승객 4.4만 명, 사상 최대)에서 나왔고, 순손실 축소는 기타손익 개선($286M) 영향이 큽니다. 연간 매출 가이던스를 $115~125M → $135~140M으로 올렸고 하반기 현금 사용 $385~415M을 유지했습니다. CFO는 3분기가 Blade 성수기라 4분기 매출이 줄어든다고 밝혔습니다(가이던스상 4분기 약 $19.5M).</p>
+      <div class="source-note">※ 출처: Joby 실적발표(8-K) · 컨센서스: Earnings Whispers($37.6M)·Motley Fool($40.4M)·TradersUnion(EPS -$0.25) · 조정 EBITDA·YoY: Urban Air Mobility News · 컨퍼런스콜: MarketBeat · 4분기 추정: Finsee</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 (합쳐서 최신순 최대 6건) -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 6건</span></summary>
+    <div class="details-body">
+      <!-- 항목 반복. dot: pos(호재) / neg(리스크) / 생략(중립). tl-kind: 공시 / 뉴스 -->
+      <div class="tl-item">
+        <div class="tl-date">2026.11.12</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">실적·공시 없이 하루 -9.2%</span><div class="tl-desc">엔비디아발 기술주 급락에 Archer·Eve와 동반 하락. 회사 소식보다 투기성 성장주 흐름에 크게 흔들린다는 점을 다시 확인.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.06</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">실적 후 이틀 연속 상승(+5.0%, +11.9%)</span><div class="tl-desc">같은 날 Archer +14.7%, Eve +17.8%로 업종 전체가 함께 올라 실적 효과만으로 보기 어렵다는 평가.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · TIKR</span><span class="tl-title">Needham $15→$10, Canaccord 매수 상향·목표가 $11.5→$7</span><div class="tl-desc">실적 직후 목표가가 잇달아 내려감. H.C. Wainwright는 최고치 $18 유지.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[10-Q] 2026년 3분기 분기보고서</span><div class="tl-desc">9월 말 장기부채 약 $7.0억(2025년 말 0). 현금성 자산 $25억 → $22억으로 감소, ATM 잔여 한도 $6.2억.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.04</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[8-K] 2026년 3분기 실적 발표</span><div class="tl-desc">매출 $55.1M로 컨센서스 상회, 연간 가이던스 3연속 상향, 공군 계약 약 $3,700만으로 확대.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.06</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">Aerosonic 영업비밀 소송, $1.169억 배상 평결</span><div class="tl-desc">부품 공급사가 낸 소송에서 연방 배심원이 배상 평결. 회사는 불복 방침. 10월 급락의 출발점.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $8.84 · 11곳 · 의견 중립(매수 3·중립 4·매도 4)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>Needham</td><td>매수</td><td>$10 (↓$15)</td><td>2026.11.05</td></tr>
+            <tr><td>Canaccord Genuity</td><td>매수 (상향)</td><td>$7 (↓$11.50)</td><td>2026.11.05</td></tr>
+            <tr><td>Morgan Stanley</td><td>중립</td><td>$10 (↓$13)</td><td>2026.10.19</td></tr>
+            <tr><td>Goldman Sachs</td><td>매도</td><td>$7 (↓$8)</td><td>2026.10.12</td></tr>
+            <tr><td>Barclays</td><td>매도 (하향)</td><td>$4 (↓$6)</td><td>2026.10.08</td></tr>
+            <tr><td>H.C. Wainwright</td><td>매수</td><td>$18</td><td>2026.09.21</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: stockanalysis.com(컨센서스 11.06 페이지·의견 분포는 10월 기준) · TIKR(11.05 Needham·Canaccord)</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">Joby는 3분기에 매출 $55.1M(+144%)으로 예상을 크게 넘고 연간 가이던스를 세 번째로 올렸지만, 이 매출은 거의 전부 헬기 승객운송(Blade)에서 나왔고 본업인 에어택시는 아직 유상 운항 전입니다. 밸류에이션은 적자라 PER로 볼 수 없고 P/S 약 35배의 큰 프리미엄이지만, PBR이 FY25 말 8.5배에서 3배 아래로 내려오는 등 기대치는 이미 많이 꺾였습니다. 대신 FAA 인증 비행 일정이 2027년 상반기로 밀렸고, 분기 약 $2억의 현금 소진을 주식 발행으로 메우고 있어 희석 부담이 이어집니다. 앞으로는 2027년 상반기 FAA 조종사 비행 착수와 두바이 첫 승객 일정이 실제로 지켜지는지가 핵심입니다. 이 종목은 하루 ±10%의 변동과 추가 희석을 견디며 에어택시 상용화에 장기로 투자하려는 투자자에게 적합합니다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>
