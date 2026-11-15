@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoFi Technologies (SOFI) 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">SOFI · NASDAQ</div>
+        <div class="company-name">SoFi Technologies</div>
+        <div class="company-desc">은행 인가를 가진 디지털 금융 '올인원 앱' · 대출·예금·투자·카드 + 핀테크 인프라(Galileo) 사업</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$15.42</div>
+        <div class="chg down">▼ 1.34% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.13 종가 · Yahoo Finance · 작성 2026.11.15</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>약 $20.0B</b></span>
+      <span>섹터 <b>금융 · 핀테크/디지털 은행</b></span>
+      <span>52주 범위 <b>$13.86 ~ $32.73</b> (현재 위치 8%)</span>
+      <span>컨센서스 <b>중립(Hold)</b> · 목표가 <b>$20.84</b> (+35%)</span>
+    </div>
+    <div class="verdict">실적은 3분기 매출 +44%·가이던스 상향으로 강하지만 주가는 금리·대출 리스크 우려에 52주 저점 부근 — PER 28.6배(2027 가이던스 기준 약 17배)로 싸진 지금, 금리 방향과 신용 건전성이 관건</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">28.6배</div><div class="m-sub">자사 FY25 68.6배 · FY24 34.9배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">18.5배</div><div class="m-sub">향후 12개월 추정 EPS 기준</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">1.77배</div><div class="m-sub">BPS $8.71 · FY25 3.15배</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">7.4%</div><div class="m-sub">TTM 기준 · FY25 5.7%</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">$0.54</div><div class="m-sub">FY25 $0.39 대비 +38%</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">35%</div><div class="m-sub">D/E 0.35 · FY25 0.19</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">19.4%</div><div class="m-sub">TTM · FY25 14.7%</div></div>
+    </div>
+    <div class="val-comment">PER은 28.6배로 FY25 말(68.6배)의 절반 아래, PBR도 3.15배 → 1.77배로 내려왔습니다. 이익이 늘고(EPS +38%) 주가가 빠지면서 생긴 할인이며, 회사가 제시한 2027년 EPS $0.90 기준으로는 약 17배입니다. 다만 시장은 금리 상승기의 대출 손실·자본 부담을 이유로 이 할인을 정당하다고 보고 있습니다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com (statistics·ratios, 기준일 2026.11.06) · PER·Forward PER·PBR·시가총액은 2026.11.13 종가 기준 재계산 · 2027 EPS 가이던스: SoFi 실적발표 · 비교기준: 자사 FY24·FY25 PER·PBR</div>
+  </div>
+
+  <!-- ③ 주가 추이 (데이터 미확보 시 카드 전체 생략) -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="40.0" y1="164.7" x2="868" y2="164.7" stroke="#e2e8f0" stroke-width="1"/><text x="34.0" y="167.7" font-size="9" fill="#94a3b8" text-anchor="end">14.00</text><line x1="40.0" y1="111.6" x2="868" y2="111.6" stroke="#e2e8f0" stroke-width="1"/><text x="34.0" y="114.6" font-size="9" fill="#94a3b8" text-anchor="end">16.00</text><line x1="40.0" y1="58.5" x2="868" y2="58.5" stroke="#e2e8f0" stroke-width="1"/><text x="34.0" y="61.5" font-size="9" fill="#94a3b8" text-anchor="end">18.00</text>
+  <line x1="40.0" y1="168.4" x2="868" y2="168.4" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="866" y="164.4" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 13.86 (2026-10-15)</text>
+  <path d="M40.0,172 L40.0,50.3 L53.1,67.5 L66.3,47.3 L79.4,60.6 L92.6,34.3 L105.7,52.1 L118.9,31.9 L132.0,36.2 L145.1,27.2 L158.3,56.9 L171.4,61.7 L184.6,83.7 L197.7,62.7 L210.9,45.0 L224.0,52.7 L237.1,58.2 L250.3,76.3 L263.4,79.5 L276.6,76.5 L289.7,67.8 L302.9,83.2 L316.0,89.3 L329.1,92.2 L342.3,86.1 L355.4,85.8 L368.6,80.8 L381.7,97.0 L394.9,90.3 L408.0,96.2 L421.1,113.4 L434.3,114.0 L447.4,119.0 L460.6,115.8 L473.7,117.7 L486.9,113.7 L500.0,118.0 L513.1,120.6 L526.3,121.9 L539.4,116.9 L552.6,132.0 L565.7,131.8 L578.9,158.8 L592.0,135.7 L605.1,150.1 L618.3,156.7 L631.4,146.6 L644.6,140.8 L657.7,144.2 L670.9,148.5 L684.0,152.5 L697.1,101.0 L710.3,81.3 L723.4,68.8 L736.6,91.4 L749.7,95.7 L762.9,91.1 L776.0,74.9 L789.1,110.5 L802.3,106.0 L815.4,91.7 L828.6,101.8 L841.7,104.4 L854.9,121.4 L868.0,127.0 L868.0,172 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="40.0,50.3 53.1,67.5 66.3,47.3 79.4,60.6 92.6,34.3 105.7,52.1 118.9,31.9 132.0,36.2 145.1,27.2 158.3,56.9 171.4,61.7 184.6,83.7 197.7,62.7 210.9,45.0 224.0,52.7 237.1,58.2 250.3,76.3 263.4,79.5 276.6,76.5 289.7,67.8 302.9,83.2 316.0,89.3 329.1,92.2 342.3,86.1 355.4,85.8 368.6,80.8 381.7,97.0 394.9,90.3 408.0,96.2 421.1,113.4 434.3,114.0 447.4,119.0 460.6,115.8 473.7,117.7 486.9,113.7 500.0,118.0 513.1,120.6 526.3,121.9 539.4,116.9 552.6,132.0 565.7,131.8 578.9,158.8 592.0,135.7 605.1,150.1 618.3,156.7 631.4,146.6 644.6,140.8 657.7,144.2 670.9,148.5 684.0,152.5 697.1,101.0 710.3,81.3 723.4,68.8 736.6,91.4 749.7,95.7 762.9,91.1 776.0,74.9 789.1,110.5 802.3,106.0 815.4,91.7 828.6,101.8 841.7,104.4 854.9,121.4 868.0,127.0" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="145.1" cy="27.2" r="3" fill="#fff" stroke="#2f6db5" stroke-width="1.5"/><text x="145.1" y="20.2" font-size="9.5" font-weight="600" fill="#475569" text-anchor="middle">19.18</text><circle cx="578.9" cy="158.8" r="3" fill="#fff" stroke="#2f6db5" stroke-width="1.5"/><text x="578.9" y="172.8" font-size="9.5" font-weight="600" fill="#475569" text-anchor="middle">14.22</text>
+  <circle cx="868.0" cy="127.0" r="3.5" fill="#2f6db5"/>
+  <text x="40.0" y="187" font-size="10" fill="#6b7280">2026-08-17</text>
+  <text x="460.6" y="187" font-size="10" fill="#6b7280" text-anchor="middle">2026-10-01</text>
+  <text x="868.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-13</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.17~11.13 수익률 -15.8%</span>
+      <span>구간 최고 $19.18 · 최저 $14.22 (종가) · 점선은 52주 최저 (52주 최고 $32.73은 축 범위 밖)</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 구간 -15.8%, 52주 고점 대비 -53%입니다. 9월 내내 밀리다가 10.14 9월 CPI 가속(3.7%)에 금리 우려로 -6.7%, 다음 날 52주 최저 $13.86을 찍었습니다. 10.27 3분기 호실적·가이던스 상향에 하루 +13.4% 반등했지만, 11.05 기술주 급락일(나스닥 -5.5%)에 -7.7%로 상승분 대부분을 반납했습니다. (StockStory·Weiss Ratings·Gotrade)</div>
+    <div class="source-note">※ 출처: Yahoo Finance 일별 시세 · 차트는 11.13까지 (헤더 가격과 같은 날) · 52주 범위: MarketChameleon(11.11 기준)</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 (최근 3년 + 추정 1년) -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>2,068</td><td>2,643</td><td>3,583</td></tr>
+          <tr><td>영업이익</td><td>-54.0</td><td>233.4</td><td>525.9</td></tr>
+          <tr><td>영업이익률</td><td>-2.6%</td><td>8.8%</td><td>14.7%</td></tr>
+          <tr><td>순이익</td><td>-341.2</td><td>479.1</td><td>481.3</td></tr>
+          <tr><td>EPS</td><td>-$0.36</td><td>$0.39</td><td>$0.39</td></tr>
+          <tr><td>PER</td><td>적자</td><td>34.9배</td><td>68.6배</td></tr>
+          <tr><td>ROE</td><td>-5.4%</td><td>8.3%</td><td>5.7%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">2026E 컨센서스: 매출 $50.5억 · EPS $0.61 (21명) — 회사 가이던스: 조정매출 $50.4억 · 순이익 $8.4억 · EPS $0.61</div>
+    <div class="source-note">※ 출처: stockanalysis.com (financials·ratios·forecast, 컨센서스 11.09 갱신) · 가이던스: SoFi 3분기 실적발표</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 (각 3개, 한 줄씩) -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>가이던스 상향·2027 전망</b> — 2026 조정매출 $50.4억(예상 $48.7억), 2027 EPS $0.90(예상 $0.81)</li>
+          <li><b>회원·상품 고성장</b> — 회원 1,710만(+35%), 상품 2,670만(+44%), 분기 순증 120만 사상 최대</li>
+          <li><b>밸류에이션 정상화</b> — PBR 3.15배 → 1.77배, 2027 가이던스 EPS 기준 PER 약 17배</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>금리 민감도</b> — 10.14 CPI 쇼크에 -6.7%, KBW는 금리 상승 시 공정가치 손익 부담 $10억+ 경고(Underperform·$15)</li>
+          <li><b>이익 전환 속도 의문</b> — 7월 2분기 실적 때 매출 상향에도 이익 가이던스 유지로 하루 -8.9%</li>
+          <li><b>대출 보유·신용·희석</b> — 3분기 개인대출 $126억 중 $90억 자체 보유, 2025년 두 차례 유상증자(12월 $15억)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">2026년 3분기 · 최신 실적 · 매출 서프라이즈 +9% · EPS +6%</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출 (조정)</td><td>$1,371M</td><td>$1,256M</td><td>+9.2%</td><td>+44%</td></tr>
+            <tr><td>조정 EBITDA</td><td>$470M</td><td>N/A</td><td>N/A</td><td>+70%</td></tr>
+            <tr><td>EPS (조정)</td><td>$0.18</td><td>$0.17</td><td>+5.9%</td><td>N/A</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">2026.10.27 장 시작 전 발표. GAAP 순이익 $2.41억, 대출 부문 조정매출 $8.07억(+68%). 2026년 가이던스를 조정매출 $47.5~48.5억 → $50.4억으로 올렸고, 4분기는 조정매출 약 $13.75억·EPS $0.19, 2027년은 조정매출 $64억·EPS $0.90을 제시했습니다. 회원 증가율 30% 이상 유지 전망도 재확인했습니다.</p>
+      <div class="source-note">※ 출처: SoFi 실적발표(8-K) · 컨센서스·대출 부문: Benzinga · 4분기 가이던스: Nasdaq(컨퍼런스콜 요약) · 회원 증가 전망: Finimize(Reuters)</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 (합쳐서 최신순 최대 6건) -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 5건</span></summary>
+    <div class="details-body">
+      <!-- 항목 반복. dot: pos(호재) / neg(리스크) / 생략(중립). tl-kind: 공시 / 뉴스 -->
+      <div class="tl-item">
+        <div class="tl-date">2026.11.09</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · TIKR</span><span class="tl-title">Scotiabank, Sector Outperform·목표가 $26 재확인</span><div class="tl-desc">주가가 1년 전 고점 대비 49% 낮다며 시장이 실적 개선을 과소평가하고 있다고 판단.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Timothy Sykes</span><span class="tl-title">기술주 급락일에 -7.7%, KBW 매도 의견 재부각</span><div class="tl-desc">KBW는 Underperform·$15를 유지하며 공정가치 회계·금리·빠른 대차대조표 확대를 핵심 위험으로 지적.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.27</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[8-K] 2026년 3분기 실적 발표</span><div class="tl-desc">조정매출 +44%, 조정 EBITDA +70%, 2026 가이던스 상향·2027 전망 제시. 당일 주가 +13.4%.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.15</div>
+        <div><span class="dot"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">2026년 만기 전환사채 $4.28억 전액 현금 상환</span><div class="tl-desc">신주 발행 없이 상환(3분기 10-Q 후속사건). 이번 만기분에서는 추가 희석이 없었다는 의미.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.14</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · StockStory</span><span class="tl-title">9월 CPI 3.7%로 가속, 금리 우려에 -6.7%</span><div class="tl-desc">근원물가도 예상을 넘어 연준 금리 경로 우려가 커지며 대출·증권주가 함께 하락. 다음 날 52주 최저 $13.86.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $20.84 · 25곳 · 의견 중립 (11.09 갱신)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>Scotiabank</td><td>매수</td><td>$26</td><td>2026.11.09</td></tr>
+            <tr><td>UBS</td><td>중립</td><td>$22 (↑$21)</td><td>2026.10.29</td></tr>
+            <tr><td>Goldman Sachs</td><td>중립</td><td>$18 (↑$15)</td><td>2026.10.28</td></tr>
+            <tr><td>TD Cowen</td><td>중립</td><td>$18</td><td>2026.10.28</td></tr>
+            <tr><td>Barclays</td><td>중립</td><td>$18</td><td>2026.10.28</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: stockanalysis.com(컨센서스·의견, 11.09 갱신) · KBW(Underperform·$15)는 발행일을 확정하지 못해 표 대신 리스크·타임라인에 반영</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">SoFi는 3분기에 조정매출 +44%, 회원 1,710만 명(+35%)으로 고성장을 이어 가고 2026 가이던스를 올렸으며 2027년 EPS $0.90을 제시했습니다. 그런데도 주가는 52주 고점 대비 -53%로, 금리 상승기에 대출을 대거 자체 보유하는 구조와 신용·자본 부담에 대한 우려가 성장을 덮고 있습니다. 밸류에이션은 PER 28.6배·PBR 1.77배로 작년보다 크게 낮아졌고, 2027 가이던스 기준 약 17배라 실적이 계획대로 나온다면 부담은 크지 않습니다. 앞으로는 금리 방향과 대출 연체·손실률, 그리고 4분기 EPS $0.19 가이던스 달성 여부가 핵심입니다. 이 종목은 금리에 따른 큰 변동성을 견디며 디지털 금융 성장에 중장기로 투자하려는 투자자에게 적합합니다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>

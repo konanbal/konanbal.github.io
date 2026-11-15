@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tesla (TSLA) 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">TSLA · NASDAQ</div>
+        <div class="company-name">Tesla</div>
+        <div class="company-desc">전기차·에너지저장 기업 · FSD(자율주행)·로보택시(Cybercab)·휴머노이드(Optimus) 등 AI 사업으로 확장 중</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$390.22</div>
+        <div class="chg down">▼ 1.82% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.13 종가 · Yahoo Finance·stockanalysis.com · 작성 2026.11.15</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>$1.54T</b></span>
+      <span>섹터 <b>경기소비재 · 전기차/AI</b></span>
+      <span>52주 범위 <b>$297.38 ~ $498.83</b> (현재 위치 46%)</span>
+      <span>컨센서스 <b>매수</b> · 목표가 <b>$412.48</b> (+6%)</span>
+    </div>
+    <div class="verdict">PER 429배로 현재 이익으로는 설명되지 않는 AI·로보택시 기대주 — 3분기 마진은 회복했지만 영업이익은 -56%, 목표가 대비 상승 여력도 6%뿐이라 Cybercab·FSD가 실제 매출로 이어지는지가 관건</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">428.7배</div><div class="m-sub">자사 FY23 52.7배 · FY25 394.2배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">182.5배</div><div class="m-sub">향후 12개월 추정 EPS 기준</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">17.28배</div><div class="m-sub">BPS $22.59 · FY25 18.05배</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">3.8%</div><div class="m-sub">TTM 기준 · FY23 27.4%</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">$0.91</div><div class="m-sub">FY25 $1.08 대비 -16%</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">18%</div><div class="m-sub">D/E 0.18 · 2025년과 같은 수준</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">2.6%</div><div class="m-sub">3분기 · 전년 5.8%</div></div>
+    </div>
+    <div class="val-comment">PER 429배는 자사 FY23(53배)의 8배, P/S 약 15배(TTM 매출 $1,036억 기준)는 S&P 500(약 3.2배)의 4~5배로 큰 프리미엄입니다. 이익은 3년째 줄고 있어(ROE 27% → 4%) 지금 주가는 자동차가 아니라 FSD·로보택시·Optimus 같은 미래 AI 사업에 대한 기대를 반영합니다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com (statistics·ratios, 기준일 2026.11.13) · 3분기 영업이익률: Electrek · S&P 500 P/S: Trefis(11.05 기준) · P/S는 11.13 종가 기준 재계산 · 비교기준: 자사 FY23~25 PER·S&P 500 P/S</div>
+  </div>
+
+  <!-- ③ 주가 추이 (데이터 미확보 시 카드 전체 생략) -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d14343" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#d14343" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="45.599999999999994" y1="134.3" x2="868" y2="134.3" stroke="#e2e8f0" stroke-width="1"/><text x="39.599999999999994" y="137.3" font-size="9" fill="#94a3b8" text-anchor="end">350.00</text><line x1="45.599999999999994" y1="87.7" x2="868" y2="87.7" stroke="#e2e8f0" stroke-width="1"/><text x="39.599999999999994" y="90.7" font-size="9" fill="#94a3b8" text-anchor="end">375.00</text><line x1="45.599999999999994" y1="41.1" x2="868" y2="41.1" stroke="#e2e8f0" stroke-width="1"/><text x="39.599999999999994" y="44.1" font-size="9" fill="#94a3b8" text-anchor="end">400.00</text>
+  
+  <path d="M45.6,172 L45.6,154.3 L58.7,158.8 L71.7,132.3 L84.8,143.4 L97.8,110.4 L110.9,136.3 L123.9,133.9 L137.0,142.1 L150.0,125.4 L163.1,136.7 L176.1,100.9 L189.2,123.0 L202.2,121.3 L215.3,85.2 L228.4,126.7 L241.4,100.5 L254.5,101.1 L267.5,109.1 L280.6,105.5 L293.6,117.6 L306.7,122.1 L319.7,119.3 L332.8,104.1 L345.8,107.7 L358.9,87.2 L371.9,80.4 L385.0,78.2 L398.1,82.2 L411.1,93.1 L424.2,120.4 L437.2,129.0 L450.3,125.4 L463.3,126.7 L476.4,95.9 L489.4,80.8 L502.5,77.1 L515.5,82.5 L528.6,87.7 L541.7,73.3 L554.7,82.1 L567.8,87.3 L580.8,102.3 L593.9,111.1 L606.9,125.5 L620.0,100.7 L633.0,90.1 L646.1,66.3 L659.1,88.5 L672.2,92.9 L685.2,56.7 L698.3,27.2 L711.4,33.2 L724.4,34.9 L737.5,41.4 L750.5,34.0 L763.6,43.9 L776.6,68.7 L789.7,146.1 L802.7,119.0 L815.8,82.0 L828.8,78.8 L841.9,58.2 L854.9,45.8 L868.0,59.3 L868.0,172 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="45.6,154.3 58.7,158.8 71.7,132.3 84.8,143.4 97.8,110.4 110.9,136.3 123.9,133.9 137.0,142.1 150.0,125.4 163.1,136.7 176.1,100.9 189.2,123.0 202.2,121.3 215.3,85.2 228.4,126.7 241.4,100.5 254.5,101.1 267.5,109.1 280.6,105.5 293.6,117.6 306.7,122.1 319.7,119.3 332.8,104.1 345.8,107.7 358.9,87.2 371.9,80.4 385.0,78.2 398.1,82.2 411.1,93.1 424.2,120.4 437.2,129.0 450.3,125.4 463.3,126.7 476.4,95.9 489.4,80.8 502.5,77.1 515.5,82.5 528.6,87.7 541.7,73.3 554.7,82.1 567.8,87.3 580.8,102.3 593.9,111.1 606.9,125.5 620.0,100.7 633.0,90.1 646.1,66.3 659.1,88.5 672.2,92.9 685.2,56.7 698.3,27.2 711.4,33.2 724.4,34.9 737.5,41.4 750.5,34.0 763.6,43.9 776.6,68.7 789.7,146.1 802.7,119.0 815.8,82.0 828.8,78.8 841.9,58.2 854.9,45.8 868.0,59.3" fill="none" stroke="#d14343" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="698.3" cy="27.2" r="3" fill="#fff" stroke="#d14343" stroke-width="1.5"/><text x="698.3" y="20.2" font-size="9.5" font-weight="600" fill="#475569" text-anchor="middle">407.46</text><circle cx="58.7" cy="158.8" r="3" fill="#fff" stroke="#d14343" stroke-width="1.5"/><text x="58.7" y="172.8" font-size="9.5" font-weight="600" fill="#475569" text-anchor="start">336.87</text>
+  <circle cx="868.0" cy="59.3" r="3.5" fill="#d14343"/>
+  <text x="45.6" y="187" font-size="10" fill="#6b7280">2026-08-17</text>
+  <text x="463.3" y="187" font-size="10" fill="#6b7280" text-anchor="middle">2026-10-01</text>
+  <text x="868.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-13</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.17~11.13 수익률 +15.0%</span>
+      <span>구간 최고 $407.46 · 최저 $336.87 (종가) · 52주 범위 $297.38~$498.83은 축 범위 밖</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 구간 +15%지만 52주 고점 대비로는 -22%입니다. 10.02 3분기 인도량 서프라이즈(+4.7%)와 10.21 실적(마진 회복) 뒤 10.27 구간 고점 $407.46을 찍었습니다. 이후 11.04 민주당의 상·하원 장악(-3.3%), 11.05 AI 투자 우려로 나스닥이 -5.5% 급락한 날 -10.8%를 맞아 $343.69까지 밀렸다가 11.12 $397로 회복했습니다. (MarketBeat·Gotrade·Trefis)</div>
+    <div class="source-note">※ 출처: Yahoo Finance 일별 시세 · 차트는 11.13까지 (헤더 가격과 같은 날) · 52주 범위: Gotrade(Yahoo 기준, 11.10)</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 (최근 3년 + 추정 1년) -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>96,773</td><td>97,690</td><td>94,827</td></tr>
+          <tr><td>영업이익</td><td>8,891</td><td>7,659</td><td>4,355</td></tr>
+          <tr><td>영업이익률</td><td>9.2%</td><td>7.8%</td><td>4.6%</td></tr>
+          <tr><td>순이익</td><td>14,999</td><td>7,130</td><td>3,794</td></tr>
+          <tr><td>EPS</td><td>$4.30</td><td>$2.04</td><td>$1.08</td></tr>
+          <tr><td>PER</td><td>52.7배</td><td>181.8배</td><td>394.2배</td></tr>
+          <tr><td>ROE</td><td>27.4%</td><td>10.4%</td><td>4.9%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="source-note">※ 출처: stockanalysis.com (financials·ratios) · TTM(2026.09 말) 매출 103,570 · 영업이익 3,134 · EPS $0.91 · 2026E 열은 최신 컨센서스 집계를 확인할 수 없어 생략</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 (각 3개, 한 줄씩) -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>마진·현금흐름 회복</b> — 3분기 총이익률 19.6%(예상 17.8%), 잉여현금흐름 $15.3억(2분기 -$10.9억)</li>
+          <li><b>FSD·로보택시 진척</b> — 활성 FSD 구독 174만(예상 157만), Cybercab 연내 고객 인도 목표</li>
+          <li><b>목표가 상향 흐름</b> — Barclays 비중확대 상향($370→$450), Piper $475·JPMorgan $430으로 상향</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>본업 이익 급감</b> — 3분기 영업이익 $7.18억(-56%), GAAP EPS $0.22(전년 $0.39), 에너지 매출 -16%</li>
+          <li><b>정치·매크로 민감도</b> — 11.04 민주당 의회 장악 -3.3%, 11.05 AI 투자 우려 급락일 -10.8%</li>
+          <li><b>투자 부담·고평가</b> — R&D +69%($27.6억)·분기 설비투자 $47.3억(전년 2배), PER 429배</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">2026년 3분기 · 최신 실적 · EPS 서프라이즈 +7~12% · 매출 부합</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$28.05B</td><td>$27.9~28.1B</td><td>±0.5% 이내</td><td>-0.2%</td></tr>
+            <tr><td>영업이익</td><td>$718M</td><td>N/A</td><td>N/A</td><td>-56%</td></tr>
+            <tr><td>EPS (조정)</td><td>$0.48</td><td>$0.43~0.45</td><td>+7~12%</td><td>$0.50 → $0.48</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">2026.10.21 장 마감 후 발표. 인도 486,532대(-2.1%)로 예상은 넘었지만 자동차 매출은 -3%, 규제 크레딧은 $4.17억 → $1.13억으로 줄었습니다. 2026년 설비투자 가이던스는 $250억 이상에서 $200억으로 낮췄고, 경영진은 Cybercab 고객 인도를 연내 시작하겠다고 밝혔습니다.</p>
+      <div class="source-note">※ 출처: Tesla 실적발표(8-K)·10-Q · 컨센서스: Electrek(FactSet), CNBC(LSEG), Yahoo Finance · 총이익률·FSD: investingLive · 설비투자: Stocktwits · 컨퍼런스콜: Tech Insider</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 (합쳐서 최신순 최대 6건) -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 6건</span></summary>
+    <div class="details-body">
+      <!-- 항목 반복. dot: pos(호재) / neg(리스크) / 생략(중립). tl-kind: 공시 / 뉴스 -->
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">하루 -10.8%, 1년 내 두 번째로 큰 낙폭</span><div class="tl-desc">AI 인프라 투자가 더 느리고 비싸질 것이란 우려로 기술주 급락(나스닥 -5.5%). 회사 소식이 아닌 시장 충격.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.04</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · AP(Tech Insider)</span><span class="tl-title">중간선거 민주당 상·하원 장악에 -3.3%</span><div class="tl-desc">머스크가 최대 개인 후원자였던 선거 결과로 규제·정책 불확실성이 부각.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.26</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · Beinsure</span><span class="tl-title">Barclays 비중확대로 상향, 목표가 $370→$450</span><div class="tl-desc">실적 후 가장 큰 의견 변화. 다음 날 구간 최고가 $407.46.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.22</div>
+        <div><span class="dot"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[10-Q] 2026년 3분기 분기보고서</span><div class="tl-desc">R&D $27.6억(전년 $16.3억), 순이익 $7.87억(전년 $13.7억). AI 투자 확대가 이익을 깎는 구조 확인.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.21</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[8-K] 2026년 3분기 실적 발표</span><div class="tl-desc">조정 EPS $0.48로 예상 상회, 총이익률 19.6%로 반등. 다만 영업이익은 -56%.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.02</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · MarketBeat</span><span class="tl-title">3분기 인도 486,532대, 예상(약 46.1만) 상회</span><div class="tl-desc">전년 대비로는 -2.1%지만 낮아진 기대치를 넘어 당일 +4.7%.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $412.48 · 44곳 · 의견 매수</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>Barclays</td><td>비중확대 (상향)</td><td>$450 (↑$370)</td><td>2026.10.26</td></tr>
+            <tr><td>Piper Sandler</td><td>비중확대</td><td>$475 (↑$450)</td><td>2026.10.22</td></tr>
+            <tr><td>Mizuho</td><td>매수</td><td>$460 (↑$450)</td><td>2026.10.22</td></tr>
+            <tr><td>JPMorgan</td><td>중립</td><td>$430 (↑$415)</td><td>2026.10.22</td></tr>
+            <tr><td>Morgan Stanley</td><td>중립</td><td>$410 (↑$400)</td><td>2026.10.22</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: stockanalysis.com(컨센서스) · FN2(10.22 의견 일자) · Beinsure·Stocktwits·연합인포맥스(목표가) · 매도 의견(GLJ Research 등)은 최신 목표가를 확인하지 못해 표에서 제외</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">Tesla는 3분기에 총이익률 19.6%와 잉여현금흐름 $15억으로 수익성 바닥을 다졌지만, AI·로보택시 투자로 영업이익은 56% 줄고 매출은 1년째 제자리입니다. PER 429배·P/S 약 15배는 자동차 사업이 아니라 FSD·Cybercab·Optimus의 미래 가치를 반영하며, 평균 목표가($412)까지 남은 상승 여력은 6% 남짓입니다. 주가는 실적보다 선거·AI 투자 심리 같은 시장 변수에 하루 10%씩 움직였습니다. 앞으로는 연말 Cybercab 고객 인도와 FSD 구독 증가가 실제 매출로 잡히는지, 영업이익률이 다시 5%대로 올라오는지가 핵심입니다. 이 종목은 큰 변동성을 견디며 Tesla의 AI·자율주행 전환에 장기로 투자하려는 투자자에게 적합합니다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>
