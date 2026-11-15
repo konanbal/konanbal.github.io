@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marvell Technology (MRVL) 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">MRVL · NASDAQ</div>
+        <div class="company-name">Marvell Technology</div>
+        <div class="company-desc">데이터센터용 맞춤형 AI 칩(ASIC)·광연결·네트워크 반도체 기업 · Lumentum 인수 추진 중</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$156.76</div>
+        <div class="chg down">▼ 4.68% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.13 종가 · Yahoo Finance·stockanalysis.com · 작성 2026.11.15</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>약 $137.6B</b></span>
+      <span>섹터 <b>반도체 · 데이터센터 인프라</b></span>
+      <span>52주 범위 <b>$70.69 ~ $329.88</b> (현재 위치 33%)</span>
+      <span>컨센서스 <b>강력매수</b> · 목표가 <b>$310.32</b> (+98%)</span>
+    </div>
+    <div class="verdict">52주 고점 대비 -52%로 매출 대비 주가(P/S)가 6월 28배 → 16배로 내려왔지만, 약 $1,150억 규모 Lumentum 전량 주식 인수의 희석 부담과 AI 반도체 매도세가 겹친 상태 — 12.01 3분기 실적(데이터센터 +75% 가이던스) 확인이 관건</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">52.6배</div><div class="m-sub">자사 FY26 25.1배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">27.8배</div><div class="m-sub">향후 12개월 추정 EPS 기준</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">7.42배</div><div class="m-sub">BPS $21.14 · FY26 4.68배</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">16.5%</div><div class="m-sub">TTM · FY26 19.3%</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">$2.98</div><div class="m-sub">FY26 $3.07 (자산 매각 이익 포함)</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">0.15%</div><div class="m-sub">주당배당 연 $0.24</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">29%</div><div class="m-sub">D/E 0.29 · FY26 0.34</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">16.8%</div><div class="m-sub">TTM · FY26 16.3%</div></div>
+    </div>
+    <div class="val-comment">TTM PER 52.6배는 FY26 말(25.1배)의 두 배지만, FY26 이익에 자산 매각 이익이 들어 있어 비교가 왜곡됩니다. 실적 성장을 반영한 Forward PER 27.8배(FY27 조정 EPS $4.22 기준 약 37배)가 더 의미 있는 지표입니다. P/S는 6월 말 28.3배로 10년 내 최고였다가 11.02 16.3배까지 내려와 거품은 상당 부분 빠졌습니다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com (statistics·ratios, 기준일 2026.11.06) · PER·Forward PER·PBR·시가총액·배당수익률은 2026.11.13 종가 기준 재계산 · P/S: Trefis · 비교기준: 자사 FY26 PER·과거 P/S</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="45.599999999999994" y1="144.7" x2="868" y2="144.7" stroke="#e2e8f0" stroke-width="1"/><text x="39.599999999999994" y="147.7" font-size="9" fill="#94a3b8" text-anchor="end">150.00</text><line x1="45.599999999999994" y1="101.8" x2="868" y2="101.8" stroke="#e2e8f0" stroke-width="1"/><text x="39.599999999999994" y="104.8" font-size="9" fill="#94a3b8" text-anchor="end">200.00</text><line x1="45.599999999999994" y1="58.9" x2="868" y2="58.9" stroke="#e2e8f0" stroke-width="1"/><text x="39.599999999999994" y="61.9" font-size="9" fill="#94a3b8" text-anchor="end">250.00</text><line x1="45.599999999999994" y1="16.0" x2="868" y2="16.0" stroke="#e2e8f0" stroke-width="1"/><text x="39.599999999999994" y="19.0" font-size="9" fill="#94a3b8" text-anchor="end">300.00</text>
+  
+  <path d="M45.6,172 L45.6,72.4 L58.7,88.1 L71.7,69.8 L84.8,58.1 L97.8,70.0 L110.9,76.7 L123.9,67.2 L137.0,63.1 L150.0,66.3 L163.1,87.6 L176.1,91.8 L189.2,92.9 L202.2,96.3 L215.3,94.2 L228.4,81.6 L241.4,80.0 L254.5,71.8 L267.5,78.7 L280.6,70.8 L293.6,85.7 L306.7,83.2 L319.7,76.3 L332.8,66.8 L345.8,63.9 L358.9,52.6 L371.9,48.3 L385.0,49.6 L398.1,51.2 L411.1,48.7 L424.2,57.3 L437.2,47.5 L450.3,46.7 L463.3,43.4 L476.4,39.8 L489.4,40.7 L502.5,27.2 L515.5,29.2 L528.6,37.8 L541.7,37.2 L554.7,45.3 L567.8,42.9 L580.8,63.0 L593.9,66.4 L606.9,77.9 L620.0,70.0 L633.0,67.1 L646.1,63.4 L659.1,81.7 L672.2,77.4 L685.2,72.8 L698.3,64.4 L711.4,57.5 L724.4,86.1 L737.5,104.9 L750.5,126.3 L763.6,125.9 L776.6,136.3 L789.7,158.8 L802.7,152.3 L815.8,140.8 L828.8,141.0 L841.9,128.6 L854.9,132.3 L868.0,138.9 L868.0,172 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="45.6,72.4 58.7,88.1 71.7,69.8 84.8,58.1 97.8,70.0 110.9,76.7 123.9,67.2 137.0,63.1 150.0,66.3 163.1,87.6 176.1,91.8 189.2,92.9 202.2,96.3 215.3,94.2 228.4,81.6 241.4,80.0 254.5,71.8 267.5,78.7 280.6,70.8 293.6,85.7 306.7,83.2 319.7,76.3 332.8,66.8 345.8,63.9 358.9,52.6 371.9,48.3 385.0,49.6 398.1,51.2 411.1,48.7 424.2,57.3 437.2,47.5 450.3,46.7 463.3,43.4 476.4,39.8 489.4,40.7 502.5,27.2 515.5,29.2 528.6,37.8 541.7,37.2 554.7,45.3 567.8,42.9 580.8,63.0 593.9,66.4 606.9,77.9 620.0,70.0 633.0,67.1 646.1,63.4 659.1,81.7 672.2,77.4 685.2,72.8 698.3,64.4 711.4,57.5 724.4,86.1 737.5,104.9 750.5,126.3 763.6,125.9 776.6,136.3 789.7,158.8 802.7,152.3 815.8,140.8 828.8,141.0 841.9,128.6 854.9,132.3 868.0,138.9" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="502.5" cy="27.2" r="3" fill="#fff" stroke="#2f6db5" stroke-width="1.5"/><text x="502.5" y="20.2" font-size="9.5" font-weight="600" fill="#475569" text-anchor="middle">287.01</text><circle cx="789.7" cy="158.8" r="3" fill="#fff" stroke="#2f6db5" stroke-width="1.5"/><text x="789.7" y="172.8" font-size="9.5" font-weight="600" fill="#475569" text-anchor="end">133.55</text>
+  <circle cx="868.0" cy="138.9" r="3.5" fill="#2f6db5"/>
+  <text x="45.6" y="187" font-size="10" fill="#6b7280">2026-08-17</text>
+  <text x="463.3" y="187" font-size="10" fill="#6b7280" text-anchor="middle">2026-10-01</text>
+  <text x="868.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-13</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.17~11.13 수익률 -33.1%</span>
+      <span>구간 최고 $287.01 · 최저 $133.55 (종가) · 52주 범위 $70.69~$329.88은 축 범위 밖</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 구간 -33.1%, 52주 고점 대비 -52%입니다. 10.06 투자자의 날에 +5.8%로 구간 고점 $287을 찍은 뒤, 10.29 Lumentum 인수 협상 보도에 -13.2%, 11.02 전량 주식 인수(약 $1,150억) 발표에 -12.7%, 11.05 회사 소식 없이 AI 관련주 급락에 -16.4%로 $133.55까지 밀렸습니다. 10.28~11.05 일주일 새 -47%였고, 이후 11.11 $168.80까지 26% 반등했습니다. (Trefis)</div>
+    <div class="source-note">※ 출처: Yahoo Finance 일별 시세 · 차트는 11.13까지 (헤더 가격과 같은 날) · 52주 범위: Motley Fool·Wedbush</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러 · 회계연도 1월 말 결산</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>FY2024</th><th>FY2025</th><th>FY2026</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>5,508</td><td>5,767</td><td>8,195</td></tr>
+          <tr><td>영업이익</td><td>-436.6</td><td>-8.5</td><td>1,339</td></tr>
+          <tr><td>영업이익률</td><td>-7.9%</td><td>-0.1%</td><td>16.3%</td></tr>
+          <tr><td>순이익</td><td>-933.4</td><td>-885.0</td><td>2,670</td></tr>
+          <tr><td>EPS</td><td>-$1.08</td><td>-$1.02</td><td>$3.07</td></tr>
+          <tr><td>PER</td><td>적자</td><td>적자</td><td>25.1배</td></tr>
+          <tr><td>ROE</td><td>-6.1%</td><td>-6.3%</td><td>19.3%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">FY2027E(2027.01 결산) 컨센서스: 매출 $12.07B · 조정 EPS $4.22 (43명, 11.09 갱신)</div>
+    <div class="source-note">※ 출처: stockanalysis.com (financials·ratios·forecast) · FY26 무렵 순이익에는 자산 매각 이익(stockanalysis 2025.11 TTM 기준 약 $18.3억) 포함 · 표의 EPS는 GAAP, 추정 EPS는 조정 기준</div>
+  </div>
+
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>데이터센터 고성장</b> — 2분기 데이터센터 매출 $21.7억(+46%, 비중 79%), 3분기 +75% 성장 가이던스</li>
+          <li><b>중장기 매출 전망</b> — FY27 매출 약 $120억(+45%), FY28 약 $180억 제시</li>
+          <li><b>밸류에이션 하락</b> — P/S 28.3배 → 16.3배, 평균 목표가 $310(현재가 대비 +98%)</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>Lumentum 인수 희석</b> — 약 $1,150억 전량 주식 인수(24% 프리미엄), 주가 하락 시 재협상·추가 희석 우려</li>
+          <li><b>AI 투자 심리</b> — 11.05 회사 발표 없이 -16.4%(나스닥 -5.5%), 일주일 새 -47%</li>
+          <li><b>목표가 하향</b> — RBC $425→$250(11.03), B. Riley $275→$250(11.09)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">FY2027 2분기(2026.07 분기) · 최신 실적 · 매출·EPS 소폭 상회 · 다음 발표 12.01</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$2.739B</td><td>$2.71B</td><td>+1.1%</td><td>+37%</td></tr>
+            <tr><td>영업이익 (GAAP)</td><td>$459.7M</td><td>N/A</td><td>N/A</td><td>+58.5%</td></tr>
+            <tr><td>EPS (조정)</td><td>$0.94</td><td>$0.93</td><td>+1.1%</td><td>+40%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">2026.08.27 장 마감 후 발표. 데이터센터 매출이 $21.7억(+46%)으로 전체의 79%를 차지했습니다. 3분기 가이던스는 매출 $31.5억±5%, 조정 EPS $1.10±$0.05입니다. FY27 매출은 약 $120억(+45%), FY28은 약 $180억으로 전망을 올렸습니다. 3분기 실적은 12.01 발표 예정입니다.</p>
+      <div class="source-note">※ 출처: Marvell 실적발표 · 컨센서스: Earnings Whispers · 영업이익: OpenCapital · 데이터센터: AlphaSense · 가이던스: Benzinga(컨퍼런스콜) · 발표일: MarketChameleon</div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 6건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.09</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · stockanalysis.com</span><span class="tl-title">B. Riley 목표가 $275→$250, 매수 유지</span><div class="tl-desc">인수 발표 뒤 목표가 하향이 이어지는 흐름.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">회사 소식 없이 하루 -16.4%</span><div class="tl-desc">AI 관련주 대량 매도로 나스닥 -5.5%. 52주 고점의 절반 아래인 $133.55로 마감.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.03</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · stockanalysis.com</span><span class="tl-title">RBC 목표가 $425→$250, 매수 유지</span><div class="tl-desc">같은 날 BMO($325)·Oppenheimer($425)·Roth($350)는 목표가 유지.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.02</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">Lumentum 전량 주식 인수 합의, 주가 -12.7%</span><div class="tl-desc">Lumentum 1주당 Marvell 4.5주, 부채 포함 약 $1,150억. AI 광연결 사업 강화 목적이지만 희석 우려.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.29</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">Lumentum 인수 협상 보도에 -13.2%</span><div class="tl-desc">인수 규모·지불 방식에 대한 우려가 먼저 반영.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.06</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">투자자의 날, 주가 +5.8%</span><div class="tl-desc">장기 성장 전략 발표로 구간 고점 $287.01. 이후 일주일 새 상승분을 모두 반납.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $310.32 · 43곳 · 강력매수 (11.09 갱신)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>B. Riley</td><td>매수</td><td>$250 (↓$275)</td><td>2026.11.09</td></tr>
+            <tr><td>Oppenheimer</td><td>매수</td><td>$425</td><td>2026.11.03</td></tr>
+            <tr><td>Roth MKM</td><td>매수</td><td>$350</td><td>2026.11.03</td></tr>
+            <tr><td>BMO Capital</td><td>매수</td><td>$325</td><td>2026.11.03</td></tr>
+            <tr><td>RBC Capital</td><td>매수</td><td>$250 (↓$425)</td><td>2026.11.03</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: stockanalysis.com(컨센서스·의견, 11.09 갱신) · 목표가 범위 $175~$450</div>
+    </div>
+  </details>
+
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">Marvell은 데이터센터 매출이 +46% 늘며 2분기에 사상 최대 매출을 냈고, FY27 매출 $120억·FY28 $180억이라는 강한 성장 전망을 내놓았습니다. 그런데 10월 말부터 Lumentum 인수 협상·발표와 AI 관련주 급락이 겹쳐 일주일 새 47% 떨어졌고, 지금은 52주 고점 대비 -52%입니다. Forward PER 27.8배·P/S 16배로 6월보다 크게 싸졌지만, 약 $1,150억을 전량 주식으로 지불하는 인수는 기존 주주 희석과 재협상 위험을 남깁니다. 앞으로는 12.01 3분기 실적에서 데이터센터 +75% 가이던스를 지키는지, 인수 조건이 그대로 유지되는지가 핵심입니다. 이 종목은 대형 인수에 따른 희석과 큰 변동을 감수하며 AI 데이터센터 연결·맞춤형 칩 성장에 투자하려는 투자자에게 적합합니다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>

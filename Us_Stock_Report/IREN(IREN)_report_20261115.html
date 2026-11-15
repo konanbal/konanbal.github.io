@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IREN (IREN) 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">IREN · NASDAQ</div>
+        <div class="company-name">IREN</div>
+        <div class="company-desc">자체 전력·부지를 가진 AI 클라우드·데이터센터 기업 · Microsoft 등과 GPU 클라우드 계약, 비트코인 채굴은 축소 중</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$18.17</div>
+        <div class="chg down">▼ 6.72% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.13 종가 · Yahoo Finance·stockanalysis.com · 작성 2026.11.15</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>$7.71B</b></span>
+      <span>섹터 <b>AI 클라우드 · 데이터센터</b></span>
+      <span>52주 범위 <b>$17.16 ~ $70.71</b> (현재 위치 2%)</span>
+      <span>컨센서스 <b>매수</b> · 목표가 <b>$56.69</b> (+212%)<span class="stale">(집계일 미공개 · TIKR 평균 약 $70)</span></span>
+    </div>
+    <div class="verdict">PBR 1.45배·선행 P/S 2.6배로 3년 평균의 절반이지만, AI 클라우드 매출이 3배로 늘어도 적자와 차입이 커지는 중 — 남은 FY27 설비투자 $150억 중 미조달 $60억을 어떻게 메우는지가 관건</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">적자</div><div class="m-sub">자사 FY25 40.5배 (마지막 흑자)</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">N/A</div><div class="m-sub">stockanalysis 미제공</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">1.45배</div><div class="m-sub">BPS $12.57 · FY26 3.91배</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">-33.8%</div><div class="m-sub">TTM · FY26 -23.4%</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">-$3.88</div><div class="m-sub">FY26 -$2.22</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">200%</div><div class="m-sub">D/E 2.00 · FY25 0.53</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">-72.9%</div><div class="m-sub">TTM · FY26 -53.6%</div></div>
+    </div>
+    <div class="val-comment">적자라 PER 비교는 불가하고, PBR은 FY26 말 3.91배 → 1.45배로 크게 내려왔습니다. 선행 P/S도 2.6배로 3년 평균 5.2배의 절반 수준입니다. 다만 부채비율이 1년 새 0.53 → 2.0배로 뛰어, 할인의 이유는 성장성보다 자금 조달 부담에 있습니다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com (statistics·ratios, 기준일 2026.11.13) · 선행 P/S: TIKR · 비교기준: 자사 FY25~26 지표·3년 평균 P/S (적자로 PER 비교 불가)</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="40.0" y1="150.3" x2="868" y2="150.3" stroke="#e2e8f0" stroke-width="1"/><text x="34.0" y="153.3" font-size="9" fill="#94a3b8" text-anchor="end">20.00</text><line x1="40.0" y1="107.2" x2="868" y2="107.2" stroke="#e2e8f0" stroke-width="1"/><text x="34.0" y="110.2" font-size="9" fill="#94a3b8" text-anchor="end">30.00</text><line x1="40.0" y1="64.1" x2="868" y2="64.1" stroke="#e2e8f0" stroke-width="1"/><text x="34.0" y="67.1" font-size="9" fill="#94a3b8" text-anchor="end">40.00</text><line x1="40.0" y1="20.9" x2="868" y2="20.9" stroke="#e2e8f0" stroke-width="1"/><text x="34.0" y="23.9" font-size="9" fill="#94a3b8" text-anchor="end">50.00</text>
+  <line x1="40.0" y1="162.6" x2="868" y2="162.6" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="866" y="158.6" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 17.16 (2026-11-05)</text>
+  <path d="M40.0,172 L40.0,42.9 L53.1,55.4 L66.3,51.8 L79.4,52.8 L92.6,55.9 L105.7,64.9 L118.9,54.5 L132.0,65.9 L145.1,61.8 L158.3,83.7 L171.4,76.5 L184.6,77.8 L197.7,65.8 L210.9,56.9 L224.0,43.9 L237.1,34.2 L250.3,40.9 L263.4,48.3 L276.6,47.5 L289.7,50.4 L302.9,57.2 L316.0,52.7 L329.1,49.0 L342.3,35.2 L355.4,32.9 L368.6,27.2 L381.7,33.6 L394.9,37.5 L408.0,46.2 L421.1,56.6 L434.3,58.1 L447.4,60.3 L460.6,61.2 L473.7,56.5 L486.9,62.0 L500.0,58.5 L513.1,69.7 L526.3,82.6 L539.4,84.8 L552.6,86.5 L565.7,86.5 L578.9,104.8 L592.0,105.5 L605.1,120.2 L618.3,117.0 L631.4,121.8 L644.6,116.5 L657.7,126.6 L670.9,129.2 L684.0,126.9 L697.1,118.2 L710.3,112.2 L723.4,123.4 L736.6,133.3 L749.7,141.6 L762.9,131.1 L776.0,143.0 L789.1,158.8 L802.3,143.3 L815.4,144.3 L828.6,151.5 L841.7,146.7 L854.9,152.6 L868.0,158.2 L868.0,172 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="40.0,42.9 53.1,55.4 66.3,51.8 79.4,52.8 92.6,55.9 105.7,64.9 118.9,54.5 132.0,65.9 145.1,61.8 158.3,83.7 171.4,76.5 184.6,77.8 197.7,65.8 210.9,56.9 224.0,43.9 237.1,34.2 250.3,40.9 263.4,48.3 276.6,47.5 289.7,50.4 302.9,57.2 316.0,52.7 329.1,49.0 342.3,35.2 355.4,32.9 368.6,27.2 381.7,33.6 394.9,37.5 408.0,46.2 421.1,56.6 434.3,58.1 447.4,60.3 460.6,61.2 473.7,56.5 486.9,62.0 500.0,58.5 513.1,69.7 526.3,82.6 539.4,84.8 552.6,86.5 565.7,86.5 578.9,104.8 592.0,105.5 605.1,120.2 618.3,117.0 631.4,121.8 644.6,116.5 657.7,126.6 670.9,129.2 684.0,126.9 697.1,118.2 710.3,112.2 723.4,123.4 736.6,133.3 749.7,141.6 762.9,131.1 776.0,143.0 789.1,158.8 802.3,143.3 815.4,144.3 828.6,151.5 841.7,146.7 854.9,152.6 868.0,158.2" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="368.6" cy="27.2" r="3" fill="#fff" stroke="#2f6db5" stroke-width="1.5"/><text x="368.6" y="20.2" font-size="9.5" font-weight="600" fill="#475569" text-anchor="middle">48.55</text><circle cx="789.1" cy="158.8" r="3" fill="#fff" stroke="#2f6db5" stroke-width="1.5"/><text x="789.1" y="172.8" font-size="9.5" font-weight="600" fill="#475569" text-anchor="end">18.03</text>
+  <circle cx="868.0" cy="158.2" r="3.5" fill="#2f6db5"/>
+  <text x="40.0" y="187" font-size="10" fill="#6b7280">2026-08-17</text>
+  <text x="460.6" y="187" font-size="10" fill="#6b7280" text-anchor="middle">2026-10-01</text>
+  <text x="868.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-13</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.17~11.13 수익률 -59.5%</span>
+      <span>구간 최고 $48.55 · 최저 $18.03 (종가) · 점선은 52주 최저 (52주 최고 $70.71은 축 범위 밖)</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 구간 -59.5%, 52주 고점 대비 -74%입니다. 8.27 FY26 실적(순손실 $6.84억) 뒤 8.28 -12.5%, 10월에는 AI 인프라주 매도 속에 연속 하락했습니다. 11.04 Bernstein이 데이터센터 모라토리엄을 지지하는 텍사스 주지사 당선을 이유로 목표가를 $100→$55로 내렸고, 11.05 1분기 손실 확대와 $40억 ARR 목표 지연에 -17%(52주 최저 $17.16)를 기록했습니다. 다음 날 +20% 반등했지만 다시 밀렸습니다. (Decrypt·TIKR·CoinCentral)</div>
+    <div class="source-note">※ 출처: Yahoo Finance 일별 시세 · 차트는 11.13까지 (헤더 가격과 같은 날) · 52주 범위: Motley Fool(11.09 기준)</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러 · 회계연도 6월 결산</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>FY2024</th><th>FY2025</th><th>FY2026</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>187.2</td><td>501.0</td><td>707.0</td></tr>
+          <tr><td>영업이익</td><td>-27.3</td><td>20.6</td><td>-378.8</td></tr>
+          <tr><td>영업이익률</td><td>-14.6%</td><td>4.1%</td><td>-53.6%</td></tr>
+          <tr><td>순이익</td><td>-28.9</td><td>86.9</td><td>-702.6</td></tr>
+          <tr><td>EPS</td><td>-$0.29</td><td>$0.39</td><td>-$2.22</td></tr>
+          <tr><td>PER</td><td>적자</td><td>40.5배</td><td>적자</td></tr>
+          <tr><td>ROE</td><td>-4.1%</td><td>6.0%</td><td>-23.4%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="source-note">※ 출처: stockanalysis.com (financials·ratios) · FY26 매출 중 비트코인 채굴 $578.2M, AI 클라우드 $128.8M · FY2027E 열은 최신 컨센서스(2026.02 이후 갱신 없음)를 확인할 수 없어 생략</div>
+  </div>
+
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>AI 클라우드 급성장</b> — 1분기 AI 클라우드 매출 $2억(전 분기 대비 +182%), 부문 총이익률 86%</li>
+          <li><b>대형 수주잔고</b> — $203억(+22%), 약 2/3가 투자등급 고객, $40억 ARR은 계약·자금 확보 완료</li>
+          <li><b>밸류에이션 하락</b> — 선행 P/S 2.6배(3년 평균 5.2배), Bernstein·JPMorgan 목표가 $55</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>일정 지연</b> — Microsoft의 설계 변경 요청으로 $40억 ARR 달성이 2027년 1월(2월 가능)로 밀림</li>
+          <li><b>적자·비용 확대</b> — 1분기 EPS -$0.62(예상 -$0.49), SG&amp;A $2.17억(전 분기 $1.28억)</li>
+          <li><b>자금 조달·부채</b> — 남은 FY27 설비투자 $150억 중 $60억 미조달, 부채비율 2.0배</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">FY2027 1분기(2026.09 분기) · 최신 실적 · 매출 +3.7% · EPS 쇼크 -27%</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$228.0M</td><td>$220.0M</td><td>+3.7%</td><td>-5.1%</td></tr>
+            <tr><td>조정 EBITDA</td><td>$66M</td><td>N/A</td><td>N/A</td><td>N/A (전 분기 $19M)</td></tr>
+            <tr><td>EPS</td><td>-$0.62</td><td>-$0.49</td><td>-26.5%</td><td>N/A</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">2026.11.05 장 마감 후 발표. AI 클라우드 매출 $2억, 비트코인 채굴 매출 $2,800만(-58%)으로 채굴은 2026년 말까지 대부분 정리할 계획입니다. 순손실은 $2.63억(전 분기 $6.84억)입니다. 영업현금흐름은 $5.29억 유입됐지만 AI 장비·데이터센터 투자로 $51.5억이 나갔습니다. Microsoft 200MW 배치의 설계 변경으로 $40억 ARR 목표 시점을 2027년 1월로 늦췄습니다.</p>
+      <div class="source-note">※ 출처: IREN 실적발표(GlobeNewswire) · 컨센서스: Earnings Whispers · 현금흐름·설비투자: Quartr · 일정 지연: CoinCentral</div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 5건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.06</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · TIKR</span><span class="tl-title">실적 다음 날 +20% 반등</span><div class="tl-desc">전날 52주 최저를 찍은 뒤 AI 클라우드 매출 3배 성장이 재평가되며 급반등.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot neg"></span><span class="tl-kind">공시 · 회사 발표(GlobeNewswire)</span><span class="tl-title">[실적] FY2027 1분기, $40억 ARR 목표 지연</span><div class="tl-desc">매출 $2.28억(+66% QoQ), 순손실 $2.63억. 같은 날 AI·기술주 매도와 겹쳐 -17%.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.04</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · TIKR</span><span class="tl-title">Bernstein 목표가 $100→$55, Outperform 유지</span><div class="tl-desc">데이터센터 모라토리엄을 지지하는 텍사스 주지사 당선을 정책 리스크로 반영.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.08.28</div>
+        <div><span class="dot"></span><span class="tl-kind">뉴스 · The Block</span><span class="tl-title">Bernstein "$250~300억 AI 증설 계획이 투자자를 놀라게 했다"</span><div class="tl-desc">당시 Outperform·$100 유지. 대규모 설비투자 부담이 주가 할인 요인으로 부상.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.08.27</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Decrypt</span><span class="tl-title">FY2026 순손실 $6.84억, 시간외 -8%</span><div class="tl-desc">채굴에서 AI로 전환하는 비용이 커지며 연간 대규모 적자. 다음 날 종가 -12.5%.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $56.69 · 20곳 · 의견 매수 (집계일 미공개)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>Bernstein</td><td>매수 (Outperform)</td><td>$55 (↓$100)</td><td>2026.11.04</td></tr>
+            <tr><td>Canaccord Genuity</td><td>강력매수</td><td>$70</td><td>2026.02.10</td></tr>
+            <tr><td>Macquarie</td><td>매수</td><td>$70 (↓$95)</td><td>2026.02.06</td></tr>
+            <tr><td>Cantor Fitzgerald</td><td>매수</td><td>$82 (↓$136)</td><td>2026.02.06</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: stockanalysis.com(컨센서스·2월 의견) · TIKR(Bernstein, 평균 약 $70·20곳) · JPMorgan의 $65→$55 하향(Overweight 유지)은 발행일을 확정하지 못해 표에서 제외</div>
+    </div>
+  </details>
+
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">IREN은 비트코인 채굴에서 AI 클라우드로 빠르게 전환 중이며, 1분기 AI 클라우드 매출이 $2억으로 한 분기 만에 거의 3배가 됐고 수주잔고도 $203억에 이릅니다. 그러나 순손실 $2.63억, EPS 쇼크, Microsoft 요청에 따른 $40억 ARR 목표 지연이 겹쳐 주가는 52주 고점 대비 -74%까지 내려왔습니다. PBR 1.45배·선행 P/S 2.6배로 과거보다 크게 싸졌지만, 부채비율 2배와 미조달 설비투자 $60억은 추가 차입이나 주식 발행으로 이어질 수 있습니다. 앞으로는 $60억을 부채 없는 데이터센터를 담보로 한 차입으로 조달하는지(주식 발행이 아니라), 2027년 초 ARR $40억 달성 일정이 지켜지는지가 핵심입니다. 이 종목은 큰 손실과 희석 가능성을 견디며 AI 인프라 수요에 고위험으로 투자하려는 투자자에게 적합합니다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIVE Digital Technologies (HIVE) 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">HIVE · NASDAQ</div>
+        <div class="company-name">HIVE Digital Technologies</div>
+        <div class="company-desc">비트코인 채굴 + GPU 클라우드(BUZZ HPC) · 캐나다·스웨덴·파라과이 데이터센터 운영</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$1.57</div>
+        <div class="chg down">▼ 4.85% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.13 종가 · Yahoo Finance·MarketChameleon · 작성 2026.11.15</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>약 $435M</b></span>
+      <span>섹터 <b>비트코인 채굴 · AI 클라우드</b></span>
+      <span>52주 범위 <b>$1.51 ~ $5.34</b> (현재 위치 2%)</span>
+      <span>컨센서스 <b>강력매수</b> · 목표가 <b>$7.00</b> (+346%)<span class="stale">(08.20 집계 · 11.09 실적 반영 전)</span></span>
+    </div>
+    <div class="verdict">PBR 1.2배로 장부가 근처까지 내려왔지만 비트코인 값 하락으로 채굴 매출이 줄고 순손실이 커지는 중 — 계약된 GPU 클라우드 ARR $1.85억이 실제 매출로 바뀌는 속도가 관건</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">적자</div><div class="m-sub">자사 FY24 12.8배 (마지막 흑자)</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">적자</div><div class="m-sub">FY27E EPS -$0.42</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">1.18배</div><div class="m-sub">FY26 말 0.89배</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">-78.7%</div><div class="m-sub">최근 기준 · FY26 -30.3%</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">-$1.35</div><div class="m-sub">2026.06 TTM · FY26 -$0.66</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">103%</div><div class="m-sub">D/E 1.03 · FY26 0.13</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">-48.5%</div><div class="m-sub">TTM · FY26 -36.5%</div></div>
+    </div>
+    <div class="val-comment">적자라 PER로는 볼 수 없고, PBR 1.18배로 장부가에 가깝습니다. 다만 FY26 말(0.89배)보다는 오히려 높아졌는데, 주가보다 자본이 더 빠르게 줄었기 때문입니다(손상차손·순손실). 부채비율도 GPU 구매 차입으로 13% → 103%로 뛰어 '싸다'고 보기 어렵습니다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com (statistics·ratios, PBR·ROE·부채비율은 2026.11.13 기준, EPS는 2026.06 TTM) · 시가총액: MarketChameleon(11.13) · 비교기준: 자사 FY24~26 지표 (적자로 PER 비교 불가)</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="34.4" y1="130.1" x2="868" y2="130.1" stroke="#e2e8f0" stroke-width="1"/><text x="28.4" y="133.1" font-size="9" fill="#94a3b8" text-anchor="end">2.00</text><line x1="34.4" y1="63.3" x2="868" y2="63.3" stroke="#e2e8f0" stroke-width="1"/><text x="28.4" y="66.3" font-size="9" fill="#94a3b8" text-anchor="end">3.00</text>
+  <line x1="34.4" y1="162.8" x2="868" y2="162.8" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="866" y="158.8" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 1.51 (2026-11-13)</text>
+  <path d="M34.4,172 L34.4,58.6 L47.6,78.0 L60.9,75.3 L74.1,54.6 L87.3,61.3 L100.6,72.6 L113.8,61.9 L127.0,71.9 L140.3,59.2 L153.5,78.0 L166.7,78.0 L179.9,87.3 L193.2,82.0 L206.4,59.9 L219.6,55.9 L232.9,53.2 L246.1,56.6 L259.3,63.9 L272.6,61.3 L285.8,63.9 L299.0,70.6 L312.3,69.9 L325.5,55.9 L338.7,35.9 L352.0,31.2 L365.2,27.2 L378.4,38.5 L391.7,43.2 L404.9,52.6 L418.1,60.6 L431.4,62.6 L444.6,66.6 L457.8,68.6 L471.0,64.6 L484.3,69.9 L497.5,69.9 L510.7,80.0 L524.0,92.7 L537.2,96.7 L550.4,103.4 L563.7,105.4 L576.9,114.1 L590.1,115.4 L603.4,128.1 L616.6,130.1 L629.8,131.4 L643.1,128.1 L656.3,133.4 L669.5,134.8 L682.8,136.8 L696.0,128.8 L709.2,122.1 L722.5,125.4 L735.7,136.1 L748.9,149.5 L762.1,142.8 L775.4,142.1 L788.6,154.8 L801.8,144.8 L815.1,142.8 L828.3,148.8 L841.5,146.8 L854.8,153.5 L868.0,158.8 L868.0,172 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="34.4,58.6 47.6,78.0 60.9,75.3 74.1,54.6 87.3,61.3 100.6,72.6 113.8,61.9 127.0,71.9 140.3,59.2 153.5,78.0 166.7,78.0 179.9,87.3 193.2,82.0 206.4,59.9 219.6,55.9 232.9,53.2 246.1,56.6 259.3,63.9 272.6,61.3 285.8,63.9 299.0,70.6 312.3,69.9 325.5,55.9 338.7,35.9 352.0,31.2 365.2,27.2 378.4,38.5 391.7,43.2 404.9,52.6 418.1,60.6 431.4,62.6 444.6,66.6 457.8,68.6 471.0,64.6 484.3,69.9 497.5,69.9 510.7,80.0 524.0,92.7 537.2,96.7 550.4,103.4 563.7,105.4 576.9,114.1 590.1,115.4 603.4,128.1 616.6,130.1 629.8,131.4 643.1,128.1 656.3,133.4 669.5,134.8 682.8,136.8 696.0,128.8 709.2,122.1 722.5,125.4 735.7,136.1 748.9,149.5 762.1,142.8 775.4,142.1 788.6,154.8 801.8,144.8 815.1,142.8 828.3,148.8 841.5,146.8 854.8,153.5 868.0,158.8" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="365.2" cy="27.2" r="3" fill="#fff" stroke="#2f6db5" stroke-width="1.5"/><text x="365.2" y="20.2" font-size="9.5" font-weight="600" fill="#475569" text-anchor="middle">3.54</text><circle cx="868.0" cy="158.8" r="3" fill="#fff" stroke="#2f6db5" stroke-width="1.5"/><text x="868.0" y="172.8" font-size="9.5" font-weight="600" fill="#475569" text-anchor="end">1.57</text>
+  <circle cx="868.0" cy="158.8" r="3.5" fill="#2f6db5"/>
+  <text x="34.4" y="187" font-size="10" fill="#6b7280">2026-08-17</text>
+  <text x="457.8" y="187" font-size="10" fill="#6b7280" text-anchor="middle">2026-10-01</text>
+  <text x="868.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-13</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.17~11.13 수익률 -48.9%</span>
+      <span>구간 최고 $3.54 · 최저 $1.57 (종가) · 점선은 52주 최저 (52주 최고 $5.34는 축 범위 밖)</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 구간 -49%, 52주 고점 대비 -71%입니다. 비트코인 평균 가격이 1년 전 $114,382에서 9월 분기 $71,003으로 떨어지며 채굴 수익성이 나빠졌고, 10월에만 -15% 넘게 밀렸습니다. 11.05 AI·디지털자산 동반 매도에 -9.5%, 11.09 실적(순손실 $7,870만) 뒤에도 하락이 이어져 11.13 장중 52주 최저 $1.51을 찍었습니다. (Cointelegraph·AAII·Kalkine)</div>
+    <div class="source-note">※ 출처: Yahoo Finance 일별 시세 · 차트는 11.13까지 (헤더 가격과 같은 날) · 52주 최고: MarketChameleon, 최저: 11.13 장중 저가</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러 · 회계연도 3월 결산</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>FY2024</th><th>FY2025</th><th>FY2026</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>114.5</td><td>115.3</td><td>297.8</td></tr>
+          <tr><td>영업이익</td><td>35.3</td><td>-33.2</td><td>-108.6</td></tr>
+          <tr><td>영업이익률</td><td>30.8%</td><td>-28.8%</td><td>-36.5%</td></tr>
+          <tr><td>순이익</td><td>26.5</td><td>-3.0</td><td>-148.5</td></tr>
+          <tr><td>EPS</td><td>$0.29</td><td>-$0.02</td><td>-$0.66</td></tr>
+          <tr><td>PER</td><td>12.8배</td><td>적자</td><td>적자</td></tr>
+          <tr><td>ROE</td><td>13.0%</td><td>-0.9%</td><td>-30.3%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">FY2027E(2027.03 결산) 컨센서스: 매출 $369.4M · EPS -$0.42 (9명, 08.20 갱신)</div>
+    <div class="source-note">※ 출처: stockanalysis.com (financials·ratios·forecast) · E = 컨센서스 추정치</div>
+  </div>
+
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>GPU 클라우드 계약 확대</b> — 계약 ARR 약 $1.85억(가동 중 $4,000만), 2026년 4분기 $2억 목표</li>
+          <li><b>대형 고객 확보</b> — Bell AI Fabric·Cohere(GB200 2,304개, 3년), 투자등급 기업 $3.5억(5년)</li>
+          <li><b>전력 자산</b> — 약 440MW 보유, 파라과이 100MW 4분기 가동 예정, 2028년 HPC ARR $7억 목표</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>비트코인 가격 하락</b> — 평균가 $114,382 → $71,003, 생산 +49%에도 채굴 매출 -7.4%</li>
+          <li><b>손실 확대</b> — 2분기 순손실 $7,870만(전년 $1,580만), 채굴장비 손상 $3,120만</li>
+          <li><b>희석·차입</b> — ATM으로 약 1,370만 주($4,320만, 주당 평균 $3.15) 발행, GPU 구매 $1.29억 차입, 부채비율 103%</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">FY2027 2분기(2026.09 분기) · 최신 실적 · 매출 -2.7% YoY · 손실 확대</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$84.9M</td><td>N/A</td><td>N/A</td><td>-2.7%</td></tr>
+            <tr><td>조정 EBITDA</td><td>$24.8M</td><td>N/A</td><td>N/A</td><td>N/A (전 분기 대비 +85%)</td></tr>
+            <tr><td>순이익</td><td>-$78.7M</td><td>N/A</td><td>N/A</td><td>전년 -$15.8M</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">2026.11.09 발표, 11.10 컨퍼런스콜. 비트코인 1,070개를 채굴했고(전 분기 1,004개), BUZZ HPC 매출은 $880만(+70.7%)입니다. 분기 말 현금 $1.39억과 디지털자산 $2,260만을 보유했습니다. 회사는 2026년 4분기 GPU 클라우드 ARR $2억, 2028년 말 HPC ARR $7억을 목표로 제시했습니다. 매출·EPS 컨센서스 비교 자료는 확인하지 못했습니다.</p>
+      <div class="source-note">※ 출처: HIVE 실적 발표(Finviz·Newsfile), The Block, Cointelegraph</div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 4건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.10</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Yahoo Finance</span><span class="tl-title">Chardan, 매수 유지·목표가 $7.5→$7</span><div class="tl-desc">실적 발표 뒤 첫 목표가 변경. 의견은 유지했지만 눈높이를 낮춤.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.09</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · The Block</span><span class="tl-title">FY27 2분기 실적: 순손실 $7,870만으로 확대</span><div class="tl-desc">채굴 매출 $7,600만(-7.4%), HPC 매출 $880만(+70.7%). 채굴장비 손상 $3,120만 반영.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Kalkine</span><span class="tl-title">회사 발표 없이 하루 -9.45%</span><div class="tl-desc">디지털자산·AI 인프라주 동반 매도. 업종 심리에 크게 흔들리는 구조 확인.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.09</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · AAII</span><span class="tl-title">10월 들어 -15.3%, 종가 $2.50</span><div class="tl-desc">비트코인 가격 약세 속 채굴주 전반 하락 흐름.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $7.00 · 9곳 · 강력매수 (08.20 집계)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>Chardan Capital</td><td>매수</td><td>$7 (↓$7.5)</td><td>2026.11.10</td></tr>
+            <tr><td>Rosenblatt</td><td>매수</td><td>$6 (↑$5.5)</td><td>2026.08.20</td></tr>
+            <tr><td>Northland</td><td>매수</td><td>$6</td><td>2026.08.18</td></tr>
+            <tr><td>Canaccord Genuity</td><td>매수</td><td>$10</td><td>2026.08.18</td></tr>
+            <tr><td>H.C. Wainwright</td><td>매수</td><td>$7</td><td>2026.08.17</td></tr>
+            <tr><td>KBW</td><td>중립</td><td>$4.50 (↓$5)</td><td>2026.07.27</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: stockanalysis.com(컨센서스·의견) · Yahoo Finance(Chardan) · 11.09 실적 뒤 목표가 변경은 Chardan 1곳만 확인</div>
+    </div>
+  </details>
+
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">HIVE는 비트코인 생산량을 49% 늘렸지만 비트코인 평균가가 38% 떨어져 채굴 매출이 줄었고, 장비 손상까지 겹쳐 2분기 순손실이 $7,870만으로 커졌습니다. 주가는 52주 고점 대비 -71%로 PBR 1.18배까지 내려왔지만, 손실로 자본이 줄고 부채비율이 103%로 뛰어 단순한 저평가로 보기 어렵습니다. 성장 축인 GPU 클라우드는 계약 ARR $1.85억 중 실제 가동분이 $4,000만이라, 4분기 $2억 목표 달성 여부가 핵심입니다. 애널리스트 목표가 $7는 실적 전 집계라 하향 가능성을 감안해야 합니다. 이 종목은 비트코인 가격과 추가 주식 발행에 따른 큰 변동을 견디며 AI 클라우드 전환에 베팅하려는 투자자에게 적합합니다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>
