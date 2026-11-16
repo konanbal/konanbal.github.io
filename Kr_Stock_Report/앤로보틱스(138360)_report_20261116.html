@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앤로보틱스 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">138360 · KOSDAQ</div>
+        <div class="company-name">앤로보틱스</div>
+        <div class="company-desc">식품가공 설비 제조사(구 협진)가 도서관·공공 서비스 로봇 기업을 인수·합병해 전환 중인 회사</div>
+      </div>
+      <div class="price-box">
+        <div class="price">1,253원</div>
+        <div class="chg up">▲ 0.72% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.16 종가 · 업로드 엑셀(kr_market_report_20261116) · 작성 2026.11.16</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>1,102억원</b></span>
+      <span>섹터 <b>기계·장비 (로봇·식품가공 설비)</b></span>
+      <span>52주 범위 <b>913원 ~ 4,980원</b> (현재 위치 8%)</span>
+      <span>컨센서스 <b>없음</b> · 목표가 <b>N/A</b> (증권사 커버리지 없음)</span>
+    </div>
+    <div class="verdict">PBR 1.15배로 겉보기엔 싸졌지만 3분기에 영업적자로 돌아섰고 현금 7억원에 단기차입금 168억원입니다. 로봇 매출이 영업현금을 만들기 전까지는 재무 부담이 먼저 보이는 구간입니다.</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">적자</div><div class="m-sub">3분기 반영 전 10.4배 · 동일업종 52.8배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">N/A</div><div class="m-sub">증권사 추정치 없음</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">1.15배</div><div class="m-sub">BPS 1,090원</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">9.97%</div><div class="m-sub">2분기까지 4개 분기 · 3분기 적자 반영 전</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">약 -18원</div><div class="m-sub">3분기 반영 계산치 · 반영 전 120원</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">39%</div><div class="m-sub">부채비중 28.2%에서 환산</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">-37.0%</div><div class="m-sub">2026년 3분기 · 전년 20.5%</div></div>
+    </div>
+    <div class="val-comment">시세 사이트의 PER 10.4배는 2분기까지의 이익(EPS 120원) 기준이라, 3분기 순손실 66억원을 넣으면 최근 4개 분기 합계가 적자로 바뀝니다. 흑자였던 이익도 본업이 아니라 관계기업(광무) 지분 손익에서 나온 것이어서, 동일업종 PER 52.8배와 견줘 싸다고 보기는 어렵습니다. PBR 1.15배 역시 순자산의 큰 몫이 상장사 지분 투자(장부가 647억원)라는 점을 감안해야 합니다.</div>
+    <div class="source-note">※ 출처: 네이버페이 증권 수치를 인용한 톱스타뉴스(2026.10.22, BPS·EPS·동일업종 PER) · 알파스퀘어(ROE·부채비중, 2026.11.13) · 뉴스포스트(3분기 실적) · PBR은 2026.11.16 종가 1,253원으로 최신 종가 기준 재계산 · TTM 순손익은 2025년 4분기 순이익 5.7억원과 2026년 1~3분기 누적 순손실 21.8억원을 더해 직접 계산 · 비교기준: 동일업종 PER</div>
+  </div>
+
+  <!-- ③ 주가 추이 -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="10" y1="27.3" x2="870" y2="27.3" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="23.3" font-size="9" fill="#6b7280" text-anchor="end">52주 최고 4,980</text><line x1="10" y1="160.7" x2="870" y2="160.7" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="171.7" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 913.00</text>
+  <path d="M10.0,174 L10.0,131.0 L24.8,134.0 L39.7,135.0 L54.5,133.4 L69.3,133.4 L84.1,133.8 L99.0,133.6 L113.8,133.1 L128.6,133.8 L143.4,135.3 L158.3,135.2 L173.1,133.9 L187.9,134.3 L202.8,135.7 L217.6,135.5 L232.4,134.5 L247.2,135.7 L262.1,135.8 L276.9,136.4 L291.7,136.4 L306.6,135.3 L321.4,134.9 L336.2,134.2 L351.0,135.2 L365.9,136.2 L380.7,137.0 L395.5,140.1 L410.3,139.7 L425.2,140.2 L440.0,143.9 L454.8,145.8 L469.7,147.0 L484.5,147.6 L499.3,148.3 L514.1,148.6 L529.0,148.8 L543.8,150.2 L558.6,148.0 L573.4,148.3 L588.3,145.5 L603.1,136.4 L617.9,137.0 L632.8,126.9 L647.6,123.9 L662.4,119.5 L677.2,121.8 L692.1,125.3 L706.9,132.7 L721.7,134.6 L736.6,137.4 L751.4,135.2 L766.2,143.9 L781.0,147.1 L795.9,149.7 L810.7,150.2 L825.5,149.9 L840.3,150.2 L855.2,149.8 L870.0,149.5 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,131.0 24.8,134.0 39.7,135.0 54.5,133.4 69.3,133.4 84.1,133.8 99.0,133.6 113.8,133.1 128.6,133.8 143.4,135.3 158.3,135.2 173.1,133.9 187.9,134.3 202.8,135.7 217.6,135.5 232.4,134.5 247.2,135.7 262.1,135.8 276.9,136.4 291.7,136.4 306.6,135.3 321.4,134.9 336.2,134.2 351.0,135.2 365.9,136.2 380.7,137.0 395.5,140.1 410.3,139.7 425.2,140.2 440.0,143.9 454.8,145.8 469.7,147.0 484.5,147.6 499.3,148.3 514.1,148.6 529.0,148.8 543.8,150.2 558.6,148.0 573.4,148.3 588.3,145.5 603.1,136.4 617.9,137.0 632.8,126.9 647.6,123.9 662.4,119.5 677.2,121.8 692.1,125.3 706.9,132.7 721.7,134.6 736.6,137.4 751.4,135.2 766.2,143.9 781.0,147.1 795.9,149.7 810.7,150.2 825.5,149.9 840.3,150.2 855.2,149.8 870.0,149.5" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="149.5" r="3.5" fill="#2f6db5"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-08-20</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-16</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.20~11.16 수익률 -31.1%</span>
+      <span>구간 최고 2,170원 · 최저 1,231원 · 점선은 52주 최고/최저</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 5월에 찍은 52주 고점 4,980원에서 75% 내려온 상태입니다. 10.20~10.28에는 뚜렷한 공시 없이 로봇 테마 순환매로 1,291원에서 2,170원까지 올랐다가(재경일보·CBC뉴스) 전부 되돌렸고, 11.13 분기보고서에서 3분기 영업적자 전환과 현금 감소가 드러났습니다(뉴스포스트). 11.16 거래량이 1,154만 주로 전일의 4배였지만 이를 설명하는 공시나 보도는 찾지 못했습니다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com 일별 시세(11.03까지) · 알파스퀘어(11.04~11.13) · 업로드 엑셀(11.16) · 차트는 11.16까지 · 52주 최고/최저: 알파스퀘어 · 출처에 따라 정규장과 통합 시세 종가가 몇 원씩 다를 수 있음</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 억원</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>103</td><td>215</td><td>234</td></tr>
+          <tr><td>영업이익</td><td>-23</td><td>-12</td><td>5.8</td></tr>
+          <tr><td>영업이익률</td><td>-22.3%</td><td>-5.4%</td><td>2.5%</td></tr>
+          <tr><td>순이익</td><td>-19</td><td>46</td><td>69</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">2026년 1~3분기 누적: 매출 221억원(+32.6%) · 영업손실 16억원 · 순손실 22억원 (증권사 추정치 없음)</div>
+    <div class="source-note">※ 출처: 알파스퀘어·디지털투데이(2025년 개별 기준 공시) · 누적 실적: 뉴스포스트 · 2024~2025년 순이익이 영업이익보다 큰 것은 관계기업 투자손익 때문 · 유상증자와 합병으로 주식 수가 크게 바뀌어 연도별 EPS·PER·ROE 행은 싣지 않음</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>도서관 로봇 해외 판로</b> — 10.12 비블리오테카(70개국 3만여 도서관 거래)와 '로미' 글로벌 독점 공급 계약, 3년간 100대 이상 판매 예상</li>
+          <li><b>국책과제 참여</b> — 산업통상부 고방사 세라믹 코팅 로봇 개발 과제(2030년까지 총 97.5억원)에서 코팅 로봇 개발 담당</li>
+          <li><b>합병으로 외형 확대</b> — 구 나이콤을 6월 말 흡수합병해 1~3분기 누적 매출 221억원(+32.6%), 제노코 지분 약 5%로 우주·방산 협력 모색</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>3분기 적자 전환</b> — 매출 53.7억원(-51.9%), 영업손실 19.9억원, 판관비 31억원으로 전년의 3배</li>
+          <li><b>유동성 압박 (구조적)</b> — 현금 7.3억원에 단기차입금 168억원, 9개월 영업현금흐름 -64.6억원, 전환사채 120억원은 2027년 5월부터 조기상환 청구 가능</li>
+          <li><b>투자자산 의존과 희석 (구조적)</b> — 관계기업 투자 장부가 647억원(광무 524억원)이 시총의 59%이고 3분기 관련 손실 48억원, 7월 제3자배정 신주 1,351만 주 상장</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">2026년 3분기 · 영업적자 전환 · 컨센서스 없음</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>53.7억원</td><td>—</td><td>—</td><td>-51.9%</td></tr>
+            <tr><td>영업이익</td><td>-19.9억원</td><td>—</td><td>—</td><td>적자 전환</td></tr>
+            <tr><td>순이익</td><td>-65.6억원</td><td>—</td><td>—</td><td>적자 전환</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">최신 실적(2026.11.13 분기보고서). 매출총이익률이 29.2%에서 20.8%로 내려갔고 관계기업투자손익이 -48억원이어서 순손실이 영업손실보다 훨씬 컸습니다. 추정하는 증권사가 없어 서프라이즈 여부는 판단하지 않았고, 회사가 제시한 가이던스도 없습니다.</p>
+      <div class="source-note">※ 출처: 뉴스포스트(2026.11.14, 금융감독원 전자공시 기준) · DART</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 6건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.14</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · 뉴스포스트</span><span class="tl-title">로봇 품고 수익성 뒷걸음, 3분기 적자 전환</span><div class="tl-desc">영업손실 19.9억원, 순손실 65.6억원. 단기차입금 급증과 현금 감소, 특수관계자 대여금 회수 가능성까지 지적한 비판 보도입니다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.13</div>
+        <div><span class="dot"></span><span class="tl-kind">공시 · DART</span><span class="tl-title">[분기보고서] 2026년 3분기</span><div class="tl-desc">합병 후 첫 분기 실적. 위 적자 전환 수치의 원자료입니다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.12</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · 머니투데이</span><span class="tl-title">비블리오테카와 AI 도서관 로봇 '로미' 글로벌 독점 공급 계약</span><div class="tl-desc">해외 판매망을 가진 파트너를 확보했습니다. 3년간 100대 이상 판매가 예상되나 확정 수주 금액은 아닙니다(아시아경제).</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.07.10</div>
+        <div><span class="dot"></span><span class="tl-kind">공시 · DART</span><span class="tl-title">[주식소각결정] 및 유상증자 결정 정정</span><div class="tl-desc">주식 소각 결정과 제3자배정 유상증자 정정 공시가 같은 날 나왔습니다. 소각은 주주에게 우호적이지만 신주 발행이 함께 진행됐습니다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.07.01</div>
+        <div><span class="dot"></span><span class="tl-kind">공시 · DART</span><span class="tl-title">[합병등종료보고서] 자회사 흡수합병 종료</span><div class="tl-desc">1월에 230억원으로 인수한 로봇 자회사(구 나이콤)를 6월 말 합쳤습니다. 로봇 매출이 본체 실적에 직접 잡히기 시작했습니다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.04.24</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · 뉴스핌</span><span class="tl-title">산업통상부 국책과제 수행기업 선정</span><div class="tl-desc">포스코, 한국세라믹기술원 등과 고방사 세라믹 코팅 로봇을 개발합니다. 약 4년 9개월간 총 연구비 97.5억원 규모입니다.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">앤로보틱스는 5월 고점에서 75% 내려와 PBR 1.15배가 됐지만, 3분기 순손실을 반영하면 최근 4개 분기 이익이 적자여서 PER로는 싸다고 말하기 어렵습니다. 합병으로 누적 매출은 33% 늘었으나 3분기에는 매출이 절반으로 줄고 판관비가 3배로 늘어 영업적자로 돌아섰습니다. 현금 7억원, 단기차입금 168억원, 9개월 영업현금 유출 65억원이라는 숫자가 가장 큰 변수이고, 추가 자금 조달이 있다면 지분 희석으로 이어질 수 있습니다. 로미 해외 공급 계약과 국책과제가 실제 매출로 잡히는 시점, 그리고 상반기 계약분을 하반기에 납품해 매출로 잡는 공공기관 사업 구조(뉴스톱)가 4분기 실적에 나타나는지가 확인 지점입니다. 이 종목은 재무 위험을 감수하고 로봇 사업 전환의 초기 단계에 소액으로 베팅하려는 투자자에게만 맞습니다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>
