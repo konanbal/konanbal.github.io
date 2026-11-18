@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Micron Technology 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">MU · NASDAQ</div>
+        <div class="company-name">Micron Technology</div>
+        <div class="company-desc">미국 유일의 HBM 생산 기업 — DRAM·NAND·HBM 메모리 반도체</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$712.42</div>
+        <div class="chg down">▼ 0.92% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.17 종가 · Yahoo Finance / stockanalysis.com · 작성 2026.11.18</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>약 $806B</b></span>
+      <span>섹터 <b>반도체 (메모리)</b></span>
+      <span>52주 범위 <b>$192.59 ~ $1,255.00</b> (현재 위치 49%)</span>
+      <span>컨센서스 <b>강력매수 (49곳)</b> · 목표가 <b>$1,561.91</b> (+119%)</span>
+    </div>
+    <div class="verdict">PER 9.6배·Forward 4배로 이익 대비 극단적 저평가이지만, 시장은 메모리 사이클 정점과 AI 투자 둔화를 먼저 반영 중 — 12월 실적과 12.09부터 가능해지는 자사주 매입이 반등의 시험대</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">9.6배</div><div class="m-sub">자사 FY2025~26 평균 14.4배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">4.0배</div><div class="m-sub">FY2027E 기준 (non-GAAP)</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">5.82배</div><div class="m-sub">BPS $122.35</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">88.3%</div><div class="m-sub">FY2026 기준</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">$74.33</div><div class="m-sub">FY2025 대비 +879%</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">0.08%</div><div class="m-sub">주당배당 $0.60 (연)</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">4%</div><div class="m-sub">FY2026 기준 (D/E 0.04)</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">74.6%</div><div class="m-sub">FY2026 · 전년 26.1%</div></div>
+    </div>
+    <div class="val-comment">PER 9.6배는 자사 FY2025~26 평균(14.4배)보다 낮고, 컨센서스 EPS가 맞는다면 Forward PER은 4배에 불과합니다. 이렇게 싼 이유는 시장이 지금 이익을 "사이클 정점 이익"으로 보기 때문입니다 — 메모리는 가격이 꺾이면 이익이 빠르게 줄어드는 업종이라, 낮은 PER이 곧 저평가를 뜻하지는 않습니다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com statistics·financials/ratios (2026.11.13 지연 데이터 → 2026.11.17 종가 $712.42 기준 재계산) · 비교기준: 자사 FY2025~26 연말 PER 평균 (FY2024는 이익 급감으로 136배라 제외)</div>
+  </div>
+
+  <!-- ③ 주가 추이 -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <text x="868" y="10" font-size="9" fill="#6b7280" text-anchor="end">▲ 52주 최고 1,255 (2026.06.25) (축 범위 밖)</text><text x="868" y="171" font-size="9" fill="#6b7280" text-anchor="end">▼ 52주 최저 192.59 (2025.11.21) (축 범위 밖)</text>
+  <path d="M10.0,174 L10.0,63.5 L26.9,67.7 L43.7,60.6 L60.6,73.6 L77.5,74.2 L94.3,87.5 L111.2,86.6 L128.0,86.8 L144.9,73.6 L161.8,63.7 L178.6,56.4 L195.5,42.8 L212.4,49.1 L229.2,46.9 L246.1,46.4 L262.9,53.8 L279.8,50.9 L296.7,50.9 L313.5,42.5 L330.4,48.3 L347.3,51.2 L364.1,55.9 L381.0,44.9 L397.8,58.5 L414.7,60.2 L431.6,70.6 L448.4,79.9 L465.3,90.1 L482.2,85.6 L499.0,99.2 L515.9,92.5 L532.7,94.7 L549.6,90.2 L566.5,105.0 L583.3,99.6 L600.2,92.8 L617.1,86.3 L633.9,72.1 L650.8,84.8 L667.6,97.7 L684.5,111.0 L701.4,105.4 L718.2,120.9 L735.1,157.0 L752.0,148.2 L768.8,137.0 L785.7,139.1 L802.5,116.7 L819.4,120.1 L836.3,125.3 L853.1,140.7 L870.0,142.4 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,63.5 26.9,67.7 43.7,60.6 60.6,73.6 77.5,74.2 94.3,87.5 111.2,86.6 128.0,86.8 144.9,73.6 161.8,63.7 178.6,56.4 195.5,42.8 212.4,49.1 229.2,46.9 246.1,46.4 262.9,53.8 279.8,50.9 296.7,50.9 313.5,42.5 330.4,48.3 347.3,51.2 364.1,55.9 381.0,44.9 397.8,58.5 414.7,60.2 431.6,70.6 448.4,79.9 465.3,90.1 482.2,85.6 499.0,99.2 515.9,92.5 532.7,94.7 549.6,90.2 566.5,105.0 583.3,99.6 600.2,92.8 617.1,86.3 633.9,72.1 650.8,84.8 667.6,97.7 684.5,111.0 701.4,105.4 718.2,120.9 735.1,157.0 752.0,148.2 768.8,137.0 785.7,139.1 802.5,116.7 819.4,120.1 836.3,125.3 853.1,140.7 870.0,142.4" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="142.4" r="3.5" fill="#2f6db5"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-09-04</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-17</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.09.04~11.17 수익률 -29.9%</span>
+      <span>구간 최고 $1,097.39 · 최저 $656.39 · y축은 구간 고저 ±10%, 52주 최고·최저는 축 밖이라 라벨로 표시</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 52주 고점(2026.06.25, $1,255) 대비 -43%. 10월에 중국 CXMT 경쟁·AI 인프라 비용 우려로 -17% (Motley Fool), 11.05 S&P 500 -4.4% 급락일에 -17.5% (Trefis), 11.12 엔비디아 CEO 젠슨 황 사임 이후 AI 반도체 동반 약세, 11.16 미 상무부 AI 칩 수출 규제 강화와 엔비디아 실적 전 포지션 정리로 약 -7% (CNBC·Startup Fortune). 11.17 장 마감 후 엔비디아 호실적에 시간외 +3.4% 반등 (Yahoo Finance).</div>
+    <div class="source-note">※ 출처: stockanalysis.com 일별 시세(11.13까지) + Yahoo Finance(11.16~17 종가) · 차트는 11.17까지 (헤더 가격과 동일 기준일)</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러 (EPS는 달러)</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>FY2024</th><th>FY2025</th><th>FY2026</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>25,111</td><td>37,378</td><td>133,188</td></tr>
+          <tr><td>영업이익</td><td>1,304</td><td>9,770</td><td>99,340</td></tr>
+          <tr><td>영업이익률</td><td>5.2%</td><td>26.1%</td><td>74.6%</td></tr>
+          <tr><td>순이익</td><td>778</td><td>8,539</td><td>84,969</td></tr>
+          <tr><td>EPS</td><td>$0.70</td><td>$7.59</td><td>$74.33</td></tr>
+          <tr><td>PER</td><td>136.2배</td><td>16.0배</td><td>12.7배</td></tr>
+          <tr><td>ROE</td><td>1.7%</td><td>17.2%</td><td>88.3%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">FY2027E 컨센서스: 매출 $275.89B (+107%) · EPS $176.50 (non-GAAP, 43명)</div>
+    <div class="source-note">※ 출처: stockanalysis.com financials·ratios (회계연도 8~9월 결산) · E = 컨센서스 추정치(stockanalysis.com 2026.11.09 집계)</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>AI 메모리 공급 부족</b> — FY2026 매출 $1,332억(+256%), Q1 FY27 가이던스 $615억으로 컨센서스 $570억 상회 — 경영진은 FY2027 분기마다 매출 증가 전망 (CNBC·Investing.com)</li>
+          <li><b>장기 계약으로 가시성 확보</b> — 26개 전략 고객과 2030년까지 추정 매출의 35% 이상을 덮는 계약, 고객 선급 약정 $320억 (Seeking Alpha, 2026.09.30 실적 기준)</li>
+          <li><b>사상 최대 자사주 매입</b> — 이사회가 한도를 $351.6억으로 확대(2026.10.08), CHIPS법 제약이 풀리는 12.09부터 집행 가능 (10-K·Motley Fool)</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>AI 투자 둔화 신호</b> — SemiAnalysis가 향후 5년 AI 칩 지출 증가율 두 자릿수 둔화 전망, 엔비디아 CEO 사임(11.12) 후 엔비디아 11월 -25% (Motley Fool, 2026.11.17)</li>
+          <li><b>DRAM 가격 담합 집단소송·중국 경쟁</b> — 연방 법원이 마이크론·삼성·SK하이닉스 대상 반독점 집단소송 진행을 허용, CXMT 점유율 확대 우려 (Motley Fool·TradingKey)</li>
+          <li><b>사이클 정점·대규모 설비투자 (구조적)</b> — 영업이익률 74.6%는 역대 최고 수준 — FY2023엔 -23.0%였음. $250억 이상 설비투자 계획이 공급 과잉으로 이어지면 이익 급감 위험 (stockanalysis.com·Startup Fortune)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">FY2026 4분기(2026.06~09) · 어닝 서프라이즈 EPS +5.7%</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$54.23B</td><td>$51.07B</td><td>+6.2%</td><td>+379%</td></tr>
+            <tr><td>EPS (non-GAAP)</td><td>$33.42</td><td>$31.61</td><td>+5.7%</td><td>+1,062% (GAAP)</td></tr>
+            <tr><td>Q1 FY27 매출 가이던스</td><td>$61.5B</td><td>$57.0B</td><td>+7.9%</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">최신 실적 — 2026.09.30 발표. 6분기 연속 매출 최고치, 매출총이익률 약 87%. Q1 FY27 가이던스는 매출 $615억±15억·EPS $38.15±1.00(컨센서스 $35.40)로 높였으나, 매출총이익률 가이던스 86.25%는 다소 낮아 "1분기가 연중 마진 저점"이라고 설명했습니다. 다음 발표는 2026.12 예정.</p>
+      <div class="source-note">※ 출처: CNBC(LSEG 컨센서스) · MarketBeat · Investing.com 실적 콜 녹취록 · Seeking Alpha · GeminiQ(GAAP EPS $32.87 vs 전년 $2.83)</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 6건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.17</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Invezz</span><span class="tl-title">GF증권, 2027년 NAND 가격 전망 하향</span><div class="tl-desc">소비자 수요 약화·서버 배치 지연으로 NAND 공급 과잉 가능성 경고. 다만 마이크론은 DRAM·HBM 비중이 커 영향이 상대적으로 작다는 평가.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.16</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Startup Fortune(Yahoo Finance 인용)</span><span class="tl-title">약 7% 하락 — 수출 규제 강화·엔비디아 실적 앞둔 포지션 정리</span><div class="tl-desc">상무부가 동남아·브라질행 AI 칩에 허가제를 도입하며 반도체 전반 약세. 메모리 동종 SK하이닉스·샌디스크도 동반 하락.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.12</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · CNBC</span><span class="tl-title">엔비디아 CEO 젠슨 황 사임</span><div class="tl-desc">GPU와 짝을 이뤄 팔리는 메모리 수요에 대한 불확실성이 커지며 AI 반도체 전반이 약세로 전환.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot neg"></span><span class="tl-kind">공시·뉴스 · SEC EDGAR(8-K) / Trefis</span><span class="tl-title">하루 -17.5% 급락, 같은 날 이사 1명 퇴임 공시</span><div class="tl-desc">S&P 500이 -4.4% 빠진 날 AI 관련주 매도가 번지며 기술 업종 낙폭의 두 배 이상 하락.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.09</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR(10-K)</span><span class="tl-title">연차보고서 — 자사주 매입 한도 $351.6억으로 확대</span><div class="tl-desc">회사 역사상 최대 한도. CHIPS법 자금 협약 때문에 확대분 집행은 2026.12.09 이후 가능.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.09.30</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR(8-K)</span><span class="tl-title">FY2026 4분기 실적 발표</span><div class="tl-desc">매출 $542억(+379%), EPS $33.42로 컨센서스 상회, 다음 분기 가이던스도 예상 웃돎.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $1,561.91 · 49곳 (매체별 $1,436~1,562)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>Phillip Securities</td><td>매수</td><td>$1,950 (↑$1,870)</td><td>2026.10.05</td></tr>
+            <tr><td>DA Davidson</td><td>매수</td><td>$3,000 (↑$2,100)</td><td>2026.10.07</td></tr>
+            <tr><td>CLSA</td><td>아웃퍼폼</td><td>$1,700</td><td>2026.10.02</td></tr>
+            <tr><td>Rosenblatt</td><td>매수</td><td>$1,900 (↑$1,500)</td><td>2026.10.01</td></tr>
+            <tr><td>HSBC</td><td>매수</td><td>$1,850 (↑$1,700)</td><td>2026.10.01</td></tr>
+            <tr><td>Mizuho</td><td>아웃퍼폼</td><td>$1,400 (↑$1,300)</td><td>2026.10.01</td></tr>
+            <tr><td>Wells Fargo</td><td>비중확대</td><td>$1,400 (↓$1,525)</td><td>2026.09.23</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: MarketBeat · MarketScreener · Defense World(MarketBeat 인용) · 컨센서스 stockanalysis.com(2026.11.09 집계: Strong Buy 36·Buy 9·Hold 4), MarketBeat $1,435.58(45곳), StockInvest.us 최근 90일 9개사 평균 $1,574</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">마이크론은 FY2026 매출이 3.5배로 늘며 PER 9.6배·Forward 4배라는 보기 드문 숫자를 기록하고 있습니다. 그럼에도 52주 고점 대비 -43%인 것은, 시장이 이 이익을 사이클 정점으로 보고 AI 투자 둔화(엔비디아 CEO 사임, 정치권의 데이터센터 규제)와 중국 경쟁·담합 소송을 먼저 반영하고 있기 때문입니다. 12월 FY27 1분기 실적이 가이던스($615억)를 지키는지와 12.09 이후 자사주 매입 속도가 단기 반등의 열쇠이고, 장기적으로는 2027년 HBM 가격과 공급 증설 규모가 이익 지속성을 결정합니다. 이 종목은 메모리 사이클의 큰 변동(베타 2.4)을 감수하고 AI 메모리 수요에 베팅하려는 투자자에게 적합합니다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>

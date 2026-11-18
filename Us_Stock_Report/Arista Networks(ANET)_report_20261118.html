@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arista Networks(ANET) 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">ANET · NYSE</div>
+        <div class="company-name">Arista Networks</div>
+        <div class="company-desc">AI·클라우드 데이터센터용 이더넷 스위치·라우터와 네트워크 OS(EOS) 공급사</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$186.21</div>
+        <div class="chg down">▼ -0.43% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.17 종가 · MarketBeat · 작성 2026.11.18</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>약 $234.6B</b></span>
+      <span>섹터 <b>IT · 통신장비(네트워킹)</b></span>
+      <span>52주 범위 <b>$114.52 ~ $217.41</b> (현재 위치 70%)</span>
+      <span>컨센서스 <b>강력 매수</b> · 목표가 <b>$250.36</b> (+34.4%, 11.17 집계 · 집계처별 $240~$250)</span>
+    </div>
+    <div class="verdict">매출 +58.5%·2027 가이던스 $18.5B로 실적 근거는 강해졌는데 Forward PER은 33배로 5년 평균(36배) 아래 — 다만 주가는 AI 투자 심리에 하루 5~10%씩 흔들리는 구간</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">49.9배</div><div class="m-sub">자사 3년 평균 43.6배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">32.9배</div><div class="m-sub">향후 12개월 추정 · 5년 평균 36배</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">14.30배</div><div class="m-sub">BPS $13.02</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">33.5%</div><div class="m-sub">TTM 기준 · 2025년 31.4%</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">$3.73</div><div class="m-sub">3분기 GAAP EPS YoY +82%</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당 · 자사주 매입 위주</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">0%</div><div class="m-sub">차입금 없음 · 현금성 $14.4B</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">44.9%</div><div class="m-sub">최근 분기(GAAP) · 전년 42.4%</div></div>
+    </div>
+    <div class="val-comment">TTM PER 49.9배는 자사 3년 평균(43.6배)보다 비싸지만, 매출 +48%(2026)·+38~40%(2027) 전망을 반영한 Forward PER 32.9배는 5년 평균 36배보다 낮다. PBR 14배가 높아 보이는 건 무차입에 ROE 33%를 내는 고수익 구조 때문이다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com (통계 기준일 2026.11.13) · 2026.11.17 종가 $186.21 기준 PER·PBR·Forward PER 재계산 · 5년 평균 Forward PER: TIKR · 비교기준: 자사 2023~2025년 연말 PER 평균</div>
+  </div>
+
+  <!-- ③ 주가 추이 -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="10" y1="49.3" x2="870" y2="49.3" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="45.3" font-size="9" fill="#6b7280" text-anchor="end">52주 최고 217.41 (2026-10-09)</text><text x="868" y="171" font-size="9" fill="#6b7280" text-anchor="end">▼ 52주 최저 114.52 (축 범위 밖)</text>
+  <path d="M10.0,174 L10.0,89.0 L26.9,87.1 L43.7,90.5 L60.6,97.1 L77.5,79.3 L94.3,99.1 L111.2,90.6 L128.0,82.7 L144.9,79.4 L161.8,79.6 L178.6,69.5 L195.5,69.9 L212.4,72.7 L229.2,69.0 L246.1,67.6 L262.9,70.3 L279.8,73.8 L296.7,72.5 L313.5,71.0 L330.4,66.2 L347.3,67.0 L364.1,52.8 L381.0,52.0 L397.8,60.1 L414.7,50.4 L431.6,60.3 L448.4,71.0 L465.3,86.3 L482.2,102.8 L499.0,117.3 L515.9,107.2 L532.7,110.2 L549.6,104.9 L566.5,127.2 L583.3,125.0 L600.2,116.8 L617.1,100.4 L633.9,100.9 L650.8,105.1 L667.6,130.9 L684.5,138.9 L701.4,129.2 L718.2,114.8 L735.1,147.2 L752.0,127.7 L768.8,101.8 L785.7,103.8 L802.5,84.2 L819.4,67.4 L836.3,83.1 L853.1,100.4 L870.0,101.8 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,89.0 26.9,87.1 43.7,90.5 60.6,97.1 77.5,79.3 94.3,99.1 111.2,90.6 128.0,82.7 144.9,79.4 161.8,79.6 178.6,69.5 195.5,69.9 212.4,72.7 229.2,69.0 246.1,67.6 262.9,70.3 279.8,73.8 296.7,72.5 313.5,71.0 330.4,66.2 347.3,67.0 364.1,52.8 381.0,52.0 397.8,60.1 414.7,50.4 431.6,60.3 448.4,71.0 465.3,86.3 482.2,102.8 499.0,117.3 515.9,107.2 532.7,110.2 549.6,104.9 566.5,127.2 583.3,125.0 600.2,116.8 617.1,100.4 633.9,100.9 650.8,105.1 667.6,130.9 684.5,138.9 701.4,129.2 718.2,114.8 735.1,147.2 752.0,127.7 768.8,101.8 785.7,103.8 802.5,84.2 819.4,67.4 836.3,83.1 853.1,100.4 870.0,101.8" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="101.8" r="3.5" fill="#2f6db5"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-09-04</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-17</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.09.04~11.17 수익률 -3.9%</span>
+      <span>구간 최고 $216.74 (10.09) · 최저 $159.16 (11.05) · 점선은 52주 최고, 52주 최저는 축 밖이라 라벨로 표시</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 10.09 사상 최고($216.74) 뒤 AI 인프라 부채 우려·물가 지표로 5거래일 -18%(TIKR), 11.05엔 민주당 중간선거 압승 뒤 데이터센터 건설 둔화 우려로 하루 -10.8%(Trefis)까지 고점 대비 -27%. 이후 Coherent·CoreWeave 호실적에 AI주가 반등해 11.12 $206.63까지 +30% 회복했다가(TIKR), 11.13~16 이틀간 업종 동반 약세로 다시 -10% 밀렸다(Trefis).</div>
+    <div class="source-note">※ 출처: stockanalysis.com 일별 시세(~11.13), Yahoo Finance·MarketBeat(11.16~17 종가) · 차트는 11.17까지</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>5,860</td><td>7,003</td><td>9,006</td></tr>
+          <tr><td>영업이익</td><td>2,257</td><td>2,945</td><td>3,856</td></tr>
+          <tr><td>영업이익률</td><td>38.5%</td><td>42.1%</td><td>42.8%</td></tr>
+          <tr><td>순이익</td><td>2,087</td><td>2,852</td><td>3,511</td></tr>
+          <tr><td>EPS ($)</td><td>1.65</td><td>2.23</td><td>2.75</td></tr>
+          <tr><td>PER</td><td>35.1배</td><td>48.8배</td><td>47.0배</td></tr>
+          <tr><td>ROE</td><td>34.5%</td><td>33.1%</td><td>31.4%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">2026E 컨센서스: 매출 $12.7B · EPS(비GAAP) $4.12 (32명, 10.26 집계 · 실적 전) — 11.03 회사 가이던스는 2026년 매출 $13.3B(+48%), 2027년 약 $18.5B(+38~40%)</div>
+    <div class="source-note">※ 출처: stockanalysis.com (GAAP, 2024.12 4:1 액면분할 반영) · 가이던스: Arista 3분기 실적 콜(247 Wall St., Zacks)</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>2027 가이던스 컨센서스 상회</b> — 2027년 매출 약 $18.5B로 실적 전 컨센서스 $16.75B를 약 $1.75B 웃돌고, AI 패브릭 매출은 $3.5B→$7B로 2배 목표</li>
+          <li><b>성장 가속 + 이익률 유지</b> — 3분기 매출 +58.5%로 상장 후 최고, 비GAAP 영업이익률 49.1%; 2026 가이던스는 연중 4번째 상향($13.3B)</li>
+          <li><b>추정치 상향 vs 주가 정체</b> — 2027 정규화 EPS 추정이 10.23 $5.22→11.10 $6.04(+16%)로 올랐지만 주가는 9월 초 수준(-3.9%)</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>AI 투자 심리·정책 민감도</b> — 11.05 중간선거 뒤 하루 -10.8%(S&amp;P -4.4%), 11.16엔 회사 뉴스 없이 업종 따라 -5.2%; 최근 1년 -5% 이상 하락일 12회</li>
+          <li><b>이연매출 정체·내부자 매도</b> — 이연매출 $6.9B→$6.8B로 전분기 대비 감소(선행지표 논란), 최근 90일 내부자 약 207만 주·$4.06억 매도(10b5-1 계획 포함)</li>
+          <li><b>고객 집중·재고 부담(구조적)</b> — 상위 2개 고객이 2025년 매출의 42%(26%·16%, 마이크로소프트·메타); 재고 $2.5B→$3.2B, 구매약정 $9.7B→$11.4B로 수요 꺾이면 부담</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">2026년 3분기 · 어닝 서프라이즈 EPS +11% / 매출 +11%</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$3.66B</td><td>$3.31B</td><td>+10.6%</td><td>+58.5%</td></tr>
+            <tr><td>영업이익 (GAAP)</td><td>$1.64B</td><td>—</td><td>—</td><td>+67.9%</td></tr>
+            <tr><td>EPS (비GAAP)</td><td>$1.20</td><td>$1.08</td><td>+11.1%</td><td>+55.8%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">최신 실적 · 발표일 2026.11.03. 4분기 가이던스는 매출 $3.9~4.0B·비GAAP EPS $1.26~1.30으로 컨센서스($3.6B·$1.14)를 상회. 2027년 매출 약 $18.5B, 비GAAP 매출총이익률 62~64%·영업이익률 약 49% 제시. 매출총이익률은 64.0%로 전년(65.2%)보다 소폭 낮았다. 다음 실적 발표 예정 2027.02.11.</p>
+      <div class="source-note">※ 출처: Arista 실적 발표(Business Wire), Earnings Whispers, The Next Platform, TradingKey, Benzinga</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 6건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.16</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">회사 발표 없이 하루 -5.2%</span><div class="tl-desc">S&amp;P 500 -1.9% 속 통신장비 15곳 중 12곳 동반 하락(Ciena -8.2%). 개별 악재가 아니라 업종 흐름에 묶여 움직이는 종목임을 다시 확인.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.13</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · TIKR</span><span class="tl-title">AI 인프라주 반등에 5거래일 +15.5%</span><div class="tl-desc">Coherent 매출 +50%, CoreWeave 2026 설비투자 하단 상향($37~39B)이 AI 투자 지속 신호로 읽히며 $197.29 마감. 다만 13일 당일은 -4.5%.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">중간선거 뒤 AI 인프라주 매도, 하루 -10.8%</span><div class="tl-desc">민주당 의회 장악이 데이터센터 건설을 늦출 수 있다는 우려로 엔비디아 등과 함께 급락. 실적 다음 날의 +5.0% 상승분을 모두 반납.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.04</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · Finviz</span><span class="tl-title">실적 후 목표가 상향 잇따라</span><div class="tl-desc">JPMorgan $250→$270, Piper Sandler $240→$261, Truist $234→$240 상향. 반면 Wells Fargo는 $255→$245로 하향해 의견이 갈렸다(MarketBeat).</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.04</div>
+        <div><span class="dot"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[10-Q] 2026년 3분기 분기보고서</span><div class="tl-desc">상위 2개 최종 고객이 2025년 매출의 26%·16% 차지(sec-api 분석). 고객 집중도를 확인할 수 있는 공시.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.03</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[8-K] 3분기 실적: 매출 $3.66B(+58.5%), 가이던스 4번째 상향</span><div class="tl-desc">2026년 매출 전망 $13.3B, 2027년 첫 전망 약 $18.5B(+38~40%). 이연매출은 $6.8B로 전분기($6.9B)보다 줄어 해석 논란.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $250.36 · 실적 후 5곳 평균 $259</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>Rosenblatt</td><td>매수 (유지)</td><td>$280</td><td>2026.11.04</td></tr>
+            <tr><td>JPMorgan</td><td>비중확대</td><td>$270 (↑ $250)</td><td>2026.11.04</td></tr>
+            <tr><td>Piper Sandler</td><td>비중확대</td><td>$261 (↑ $240)</td><td>2026.11.04</td></tr>
+            <tr><td>Wells Fargo</td><td>비중확대</td><td>$245 (↓ $255)</td><td>2026.11.04</td></tr>
+            <tr><td>Truist</td><td>매수</td><td>$240 (↑ $234)</td><td>2026.11.04</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: Finviz(11.04 기사·11.17 컨센서스), MarketBeat, Webull/Barchart · 컨센서스 평균은 집계처별 $240.24(MarketBeat)~$250.36(Finviz), 매도 의견 없음(MarketBeat 기준 강력매수 4·매수 20·보유 1)</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">Arista는 3분기 매출 +58.5%, 비GAAP 영업이익률 49%로 AI 네트워킹 수요를 가장 직접적으로 숫자로 보여 주는 회사이며, 2027년 매출 $18.5B 전망은 시장 예상을 크게 웃돌았다. 그런데 주가는 9월 초와 비슷한 $186으로, Forward PER 약 33배는 5년 평균(36배)보다 낮아 실적 대비 밸류에이션 부담은 오히려 줄었다. 대신 주가는 회사 실적보다 AI 투자 심리·정책 뉴스에 업종째 흔들리고 있고, 이연매출 정체와 두 고객(MS·메타) 의존도가 다음 실적(2027.02.11)에서 확인할 변수다. 이 종목은 하루 5~10% 변동을 견디며 AI 데이터센터 투자 확대에 2~3년 단위로 베팅하려는 성장주 투자자에게 적합하며, 단기 변동이 부담스러운 투자자에게는 맞지 않는다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>

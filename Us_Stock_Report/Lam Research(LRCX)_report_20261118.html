@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lam Research 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">LRCX · NASDAQ</div>
+        <div class="company-name">Lam Research</div>
+        <div class="company-desc">식각(에칭)·증착 장비 세계 선두 — 반도체 전공정 장비 기업</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$210.69</div>
+        <div class="chg down">▼ 0.07% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.17 종가 · Yahoo Finance / stockanalysis.com · 작성 2026.11.18</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>약 $263B</b></span>
+      <span>섹터 <b>반도체 장비</b></span>
+      <span>52주 범위 <b>$135.50 ~ $438.50</b> (현재 위치 25%)</span>
+      <span>컨센서스 <b>강력매수 (34곳)</b> · 목표가 <b>$362.10</b> (+72%)</span>
+    </div>
+    <div class="verdict">PER 31배로 자사 3년 평균(42배)보다 낮아졌고 실적은 사상 최대이지만, 공급 제약에 묶인 가이던스와 매출 35%를 차지하는 중국의 수출 규제가 주가 회복의 걸림돌</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">31.4배</div><div class="m-sub">자사 3년 평균 41.6배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">21.8배</div><div class="m-sub">FY2027E 기준 (non-GAAP)</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">18.93배</div><div class="m-sub">BPS $11.13</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">70.1%</div><div class="m-sub">TTM 기준</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">$6.71</div><div class="m-sub">FY2026 대비 +16.5%</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">0.63%</div><div class="m-sub">주당배당 $1.32 (연)</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">27%</div><div class="m-sub">TTM 기준 (D/E 0.27)</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">40.0%</div><div class="m-sub">최근 분기 · FY2026 35.3%</div></div>
+    </div>
+    <div class="val-comment">PER 31배는 자사 FY2024~26 평균(41.6배, 6월 고점 영향으로 FY2026이 65배)보다 낮지만, 사이클 저점이던 FY2023에는 18.1배에 거래된 적도 있어 아직 싸다고 단정하기는 어렵습니다. Forward PER 22배는 FY2027 EPS +66% 성장을 전제로 한 값이라, 공급 제약으로 출하가 밀리면 할인 폭이 생각보다 작을 수 있습니다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com statistics·financials/ratios (2026.11.13 지연 데이터 → 2026.11.17 종가 $210.69 기준 재계산) · 비교기준: 자사 FY2024~26 연말 PER 평균</div>
+  </div>
+
+  <!-- ③ 주가 추이 -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <text x="868" y="10" font-size="9" fill="#6b7280" text-anchor="end">▲ 52주 최고 438.50 (2026.06.30) (축 범위 밖)</text><text x="868" y="171" font-size="9" fill="#6b7280" text-anchor="end">▼ 52주 최저 135.50 (2025.11.21) (축 범위 밖)</text>
+  <path d="M10.0,174 L10.0,69.4 L26.9,59.9 L43.7,63.3 L60.6,76.5 L77.5,76.4 L94.3,94.7 L111.2,96.7 L128.0,97.9 L144.9,97.8 L161.8,83.9 L178.6,73.4 L195.5,66.9 L212.4,69.6 L229.2,69.7 L246.1,63.8 L262.9,64.3 L279.8,57.3 L296.7,53.9 L313.5,45.3 L330.4,39.8 L347.3,41.0 L364.1,49.9 L381.0,53.1 L397.8,59.8 L414.7,61.1 L431.6,67.9 L448.4,74.2 L465.3,84.8 L482.2,91.8 L499.0,101.8 L515.9,95.7 L532.7,102.2 L549.6,104.1 L566.5,126.9 L583.3,126.9 L600.2,121.4 L617.1,118.9 L633.9,109.3 L650.8,108.9 L667.6,120.2 L684.5,128.8 L701.4,126.5 L718.2,133.4 L735.1,160.3 L752.0,148.9 L768.8,133.5 L785.7,132.6 L802.5,122.6 L819.4,124.2 L836.3,130.0 L853.1,141.2 L870.0,141.3 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,69.4 26.9,59.9 43.7,63.3 60.6,76.5 77.5,76.4 94.3,94.7 111.2,96.7 128.0,97.9 144.9,97.8 161.8,83.9 178.6,73.4 195.5,66.9 212.4,69.6 229.2,69.7 246.1,63.8 262.9,64.3 279.8,57.3 296.7,53.9 313.5,45.3 330.4,39.8 347.3,41.0 364.1,49.9 381.0,53.1 397.8,59.8 414.7,61.1 431.6,67.9 448.4,74.2 465.3,84.8 482.2,91.8 499.0,101.8 515.9,95.7 532.7,102.2 549.6,104.1 566.5,126.9 583.3,126.9 600.2,121.4 617.1,118.9 633.9,109.3 650.8,108.9 667.6,120.2 684.5,128.8 701.4,126.5 718.2,133.4 735.1,160.3 752.0,148.9 768.8,133.5 785.7,132.6 802.5,122.6 819.4,124.2 836.3,130.0 853.1,141.2 870.0,141.3" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="141.3" r="3.5" fill="#2f6db5"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-09-04</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-17</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.09.04~11.17 수익률 -31.5%</span>
+      <span>구간 최고 $347.49 · 최저 $185.20 · y축은 구간 고저 ±10%, 52주 최고·최저는 축 밖이라 라벨로 표시</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 52주 고점(2026.06.30, $438.50) 대비 -52%. 10.22 사상 최대 실적에도 공급 제약에 묶인 12월 분기 가이던스와 중국 매출 감소 경고로 -11.8% (MarketBeat·Invezz), 11.05 AI 인프라주 동반 급락에 -16.4%로 2020.03.16 이후 최악의 하루 (SimianX), 11.16 미 상무부 AI 칩 수출 규제 강화 속 장비주 전종목 하락에 -6.7% (Yahoo Finance·Crypto Briefing).</div>
+    <div class="source-note">※ 출처: stockanalysis.com 일별 시세(11.13까지) + Yahoo Finance·INDmoney(11.16~17 종가) · 차트는 11.17까지 (헤더 가격과 동일 기준일)</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러 (EPS는 달러)</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>FY2024</th><th>FY2025</th><th>FY2026</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>14,905</td><td>18,436</td><td>23,233</td></tr>
+          <tr><td>영업이익</td><td>4,325</td><td>5,901</td><td>8,200</td></tr>
+          <tr><td>영업이익률</td><td>29.0%</td><td>32.0%</td><td>35.3%</td></tr>
+          <tr><td>순이익</td><td>3,828</td><td>5,358</td><td>7,265</td></tr>
+          <tr><td>EPS</td><td>$2.90</td><td>$4.15</td><td>$5.76</td></tr>
+          <tr><td>PER</td><td>36.4배</td><td>23.2배</td><td>65.3배</td></tr>
+          <tr><td>ROE</td><td>45.7%</td><td>58.2%</td><td>65.1%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">FY2027E 컨센서스: 매출 $35.39B (+52%) · EPS $9.65 (non-GAAP, 30명)</div>
+    <div class="source-note">※ 출처: stockanalysis.com financials·ratios (회계연도 6월 결산) · E = 컨센서스 추정치(stockanalysis.com 2026.11.09 집계)</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>5분기 연속 사상 최대 실적</b> — 9월 분기 매출 $82.2억(전년 대비 +54%), 영업이익률 40.2%로 최고치 — AI발 파운드리·메모리 장비 투자 확대 (Lam 8-K·Yahoo Finance, 2026.10.21)</li>
+          <li><b>$250억 자사주 매입</b> — 이사회가 신규 $250억 매입 한도 승인(2026.11.05), 시가총액의 약 9.5% 규모 (Lam 8-K)</li>
+          <li><b>공급이 막혔을 뿐 수요는 견조</b> — Cantor는 매출을 제한하는 것이 수요가 아니라 공급이라고 분석, 이연매출도 $24.3억→$26.6억 증가 (KuCoin·BasisPilot)</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>공급 제약으로 성장 둔화</b> — 12월 분기 가이던스 $86억으로 9월 분기 대비 +4.6%에 그쳐, Needham은 목표가 $390→$290 하향 (GuruFocus, 2026.10.22)</li>
+          <li><b>AI 투자 사이클 민감도</b> — 11.05 하루 -16.4%, 11.16 -6.7%로 장비 업종 중앙값(-5.1%)보다 크게 하락 — 베타 2.0 (SimianX·Yahoo Finance·stockanalysis.com)</li>
+          <li><b>중국 의존·수출 규제 (구조적)</b> — 9월 분기 중국 매출 $28.9억으로 전체의 35%, 회사가 10-Q에서 미국 수출 허가 요건이 이미 중국 매출을 줄였다고 밝힘 (EconoTimes·SEC 10-Q)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">FY2027 1분기(2026.07~09) · 부합 (매출 +1.0%, EPS +1.4%)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$8.22B</td><td>$8.14B</td><td>+1.0%</td><td>+54%</td></tr>
+            <tr><td>EPS (non-GAAP)</td><td>$2.20</td><td>$2.17</td><td>+1.4%</td><td>N/A</td></tr>
+            <tr><td>12월 분기 매출 가이던스</td><td>$8.6B</td><td>$8.57B</td><td>+0.4%</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">최신 실적 — 2026.10.21 발표. 매출총이익률 52.4%·영업이익률 40.2% 모두 최고치. 1분기 EPS $2.20은 공식 컨센서스는 넘었지만 위스퍼 수치($2.28)에는 못 미쳤고, 12월 분기 가이던스(매출 $86억±4억, EPS $2.33±0.15)도 FactSet 컨센서스 수준에 그쳐 다음 날 -11.8%. 경영진은 공급망 제약과 중국 매출 감소를 언급했습니다. 다음 발표는 2027.01 예정.</p>
+      <div class="source-note">※ 출처: Lam Research 8-K Exhibit 99.1(SEC EDGAR, 2026.10.21) · Earnings Whispers · FX Broker Trust(FactSet·Yahoo Finance 컨센서스 인용) · Yahoo Finance 실적 콜 요약</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 5건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.16</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Yahoo Finance</span><span class="tl-title">하루 -6.7% — 장비주 전종목 동반 하락</span><div class="tl-desc">회사 자체 공시·실적은 없었으나 미국 상무부의 AI 칩 수출 규제 강화 속 반도체 장비 업종 16개 종목이 모두 하락, 램리서치 낙폭이 업종 중앙값보다 컸음.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.09</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · stockanalysis.com·Benzinga</span><span class="tl-title">B. Riley, 목표가 $338→$310 하향 (매수 유지)</span><div class="tl-desc">10월 이후 이어진 목표가 하향 흐름의 연장.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR(8-K)</span><span class="tl-title">$250억 자사주 매입 승인·분기 배당 $0.33</span><div class="tl-desc">같은 날 AI 인프라주 급락으로 주가는 -16.4%였지만, 주가 하락기에 대규모 환원 여력을 확보했다는 점에서 의미.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.22</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · MarketBeat·GuruFocus</span><span class="tl-title">실적 다음 날 -11.8%, 목표가 하향 잇따라</span><div class="tl-desc">Needham $390→$290, Morgan Stanley $339, Mizuho $365→$360. 공급 제약에 묶인 가이던스가 높은 기대에 못 미침.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.21</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR(8-K)</span><span class="tl-title">FY2027 1분기 실적 발표</span><div class="tl-desc">매출 $82.2억(+22% QoQ), 5분기 연속 최고치. 중국 비중 35%로 6월 분기 26%에서 반등.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $362.10 · 34곳 (매체별 $358~362)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>B. Riley</td><td>매수</td><td>$310 (↓$338)</td><td>2026.11.09</td></tr>
+            <tr><td>Needham</td><td>매수</td><td>$290 (↓$390)</td><td>2026.10.22</td></tr>
+            <tr><td>Mizuho</td><td>아웃퍼폼</td><td>$360 (↓$365)</td><td>2026.10.22</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: stockanalysis.com·Benzinga(B. Riley) · GuruFocus(Needham) · MarketBeat(Mizuho) · 컨센서스 stockanalysis.com(2026.11.09 집계: Strong Buy 25·Buy 5·Hold 4, 범위 $255~500), MarketBeat $357.57</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">램리서치는 9월 분기 매출 +54%·영업이익률 40%로 사상 최대 실적을 냈지만, 공급 제약에 묶인 12월 분기 가이던스와 AI 인프라주 매도가 겹치며 52주 고점 대비 -52% 하락했습니다. PER 31배는 자사 3년 평균보다 낮아졌지만 사이클 저점 수준(FY2023 18배)보다는 여전히 높아서, Forward PER 22배를 정당화하려면 FY2027 EPS +66% 성장 경로가 지켜져야 합니다. 1월 실적에서 공급 병목 해소 여부와 중국(매출 35%) 수출 규제의 추가 영향, $250억 자사주 매입 집행 속도가 핵심 변수입니다. 이 종목은 AI 반도체 장비 투자 사이클의 장기 수혜를 믿고, 규제·사이클발 큰 변동성(베타 2.0)을 견딜 수 있는 투자자에게 적합합니다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>
