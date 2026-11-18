@@ -219,14 +219,14 @@ def scan_etf_reports():
 
 
 # 마이 리서치: 파일명 접두어로 카테고리 구분
-#   스크랩_제목_YYYYMMDD.(html|pdf)  -> 내가 찾은 리포트
-#   작성_제목_YYYYMMDD.(html|pdf)    -> 내가 만든 리포트
-#   관심_제목_YYYYMMDD.(html|pdf)    -> 관심 리서치 (밸류체인_ 접두어도 여기로)
+#   스크랩_제목_YYYYMMDD.(html|pdf)  -> 남이 쓴 리포트 (증권사 리포트, 기사)
+#   노트_제목_YYYYMMDD.(html|pdf)    -> 투자 노트 (매수 근거, 매매 복기, 포트폴리오 점검)
+#   리서치_제목_YYYYMMDD.(html|pdf)  -> 리서치 (종목·테마·산업 공부, 밸류체인_ 접두어도 여기로)
 MY_CATEGORIES = [
     ("스크랩_", "scrap"),
-    ("작성_", "write"),
-    ("관심_", "interest"),
-    ("밸류체인_", "interest"),
+    ("노트_", "note"),
+    ("리서치_", "research"),
+    ("밸류체인_", "research"),
 ]
 
 
@@ -240,7 +240,7 @@ def scan_my_research():
         if fh.name in LIST_PAGES or fh.name.endswith("_naver.html"):
             continue
         stem = fh.stem
-        category = "interest"
+        category = "research"
         for prefix, cat in MY_CATEGORIES:
             if stem.startswith(prefix):
                 category = cat

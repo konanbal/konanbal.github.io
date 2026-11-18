@@ -978,7 +978,7 @@
           <div class="card-icon my">📒</div>
           <div class="card-title-group">
             <div class="card-title">마이 리서치</div>
-            <div class="card-subtitle">스크랩 · 직접 작성 · 관심 리서치</div>
+            <div class="card-subtitle">스크랩 · 리서치 · 투자 노트</div>
           </div>
         </div>
         <span class="card-count-badge" id="badge-my">0건</span>
@@ -1174,8 +1174,8 @@ function renderETF(listEl, items) {
     </li>`).join('');
 }
 
-const MY_CAT_LABEL = { scrap: '📎 스크랩', write: '✍️ 직접 작성', interest: '🔍 관심 리서치' };
-function myLabel(item) { return MY_CAT_LABEL[item.category] || MY_CAT_LABEL.interest; }
+const MY_CAT_LABEL = { scrap: '📎 스크랩', research: '🔍 리서치', note: '📝 투자 노트' };
+function myLabel(item) { return MY_CAT_LABEL[item.category] || MY_CAT_LABEL.research; }
 
 function renderMy(listEl, items) {
   if (!items || items.length === 0) { renderEmpty(listEl); return; }

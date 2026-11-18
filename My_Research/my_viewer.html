@@ -212,8 +212,8 @@ function loadReport(file){
   // 툴바 업데이트
   document.getElementById('rbTitle').textContent = title;
   document.getElementById('rbDate').textContent  = date;
-  var CATN = {scrap:'📎 스크랩', write:'✍️ 직접 작성', interest:'🔍 관심 리서치'};
-  document.getElementById('rbCat').textContent = item ? (CATN[item.category]||CATN.interest) : '';
+  var CATN = {scrap:'📎 스크랩', research:'🔍 리서치', note:'📝 투자 노트'};
+  document.getElementById('rbCat').textContent = item ? (CATN[item.category]||CATN.research) : '';
   document.title = title + ' — 주식 리서치 허브';
 
   // 위치 배지
