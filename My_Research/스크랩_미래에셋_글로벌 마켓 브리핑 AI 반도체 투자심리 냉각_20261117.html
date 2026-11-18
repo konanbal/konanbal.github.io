@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>글로벌 마켓 브리핑 11월 17일</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f2244;--teal:#0d9488;--teal-dark:#0f766e;--teal-bg:#f0fdfa;--teal-line:#99f6e4;--orange:#ea7a1f;--orange-bg:#fff7ed;--bg:#f4f7fb;--card:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;--light:#94a3b8;--up:#dc2626;--down:#2563eb}
+body{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;word-break:keep-all}
+.wrap{max-width:880px;margin:0 auto;padding:28px 16px 56px}
+.scrap-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;background:var(--teal-bg);border:1px solid var(--teal-line);border-radius:10px;padding:10px 16px;font-size:.8rem;color:var(--teal-dark);margin-bottom:18px}
+.scrap-bar b{font-weight:700}
+.scrap-tag{background:var(--teal);color:#fff;font-weight:700;font-size:.72rem;padding:2px 8px;border-radius:5px}
+.hero{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:22px}
+.hero-top{border-top:5px solid var(--orange);padding:26px 26px 20px}
+.hero-kicker{font-size:.8rem;font-weight:700;color:var(--orange);letter-spacing:.3px;margin-bottom:6px}
+.hero h1{font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800;color:var(--orange);line-height:1.25;letter-spacing:-.5px}
+.hero h2{font-size:clamp(1.05rem,2.6vw,1.3rem);font-weight:700;margin-top:6px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px 26px;background:#f8fafc;border-top:1px solid var(--border);font-size:.82rem;color:var(--muted)}
+.hero-meta b{color:var(--text);font-weight:600}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px 26px;margin-bottom:22px}
+.sec-title{font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sec-title::before{content:'';width:4px;height:18px;background:var(--orange);border-radius:2px}
+.sub{font-size:.95rem;font-weight:700;margin:18px 0 8px;color:var(--text)}
+.sub:first-of-type{margin-top:0}
+ul.pts{padding-left:18px}
+ul.pts li{font-size:.92rem;margin-bottom:6px}
+.up{color:var(--up)}.down{color:var(--down)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.85rem;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+th{background:#f8fafc;color:var(--muted);font-weight:700;text-align:center}
+td{text-align:right}td:first-child{text-align:left;font-weight:600}
+.bars{display:grid;gap:6px}
+.bar-row{display:grid;grid-template-columns:96px 1fr 56px;align-items:center;gap:10px;font-size:.84rem}
+.bar-track{position:relative;height:14px;background:#f1f5f9;border-radius:4px}
+.bar-track::after{content:'';position:absolute;left:calc(100% * 0.75);top:-2px;bottom:-2px;width:1px;background:var(--light)}
+.bar{position:absolute;top:0;height:100%;border-radius:3px}
+.bar.neg{background:#93c5fd;right:25%}.bar.pos{background:#fca5a5;left:75%}
+.bar-val{text-align:right;font-weight:700}
+.tk{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+.tk-no{font-size:.72rem;font-weight:800;color:var(--orange);letter-spacing:.4px}
+.tk h3{font-size:1rem;font-weight:800;margin:2px 0 2px}
+.tk .tk-sub{font-size:.85rem;color:var(--muted);margin-bottom:8px}
+.stocks{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stk{border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.stk-head{display:flex;justify-content:space-between;font-weight:700;font-size:.92rem}
+.stk p{font-size:.83rem;color:var(--muted);margin-top:4px;line-height:1.6}
+.ficc{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ficc .box{border:1px solid var(--border);border-radius:10px;padding:14px}
+.ficc .box h4{font-size:.88rem;font-weight:800;margin-bottom:6px}
+.ficc .row{display:flex;justify-content:space-between;font-size:.82rem;font-variant-numeric:tabular-nums}
+.ficc .why{font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.6}
+.memo{background:var(--orange-bg);border:1px dashed #fdba74;border-radius:10px;padding:14px 16px;font-size:.88rem}
+.footer{text-align:center;font-size:.76rem;color:var(--light);margin-top:28px;line-height:1.7}
+@media(max-width:700px){.stocks,.ficc{grid-template-columns:1fr}.card{padding:20px 16px}.hero-top{padding:22px 18px 16px}.hero-meta{padding:12px 18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="scrap-bar">
+    <span class="scrap-tag">📎 스크랩 · 핵심 정리</span>
+    <span>출처 <b>미래에셋증권 Investment Strategy</b></span>
+    <span>발간 <b>2026.11.17</b></span>
+    <span>원문 <b>20261117_글로벌 마켓 브리핑(11월 17일).pdf</b> (12쪽)</span>
+  </div>
+
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-kicker">GLOBAL MARKET BRIEFING · 2026.11.17</div>
+      <h1>AI 반도체 투자심리 냉각</h1>
+      <h2>나스닥 −2.49%, 필라델피아 반도체 −5.28%</h2>
+    </div>
+    <div class="hero-meta">
+      <span>증권사 <b>미래에셋증권</b></span>
+      <span>작성 <b>김주연</b></span>
+      <span>기준 <b>작성 시점</b></span>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="sec-title">한 줄 요약</div>
+    <div class="memo">엔비디아 경영 불확실성과 미 의회·상무부의 반도체 수출 규제 강화가 겹치며 반도체주가 급락(SOX −5.28%, 6월 고점 대비 −34%). 위험회피로 국채금리는 소폭 하락, 공급과잉 전망에 유가는 3개월래 최저. 시장의 다음 변수는 <b>17일 엔비디아 실적, 19일 앤트로픽 상장</b>.</div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">미국 증시 주요 지수</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>지수</th><th>종가</th><th>등락률</th></tr></thead>
+        <tbody>
+          <tr><td>다우존스 산업평균</td><td>51,608.17</td><td class="down">−1.41%</td></tr>
+          <tr><td>S&amp;P500</td><td>7,416.59</td><td class="down">−1.92%</td></tr>
+          <tr><td>나스닥 종합</td><td>24,509.75</td><td class="down">−2.49%</td></tr>
+          <tr><td>나스닥 100</td><td>27,197.15</td><td class="down">−2.67%</td></tr>
+          <tr><td>러셀 2000</td><td>2,742.94</td><td class="down">−1.70%</td></tr>
+          <tr><td>필라델피아 반도체</td><td>9,610.65</td><td class="down">−5.28%</td></tr>
+          <tr><td>VIX</td><td>22.91</td><td class="up">+18.70%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub" style="margin-top:22px">S&amp;P500 업종 등락률 (%)</div>
+    <div class="bars">
+      <div class="bar-row"><span>필수소비재</span><div class="bar-track"><div class="bar pos" style="width:1.9%"></div></div><span class="bar-val up">+0.21</span></div>
+      <div class="bar-row"><span>유틸리티</span><div class="bar-track"><div class="bar neg" style="width:0.9%"></div></div><span class="bar-val down">−0.10</span></div>
+      <div class="bar-row"><span>부동산</span><div class="bar-track"><div class="bar neg" style="width:3.3%"></div></div><span class="bar-val down">−0.37</span></div>
+      <div class="bar-row"><span>헬스케어</span><div class="bar-track"><div class="bar neg" style="width:3.6%"></div></div><span class="bar-val down">−0.40</span></div>
+      <div class="bar-row"><span>금융</span><div class="bar-track"><div class="bar neg" style="width:8.9%"></div></div><span class="bar-val down">−1.00</span></div>
+      <div class="bar-row"><span>소재</span><div class="bar-track"><div class="bar neg" style="width:12.0%"></div></div><span class="bar-val down">−1.34</span></div>
+      <div class="bar-row"><span>산업재</span><div class="bar-track"><div class="bar neg" style="width:16.2%"></div></div><span class="bar-val down">−1.81</span></div>
+      <div class="bar-row"><span>에너지</span><div class="bar-track"><div class="bar neg" style="width:17.4%"></div></div><span class="bar-val down">−1.95</span></div>
+      <div class="bar-row"><span>경기소비재</span><div class="bar-track"><div class="bar neg" style="width:19.1%"></div></div><span class="bar-val down">−2.14</span></div>
+      <div class="bar-row"><span>커뮤니케이션</span><div class="bar-track"><div class="bar neg" style="width:23.3%"></div></div><span class="bar-val down">−2.61</span></div>
+      <div class="bar-row"><span>정보기술</span><div class="bar-track"><div class="bar neg" style="width:25%"></div></div><span class="bar-val down">−2.80</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">Key Takeaways</div>
+    <div class="tk">
+      <div class="tk-no">#1</div>
+      <h3>반도체주 급락: 필라델피아 반도체 지수 −5.28%</h3>
+      <div class="tk-sub">엔비디아 불확실성 + 미국 의회 반도체 수출 규제 강화 움직임</div>
+      <ul class="pts">
+        <li>상무부, 첨단 칩 원격 접근 규제 발표 — 해외 데이터센터 '우회통로' 겨냥</li>
+        <li>필라델피아 반도체지수, 6월 고점 대비 34% 급락</li>
+        <li>17일 엔비디아 실적, 19일 앤트로픽 상장이 투자심리를 좌우할 변수</li>
+      </ul>
+    </div>
+    <div class="tk">
+      <div class="tk-no">#2</div>
+      <h3>기술주·유가·국채금리 상승 '일단 멈춤'</h3>
+      <div class="tk-sub">기술주 급락에 위험 회피 심리 강화 → 국채 가격 상승</div>
+      <ul class="pts">
+        <li>공급 과잉 전망이 잇따르며 국제유가 급락, WTI 3개월래 최저</li>
+        <li>골드만삭스 "내년 석유 시장, 상당한 과잉에 직면할 것"</li>
+        <li>FedWatch, 12월 50bp 금리 인상 가능성을 4%대로 낮춰 반영</li>
+      </ul>
+    </div>
+    <div class="tk">
+      <div class="tk-no">#3</div>
+      <h3>연준의 입: 워시, 해맥</h3>
+      <ul class="pts">
+        <li>케빈 워시 연준 의장: "AI의 경제적 영향 관련 시나리오 작업 중", "초지능은 통화정책에 중요한 함의" — 단기 통화정책 언급은 없음</li>
+        <li>베스 해맥 클리블랜드 연은 총재: "느리고 꾸준한 금리 인상 선호", 기업의 비용 전가 움직임이 인상 속도의 변수</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">특징 종목</div>
+    <div class="sub">▲ 상승</div>
+    <div class="stocks">
+      <div class="stk"><div class="stk-head"><span>코스트코 홀세일</span><span class="up">+0.68%</span></div><p>특별 배당 기대 + BofA 목표가 $1,257 상향, 최고가 경신</p></div>
+      <div class="stk"><div class="stk-head"><span>샤오펑</span><span class="up">+3.20%</span></div><p>기대 이상 실적·가이던스, 휴머노이드·로보택시 등 성장 동력 긍정 평가</p></div>
+      <div class="stk"><div class="stk-head"><span>맥도날드</span><span class="up">+0.99%</span></div><p>음식료·저가 외식 등 방어주 상대 강세</p></div>
+      <div class="stk"><div class="stk-head"><span>델타 에어라인스</span><span class="up">+0.41%</span></div><p>미국 항공 운항 중단 진정 + 유가 하락 + 추수감사절 여행 수요 기대</p></div>
+      <div class="stk"><div class="stk-head"><span>타이슨 푸드</span><span class="up">+8.72%</span></div><p>내년 소고기 부문 적자 전망에도 전분기 호실적</p></div>
+      <div class="stk"><div class="stk-head"><span>CG 온콜로지</span><span class="up">+13.95%</span></div><p>비근육 침습성 방광암 치료제 후보물질 임상 3상에서 의미 있는 개선 확인</p></div>
+    </div>
+    <div class="sub">▼ 하락</div>
+    <div class="stocks">
+      <div class="stk"><div class="stk-head"><span>엔비디아</span><span class="down">−4.12%</span></div><p>이사회 "젠슨 황 전 CEO 복귀 검토 안 해, 국가 안보 조사 집중" — 경영진 교체·조사 불확실성</p></div>
+      <div class="stk"><div class="stk-head"><span>인텔</span><span class="down">−7.02%</span></div><p>PC 판매 침체·재고 과잉의 매출 부담 공시 미흡으로 주주 소송 직면</p></div>
+      <div class="stk"><div class="stk-head"><span>아마존닷컴</span><span class="down">−3.34%</span></div><p>위성 40기 실은 벌컨 로켓 추락, 저궤도 위성 인터넷 연말 상용화 차질 전망</p></div>
+      <div class="stk"><div class="stk-head"><span>마이크론</span><span class="down">−7.62%</span></div><p>미 법원, 삼성전자·SK하이닉스·마이크론 D램 담합 소송 기각 요청 거부</p></div>
+      <div class="stk"><div class="stk-head"><span>스트래티지</span><span class="down">−7.70%</span></div><p>비트코인 하락 지속, 485개 추가 매수(총 85만 849개)</p></div>
+      <div class="stk"><div class="stk-head"><span>L3 해리스</span><span class="down">−3.89%</span></div><p>미 행정부, 전국 항공편 마비 원인으로 L3 해리스 정기 유지보수 지목</p></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">FICC</div>
+    <div class="ficc">
+      <div class="box">
+        <h4>채권</h4>
+        <div class="row"><span>미 2년물</span><span>4.8315% <span class="down">−1.0bp</span></span></div>
+        <div class="row"><span>미 10년물</span><span>5.1291% <span class="down">−0.6bp</span></span></div>
+        <div class="row"><span>미 30년물</span><span>5.4741% <span class="up">+0.9bp</span></span></div>
+        <div class="why">기술주 급락·유가 하락·워시 의장의 단기 정책 언급 부재·해맥 총재의 '빅스텝' 가능성 완화 발언으로 금리 하락. 단기물 중심 하락으로 10년-2년 금리차 확대.</div>
+      </div>
+      <div class="box">
+        <h4>외환</h4>
+        <div class="row"><span>달러인덱스</span><span>103.61 <span class="up">+0.19%</span></span></div>
+        <div class="row"><span>달러-원</span><span>1,336.25 <span class="up">+0.03원</span></span></div>
+        <div class="row"><span>NDF 1M</span><span>1,334.77 <span class="up">+0.08원</span></span></div>
+        <div class="why">달러 5거래일 연속 상승. 기술주 급락에 따른 위험 회피가 달러 강세 재료.</div>
+      </div>
+      <div class="box">
+        <h4>상품</h4>
+        <div class="row"><span>WTI (12월물)</span><span>$85.72 <span class="down">−3.51%</span></span></div>
+        <div class="row"><span>브렌트 (1월물)</span><span>$92.44 <span class="down">−3.72%</span></span></div>
+        <div class="why">IEA에 이어 골드만삭스도 공급 과잉 전망(내년 브렌트 평균 $88). WTI 3개월래 최저.</div>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer">📎 개인 스크랩 · 핵심 정리본 (원문 전문 아님)<br>원문: 미래에셋증권 「글로벌 마켓 브리핑 — AI 반도체 투자심리 냉각」 (2026.11.17, 김주연)<br>본 자료의 저작권은 미래에셋증권에 있으며, 투자 권유가 아닙니다.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>2027 전망 기초소재</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f2244;--teal:#0d9488;--teal-dark:#0f766e;--teal-bg:#f0fdfa;--teal-line:#99f6e4;--orange:#ea7a1f;--orange-bg:#fff7ed;--bg:#f4f7fb;--card:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;--light:#94a3b8;--up:#dc2626;--down:#2563eb}
+body{font-family:'Pretendard','Noto Sans KR','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;word-break:keep-all}
+.wrap{max-width:880px;margin:0 auto;padding:28px 16px 56px}
+.scrap-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;background:var(--teal-bg);border:1px solid var(--teal-line);border-radius:10px;padding:10px 16px;font-size:.8rem;color:var(--teal-dark);margin-bottom:18px}
+.scrap-bar b{font-weight:700}
+.scrap-tag{background:var(--teal);color:#fff;font-weight:700;font-size:.72rem;padding:2px 8px;border-radius:5px}
+.hero{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:22px}
+.hero-top{border-top:5px solid var(--orange);padding:26px 26px 20px}
+.hero-kicker{font-size:.8rem;font-weight:700;color:var(--orange);letter-spacing:.3px;margin-bottom:6px}
+.hero h1{font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800;color:var(--orange);line-height:1.25;letter-spacing:-.5px}
+.hero h2{font-size:clamp(1.05rem,2.6vw,1.3rem);font-weight:700;margin-top:6px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px 26px;background:#f8fafc;border-top:1px solid var(--border);font-size:.82rem;color:var(--muted)}
+.hero-meta b{color:var(--text);font-weight:600}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px 26px;margin-bottom:22px}
+.sec-title{font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sec-title::before{content:'';width:4px;height:18px;background:var(--orange);border-radius:2px}
+.sub{font-size:.95rem;font-weight:700;margin:20px 0 8px}
+ul.pts{padding-left:18px}
+ul.pts li{font-size:.92rem;margin-bottom:6px}
+.memo{background:var(--orange-bg);border:1px dashed #fdba74;border-radius:10px;padding:14px 16px;font-size:.9rem}
+.thesis{display:grid;gap:12px}
+.th{display:grid;grid-template-columns:150px 1fr;gap:14px;border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.th-no{font-size:.75rem;font-weight:800;color:var(--orange)}
+.th-name{font-weight:800;font-size:.95rem;line-height:1.4}
+.th ul{padding-left:16px}.th li{font-size:.88rem;margin-bottom:4px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.83rem;font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px;border-bottom:1px solid var(--border)}
+thead th{background:#f8fafc;color:var(--muted);font-weight:700;text-align:center;white-space:nowrap}
+td.l{text-align:left;font-weight:600;white-space:nowrap}
+td.n{text-align:right;white-space:nowrap}
+.stock{border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+.stock-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px;margin-bottom:4px}
+.stock-head h3{font-size:1.15rem;font-weight:800}
+.code{color:var(--muted);font-size:.85rem}
+.pick{background:var(--orange);color:#fff;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:5px}
+.stock-sub{color:var(--orange);font-weight:700;font-size:.92rem;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.kpi{background:#f8fafc;border-radius:8px;padding:10px 12px}
+.kpi .k{font-size:.72rem;color:var(--muted)}.kpi .v{font-size:1.05rem;font-weight:800;font-variant-numeric:tabular-nums}
+.kpi .v.up{color:var(--up)}
+.note{font-size:.76rem;color:var(--light);margin-top:8px;line-height:1.6}
+.footer{text-align:center;font-size:.76rem;color:var(--light);margin-top:28px;line-height:1.7}
+@media(max-width:700px){.th{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.card{padding:20px 16px}.hero-top{padding:22px 18px 16px}.hero-meta{padding:12px 18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="scrap-bar">
+    <span class="scrap-tag">📎 스크랩 · 핵심 정리</span>
+    <span>출처 <b>미래에셋증권 Equity Research</b></span>
+    <span>발간 <b>2026.11.16</b></span>
+    <span>원문 <b>20261116_[2027년 전망] 기초소재 (비중확대_유지).pdf</b> (28쪽)</span>
+  </div>
+
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-kicker">OUTLOOK 2027 · 기초소재 (중립/유지)</div>
+      <h1>수출길에 드리운 철의 장막</h1>
+      <h2>글로벌 철강 시황 회복 제한적, Trading 관점의 접근 유효</h2>
+    </div>
+    <div class="hero-meta">
+      <span>증권사 <b>미래에셋증권</b></span>
+      <span>애널리스트 <b>김기룡</b></span>
+      <span>업종의견 <b>중립(유지)</b></span>
+      <span>Top Pick <b>POSCO홀딩스</b></span>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="sec-title">한 줄 요약</div>
+    <div class="memo">보호무역 강화와 중국의 높은 순수출로 2027년 철강 시황 회복은 제한적이라 업종은 <b>중립, Trading 관점</b>. 다만 POSCO홀딩스·현대제철은 롤마진 개선으로 전년 대비 실적이 좋아질 전망이며, 최선호주는 철강 실적이 견조하고 이차전지 성장성이 있는 <b>POSCO홀딩스</b>(목표주가 470,000원).</div>
+    <p class="note">* 원문 표지의 업종 의견은 "중립/유지"입니다. 원본 PDF 파일명의 "비중확대_유지"와 다릅니다.</p>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">2027년 전망 3가지 축</div>
+    <div class="thesis">
+      <div class="th">
+        <div><div class="th-no">01</div><div class="th-name">글로벌 철강 시황 회복 제한적</div></div>
+        <ul>
+          <li>KRX 철강지수 PBR 0.49배, KOSPI 대비 할인율 61% (2008년 이후 평균 33%)</li>
+          <li>그래도 POSCO홀딩스·현대제철 손익은 롤마진 개선으로 전년 대비 개선 전망 — 반덤핑으로 저가 수입재 축소 + 제강사 감산이 내수 판가를 지지, 철광석 안정·원/달러 하락으로 원재료 부담 완화</li>
+          <li>판가는 연초 반덤핑 효과로 올랐지만 수요 둔화·원재료 안정으로 조정 → 상승 여력 축소 요인 상존</li>
+          <li>최선호주 POSCO홀딩스: 철강 부문의 견조한 실적 + 이차전지 성장성</li>
+        </ul>
+      </div>
+      <div class="th">
+        <div><div class="th-no">02</div><div class="th-name">녹록지 않은 수출 환경</div></div>
+        <ul>
+          <li>각국의 보호무역 강화가 지속 → 철강사의 수출 여건은 녹록지 않을 전망</li>
+          <li>미국 철강 시장은 우호적 환경 지속: 2026년 글로벌 철강사 주가 수익률 상위는 대부분 미국 철강사</li>
+          <li>미국 철강업계, 공동 서한으로 한국산 철강 수입 급증에 대한 조사·추가 규제 요청</li>
+          <li>미국向 수출은 물량 확대보다 제품 Mix 개선(예: 철근 → H형강) 전략이 이어질 전망</li>
+        </ul>
+      </div>
+      <div class="th">
+        <div><div class="th-no">03</div><div class="th-name">중국 감산에도 수급 개선 효과 제한적</div></div>
+        <ul>
+          <li>중국은 2027년에도 생산 축소·수요 감소 기조지만, 철강 순수출 물량은 여전히 높은 수준</li>
+          <li>수출허가제 시행 — 수출 통제 의지는 긍정적이나 내수 둔화 국면에서 효과 반감 우려</li>
+          <li>중국 부동산은 부양책에도 회복을 낙관하기 어려움 (2020년 3대 레드라인 이후 장기 조정)</li>
+          <li>3Q26 중국 철강사 실적: 공급과잉에 따른 판가 약세로 수익성 악화</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">주요국 철강 보호무역 정책</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>국가</th><th>주요 사항</th></tr></thead>
+        <tbody>
+          <tr><td class="l">미국</td><td>Section 232 철강 관세 25% → 50% 인상(2025.06~), 2025.08 파생상품 407개 HTS 추가, 2026.04부터 철강 함량이 아닌 제품 전체가액에 부과</td></tr>
+          <tr><td class="l">EU</td><td>2026.07 신규 철강조치 시행: 무관세 쿼터 연 1,835만톤(−47%), 초과분 관세 25% → 50%. 한국은 재협상으로 무관세 쿼터 130만톤 → 207만톤</td></tr>
+          <tr><td class="l">일본</td><td>한국·중국산 용융아연도금강판 잠정 반덤핑관세 9.2~55.3%. 한·중·대만산 열연·냉연 반덤핑 조사 개시(2027.06 전후 판정 예상)</td></tr>
+          <tr><td class="l">인도</td><td>평판재 세이프가드 3년 확정: 12% → 11.5%(2026.04~) → 11%(2027.04~2028.04)</td></tr>
+          <tr><td class="l">베트남</td><td>한·중산 도금강판 반덤핑 확정(5년), 중국산 열연 반덤핑 23.1~27.8%</td></tr>
+          <tr><td class="l">멕시코</td><td>비FTA국 수입관세 인상(2026.01~), 쿼터를 비FTA국 20%·FTA국(한국 포함) 75%로 축소</td></tr>
+          <tr><td class="l">캐나다</td><td>철강 TRQ와 쿼터 초과물량 50% 부가세(2025.06~2027.06), 파생상품 25% 부가세</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">국내 수요 · 원재료 · 비용</div>
+    <div class="sub" style="margin-top:0">전방산업별 내수 전망 (2027년)</div>
+    <ul class="pts">
+      <li><b>조선</b>: 풍부한 수주잔고로 견조한 수요 지속</li>
+      <li><b>자동차</b>: 현대차 파업 등에 따른 기저 효과로 회복 기대</li>
+      <li><b>건설</b>: 착공 지표 부진(2026년 9월 누계 건축착공면적 −8.6%)으로 신규 수요 회복은 제한적. 기저효과로 반등 가능하나 폭은 작음</li>
+      <li><b>가전</b>: ODM·구독 비중 확대로 자체 생산 감소 → 철강재 수요 회복 제한적</li>
+    </ul>
+    <div class="sub">내수 가격과 반덤핑</div>
+    <ul class="pts">
+      <li>2026년 내수 가격은 중국산 후판, 중국·일본산 열연 반덤핑 효과로 상승 (2025년 말 대비 열연 15%, 냉연 12.9%, 후판 7.7%, 철근 15.7%)</li>
+      <li>최근엔 수요 둔화·원재료 안정으로 조정 국면. 원화 강세로 베트남 등 중국 외 아시아산 수입이 늘어 반덤핑 효과 희석 (10월 베트남산 열연 수입 약 4.1만톤, 역대 최대)</li>
+    </ul>
+    <div class="sub">원재료</div>
+    <ul class="pts">
+      <li>철광석·원료탄은 하향 안정화 기조 지속 전망 — 중국 철광석 재고가 예년보다 높고, CMRG–리오틴토 장기 공급계약(26.11~28.05)으로 구매 협상력 강화</li>
+      <li>원화 강세는 100% 수입 구조인 원재료 매입비 부담 완화 요인. 기니 시만두 광산(연 1.2억톤) 가동으로 공급 확대</li>
+    </ul>
+    <div class="sub">탄소비용과 전기료</div>
+    <ul class="pts">
+      <li>NDC 법제화(2026.08)로 초과 배출분의 시장 매입 부담 확대. 탄소배출권(KAU) 가격은 1년간 약 3배 이상 상승 (철강은 100% 무상할당 유지)</li>
+      <li>산업용 지역별 전기요금제 추진 → 비수도권 최대 약 10% 인하 (남부권 kWh당 13~18원, 중부권 10~15원). 포항·광양·당진 입지 철강사에 절감 효과</li>
+    </ul>
+    <div class="sub">정책: K-스틸법</div>
+    <ul class="pts">
+      <li>2025년 11월 국회 통과 → 2026년 6월 시행. 저탄소 전환·사업재편·공급과잉 완화·고부가 전환 지원</li>
+      <li>2026년 10월 K-GX 전략: 저탄소철강 인증제(2027년), 수소환원제철 30만톤 실증(~2030년). 포항·당진 특구 유치 활동 본격화</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">종목 분석</div>
+
+    <div class="stock">
+      <div class="stock-head"><h3>POSCO홀딩스</h3><span class="code">005490</span><span class="pick">Top Pick</span></div>
+      <div class="stock-sub">철강 실적 방어, 이차전지 성장성 확인 기대</div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">투자의견</div><div class="v">매수(유지)</div></div>
+        <div class="kpi"><div class="k">목표주가</div><div class="v">470,000원</div></div>
+        <div class="kpi"><div class="k">현재주가(11/13)</div><div class="v">275,000원</div></div>
+        <div class="kpi"><div class="k">상승여력</div><div class="v up">70.9%</div></div>
+      </div>
+      <ul class="pts">
+        <li>2027년 연결 영업이익 3.64조원(+18% YoY) 추정 — 상저하고 흐름</li>
+        <li>철강: 광양 2고로 개보수(26.10~27.03)로 생산은 줄지만, 내수 점유율 상승과 롤마진으로 실적 안정성 제고</li>
+        <li>이차전지: 리튬 약세에도 장기 공급계약 물량·가동률 상승으로 손익 방어. 포스코아르헨티나 2공장은 2027년 하반기 정상 가동으로 흑자전환 예상</li>
+        <li>지주사 할인 축소를 위한 자회사 지분 최적화(50% 수준) 계획. 포스코인터내셔널(2.0조원)·포스코DX(4,817억원) 지분 매각 대금의 10%를 자사주 매입·소각에 활용</li>
+      </ul>
+      <div class="tbl-wrap" style="margin-top:12px">
+        <table>
+          <thead><tr><th>결산기(12월)</th><th>2024</th><th>2025</th><th>2026F</th><th>2027F</th><th>2028F</th></tr></thead>
+          <tbody>
+            <tr><td class="l">매출액(십억원)</td><td class="n">72,688</td><td class="n">69,095</td><td class="n">74,124</td><td class="n">75,930</td><td class="n">78,771</td></tr>
+            <tr><td class="l">영업이익(십억원)</td><td class="n">2,174</td><td class="n">1,827</td><td class="n">3,085</td><td class="n">3,636</td><td class="n">4,255</td></tr>
+            <tr><td class="l">영업이익률(%)</td><td class="n">3.0</td><td class="n">2.6</td><td class="n">4.2</td><td class="n">4.8</td><td class="n">5.4</td></tr>
+            <tr><td class="l">순이익(십억원)</td><td class="n">1,095</td><td class="n">658</td><td class="n">1,634</td><td class="n">1,852</td><td class="n">2,233</td></tr>
+            <tr><td class="l">EPS(원)</td><td class="n">13,073</td><td class="n">8,085</td><td class="n">20,507</td><td class="n">23,369</td><td class="n">28,183</td></tr>
+            <tr><td class="l">ROE(%)</td><td class="n">2.0</td><td class="n">1.2</td><td class="n">2.9</td><td class="n">3.2</td><td class="n">3.7</td></tr>
+            <tr><td class="l">P/E(배)</td><td class="n">19.4</td><td class="n">37.7</td><td class="n">13.4</td><td class="n">11.8</td><td class="n">9.8</td></tr>
+            <tr><td class="l">P/B(배)</td><td class="n">0.4</td><td class="n">0.4</td><td class="n">0.4</td><td class="n">0.4</td><td class="n">0.4</td></tr>
+            <tr><td class="l">배당수익률(%)</td><td class="n">3.9</td><td class="n">3.3</td><td class="n">3.6</td><td class="n">4.0</td><td class="n">4.4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="stock">
+      <div class="stock-head"><h3>현대제철</h3><span class="code">004020</span></div>
+      <div class="stock-sub">실적은 좋아지고 밸류는 여전히 싸다</div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">투자의견</div><div class="v">매수(유지)</div></div>
+        <div class="kpi"><div class="k">목표주가</div><div class="v">40,000원</div></div>
+        <div class="kpi"><div class="k">현재주가(11/13)</div><div class="v">28,900원</div></div>
+        <div class="kpi"><div class="k">상승여력</div><div class="v up">38.4%</div></div>
+      </div>
+      <ul class="pts">
+        <li>2027년 연결 영업이익 5,545억원(+110% YoY) 추정 — 롤마진 개선 + 2026년 부진의 기저효과</li>
+        <li>미국 수출은 물량보다 Mix 개선(철근 → H형강) 중심. H ONE 출범으로 데이터센터·반도체 FAB向 고사양 H형강 판매 확대</li>
+        <li>2027년 주주환원 정책 발표, 신수요(데이터센터·FAB) 노출, 미국 전기로 제철소 가시성 확대가 저평가 축소 요인</li>
+      </ul>
+      <div class="tbl-wrap" style="margin-top:12px">
+        <table>
+          <thead><tr><th>결산기(12월)</th><th>2024</th><th>2025</th><th>2026F</th><th>2027F</th><th>2028F</th></tr></thead>
+          <tbody>
+            <tr><td class="l">매출액(십억원)</td><td class="n">23,226</td><td class="n">22,733</td><td class="n">23,767</td><td class="n">24,625</td><td class="n">24,964</td></tr>
+            <tr><td class="l">영업이익(십억원)</td><td class="n">159</td><td class="n">219</td><td class="n">265</td><td class="n">554</td><td class="n">630</td></tr>
+            <tr><td class="l">영업이익률(%)</td><td class="n">0.7</td><td class="n">1.0</td><td class="n">1.1</td><td class="n">2.2</td><td class="n">2.5</td></tr>
+            <tr><td class="l">순이익(십억원)</td><td class="n">−12</td><td class="n">−7</td><td class="n">89</td><td class="n">291</td><td class="n">352</td></tr>
+            <tr><td class="l">EPS(원)</td><td class="n">−87</td><td class="n">−52</td><td class="n">664</td><td class="n">2,184</td><td class="n">2,637</td></tr>
+            <tr><td class="l">ROE(%)</td><td class="n">−0.1</td><td class="n">0.0</td><td class="n">0.5</td><td class="n">1.4</td><td class="n">1.7</td></tr>
+            <tr><td class="l">P/E(배)</td><td class="n">–</td><td class="n">–</td><td class="n">43.5</td><td class="n">13.2</td><td class="n">11.0</td></tr>
+            <tr><td class="l">P/B(배)</td><td class="n">0.1</td><td class="n">0.2</td><td class="n">0.2</td><td class="n">0.2</td><td class="n">0.2</td></tr>
+            <tr><td class="l">배당수익률(%)</td><td class="n">3.6</td><td class="n">1.6</td><td class="n">1.7</td><td class="n">1.7</td><td class="n">1.7</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">주: K-IFRS 연결 기준, 순이익은 지배주주 귀속. 차트·분기 실적표·Compliance는 원본 PDF 참고.</p>
+    </div>
+  </section>
+
+  <p class="footer">📎 개인 스크랩 · 핵심 정리본 (원문 전문 아님)<br>원문: 미래에셋증권 「OUTLOOK 2027 기초소재 — 수출길에 드리운 철의 장막」 (2026.11.16, 김기룡)<br>본 자료의 저작권은 미래에셋증권에 있으며, 투자 권유가 아닙니다.</p>
+</div>
+</body>
+</html>
