@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>두산 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">000150 · KOSPI</div>
+        <div class="company-name">두산</div>
+        <div class="company-desc">두산그룹 지주사 · 자체사업 전자BG(AI 가속기·네트워크용 CCL) + 두산에너빌리티·밥캣·로보틱스 연결</div>
+      </div>
+      <div class="price-box">
+        <div class="price">545,000원</div>
+        <div class="chg down">▼ 6.03% (전일 대비, 장중)</div>
+        <div class="asof">데이터 기준 2026.11.17 14:25 장중가(종가 미확보) · 잡포스트 · 작성 2026.11.17</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>약 7.8조원</b></span>
+      <span>섹터 <b>지주회사 / 전자소재(CCL)</b></span>
+      <span>52주 범위 <b>52.5만 ~ 248.9만원</b> (현재 위치 1%)</span>
+      <span>컨센서스 <b>매수</b> · 목표가 <b>114만원</b> (+109%, 실적 후 5곳 평균)</span>
+    </div>
+    <div class="verdict">PER 31배로 업종(15.9배) 대비 비싸 보이지만 2026E 기준 14배 — 3분기 영업이익 +98%로 실적은 확인됐고, 52주 고점 대비 -78%까지 밀린 주가는 엔비디아·AI 설비투자 우려가 걷히느냐에 달렸다</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">31.4배</div><div class="m-sub">동일업종 15.9배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">14.0배</div><div class="m-sub">2026E 기준</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">3.73배</div><div class="m-sub">BPS 145,939원</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">5.1%</div><div class="m-sub">TTM 기준</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">17,343원</div><div class="m-sub">2025년 3,168원</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">0.73%</div><div class="m-sub">주당배당 4,000원</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">78%</div><div class="m-sub">총차입금/자본 기준</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">8.5%</div><div class="m-sub">최근 분기 · 전년 5.2%</div></div>
+    </div>
+    <div class="val-comment">업종 평균 PER(15.9배)의 약 2배지만, 컨센서스 2026E EPS(39,007원) 기준으로는 14배로 업종과 비슷하다. 연결 실적에 두산에너빌리티·밥캣이 섞여 있어 PER보다는 전자BG 성장과 자회사 지분가치(NAV)로 평가받는 종목이며, 증권사들이 목표가를 깎은 것도 실적이 아니라 대만 CCL 경쟁사와 자회사 주가 하락 때문이다.</div>
+    <div class="source-note">※ 출처: 네이버페이 증권(EPS·BPS·업종 PER, 중앙이코노미뉴스 11.12 인용), stockanalysis.com(Forward EPS·ROE·차입금비율, 기준일 2026.11.12) · 비교기준: 동일업종 PER(11.12) · 현재가 545,000원으로 재계산</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 억원</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>191,301</td><td>181,329</td><td>197,841</td></tr>
+          <tr><td>영업이익</td><td>13,562</td><td>9,782</td><td>10,055</td></tr>
+          <tr><td>영업이익률</td><td>7.1%</td><td>5.4%</td><td>5.1%</td></tr>
+          <tr><td>순이익</td><td>-3,698</td><td>-2,154</td><td>539</td></tr>
+          <tr><td>EPS</td><td>-21,812원</td><td>-12,705원</td><td>3,168원</td></tr>
+          <tr><td>PER</td><td>적자</td><td>적자</td><td>233.6배</td></tr>
+          <tr><td>ROE</td><td>2.5%</td><td>2.6%</td><td>2.1%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">2026E 컨센서스: 매출 22.1조원 · EPS 39,007원 (11명, S&P Global 집계)</div>
+    <div class="source-note">※ 출처: stockanalysis.com 연간 손익·비율 (백만원 → 억원 환산) · 순이익·EPS는 지배주주 기준, ROE는 stockanalysis 산정치(비지배지분 포함 연결순이익 기준) · E = 컨센서스 추정치</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>전자BG 고성장</b> — 3분기 전자BG 매출 8,020억원(+82%)·영업이익 2,353억원(+127%), 회사는 자체사업 연매출 3.2조원 상회 전망</li>
+          <li><b>생산능력 확대</b> — 9월 CCL 설비 9,684억원 투자 결정, NH는 태국·신규 증설이 반영되면 생산능력이 현재보다 168% 늘어난다고 추정</li>
+          <li><b>목표가와 괴리</b> — 실적 후 하향된 목표가 평균 114만원(5곳)도 현재가의 2배이며 5곳 모두 매수 유지, 자사주 256만여주 소각 결정</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>엔비디아 의존</b> — CCL이 엔비디아 AI 가속기 공급망에 묶여 젠슨 황 퇴진 후 엔비디아 약세에 11.17 장중 -7.5%, NH는 N사 공급망 다변화 우려를 지적</li>
+          <li><b>CCL 피어 디레이팅</b> — 대만 CCL 경쟁사 주가 급락으로 DB·대신·하나·교보가 목표가를 45~50% 일제히 하향(11.10)</li>
+          <li><b>지주사 구조</b> — 두산에너빌리티 주가가 52주 고점 13.9만원에서 4.4만원대로 떨어지는 등 자회사 지분가치 하락이 NAV를 깎고, 연결 순이익은 2023~24년 적자</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">2026년 3분기 · 영업이익 YoY +98.4% (컨센서스 비교치 미확보)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>54,269억</td><td>N/A</td><td>N/A</td><td>+22.2%</td></tr>
+            <tr><td>영업이익</td><td>4,594억</td><td>N/A</td><td>N/A</td><td>+98.4%</td></tr>
+            <tr><td>전자BG 매출</td><td>8,020억</td><td>N/A</td><td>N/A</td><td>+82.4%</td></tr>
+            <tr><td>전자BG 영업이익</td><td>2,353억</td><td>N/A</td><td>N/A</td><td>+126.5%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">2026.11.09 연결 잠정실적 공시. 영업이익률은 8.5%로 전년 동기 5.2%에서 3.3%p 상승했지만, 2분기 대비로는 매출 -2.8%·영업이익 -5.9%로 밥캣 둔화가 반영됐다. 회사는 4분기에도 전자BG 중심 성장이 이어져 자체사업 연매출 3.2조원 이상을 예상했다. (최신 실적)</p>
+      <div class="source-note">※ 출처: DART 잠정실적 공시(딜사이트·비즈워치 보도), 새턴경제(전자BG 영업이익)</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 5건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.17</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · 글로벌이코노믹</span><span class="tl-title">엔비디아발 불확실성에 장중 -7.5%</span><div class="tl-desc">젠슨 황 퇴진 후 엔비디아가 3거래일 연속 하락하자 엔비디아향 CCL 공급사인 두산도 53.65만원까지 밀림.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.11</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · 머니투데이</span><span class="tl-title">NH투자증권 목표가 200만→120만원</span><div class="tl-desc">두산에너빌리티·로보틱스 등 투자자산 가치 하락 반영. 다만 "현재 주가는 저평가 영역"이라며 매수 유지.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.10</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · 비즈워치</span><span class="tl-title">증권사 4곳 목표가 45~50% 하향</span><div class="tl-desc">DB·대신·하나·교보 모두 매수 유지. 실적이 아니라 대만 CCL 경쟁사 주가 하락에 따른 비교 배수 조정이 이유.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.09</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · DART</span><span class="tl-title">[잠정실적] 2026년 3분기 영업이익 4,594억원</span><div class="tl-desc">매출 5조4,269억원(+22.2%), 영업이익 +98.4%. 전자BG가 분기 최대 매출 8,020억원 기록.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.09.17</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · 잡포스트</span><span class="tl-title">CCL 생산시설 9,684억원 투자·자사주 소각</span><div class="tl-desc">AI 데이터센터용 CCL 증설과 자사주 256만여주 소각 결정이 부각되며 3거래일 연속 상승(141만원).</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">실적 후 평균 114만원 · 5곳</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>NH투자증권</td><td>매수</td><td>1,200,000원</td><td>2026.11.11</td></tr>
+            <tr><td>하나증권</td><td>매수</td><td>1,270,000원</td><td>2026.11.10</td></tr>
+            <tr><td>교보증권</td><td>매수</td><td>1,200,000원</td><td>2026.11.10</td></tr>
+            <tr><td>대신증권</td><td>매수</td><td>1,030,000원</td><td>2026.11.10</td></tr>
+            <tr><td>DB증권</td><td>매수</td><td>1,000,000원</td><td>2026.11.10</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: 비즈워치(11.10), 뉴스1·와이드경제(하나), 아주경제(교보), 머니투데이(NH) · 참고: S&P Global 집계 평균 178.8만원(12곳)은 하향 전 목표가가 섞여 있어 헤더에 쓰지 않음</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">두산은 3분기 영업이익이 전년보다 98% 늘고 전자BG가 분기 최대 매출을 냈지만, 주가는 52주 최고 248.9만원 대비 -78%인 50만원대 중반까지 내려왔다. <b>왜 움직였나</b> · 10월 초 138만원대에서 11월 들어 AI 설비투자 둔화와 엔비디아 공급망 다변화 우려, 대만 CCL 경쟁사 주가 급락이 겹치며 하락이 가팔라졌고(하나·NH 리포트), 11.17에는 젠슨 황 퇴진 후 엔비디아 약세가 더해졌다(글로벌이코노믹). 현재가는 TTM PER 31배로 업종보다 비싸지만 2026E 기준 14배, 실적 후 하향된 목표가 평균(114만원)의 절반 수준이라 밸류에이션 부담은 크게 줄었다. 핵심 변수는 엔비디아의 리더십 공백이 실제 AI 가속기 발주로 이어지는지와 CCL 피어 주가의 안정이다. AI 소재 성장을 믿고 높은 변동성을 감내할 수 있는 투자자에게 맞는 종목이다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>두산로보틱스 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">454910 · KOSPI</div>
+        <div class="company-name">두산로보틱스</div>
+        <div class="company-desc">국내 1위 협동로봇 제조사 · 북미 엔드오브라인(EOL) 자동화 솔루션(ONExia) · 피지컬 AI</div>
+      </div>
+      <div class="price-box">
+        <div class="price">51,400원</div>
+        <div class="chg down">▼ 0.96% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.12 종가 · 중앙이코노미뉴스(네이버페이 증권 인용) · 작성 2026.11.17</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>약 3.33조원</b></span>
+      <span>섹터 <b>기계(협동로봇)</b></span>
+      <span>52주 범위 <b>46,850 ~ 170,000원</b> (현재 위치 3.7%)</span>
+      <span>컨센서스 <b>중립</b> · 목표가 <b>103,667원</b> (+102%, 집계처별 103,667~145,000원)<span class="stale">(08.15 기준 · 3분기 실적 후 변경 미반영)</span></span>
+    </div>
+    <div class="verdict">매출은 북미 덕에 59% 늘었지만 분기 영업손실 130억원대가 이어지는 적자 성장주 — PBR 10배는 여전히 미래 기대 가격이고, 고점 대비 -70% 조정 뒤에도 흑자 전환 시점이 보여야 재평가가 가능</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 & 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">적자</div><div class="m-sub">동일업종 44.5배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">적자</div><div class="m-sub">2026E 기준 (1~3분기 영업손실 399억원)</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">10.12배</div><div class="m-sub">BPS 5,079원</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">-14.6%</div><div class="m-sub">TTM · 2026.06 기준</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">-878원</div><div class="m-sub">FY2025 -856원 · 적자 소폭 확대</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">33.9%</div><div class="m-sub">2026.09 기준 · 전년 말 14.6%</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">-82.9%</div><div class="m-sub">최근 분기 · 전년 -150.2%</div></div>
+    </div>
+    <div class="val-comment">이익이 없어 PER로는 비교가 안 되고, PBR 10.1배는 자본의 10배를 미래 기대에 매긴 가격입니다. 연말 기준 PBR이 2023년 17.2배 → 2024년 8.4배 → 2025년 14.5배로 오르내렸듯, 주가는 실적보다 로봇·휴머노이드 테마 심리에 따라 움직여 왔습니다. 고점 대비 70% 빠졌어도 실적 근거로 '싸다'고 말하기는 어렵습니다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com(BPS·ROE·연도별 PBR, 2026.06 분기 기준), 디지털투데이·글로벌이코노믹(3Q26 잠정실적·부채비율), 중앙이코노미뉴스(동일업종 PER, 2026.11.13) · PBR은 11.12 종가 기준 재계산, EPS(TTM)는 3Q26 순손실 반영 재계산 · 비교기준: 동일업종 PER(적자라 직접 비교 불가)</div>
+  </div>
+
+  <!-- ③ 주가 추이 -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <text x="868" y="10" font-size="9" fill="#6b7280" text-anchor="end">▲ 52주 최고 170,000 (2026.06.02) (축 범위 밖)</text><line x1="10" y1="161.8" x2="870" y2="161.8" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="172.8" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 46,850 (2026.11.06)</text>
+  <path d="M10.0,174 L10.0,64.4 L26.2,57.7 L42.5,52.3 L58.7,58.5 L74.9,61.0 L91.1,69.4 L107.4,81.9 L123.6,81.1 L139.8,71.9 L156.0,63.6 L172.3,68.1 L188.5,55.2 L204.7,57.3 L220.9,59.0 L237.2,67.7 L253.4,67.3 L269.6,74.8 L285.8,69.0 L302.1,68.6 L318.3,66.9 L334.5,61.0 L350.8,61.9 L367.0,67.7 L383.2,71.5 L399.4,71.1 L415.7,57.7 L431.9,52.3 L448.1,45.2 L464.3,60.2 L480.6,69.4 L496.8,93.6 L513.0,98.6 L529.2,97.8 L545.5,116.1 L561.7,111.1 L577.9,99.0 L594.2,106.1 L610.4,106.1 L626.6,114.4 L642.8,122.4 L659.1,122.4 L675.3,121.1 L691.5,104.8 L707.7,117.4 L724.0,130.3 L740.2,123.2 L756.4,138.6 L772.6,133.2 L788.9,141.5 L805.1,147.0 L821.3,153.6 L837.5,145.7 L853.8,140.7 L870.0,142.8 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,64.4 26.2,57.7 42.5,52.3 58.7,58.5 74.9,61.0 91.1,69.4 107.4,81.9 123.6,81.1 139.8,71.9 156.0,63.6 172.3,68.1 188.5,55.2 204.7,57.3 220.9,59.0 237.2,67.7 253.4,67.3 269.6,74.8 285.8,69.0 302.1,68.6 318.3,66.9 334.5,61.0 350.8,61.9 367.0,67.7 383.2,71.5 399.4,71.1 415.7,57.7 431.9,52.3 448.1,45.2 464.3,60.2 480.6,69.4 496.8,93.6 513.0,98.6 529.2,97.8 545.5,116.1 561.7,111.1 577.9,99.0 594.2,106.1 610.4,106.1 626.6,114.4 642.8,122.4 659.1,122.4 675.3,121.1 691.5,104.8 707.7,117.4 724.0,130.3 740.2,123.2 756.4,138.6 772.6,133.2 788.9,141.5 805.1,147.0 821.3,153.6 837.5,145.7 853.8,140.7 870.0,142.8" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="142.8" r="3.5" fill="#2f6db5"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-08-25</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-12</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.25~11.12 수익률 -26.8%</span>
+      <span>구간 최고 74,800 · 최저 48,800 · y축은 구간 고저 ±10%, 점선은 52주 최저 · 52주 최고는 축 밖이라 라벨로 표시</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 52주 고점(170,000원, 2026.06.02) 대비 -70%. 10월 중순 이후 하락은 개별 공시 없이 로봇 업종 심리 위축과 밸류에이션 부담이 주된 배경으로 꼽혔고(재경일보 2026.10.15), 11월 코스피 급락 속에 11.06 장중 46,850원으로 52주 최저가를 새로 썼습니다. 11.17에는 로보티즈의 3분기 적자 전환을 계기로 로봇주 '실적 경계령'이 번지며 장중 -2.94%까지 밀렸습니다(한국경제 2026.11.17).</div>
+    <div class="source-note">※ 출처: stockanalysis.com 일별 시세(08.25~11.06), 아시아뉴스통신(11.09), Daum 금융(11.10), Investing.com(11.11), 중앙이코노미뉴스(11.12) · 차트는 11.12까지 (11.13 이후 종가는 확보하지 못해 헤더 가격도 11.12 종가)</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 억원</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>530</td><td>468</td><td>330</td></tr>
+          <tr><td>영업이익</td><td>-192</td><td>-412</td><td>-595</td></tr>
+          <tr><td>영업이익률</td><td>-36.1%</td><td>-88.0%</td><td>-180.3%</td></tr>
+          <tr><td>순이익</td><td>-159</td><td>-366</td><td>-555</td></tr>
+          <tr><td>EPS</td><td>-300원</td><td>-564원</td><td>-856원</td></tr>
+          <tr><td>PER</td><td>적자</td><td>적자</td><td>적자</td></tr>
+          <tr><td>ROE</td><td>-6.6%</td><td>-8.7%</td><td>-14.8%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">2026E: 1~3분기 누적 매출 491억원(+146%)·영업손실 399억원 확정 · 회사는 북미법인(DRA) 연매출 +50% 이상을 전망 · 연간 실적 컨센서스는 공개 자료에서 찾지 못함</div>
+    <div class="source-note">※ 출처: stockanalysis.com(연간 실적·ROE), 브릿지경제·디지털투데이(2026 누적 실적) · 2026년은 이미 2025년 연매출을 넘었지만 영업손실도 2025년의 3분의 2 수준</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>북미 EOL 솔루션 성장</b> — 3Q 미국법인 EOL 매출 +55%, 누적 북미 비중 55%(2025년 연간 27%), DRA 연매출 +50% 이상 전망</li>
+          <li><b>수익 구조 개선 신호</b> — 3Q 매출총이익률 28.5%(+7.5%p), EBITDA 적자 103억원으로 전년(134억)·전분기(113억)보다 축소</li>
+          <li><b>현금 여력</b> — 3분기 말 현금성 자산 2,084억원, 부채비율 33.9%로 당장 자금 조달 압박은 크지 않음</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>흑자 전환 지연</b> — IPO(2023) 때 2026년 이익을 기대했지만 1~3분기 영업손실 399억원, 회사는 올해 실적 목표도 제시하지 않음</li>
+          <li><b>순손실 확대·업종 심리</b> — 3Q 순손실 183억원(전년 대비 +42%), 로보티즈 적자 전환(11.17)으로 로봇주 실적 경계가 커짐</li>
+          <li><b>현금 소진 구조</b> — 분기 EBITDA 적자 약 100억원이 이어지는 가운데 부채비율이 1년 새 9.7% → 33.9%로 상승, 북미 사업장 확장·AI R&amp;D로 고정비 증가</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">2026년 3분기 · 매출 +59% / 영업적자 축소 · 순손실 확대 (컨센서스 비교 불가)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>161.8억원</td><td>N/A</td><td>N/A</td><td>+59.1%</td></tr>
+            <tr><td>영업이익</td><td>-134.0억원</td><td>N/A</td><td>N/A</td><td>적자 12.2% 축소</td></tr>
+            <tr><td>순이익</td><td>-183.0억원</td><td>N/A</td><td>N/A</td><td>적자 42.3% 확대</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">2026.10.29 잠정실적 공시(최신 실적). 전분기 대비로는 매출 -8.5%, 영업손실 -7.0%. 회사는 북미 사업장 확대와 AI R&amp;D 투자·인력 채용을 적자 요인으로 설명했고, 북미법인(DRA) 올해 매출이 전년 대비 50% 이상 늘 것으로 전망했습니다. 내년에는 에이전틱 로봇 OS 솔루션을 공개할 계획입니다. 다음 실적은 2027.01 예정입니다.</p>
+      <div class="source-note">※ 출처: 디지털투데이(공시 요약, 2026.10.29), 브릿지경제·글로벌이코노믹·ZDNet Korea(2026.10.29), Daum 금융(다음 실적 예정일)</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 6건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.17</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · 한국경제</span><span class="tl-title">로보티즈 적자 전환에 로봇株 '실적 경계령'</span><div class="tl-desc">로보티즈 -8.86%, 레인보우로보틱스 -5.72%, 두산로보틱스 장중 -2.94%. 휴머노이드 기대를 이익으로 증명하라는 압박이 업종 전체로 번졌습니다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.06</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · 중앙이코노미뉴스</span><span class="tl-title">장중 46,850원, 52주 최저가 경신</span><div class="tl-desc">동일업종 -5.96% 급락일에 함께 밀렸고, 종가는 50,400원으로 일부 회복.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.29</div>
+        <div><span class="dot"></span><span class="tl-kind">공시 · DART</span><span class="tl-title">[영업(잠정)실적] 2026년 3분기 매출 161.8억원·영업손실 134.0억원</span><div class="tl-desc">매출 +59.1%, 영업적자 축소, 순손실은 183억원으로 확대. 외형과 수익성이 엇갈린 분기.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.15</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · 재경일보</span><span class="tl-title">7%대 하락하며 5만7000원대 후퇴</span><div class="tl-desc">개별 악재·공시 없이 로봇 업종 심리 변화와 밸류에이션 부담으로 6만원선 이탈.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.07.24</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · 파이낸셜뉴스</span><span class="tl-title">2분기 매출 177억원 '290% 폭증', 적자 폭 축소</span><div class="tl-desc">외형은 크게 늘었지만 영업손실은 144억원으로 적자가 이어진 분기.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.05.29</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · 뉴스핌</span><span class="tl-title">DS투자증권 '중립' 유지, 목표가 7.5만 → 9.2만원</span><div class="tl-desc">1Q26 매출 +190%를 반영해 목표가는 올렸지만 투자의견은 중립을 유지.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 103,667원 · 3곳 (08.15 집계, 실적 후 변경 없음)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>DS투자증권</td><td>중립</td><td>92,000원 (↑ 75,000)</td><td>2026.05.29</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: 뉴스핌(DS투자증권) · 컨센서스: stockanalysis.com·bullstory(S&amp;P 집계 3곳, 평균 103,667원·범위 88,000~112,000원, 2026.08.15 기준, 의견 Hold), 한경 컨센서스(145,000원, 2026.09.30 기준) · 3분기 실적(10.29) 이후 새 목표가 발표는 찾지 못함</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">두산로보틱스는 ONExia 인수로 북미 EOL 자동화 매출을 키우며 올해 1~3분기에 이미 지난해 연매출을 넘어섰지만, 분기 영업손실 130~140억원이 이어지는 적자 기업입니다. 주가는 6월 고점(170,000원)에서 70% 빠졌어도 PBR 10배로 여전히 실적보다 로봇·피지컬 AI 기대를 반영한 가격이며, 11월 로봇주 실적 경계와 함께 52주 저점권에 머물러 있습니다. 반등의 조건은 매출총이익률 개선이 영업적자 축소로 이어지는지, 북미 성장이 고정비를 덮는 시점이 언제인지입니다. 현금 2,084억원으로 당장의 자금 부담은 크지 않지만 소진 속도를 지켜봐야 합니다. 이 종목은 단기 실적보다 협동로봇·휴머노이드의 장기 성장에 베팅하며 큰 변동성을 견딜 수 있는 투자자에게 적합합니다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>
