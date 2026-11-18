@@ -343,7 +343,7 @@
     .card-icon.us  { background: linear-gradient(135deg, #fef3c7, #fde68a); }
     .card-icon.stk { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
     .card-icon.etf { background: linear-gradient(135deg, #e0f2fe, #7dd3fc); }
-    .card-icon.thm { background: linear-gradient(135deg, #ede9fe, #c4b5fd); }
+    .card-icon.my { background: linear-gradient(135deg, #ccfbf1, #99f6e4); }
     .card-icon.wk  { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
     .card-icon.qt  { background: linear-gradient(135deg, #fef9c3, #fde68a); }
 
@@ -642,7 +642,7 @@
     .recent-badge.kr-stk { background: #0891b2; }
     .recent-badge.us-stk { background: #7c3aed; }
     .recent-badge.etf   { background: #ea580c; }
-    .recent-badge.thm   { background: #7c3aed; }
+    .recent-badge.my    { background: #0d9488; }
     .recent-badge.wk    { background: #0f2244; }
 
     .recent-date {
@@ -788,11 +788,11 @@
         <div class="stat-label">ETF 리포트</div>
         <div class="stat-sublabel" id="latest-etf"></div>
       </a>
-      <a class="stat-card" href="Theme_Report/theme_list.html">
-        <span class="stat-icon">🔗</span>
-        <div class="stat-number" id="cnt-thm">—</div>
-        <div class="stat-label">테마 밸류체인 리포트</div>
-        <div class="stat-sublabel" id="latest-thm"></div>
+      <a class="stat-card" href="My_Research/my_list.html">
+        <span class="stat-icon">📒</span>
+        <div class="stat-number" id="cnt-my">—</div>
+        <div class="stat-label">마이 리서치</div>
+        <div class="stat-sublabel" id="latest-my"></div>
       </a>
       <a class="stat-card" href="Weekly_Report/weekly_list.html">
         <span class="stat-icon">📰</span>
@@ -971,19 +971,19 @@
       </div>
     </div>
 
-    <!-- 테마 밸류체인 리포트 -->
-    <div class="section-card" id="theme-section">
+    <!-- 마이 리서치 -->
+    <div class="section-card" id="my-section">
       <div class="card-header">
         <div class="card-header-left">
-          <div class="card-icon thm">🔗</div>
+          <div class="card-icon my">📒</div>
           <div class="card-title-group">
-            <div class="card-title">테마 밸류체인 리포트</div>
-            <div class="card-subtitle">Theme_Report /</div>
+            <div class="card-title">마이 리서치</div>
+            <div class="card-subtitle">스크랩 · 직접 작성 · 관심 리서치</div>
           </div>
         </div>
-        <span class="card-count-badge" id="badge-thm">0건</span>
+        <span class="card-count-badge" id="badge-my">0건</span>
       </div>
-      <ul class="card-list" id="list-thm">
+      <ul class="card-list" id="list-my">
         <li class="card-list-item">
           <div class="item-row">
             <div class="skeleton" style="width:90px"></div>
@@ -992,8 +992,8 @@
         </li>
       </ul>
       <div class="card-footer">
-        <span class="card-footer-info" id="info-thm"></span>
-        <a class="view-all-btn" href="Theme_Report/theme_list.html">
+        <span class="card-footer-info" id="info-my"></span>
+        <a class="view-all-btn" href="My_Research/my_list.html">
           전체 보기 →
         </a>
       </div>
@@ -1174,16 +1174,19 @@ function renderETF(listEl, items) {
     </li>`).join('');
 }
 
-function renderTheme(listEl, items) {
+const MY_CAT_LABEL = { scrap: '📎 스크랩', write: '✍️ 직접 작성', interest: '🔍 관심 리서치' };
+function myLabel(item) { return MY_CAT_LABEL[item.category] || MY_CAT_LABEL.interest; }
+
+function renderMy(listEl, items) {
   if (!items || items.length === 0) { renderEmpty(listEl); return; }
   const recent = items.slice(0, 6);
   listEl.innerHTML = recent.map(item => `
     <li class="card-list-item">
-      <a href="Theme_Report/theme_viewer.html?file=${encodeURIComponent(item.file)}" style="padding-right:14px">
+      <a href="My_Research/my_viewer.html?file=${encodeURIComponent(item.file)}" style="padding-right:14px">
         <span class="item-date">${fmtDateFull(item.date)}</span>
         <span class="item-title">${item.name || item.title}</span>
         <div class="item-links">
-          <span class="item-link-btn report">🔗 밸류체인</span>
+          <span class="item-link-btn report">${myLabel(item)}</span>
         </div>
       </a>
     </li>`).join('');
@@ -1223,7 +1226,7 @@ function renderQuote(listEl, items) {
 }
 
 /* ─── 최신 글 렌더러 ─────────────────────────────── */
-function renderRecentPosts(kr, us, krStk, usStk, etf, thm, wk) {
+function renderRecentPosts(kr, us, krStk, usStk, etf, my, wk) {
   const el = document.getElementById('recent-list');
   if (!el) return;
 
@@ -1259,9 +1262,9 @@ function renderRecentPosts(kr, us, krStk, usStk, etf, thm, wk) {
     url: `ETF_Report/etf_viewer.html?file=${encodeURIComponent(item.file)}`
   }));
 
-  thm.forEach(item => all.push({
-    date: item.date, title: item.name || item.title, cat: 'thm', label: '🔗 밸류체인',
-    url: `Theme_Report/theme_viewer.html?file=${encodeURIComponent(item.file)}`
+  my.forEach(item => all.push({
+    date: item.date, title: item.name || item.title, cat: 'my', label: myLabel(item),
+    url: `My_Research/my_viewer.html?file=${encodeURIComponent(item.file)}`
   }));
 
   wk.forEach(item => all.push({
@@ -1327,7 +1330,7 @@ function init() {
   const krStk  = m.Kr_Stock_Report  || [];
   const usStk  = m.Us_Stock_Report  || [];
   const etf    = m.ETF_Report       || [];
-  const thm    = m.Theme_Report     || [];
+  const my     = m.My_Research      || [];
   const wk     = m.Weekly_Report    || [];
   const qt     = m.Quote            || [];
 
@@ -1337,7 +1340,7 @@ function init() {
   document.getElementById('cnt-kr-stk').textContent = krStk.length;
   document.getElementById('cnt-us-stk').textContent = usStk.length;
   document.getElementById('cnt-etf').textContent    = etf.length;
-  document.getElementById('cnt-thm').textContent    = thm.length;
+  document.getElementById('cnt-my').textContent    = my.length;
   document.getElementById('cnt-wk').textContent     = wk.length;
   document.getElementById('cnt-qt').textContent     = qt.length;
 
@@ -1346,7 +1349,7 @@ function init() {
   if (krStk[0]) document.getElementById('latest-kr-stk').textContent = `최신: ${fmtDateFull(krStk[0].date)}`;
   if (usStk[0]) document.getElementById('latest-us-stk').textContent = `최신: ${fmtDateFull(usStk[0].date)}`;
   if (etf[0])   document.getElementById('latest-etf').textContent    = `최신: ${fmtDateFull(etf[0].date)}`;
-  if (thm[0])   document.getElementById('latest-thm').textContent    = `최신: ${fmtDateFull(thm[0].date)}`;
+  if (my[0])    document.getElementById('latest-my').textContent    = `최신: ${fmtDateFull(my[0].date)}`;
   if (wk[0])    document.getElementById('latest-wk').textContent     = `최신: ${fmtDateFull(wk[0].date)}`;
   if (qt[0])    document.getElementById('latest-qt').textContent     = `총 ${qt.length}편`;
 
@@ -1356,7 +1359,7 @@ function init() {
   document.getElementById('badge-kr-stk').textContent = `${krStk.length}건`;
   document.getElementById('badge-us-stk').textContent = `${usStk.length}건`;
   document.getElementById('badge-etf').textContent    = `${etf.length}건`;
-  document.getElementById('badge-thm').textContent    = `${thm.length}건`;
+  document.getElementById('badge-my').textContent    = `${my.length}건`;
   document.getElementById('badge-wk').textContent     = `${wk.length}건`;
   document.getElementById('badge-qt').textContent     = `${qt.length}건`;
 
@@ -1368,12 +1371,12 @@ function init() {
   document.getElementById('info-kr-stk').textContent = krStk.length ? `총 ${krStk.length}개 종목` : '';
   document.getElementById('info-us-stk').textContent = usStk.length ? `총 ${usStk.length}개 종목` : '';
   document.getElementById('info-etf').textContent    = etf.length   ? `총 ${etf.length}개 ETF` : '';
-  document.getElementById('info-thm').textContent    = thm.length   ? `총 ${thm.length}개 테마` : '';
+  document.getElementById('info-my').textContent    = my.length    ? `총 ${my.length}편` : '';
   document.getElementById('info-wk').textContent     = wk.length    ? `총 ${wk.length}개 발행` : '';
   document.getElementById('info-qt').textContent     = qt.length    ? `총 ${qt.length}편` : '';
 
   /* ── 최신 글 ─ */
-  renderRecentPosts(kr, us, krStk, usStk, etf, thm, wk);
+  renderRecentPosts(kr, us, krStk, usStk, etf, my, wk);
 
   /* ── 목록 렌더 ─ */
   renderKrUs(document.getElementById('list-kr'),       kr,    'Kr_Daily_Report');
@@ -1381,7 +1384,7 @@ function init() {
   renderKrStock(document.getElementById('list-kr-stk'), krStk);
   renderUsStock(document.getElementById('list-us-stk'), usStk);
   renderETF(document.getElementById('list-etf'),        etf);
-  renderTheme(document.getElementById('list-thm'),      thm);
+  renderMy(document.getElementById('list-my'),         my);
   renderWeekly(document.getElementById('list-wk'),      wk);
   renderQuote(document.getElementById('list-qt'),       qt);
 }

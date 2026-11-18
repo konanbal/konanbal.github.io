@@ -6,7 +6,7 @@
 (function () {
   // 현재 경로 기반으로 prefix 자동 결정
   var p = window.location.pathname.replace(/\\/g, '/');
-  var isRoot = !/\/(Kr_Daily_Report|Us_Daily_Report|Kr_Stock_Report|Us_Stock_Report|Weekly_Report|Quote|ETF_Report|Theme_Report)\//.test(p);
+  var isRoot = !/\/(Kr_Daily_Report|Us_Daily_Report|Kr_Stock_Report|Us_Stock_Report|Weekly_Report|Quote|ETF_Report|My_Research)\//.test(p);
   var pre = isRoot ? '' : '../';
 
   // ── 메뉴 항목 정의 (여기만 수정하면 전체 반영) ─────────────
@@ -17,7 +17,7 @@
     { key: 'kr_stk',   href: pre + 'Kr_Stock_Report/kr_stock_list.html',            icon: '📊',  label: '한국 종목 리포트' },
     { key: 'us_stk',   href: pre + 'Us_Stock_Report/us_stock_list.html',            icon: '📋',  label: '미국 종목 리포트' },
     { key: 'etf',      href: pre + 'ETF_Report/etf_list.html',                      icon: '📈',  label: 'ETF 리포트'      },
-    { key: 'thm',      href: pre + 'Theme_Report/theme_list.html',                  icon: '🔗',  label: '테마 밸류체인'   },
+    { key: 'my',       href: pre + 'My_Research/my_list.html',                      icon: '📒',  label: '마이 리서치'     },
     { key: 'wk',       href: pre + 'Weekly_Report/weekly_list.html',                icon: '📰',  label: '주간 뉴스레터'   },
     { key: 'qt',       href: pre + 'Quote/quote_list.html',                         icon: '💬',  label: '오늘의 명언'     },
   ];
@@ -29,7 +29,7 @@
     if (/\/Kr_Stock_Report\//.test(p))   return 'kr_stk';
     if (/\/Us_Stock_Report\//.test(p))   return 'us_stk';
     if (/\/ETF_Report\//.test(p))        return 'etf';
-    if (/\/Theme_Report\//.test(p))      return 'thm';
+    if (/\/My_Research\//.test(p))       return 'my';
     if (/\/Weekly_Report\//.test(p))     return 'wk';
     if (/\/Quote\//.test(p))             return 'qt';
     return 'home';

@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>테마 밸류체인 리포트 — 주식 리서치 허브</title>
+<title>마이 리서치 — 주식 리서치 허브</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --primary:#1a56db;--primary-dark:#1239a0;--primary-light:#3b82f6;
   --navy:#0f2244;--navy-mid:#1e3a5f;--accent:#60a5fa;
-  --theme:#7c3aed;--theme-dark:#5b21b6;--theme-light:#a78bfa;
+  --theme:#0d9488;--theme-dark:#0f766e;--theme-light:#5eead4;
   --bg:#f0f5fb;--card:#fff;--border:#dbe8f8;
   --text:#1e293b;--muted:#64748b;--light:#94a3b8;
   --shadow-md:0 4px 20px rgba(26,86,219,.12);
@@ -39,11 +39,12 @@ a{text-decoration:none;color:inherit}
 .rb-title{font-size:.9rem;font-weight:700;color:var(--text);
            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:480px}
 .rb-date{font-size:.78rem;font-weight:600;color:var(--theme);
-          background:#faf5ff;border:1px solid #ddd6fe;padding:3px 10px;border-radius:6px;white-space:nowrap}
+          background:#f0fdfa;border:1px solid #99f6e4;padding:3px 10px;border-radius:6px;white-space:nowrap}
 .rb-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .nav-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--radius-sm);
           font-size:.82rem;font-weight:600;border:1px solid;transition:var(--t);white-space:nowrap;cursor:pointer}
-.nav-btn.back{background:#faf7ff;color:var(--theme);border-color:#ddd6fe}
+.nav-btn.back{background:#f0fdfa;color:var(--theme);border-color:#99f6e4}
+.rb-cat{font-size:.74rem;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;background:#f1f5f9;color:#334155}
 .nav-btn.back:hover{background:var(--theme);color:#fff;border-color:var(--theme)}
 .nav-btn.prev{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}
 .nav-btn.prev:hover{background:#15803d;color:#fff;border-color:#15803d}
@@ -110,11 +111,12 @@ a{text-decoration:none;color:inherit}
 <!-- 리포트 툴바 -->
 <div class="report-bar" id="reportBar">
   <div class="rb-left">
+    <span id="rbCat" class="rb-cat"></span>
     <span id="rbDate" class="rb-date"></span>
     <span id="rbTitle" class="rb-title"></span>
   </div>
   <div class="rb-right">
-    <a href="theme_list.html" class="nav-btn back">📋 목록으로</a>
+    <a href="my_list.html" class="nav-btn back">📋 목록으로</a>
     <span class="sep">|</span>
     <span class="pos-badge" id="posBadge"></span>
     <button id="btnPrev" class="nav-btn prev" onclick="goPrev()">◀ 이전</button>
@@ -141,7 +143,7 @@ a{text-decoration:none;color:inherit}
     <div id="prevDate"  class="bn-date">—</div>
   </div>
   <div class="bn-center">
-    <a href="theme_list.html" class="list-btn">📋 목록으로 돌아가기</a>
+    <a href="my_list.html" class="list-btn">📋 목록으로 돌아가기</a>
   </div>
   <div id="btnNextBottom" class="bn-btn disabled" onclick="goNext()" style="text-align:right">
     <div class="bn-label">이후 게시물 ▶</div>
@@ -152,7 +154,7 @@ a{text-decoration:none;color:inherit}
 
 <script>
 // ── 데이터 ───────────────────────────────────────────────────
-var DATA = (window.SITE_MANIFEST && window.SITE_MANIFEST["Theme_Report"]) || [];
+var DATA = (window.SITE_MANIFEST && window.SITE_MANIFEST["My_Research"]) || [];
 
 // ── 유틸 ─────────────────────────────────────────────────────
 function fmt(s){
@@ -187,6 +189,7 @@ function onFrameLoad(){
   document.getElementById('loading').style.display = 'none';
   document.getElementById('bottomNav').style.display = '';
   var frame = document.getElementById('reportFrame');
+  if(/\.pdf$/i.test(currentFile)){ frame.style.height = '90vh'; return; }
   // 높이 자동 조정
   try{
     var h = frame.contentWindow.document.documentElement.scrollHeight
@@ -209,6 +212,8 @@ function loadReport(file){
   // 툴바 업데이트
   document.getElementById('rbTitle').textContent = title;
   document.getElementById('rbDate').textContent  = date;
+  var CATN = {scrap:'📎 스크랩', write:'✍️ 직접 작성', interest:'🔍 관심 리서치'};
+  document.getElementById('rbCat').textContent = item ? (CATN[item.category]||CATN.interest) : '';
   document.title = title + ' — 주식 리서치 허브';
 
   // 위치 배지

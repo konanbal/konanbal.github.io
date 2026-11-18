@@ -15,7 +15,7 @@ LIST_PAGES = {
     "weekly_list.html",
     "quote_list.html",
     "etf_list.html",
-    "theme_list.html",
+    "my_list.html",
     "kr_viewer.html",
     "us_viewer.html",
     "stock_viewer.html",
@@ -24,7 +24,7 @@ LIST_PAGES = {
     "weekly_viewer.html",
     "quote_viewer.html",
     "etf_viewer.html",
-    "theme_viewer.html",
+    "my_viewer.html",
 }
 
 
@@ -218,35 +218,54 @@ def scan_etf_reports():
     return items
 
 
-def scan_theme_reports():
-    folder = BASE_DIR / "Theme_Report"
+# 마이 리서치: 파일명 접두어로 카테고리 구분
+#   스크랩_제목_YYYYMMDD.(html|pdf)  -> 내가 찾은 리포트
+#   작성_제목_YYYYMMDD.(html|pdf)    -> 내가 만든 리포트
+#   관심_제목_YYYYMMDD.(html|pdf)    -> 관심 리서치 (밸류체인_ 접두어도 여기로)
+MY_CATEGORIES = [
+    ("스크랩_", "scrap"),
+    ("작성_", "write"),
+    ("관심_", "interest"),
+    ("밸류체인_", "interest"),
+]
+
+
+def scan_my_research():
+    folder = BASE_DIR / "My_Research"
     items = []
     if not folder.exists():
         return items
-    files = sorted(folder.glob("*.html"))
+    files = sorted(list(folder.glob("*.html")) + list(folder.glob("*.pdf")))
     for fh in files:
-        if fh.name in LIST_PAGES:
+        if fh.name in LIST_PAGES or fh.name.endswith("_naver.html"):
             continue
-        # 네이버 붙여넣기용 사본은 목록에서 제외 (동일 내용)
-        if fh.name.endswith("_naver.html"):
-            continue
-        m = re.search(r"_(\d{8})\.html$", fh.name)
+        stem = fh.stem
+        category = "interest"
+        for prefix, cat in MY_CATEGORIES:
+            if stem.startswith(prefix):
+                category = cat
+                if prefix != "밸류체인_":
+                    stem = stem[len(prefix):]
+                break
+        m = re.search(r"_(\d{8})$", stem)
         date_fmt = ""
         if m:
             ds = m.group(1)
             date_fmt = "{}-{}-{}".format(ds[:4], ds[4:6], ds[6:])
+            stem = stem[:m.start()]
         dt_str = _datetime_str(date_fmt, fh) if date_fmt else datetime.fromtimestamp(fh.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
-        # 밸류체인_[테마]_YYYYMMDD.html → "[테마] 밸류체인"
-        theme = re.sub(r"_\d{8}\.html$", "", fh.name)
-        theme = re.sub(r"^밸류체인_", "", theme)
-        theme = theme.replace("_", " ").strip()
-        title = "{} 밸류체인".format(theme) if theme else fh.stem
+        if stem.startswith("밸류체인_"):
+            title = "{} 밸류체인".format(stem[len("밸류체인_"):].replace("_", " ").strip())
+        else:
+            title = stem.replace("_", " ").strip() or fh.stem
         items.append({
-            "date": date_fmt,
+            "date": date_fmt or dt_str[:10],
             "datetime": dt_str,
             "file": fh.name,
             "title": title,
-            "name": title
+            "name": title,
+            "category": category,
+            "type": fh.suffix.lower().lstrip("."),
         })
     items.sort(key=lambda x: x["datetime"], reverse=True)
     return items
@@ -291,7 +310,7 @@ def main():
         "Weekly_Report": scan_weekly_reports(),
         "Quote": scan_quotes(),
         "ETF_Report": scan_etf_reports(),
-        "Theme_Report": scan_theme_reports(),
+        "My_Research": scan_my_research(),
         "list_pages": {
             "kr":       "Kr_Daily_Report/kr_daily_list.html",
             "us":       "Us_Daily_Report/us_daily_list.html",
@@ -300,7 +319,7 @@ def main():
             "weekly":   "Weekly_Report/weekly_list.html",
             "quote":    "Quote/quote_list.html",
             "etf":      "ETF_Report/etf_list.html",
-            "theme":    "Theme_Report/theme_list.html"
+            "my":       "My_Research/my_list.html"
         }
     }
 
@@ -317,7 +336,7 @@ def main():
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print("\n  manifest.js generated [{}]".format(now))
     print("-" * 44)
-    for key in ["Kr_Daily_Report", "Us_Daily_Report", "Kr_Stock_Report", "Us_Stock_Report", "Weekly_Report", "Quote", "ETF_Report", "Theme_Report"]:
+    for key in ["Kr_Daily_Report", "Us_Daily_Report", "Kr_Stock_Report", "Us_Stock_Report", "Weekly_Report", "Quote", "ETF_Report", "My_Research"]:
         print("  {:<22}: {:>3} items".format(key, len(manifest[key])))
     print("-" * 44 + "\n")
 
