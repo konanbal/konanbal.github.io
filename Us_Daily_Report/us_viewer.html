@@ -129,7 +129,7 @@ a{text-decoration:none;color:inherit}
 
 <!-- iframe -->
 <div class="viewer-wrap">
-  <iframe id="reportFrame" src="" title="리포트" onload="onFrameLoad()"></iframe>
+  <iframe id="reportFrame" src="" title="리포트"></iframe>
 </div>
 
 <!-- 하단 네비 -->
@@ -175,13 +175,14 @@ var currentIdx  = -1;
 
 function findIdx(file){
   for(var i=0;i<DATA.length;i++){
-    var f = DATA[i].file || DATA[i].dashboard || '';
+    var f = DATA[i].file || '';
     if(f === file) return i;
   }
   return -1;
 }
 
 // ── iframe 로드 ──────────────────────────────────────────────
+document.getElementById('reportFrame').addEventListener('load', onFrameLoad);
 function onFrameLoad(){
   document.getElementById('loading').style.display = 'none';
   document.getElementById('bottomNav').style.display = '';
@@ -251,13 +252,13 @@ function loadReport(file){
 
 function goPrev(){
   if(currentIdx < DATA.length-1){
-    var f = DATA[currentIdx+1].file || DATA[currentIdx+1].dashboard || '';
+    var f = DATA[currentIdx+1].file || '';
     if(f) loadReport(f);
   }
 }
 function goNext(){
   if(currentIdx > 0){
-    var f = DATA[currentIdx-1].file || DATA[currentIdx-1].dashboard || '';
+    var f = DATA[currentIdx-1].file || '';
     if(f) loadReport(f);
   }
 }
@@ -275,7 +276,7 @@ function showError(){
   var file = getParam('file');
   if(!file && DATA.length > 0){
     // 파라미터 없으면 최신 파일 로드
-    file = DATA[0].file || DATA[0].dashboard || '';
+    file = DATA[0].file || '';
   }
   if(file) loadReport(file);
   else showError();

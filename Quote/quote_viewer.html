@@ -92,7 +92,7 @@ iframe{width:100%;border:none;display:block;min-height:calc(100vh - 114px)}
     <div class="spinner"></div>
     <span style="color:var(--muted);font-size:.9rem">불러오는 중...</span>
   </div>
-  <iframe id="frame" scrolling="yes" onload="onFrameLoad()"></iframe>
+  <iframe id="frame" scrolling="yes"></iframe>
 </div>
 
 <div class="bottom-nav">
@@ -170,6 +170,7 @@ function loadReport(file){
   history.replaceState(null,'', setParam('file', file));
 }
 
+document.getElementById('frame').addEventListener('load', onFrameLoad);
 function onFrameLoad(){
   document.getElementById('loading').style.display='none';
   var frame = document.getElementById('frame');

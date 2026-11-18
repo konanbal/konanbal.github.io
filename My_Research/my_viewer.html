@@ -51,6 +51,8 @@ a{text-decoration:none;color:inherit}
 .nav-btn.next{background:#fef3c7;color:#92400e;border-color:#fde68a}
 .nav-btn.next:hover{background:#92400e;color:#fff;border-color:#92400e}
 .nav-btn.disabled{opacity:.35;pointer-events:none}
+.nav-btn.pdf{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.nav-btn.pdf:hover{background:#b91c1c;color:#fff;border-color:#b91c1c}
 .sep{color:var(--border);font-size:1.2rem;user-select:none}
 .pos-badge{font-size:.75rem;color:var(--muted);white-space:nowrap}
 
@@ -116,6 +118,7 @@ a{text-decoration:none;color:inherit}
     <span id="rbTitle" class="rb-title"></span>
   </div>
   <div class="rb-right">
+    <a id="btnPdf" class="nav-btn pdf" href="#" target="_blank" rel="noopener" style="display:none">📄 PDF 새 창으로 열기</a>
     <a href="my_list.html" class="nav-btn back">📋 목록으로</a>
     <span class="sep">|</span>
     <span class="pos-badge" id="posBadge"></span>
@@ -132,7 +135,7 @@ a{text-decoration:none;color:inherit}
 
 <!-- iframe -->
 <div class="viewer-wrap">
-  <iframe id="reportFrame" src="" title="리포트" onload="onFrameLoad()"></iframe>
+  <iframe id="reportFrame" src="" title="리포트"></iframe>
 </div>
 
 <!-- 하단 네비 -->
@@ -185,6 +188,7 @@ function findIdx(file){
 }
 
 // ── iframe 로드 ──────────────────────────────────────────────
+document.getElementById('reportFrame').addEventListener('load', onFrameLoad);
 function onFrameLoad(){
   document.getElementById('loading').style.display = 'none';
   document.getElementById('bottomNav').style.display = '';
@@ -249,6 +253,12 @@ function loadReport(file){
   var frame = document.getElementById('reportFrame');
   frame.style.height = '80vh';
   frame.src = encodeURIComponent(file);
+
+  // PDF면 새 창 열기 버튼 노출 (모바일 브라우저는 iframe 안 PDF 표시가 불안정)
+  var btnPdf = document.getElementById('btnPdf');
+  var isPdf = /\.pdf$/i.test(file);
+  btnPdf.style.display = isPdf ? '' : 'none';
+  btnPdf.href = isPdf ? encodeURIComponent(file) : '#';
 
   // URL 업데이트
   history.replaceState(null,'', setParam('file', file));

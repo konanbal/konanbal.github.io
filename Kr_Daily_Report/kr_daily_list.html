@@ -69,8 +69,6 @@ a{text-decoration:none;color:inherit}
 .btn-stk:hover{background:#15803d;color:#fff}
 .btn-nl{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
 .btn-nl:hover{background:#c2410c;color:#fff}
-.btn-dash{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}
-.btn-dash:hover{background:#15803d;color:#fff}
 .btn-post{background:#faf5ff;color:#7c3aed;border-color:#ddd6fe}
 .btn-post:hover{background:#7c3aed;color:#fff}
 .sc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;display:flex;align-items:center;gap:14px;transition:var(--t);box-shadow:var(--shadow-sm)}
@@ -202,10 +200,6 @@ function renderItems(items){
     if(mo !== prev){ html += '<div class="mh">📅 '+monthLabel(mo)+'</div>'; prev=mo; }
     var btns='';
     if(item.file) btns='<a class="btn btn-kr" href="kr_viewer.html?file='+item.file+'">📝 리포트</a>';
-    else {
-      if(item.dashboard) btns+='<a class="btn btn-kr" href="kr_viewer.html?file='+item.dashboard+'">📊 대시보드</a>';
-      if(item.post) btns+='<a class="btn btn-dash" href="kr_viewer.html?file='+item.post+'">📝 포스트</a>';
-    }
     html += '<div class="card">'
       +'<span class="date-badge">'+fmt(item.date)+(item.datetime&&item.datetime.length>10?'<br><span style="font-size:.7em;font-weight:400;opacity:.75">'+item.datetime.substring(11)+'</span>':'')+'</span>'
       +'<span class="card-title">'+(item.title||item.date)+'</span>'

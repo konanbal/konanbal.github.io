@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>투자 대가들의 특이한 매매 규칙</title>
+<style>
+  :root {
+    --primary: #0f172a;
+    --accent: #60a5fa;
+    --accent2: #1e40af;
+    --bg: #f7f9fb;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e5e7eb;
+    --contra: #0f766e;   /* 역발상 */
+    --trend: #b91c1c;    /* 추세 */
+    --mech: #6d28d9;     /* 기계적·퀀트 */
+    --cycle: #b45309;    /* 사이클·이벤트 */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
+
+  .report-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent2) 100%); color: #fff; padding: 2.75rem 2rem 2.25rem; }
+  .hdr-inner { max-width: 1080px; margin: 0 auto; }
+  .series-badge { background: rgba(96,165,250,0.18); color: var(--accent); font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.06em; display: inline-block; margin-bottom: 12px; }
+  .title { font-size: 30px; font-weight: 800; line-height: 1.3; margin-bottom: 10px; }
+  .sub { font-size: 14.5px; opacity: 0.85; max-width: 680px; }
+  .pills { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pill { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.3); }
+  .report-date { font-size: 12px; opacity: 0.6; margin-top: 1rem; }
+
+  .container { max-width: 1080px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.6rem; margin-bottom: 1.1rem; }
+  .card-title { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 1rem; display: flex; align-items: center; gap: 7px; }
+  .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent2); border-radius: 2px; }
+  .lead { font-size: 15px; line-height: 1.85; }
+  .lead p + p { margin-top: 0.8em; }
+  .hl { color: var(--accent2); font-weight: 700; }
+
+  /* 비교표 */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+  .chip { font: inherit; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: #fff; color: var(--muted); cursor: pointer; }
+  .chip.on { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+  .tbl-wrap { overflow-x: auto; }
+  .cmp { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 960px; }
+  .cmp th { text-align: left; font-size: 11.5px; color: var(--muted); font-weight: 700; padding: 9px 10px; border-bottom: 2px solid var(--border); white-space: nowrap; background: #fafbfc; position: sticky; top: 0; }
+  .cmp td { padding: 11px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .cmp tr:hover td { background: #f8fafc; }
+  .cmp .who { font-weight: 700; white-space: nowrap; }
+  .cmp .who small { display: block; font-weight: 400; color: var(--muted); font-size: 11.5px; }
+  .cmp .num { font-weight: 700; white-space: nowrap; }
+  .tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .t-contra { background: #ccfbf1; color: var(--contra); }
+  .t-trend { background: #fee2e2; color: var(--trend); }
+  .t-mech { background: #ede9fe; color: var(--mech); }
+  .t-cycle { background: #fef3c7; color: var(--cycle); }
+  .note { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+
+  /* 인물 카드 */
+  .sec-head { display: flex; align-items: baseline; gap: 10px; margin: 2.2rem 0 0.9rem; }
+  .sec-num { font-size: 13px; font-weight: 800; color: #fff; background: var(--accent2); border-radius: 6px; padding: 2px 9px; }
+  .sec-title { font-size: 20px; font-weight: 800; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .p-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.35rem; border-top: 3px solid var(--accent2); }
+  .p-card.contra { border-top-color: var(--contra); }
+  .p-card.trend { border-top-color: var(--trend); }
+  .p-card.mech { border-top-color: var(--mech); }
+  .p-card.cycle { border-top-color: var(--cycle); }
+  .p-name { font-size: 16px; font-weight: 800; }
+  .p-meta { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .p-rule { font-size: 13px; font-weight: 700; background: var(--bg); border-radius: 8px; padding: 8px 11px; margin-bottom: 9px; }
+  .p-body { font-size: 13.5px; line-height: 1.75; }
+  .p-warn { font-size: 12.5px; margin-top: 9px; padding: 8px 11px; border-radius: 8px; background: #fff7ed; color: #9a3412; line-height: 1.6; }
+
+  /* 회복 산수 */
+  .rec-row { display: grid; grid-template-columns: 70px 1fr 80px; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .rec-row:last-child { border-bottom: none; }
+  .rec-l { font-size: 13.5px; font-weight: 700; color: var(--trend); }
+  .rec-track { background: var(--bg); border-radius: 20px; height: 14px; overflow: hidden; }
+  .rec-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, #93c5fd, var(--accent2)); }
+  .rec-v { font-size: 13.5px; font-weight: 800; text-align: right; }
+
+  /* 대비 */
+  .vs { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .vs-col { border-radius: 12px; padding: 1.2rem 1.35rem; }
+  .vs-col.l { background: #f0fdfa; border: 1px solid #99f6e4; }
+  .vs-col.r { background: #fef2f2; border: 1px solid #fecaca; }
+  .vs-h { font-size: 15px; font-weight: 800; margin-bottom: 8px; }
+  .vs-col.l .vs-h { color: var(--contra); }
+  .vs-col.r .vs-h { color: var(--trend); }
+  .vs-item { font-size: 13.5px; padding: 6px 0; border-bottom: 1px dashed rgba(0,0,0,0.08); }
+  .vs-item:last-child { border-bottom: none; }
+  .vs-item b { display: inline-block; min-width: 70px; color: var(--muted); font-size: 12px; }
+  .insight { margin-top: 1rem; font-size: 14px; line-height: 1.85; }
+
+  .check-item { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; padding: 7px 0; line-height: 1.6; }
+  .check-box { flex-shrink: 0; width: 16px; height: 16px; border: 1.5px solid var(--accent2); border-radius: 4px; margin-top: 4px; }
+
+  .summary-box { background: linear-gradient(135deg, #eff6ff 0%, #f0fdfa 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem 1.6rem; margin-top: 1.1rem; }
+  .summary-title { font-size: 16px; font-weight: 800; color: var(--accent2); margin-bottom: 0.75rem; }
+  .summary-box ol { padding-left: 1.2rem; font-size: 14px; line-height: 1.85; }
+  .sources { font-size: 12.5px; color: var(--muted); line-height: 1.8; columns: 2; column-gap: 2rem; }
+  .sources a { color: var(--accent2); text-decoration: none; }
+  .sources a:hover { text-decoration: underline; }
+  .disclaimer { font-size: 11.5px; color: var(--muted); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); line-height: 1.65; }
+
+  @media (max-width: 760px) {
+    .title { font-size: 23px; }
+    .grid, .vs { grid-template-columns: 1fr; }
+    .sources { columns: 1; }
+    .rec-row { grid-template-columns: 56px 1fr 66px; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="hdr-inner">
+    <div class="series-badge">투자 대가 연구 노트</div>
+    <div class="title">-30%에 사고, -7%에 판다?<br>투자 대가 16인의 '특이한 매매 규칙'</div>
+    <div class="sub">"장기투자 하세요" 같은 말은 빼고, 숫자가 박힌 구체적인 규칙만 모았습니다. 같은 하락을 두고 정반대로 움직이는 대가들 — 둘 다 큰돈을 벌었습니다.</div>
+    <div class="pills">
+      <span class="pill">🌏 국내 4 · 해외 12</span>
+      <span class="pill">📉 역발상 vs 📈 추세</span>
+      <span class="pill">📊 필터 되는 비교표</span>
+    </div>
+    <div class="report-date">작성일 2026년 11월 7일</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">이 글을 쓰게 된 이유</div>
+    <div class="lead">
+      <p>"고점 대비 -50%부터 사라"는 말이 누구 것인지 찾아보다가 판이 커졌습니다. 결론부터 말하면 <span class="hl">정확히 "-50%부터 산다"를 공식 규칙으로 내건 대가는 찾지 못했습니다.</span> 가장 가까운 건 BNF의 <span class="hl">25일선 대비 -20~35%</span>, 박세익 전무의 <span class="hl">고점 대비 -30%</span>, 그리고 반토막이 나도 계속 샀다는 강방천 회장입니다.</p>
+      <p>더 재미있는 건 따로 있었습니다. 같은 '하락'을 두고 어떤 대가는 사라고 하고, 어떤 대가는 7%만 빠져도 무조건 팔라고 합니다. 이 모순이 이 글의 진짜 주제입니다.</p>
+    </div>
+  </div>
+
+  <!-- 비교표 -->
+  <div class="card">
+    <div class="card-title">한눈에 보는 비교표</div>
+    <div class="chips" role="group" aria-label="유형 필터">
+      <button class="chip on" data-f="all">전체</button>
+      <button class="chip" data-f="contra">📉 역발상</button>
+      <button class="chip" data-f="trend">📈 추세</button>
+      <button class="chip" data-f="mech">⚙️ 기계적·퀀트</button>
+      <button class="chip" data-f="cycle">🔄 사이클·이벤트</button>
+      <button class="chip" data-f="kr">🇰🇷 국내만</button>
+    </div>
+    <div class="tbl-wrap">
+      <table class="cmp">
+        <thead>
+          <tr><th>인물</th><th>유형</th><th>언제 사나</th><th>언제 파나</th><th>떨어지면?</th><th>핵심 숫자</th><th>주의점</th></tr>
+        </thead>
+        <tbody>
+          <tr data-t="contra"><td class="who">존 템플턴<small>미국 · 1939</small></td><td><span class="tag t-contra">역발상</span></td><td>전쟁 공포 속, 1달러 미만 전 종목을 균등 매수</td><td>약 4년 뒤, 전쟁 막바지</td><td>분산으로 버팀</td><td class="num">104종목 × 100주</td><td>빌린 돈 1만 달러, 34개는 파산 절차 중</td></tr>
+          <tr data-t="contra"><td class="who">BNF (고테가와)<small>일본 · 2000년대</small></td><td><span class="tag t-contra">역발상·단기</span></td><td>유동성 높은 종목이 25일선보다 크게 아래</td><td>25일선 쪽 복귀</td><td>반등만 짧게</td><td class="num">-20~35% 이격</td><td>2001~02년 약세장 기준, 본인도 효과 감소 언급</td></tr>
+          <tr data-t="contra" data-kr="1"><td class="who">강방천<small>한국 · IMF</small></td><td><span class="tag t-contra">역발상</span></td><td>위기 속 증권 우선주</td><td>제 가치 도달 시</td><td>반토막에도 추가 매수</td><td class="num">1억 → 약 156억</td><td>보통주 대비 85% 할인·배당 60%의 극단적 가격</td></tr>
+          <tr data-t="contra" data-kr="1"><td class="who">박세익<small>한국</small></td><td><span class="tag t-contra">역발상·계절</span></td><td>고성장주·블루칩이 고점 대비 하락 / 10월 말</td><td>이듬해 5월</td><td>칼손절 금지, 역발상</td><td class="num">-30%</td><td>고성장 기업에 한정한 규칙</td></tr>
+          <tr data-t="mech" data-kr="1"><td class="who">라오어<small>한국 · 미국 ETF</small></td><td><span class="tag t-mech">기계적 분할</span></td><td>레버리지 ETF를 매일 LOC 분할</td><td>평단 대비 목표 수익</td><td>계속 분할 매수</td><td class="num">40분할 · 40~80일</td><td>3배 레버리지, 소진 후 -50%면 손절 고려</td></tr>
+          <tr data-t="mech"><td class="who">벤저민 그레이엄<small>미국</small></td><td><span class="tag t-mech">가치·기계적</span></td><td>주가 ≤ 순유동자산의 2/3</td><td>+50% 또는 2년 경과</td><td>분산 보유</td><td class="num">2/3 · 50% · 2년</td><td>소형·저유동성 종목이 많음</td></tr>
+          <tr data-t="trend"><td class="who">윌리엄 오닐<small>미국</small></td><td><span class="tag t-trend">추세</span></td><td>CAN SLIM 조건 성장주</td><td>매수가 대비 하락 즉시</td><td>예외 없이 매도</td><td class="num">-7~8%</td><td>물타기 금지</td></tr>
+          <tr data-t="trend"><td class="who">폴 튜더 존스<small>미국</small></td><td><span class="tag t-trend">추세</span></td><td>200일선 위 국면</td><td>200일선 아래면 방어</td><td>물타기 금지</td><td class="num">200일</td><td>기계적 크로스 매매가 아니라 국면 판단용</td></tr>
+          <tr data-t="trend"><td class="who">제시 리버모어<small>미국</small></td><td><span class="tag t-trend">추세</span></td><td>피벗 돌파 시 일부, 맞으면 추가</td><td>큰 수익 후 절반 현금화</td><td>손실 쪽엔 추가 안 함</td><td class="num">25% · 50%</td><td>수익 종목에 추가하는 피라미딩</td></tr>
+          <tr data-t="trend"><td class="who">니콜라스 다비스<small>미국 · 1950년대</small></td><td><span class="tag t-trend">추세·돌파</span></td><td>박스 상단을 거래량 동반 돌파</td><td>박스 하단 이탈</td><td>매도</td><td class="num">18개월 200만 달러</td><td>시작 자금은 출처마다 다름</td></tr>
+          <tr data-t="trend mech"><td class="who">리처드 데니스<small>미국 · 터틀</small></td><td><span class="tag t-trend">추세·기계적</span></td><td>20일 최고가 돌파</td><td>10일 최저가 이탈</td><td>2N 손절, 계좌 -10%면 규모 20% 축소</td><td class="num">20 · 10 · 2N</td><td>횡보장에서 손절 반복</td></tr>
+          <tr data-t="mech"><td class="who">도그스 오브 더 다우<small>미국 · 오히긴스</small></td><td><span class="tag t-mech">기계적</span></td><td>연초 다우 배당 상위 10개 균등</td><td>12개월 뒤 교체</td><td>규칙대로 보유</td><td class="num">10종목 · 1년</td><td>변형: 그중 저가 5종목(Dow 5)</td></tr>
+          <tr data-t="mech" data-kr="1"><td class="who">강환국<small>한국</small></td><td><span class="tag t-mech">퀀트</span></td><td>소형주는 가치·퀄리티 지표</td><td>규칙 기반 교체</td><td>규칙대로</td><td class="num">대형주만 모멘텀</td><td>해외 규칙의 한국 적용 차이</td></tr>
+          <tr data-t="mech"><td class="who">나심 탈레브<small>미국</small></td><td><span class="tag t-mech">자산배분</span></td><td>초안전 + 초고위험, 중간 없음</td><td>—</td><td>최대 손실 10%로 제한</td><td class="num">90 / 10</td><td>중간 위험 자산 배제</td></tr>
+          <tr data-t="mech"><td class="who">모니시 파브라이<small>미국</small></td><td><span class="tag t-mech">가치</span></td><td>하방 작고 상방 큰 기회만</td><td>—</td><td>—</td><td class="num">적게·크게·드물게</td><td>베팅 크기는 켈리 공식</td></tr>
+          <tr data-t="cycle"><td class="who">앙드레 코스톨라니<small>헝가리·유럽</small></td><td><span class="tag t-cycle">사이클</span></td><td>대중이 주식에 무관심할 때</td><td>대중이 열광할 때</td><td>—</td><td class="num">달걀 모형</td><td>놓친 버스·주식은 쫓지 말 것</td></tr>
+          <tr data-t="cycle"><td class="who">존 템플턴<small>미국 · 2000</small></td><td><span class="tag t-cycle">이벤트</span></td><td>신규상장주 보호예수 만료 직전 공매도</td><td>—</td><td>—</td><td class="num">만료 11일 전</td><td>진짜 원인은 고평가, 내부자 매도는 방아쇠</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">※ "—"는 공개 자료에서 구체 규칙을 확인하지 못한 항목입니다. 표는 가로로 스크롤됩니다.</div>
+  </div>
+
+  <!-- ① -->
+  <div class="sec-head"><span class="sec-num">①</span><span class="sec-title">폭락하면 '사는' 사람들</span></div>
+  <div class="grid">
+    <div class="p-card contra">
+      <div class="p-name">존 템플턴</div><div class="p-meta">미국 · 1939년 2차대전 발발</div>
+      <div class="p-rule">1달러 미만 주식을 '전부' 100주씩</div>
+      <div class="p-body">1만 달러를 빌려 주당 1달러 이하에 거래되던 104개 회사를 샀습니다. 핵심은 고른 게 아니라 <span class="hl">조건에 맞는 걸 전부 샀다</span>는 점입니다. 34개는 이미 파산 절차 중이었는데 4년 뒤 휴지가 된 건 4개뿐, 원금은 약 4배가 됐습니다. 미주리 퍼시픽 철도 한 종목은 40배를 냈다고 합니다.</div>
+    </div>
+    <div class="p-card contra">
+      <div class="p-name">고테가와 다카시 (BNF)</div><div class="p-meta">일본 · 1만 3천 달러 → 1억 5천만 달러+</div>
+      <div class="p-rule">25일선 대비 -20~35%면 매수, 복귀하면 매도</div>
+      <div class="p-body">유동성 높은 종목이 펀더멘털 이유 없는 패닉으로 25일 이동평균선보다 크게 밀리면 사고, 평균선 쪽으로 돌아오면 팝니다. 기업에 정 붙이지 않고 반등만 취하는 단기 평균회귀입니다.</div>
+      <div class="p-warn">⚠ 2001~02년 약세장에서 나온 숫자이고, 본인이 2004년에 이미 효과가 줄었다고 했으며, 이 규칙 하나로는 안 된다고 말했습니다.</div>
+    </div>
+    <div class="p-card contra">
+      <div class="p-name">강방천</div><div class="p-meta">한국 · IMF 외환위기</div>
+      <div class="p-rule">반토막 나도 계속 산 증권 우선주</div>
+      <div class="p-body">"자본주의가 있는 한 증권업은 있다"며 1,200원에 산 증권주가 반토막이 나도 계속 샀고, 600원까지 밀렸던 주식이 두 달 만에 1만 2,000원이 됐습니다. 근거는 <span class="hl">보통주보다 85% 싸고 배당수익률 60%</span>라는 숫자였습니다. 결과는 1억 원 → 약 156억 원(1년 10개월).</div>
+    </div>
+    <div class="p-card contra">
+      <div class="p-name">박세익</div><div class="p-meta">한국 · 체슬리자문</div>
+      <div class="p-rule">고성장주 고점 대비 -30%면 역발상 / 10월 말 매수 → 5월 매도</div>
+      <div class="p-body">고성장주·블루칩이 30% 빠지면 역발상으로 사야 하고, -15~20%에서 칼같이 손절하면 오히려 손해라는 입장입니다. 10월 말에 사서 이듬해 5월에 파는 계절 전략이 1년 내내 보유보다 낫다고도 했습니다. '-50%부터 사라'에 가장 가까운 국내 규칙입니다.</div>
+    </div>
+    <div class="p-card mech">
+      <div class="p-name">라오어 — 무한매수법</div><div class="p-meta">한국 · 미국 레버리지 ETF</div>
+      <div class="p-rule">투자금 40분할, 매일 LOC 매수 → 목표수익 도달 시 매도</div>
+      <div class="p-body">TQQQ·SOXL 같은 3배 ETF를 장마감 지정가로 기계적으로 나눠 사고, 평균 매입가 대비 목표 수익률에 닿으면 팝니다. 한 사이클이 보통 40~80일로 사실상 단타입니다.</div>
+      <div class="p-warn">⚠ 3배 레버리지. 40회를 다 소진한 뒤 평단 대비 -50% 이상이면 손절을 고려하라는 게 커뮤니티 기준입니다.</div>
+    </div>
+    <div class="p-card mech">
+      <div class="p-name">벤저민 그레이엄 — 넷넷</div><div class="p-meta">미국 · 가치투자의 아버지</div>
+      <div class="p-rule">주가 ≤ 순유동자산의 2/3 → +50% 또는 2년이면 무조건 매도</div>
+      <div class="p-body">유동자산에서 유동부채를 뺀 금액의 3분의 2 이하로 거래되는 주식을 삽니다. 당장 청산해도 받을 돈보다 싸게 사는 셈이죠. 매도는 <span class="hl">50% 오르거나 2년이 지나면</span> 수익률과 상관없이.</div>
+    </div>
+  </div>
+
+  <!-- ② -->
+  <div class="sec-head"><span class="sec-num">②</span><span class="sec-title">떨어지면 '무조건 파는' 사람들</span></div>
+  <div class="grid">
+    <div class="p-card trend">
+      <div class="p-name">윌리엄 오닐</div><div class="p-meta">미국 · CAN SLIM 창시자</div>
+      <div class="p-rule">매수가 대비 -7~8%면 예외 없이 매도</div>
+      <div class="p-body">인터뷰에서 정말 예외가 없냐는 질문에 "없다"고 답했습니다. 이유는 아래의 손실 회복 산수입니다. 작게 잃으면 작게 벌어도 복구되지만, 크게 잃으면 복구가 거의 불가능해집니다.</div>
+    </div>
+    <div class="p-card trend">
+      <div class="p-name">폴 튜더 존스</div><div class="p-meta">미국 · 매크로 헤지펀드</div>
+      <div class="p-rule">200일선 아래에선 좋은 일이 없다</div>
+      <div class="p-body">선을 넘을 때마다 기계적으로 사고파는 게 아니라, 지금이 유리한 국면인지 판단하는 지표로 씁니다. 책상 위에 <span class="hl">"Losers Average Losers(물타기는 패자의 방식)"</span>를 붙여두고 손실 포지션에는 절대 추가하지 않았습니다.</div>
+    </div>
+    <div class="p-card trend">
+      <div class="p-name">제시 리버모어</div><div class="p-meta">미국 · 20세기 초 전설의 투기꾼</div>
+      <div class="p-rule">피벗에서 25%만 먼저 → 맞으면 추가 / 큰 수익 후 50% 현금화</div>
+      <div class="p-body">물타기의 정반대인 피라미딩입니다. 틀리면 작은 손실로 끝나고, 맞으면 가장 큰 포지션이 가장 잘 되는 종목에 실립니다.</div>
+    </div>
+    <div class="card" style="margin:0;">
+      <div class="card-title">손실 회복 산수 — 왜 7~8%에서 자르나</div>
+      <div class="rec-row"><span class="rec-l">-8%</span><div class="rec-track"><div class="rec-fill" style="width:3.7%;"></div></div><span class="rec-v">+8.7%</span></div>
+      <div class="rec-row"><span class="rec-l">-20%</span><div class="rec-track"><div class="rec-fill" style="width:10.7%;"></div></div><span class="rec-v">+25%</span></div>
+      <div class="rec-row"><span class="rec-l">-30%</span><div class="rec-track"><div class="rec-fill" style="width:18.4%;"></div></div><span class="rec-v">+42.9%</span></div>
+      <div class="rec-row"><span class="rec-l">-50%</span><div class="rec-track"><div class="rec-fill" style="width:42.9%;"></div></div><span class="rec-v">+100%</span></div>
+      <div class="rec-row"><span class="rec-l">-70%</span><div class="rec-track"><div class="rec-fill" style="width:100%;"></div></div><span class="rec-v">+233%</span></div>
+      <div class="note">막대 = 원금 회복에 필요한 상승률 (-70% 기준 100%)</div>
+    </div>
+  </div>
+
+  <!-- ③ -->
+  <div class="sec-head"><span class="sec-num">③</span><span class="sec-title">신고가·돌파에서 '사는' 사람들</span></div>
+  <div class="grid">
+    <div class="p-card trend">
+      <div class="p-name">니콜라스 다비스 — 박스 이론</div><div class="p-meta">헝가리 출신 무용수 · 1950년대</div>
+      <div class="p-rule">박스 상단을 거래량 동반 돌파 시 매수, 하단 이탈 시 매도</div>
+      <div class="p-body">세계 투어를 다니며 전보로 주문을 넣었고 18개월 만에 200만 달러를 벌었습니다. 좁은 가격대(박스)에서 움직이던 주식이 위로 뚫리면 사고, 다시 박스 아래로 떨어지면 팝니다. 시작 자금은 출처마다 1만~3만 6천 달러로 다르게 전해집니다.</div>
+    </div>
+    <div class="p-card trend">
+      <div class="p-name">리처드 데니스 — 터틀 트레이딩</div><div class="p-meta">미국 · 일반인 트레이더 양성 실험</div>
+      <div class="p-rule">20일 최고가 돌파 매수 · 10일 최저가 이탈 청산 · 2N 손절</div>
+      <div class="p-body">손절은 20일 평균 변동폭(ATR)의 2배('2N')로 잡고, 계좌가 10% 줄면 포지션 크기를 20% 줄입니다. 감정을 빼고 규칙만 지키면 평범한 사람도 된다는 걸 보여주려 한 실험입니다.</div>
+    </div>
+  </div>
+
+  <!-- ④ -->
+  <div class="sec-head"><span class="sec-num">④</span><span class="sec-title">공식대로 기계적으로</span></div>
+  <div class="grid">
+    <div class="p-card mech">
+      <div class="p-name">도그스 오브 더 다우</div><div class="p-meta">미국 · 마이클 오히긴스(1991)</div>
+      <div class="p-rule">연초 다우 배당 상위 10개 균등 매수 → 1년 뒤 교체</div>
+      <div class="p-body">배당수익률이 높다는 건 대개 주가가 눌려 있다는 뜻이라, 사실상 '소외된 우량주 사기'입니다. 그중 주가가 가장 낮은 5개만 사는 변형(Dow 5)도 있습니다.</div>
+    </div>
+    <div class="p-card mech">
+      <div class="p-name">강환국 — 한국형 퀀트</div><div class="p-meta">한국</div>
+      <div class="p-rule">한국 모멘텀은 대형주만, 소형주는 가치·퀄리티로</div>
+      <div class="p-body">해외에서 잘 통하는 '최근 6~12개월 많이 오른 주식 사기'가 그의 데이터에선 한국 소형주에서 잘 안 됐습니다. 그래서 소형주는 PER·PBR·PCR·PSR 같은 가치 지표 조합으로 고릅니다. 해외 규칙을 그대로 들여오면 안 된다는 사례입니다.</div>
+    </div>
+    <div class="p-card mech">
+      <div class="p-name">나심 탈레브 — 바벨</div><div class="p-meta">미국 · 『안티프래질』</div>
+      <div class="p-rule">90% 초안전 + 10% 초고위험, 중간은 없음</div>
+      <div class="p-body">최대 손실이 10%로 묶이고, 10%가 대박 나면 전체가 크게 오릅니다. 핵심은 애매한 중간 위험 자산을 아예 들고 가지 않는 것입니다.</div>
+    </div>
+    <div class="p-card mech">
+      <div class="p-name">모니시 파브라이 — 단도 투자</div><div class="p-meta">미국 · 『단도투자』</div>
+      <div class="p-rule">앞면이면 내가 이기고, 뒷면이면 별로 안 잃는다</div>
+      <div class="p-body">하방이 작고 상방이 큰 기회만 고르고, 적게·크게·드물게 베팅합니다. 베팅 크기는 켈리 공식으로 정합니다.</div>
+    </div>
+  </div>
+
+  <!-- ⑤ -->
+  <div class="sec-head"><span class="sec-num">⑤</span><span class="sec-title">사이클·이벤트를 노리는 방법</span></div>
+  <div class="grid">
+    <div class="p-card cycle">
+      <div class="p-name">앙드레 코스톨라니 — 달걀 이론</div><div class="p-meta">헝가리 출신 · 유럽의 버핏</div>
+      <div class="p-rule">대중이 무관심할 때 사고, 열광할 때 판다</div>
+      <div class="p-body">금리와 대중 심리로 시장 사이클을 달걀 모양으로 그린 이론입니다. "놓친 버스와 주식은 쫓아가지 말라"는 말도 남겼습니다.</div>
+    </div>
+    <div class="p-card cycle">
+      <div class="p-name">템플턴의 두 번째 명매매</div><div class="p-meta">미국 · 2000년 닷컴 버블</div>
+      <div class="p-rule">보호예수 만료 11일 전에 공매도</div>
+      <div class="p-body">내부자 물량이 풀리는 날이 정해져 있다는 걸 이용했습니다. 다만 본인은 내부자 매도는 방아쇠였을 뿐, 진짜 원인은 과도한 고평가였다고 봤습니다. 몇 주 만에 8천만 달러를 벌었다고 전해집니다.</div>
+    </div>
+  </div>
+
+  <!-- 대비 -->
+  <div class="sec-head"><span class="sec-num">?</span><span class="sec-title">같은 하락, 정반대 규칙 — 누가 맞나?</span></div>
+  <div class="card">
+    <div class="vs">
+      <div class="vs-col l">
+        <div class="vs-h">📉 "떨어지면 산다"</div>
+        <div class="vs-item"><b>대표</b>템플턴, 강방천, BNF, 그레이엄</div>
+        <div class="vs-item"><b>보는 하락</b>시장 전체의 공포</div>
+        <div class="vs-item"><b>안전장치</b>넓은 분산 또는 숫자상 극단적 저평가</div>
+        <div class="vs-item"><b>약점</b>진짜 망하는 종목을 끝까지 들고 감</div>
+      </div>
+      <div class="vs-col r">
+        <div class="vs-h">📈 "떨어지면 판다"</div>
+        <div class="vs-item"><b>대표</b>오닐, 튜더 존스, 리버모어</div>
+        <div class="vs-item"><b>보는 하락</b>개별 종목의 추세 붕괴</div>
+        <div class="vs-item"><b>안전장치</b>작은 손절 + 수익 종목에 집중</div>
+        <div class="vs-item"><b>약점</b>횡보장에서 손절이 반복됨</div>
+      </div>
+    </div>
+    <div class="insight">둘 다 맞습니다. <span class="hl">보는 하락이 다릅니다.</span> 정리하면서 느낀 건 '역발상' 대가들도 아무거나 떨어진 걸 산 게 아니었다는 점입니다. 템플턴은 104개로 쪼갰고, 강방천은 배당 60%짜리를 샀고, 그레이엄은 청산가치 아래에서만 샀습니다. 개인이 흔히 하는 물타기는 이 안전장치 없이 역발상만 흉내 내는 경우가 많습니다. 박세익 전무가 -30% 역발상을 고성장 기업에만 한정한 것도 같은 맥락입니다.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">내 규칙을 만들 때 체크리스트</div>
+    <div class="check-item"><div class="check-box"></div><div>내가 보는 하락은 <b>시장 전체</b>의 하락인가, <b>이 종목만</b>의 하락인가?</div></div>
+    <div class="check-item"><div class="check-box"></div><div>역발상으로 산다면, <b>분산</b>이나 <b>숫자상 안전마진</b>(청산가치·배당 등) 중 하나라도 있는가?</div></div>
+    <div class="check-item"><div class="check-box"></div><div>손절 규칙이 있다면, 사기 <b>전에</b> 정해 두었는가?</div></div>
+    <div class="check-item"><div class="check-box"></div><div>이 % 기준이 <b>언제, 어느 시장</b>의 데이터에서 나온 숫자인가? (BNF의 교훈)</div></div>
+    <div class="check-item"><div class="check-box"></div><div>레버리지 상품이라면, 최악의 경우 <b>-50% 이후 시나리오</b>를 감당할 수 있는가?</div></div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">📋 한 장 요약</div>
+    <ol>
+      <li>정확히 "-50%부터 사라"는 대가의 공식 규칙은 찾지 못했고, 가장 가까운 건 BNF(-20~35% 이격), 박세익(-30%), 강방천(반토막에도 매수)입니다.</li>
+      <li>대가들은 크게 역발상(템플턴·강방천·그레이엄)과 추세(오닐·튜더 존스·리버모어·다비스·데니스)로 갈리고, 하락에 대한 규칙이 정반대입니다.</li>
+      <li>역발상 진영은 시장 전체의 공포를 사되, 분산이나 극단적 저평가라는 안전장치를 함께 썼습니다.</li>
+      <li>추세 진영은 개별 종목의 하락을 경고로 보고 -7~8%, 200일선 같은 선을 미리 정해 둡니다. -50%면 +100%가 필요하다는 산수가 그 이유입니다.</li>
+      <li>어떤 % 숫자든 그 숫자가 나온 시대와 시장을 같이 봐야 합니다. 규칙의 유효기간은 생각보다 짧을 수 있습니다.</li>
+    </ol>
+  </div>
+
+  <div class="card" style="margin-top:1.1rem;">
+    <div class="card-title">참고 자료</div>
+    <div class="sources">
+      템플턴 1939 — <a href="https://wng.org/articles/maximum-optimist-1620660691">WORLD</a>, <a href="https://dailyspeculations.com/wordpress/?p=3202">dailyspeculations</a>, <a href="https://kr.investing.com/analysis/article-200447844">인베스팅닷컴</a><br>
+      BNF — <a href="https://completetradersedge.com/takashi-kotegawa-bnf-japanese-day-trader/">Complete Trader's Edge</a>, <a href="https://blog.pickmytrade.trade/bnf-takashi-kotegawa-strategy-pickmytrade.md">PickMyTrade</a><br>
+      강방천 — <a href="https://www.mt.co.kr/entertainment/2020/11/26/2020112607081170504">머니투데이</a>, <a href="https://www.hankyung.com/article/202606034746i">한국경제</a><br>
+      박세익 — <a href="https://economist.co.kr/article/view/ecn202110100001">이코노미스트</a><br>
+      라오어 — <a href="https://www.moneynestlab.com/infinite-buying">moneynestlab</a>, <a href="https://pedia.watcha.com/en/contents/b97lPZQ/book_description">왓챠피디아</a><br>
+      그레이엄 — <a href="https://magazine.hankyung.com/business/article/202103093616b">한경비즈니스</a>, <a href="https://valueline.co.kr/stock/graham">valueline</a><br>
+      오닐 — <a href="https://www.fool.com/specials/2002/06/20/foolcom-tmf-interview-bill-oneil-special.aspx">Motley Fool</a><br>
+      튜더 존스 — <a href="https://wyandanch-library.pages.dev/read/tudor-jones-principles">Tudor Jones Principles</a><br>
+      리버모어 — <a href="https://tradingsim.com/blog/jesse-livermore-money-management/">Tradingsim</a><br>
+      다비스 — <a href="https://chaikinanalytics.com/powerfeed/articles/how-a-dancers-rules-beat-the-market">Chaikin Analytics</a><br>
+      터틀 — <a href="https://trendspider.com/learning-center/richard-dennis-turtle-trading-strategy/">TrendSpider</a><br>
+      도그스 오브 더 다우 — <a href="https://en.wikipedia.org/wiki/Dogs_of_the_Dow">Wikipedia</a><br>
+      강환국 — <a href="https://ppss.kr/archives/113850">ppss.kr</a><br>
+      탈레브 — <a href="https://www.singsaver.com.sg/page/blog/barbell-strategy-the-90-10-rule-to-make-you-rich">SingSaver</a><br>
+      파브라이 — <a href="https://hedgefundalpha.com/?p=374040">Hedge Fund Alpha</a><br>
+      코스톨라니 — <a href="https://kr.investing.com/analysis/article-200434141">인베스팅닷컴</a><br>
+      템플턴 2000 — <a href="https://m.investing.com/analysis/when-the-unicorns-become-horses-again--tech-bubble-repeats-200470464?ampMode=1">Investing.com</a>, <a href="https://www.avatrade.com/blog/trading-history/contrarian-views-in-trading">AvaTrade</a>
+    </div>
+    <div class="disclaimer">
+      ⚠️ 본 글은 투자 대가들의 공개된 매매 규칙을 정리한 개인 공부 기록이며, 특정 종목이나 전략의 매수·매도를 권유하지 않습니다.
+      수익 사례는 해당 인물의 과거 기록이며 같은 결과를 보장하지 않습니다. 내용은 작성 시점(2026년 11월 7일)의 공개 자료 기준입니다.
+      투자 판단과 그에 따른 책임은 투자자 본인에게 있습니다.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  (function () {
+    var chips = document.querySelectorAll('.chip');
+    var rows = document.querySelectorAll('.cmp tbody tr');
+    chips.forEach(function (c) {
+      c.addEventListener('click', function () {
+        chips.forEach(function (x) { x.classList.remove('on'); });
+        c.classList.add('on');
+        var f = c.getAttribute('data-f');
+        rows.forEach(function (r) {
+          var show = f === 'all' ||
+            (f === 'kr' ? r.getAttribute('data-kr') === '1'
+                        : (r.getAttribute('data-t') || '').split(' ').indexOf(f) > -1);
+          r.style.display = show ? '' : 'none';
+        });
+      });
+    });
+  })();
+</script>
+</body>
+</html>
