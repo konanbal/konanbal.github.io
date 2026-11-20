@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDD Holdings 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">PDD · NASDAQ</div>
+        <div class="company-name">PDD Holdings</div>
+        <div class="company-desc">중국 전자상거래 핀둬둬·글로벌 직구 플랫폼 테무(Temu) 운영사</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$86.00</div>
+        <div class="chg up">▲ 11.04% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.19 종가 · Motley Fool·Yahoo Finance · 작성 2026.11.20</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>$122.1B</b></span>
+      <span>섹터 <b>경기소비재 · 전자상거래</b></span>
+      <span>52주 범위 <b>$71.94 ~ $125.36</b> (현재 위치 26%)</span>
+      <span>컨센서스 <b>중립</b> · 목표가 <b>$107.31</b> (+24.8%)<span class="stale">(11.10 기준 · 실적 후 변경 미반영)</span></span>
+    </div>
+    <div class="verdict">PER 9배·Forward 7.5배로 자사 3년 평균(14배)의 절반 수준에서 거래되고, 3분기 이익 서프라이즈로 바닥 신호가 나왔다. 다만 매출 정체와 주주환원 부재가 이 할인의 이유</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 &amp; 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">9.4배</div><div class="m-sub">자사 3년 평균 14.4배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">7.5배</div><div class="m-sub">2026E 기준</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">1.84배</div><div class="m-sub">BPS $46.86</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">22.7%</div><div class="m-sub">TTM 2026.06 기준</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">$9.17</div><div class="m-sub">3Q 조정 EPS YoY -0.2%</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">1%</div><div class="m-sub">2026.06 기준 (D/E)</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">30.1%</div><div class="m-sub">3Q 조정 기준 · 전년 25.0%</div></div>
+    </div>
+    <div class="val-comment">TTM PER 9.4배는 자사 2023~2025년 평균 PER(14.4배)보다 35% 낮고, Forward PER 7.5배에 PBR 1.84배로 ROE 23% 기업치고 크게 할인돼 있다. 할인의 이유는 성장 정체(3분기 매출 YoY 0%), 테무를 둘러싼 규제 비용, 쌓인 현금이 배당이나 자사주로 돌아오지 않는다는 점이다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com 통계·재무(2026.10.30 기준) · 최신 종가(11.19) 기준 재계산 · 영업이익률은 Benzinga(3분기 조정 기준) · 비교기준: 자사 FY2023~2025 PER 평균</div>
+  </div>
+
+  <!-- ③ 주가 추이 -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f6db5" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#2f6db5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <text x="868" y="10" font-size="9" fill="#6b7280" text-anchor="end">▲ 52주 최고 125.36 (축 범위 밖)</text><line x1="10" y1="153.1" x2="870" y2="153.1" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="164.1" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 71.94</text>
+  <path d="M10.0,174 L10.0,76.6 L24.3,74.9 L38.7,60.0 L53.0,63.5 L67.3,69.3 L81.7,76.0 L96.0,72.5 L110.3,77.6 L124.7,88.1 L139.0,83.0 L153.3,91.6 L167.7,95.8 L182.0,100.5 L196.3,103.7 L210.7,100.7 L225.0,113.3 L239.3,119.1 L253.7,123.0 L268.0,123.2 L282.3,115.2 L296.7,121.8 L311.0,118.3 L325.3,123.6 L339.7,117.6 L354.0,115.6 L368.3,110.2 L382.7,116.1 L397.0,121.2 L411.3,124.4 L425.7,119.7 L440.0,124.8 L454.3,122.5 L468.7,129.9 L483.0,135.6 L497.3,122.7 L511.7,120.2 L526.0,119.7 L540.3,120.9 L554.7,105.1 L569.0,107.3 L583.3,102.0 L597.7,104.6 L612.0,99.7 L626.3,107.1 L640.7,104.9 L655.0,103.7 L669.3,118.5 L683.7,116.2 L698.0,116.9 L712.3,121.5 L726.7,119.1 L741.0,103.4 L755.3,111.1 L769.7,96.6 L784.0,109.5 L798.3,115.1 L812.7,117.1 L827.0,121.6 L841.3,125.3 L855.7,125.0 L870.0,81.4 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,76.6 24.3,74.9 38.7,60.0 53.0,63.5 67.3,69.3 81.7,76.0 96.0,72.5 110.3,77.6 124.7,88.1 139.0,83.0 153.3,91.6 167.7,95.8 182.0,100.5 196.3,103.7 210.7,100.7 225.0,113.3 239.3,119.1 253.7,123.0 268.0,123.2 282.3,115.2 296.7,121.8 311.0,118.3 325.3,123.6 339.7,117.6 354.0,115.6 368.3,110.2 382.7,116.1 397.0,121.2 411.3,124.4 425.7,119.7 440.0,124.8 454.3,122.5 468.7,129.9 483.0,135.6 497.3,122.7 511.7,120.2 526.0,119.7 540.3,120.9 554.7,105.1 569.0,107.3 583.3,102.0 597.7,104.6 612.0,99.7 626.3,107.1 640.7,104.9 655.0,103.7 669.3,118.5 683.7,116.2 698.0,116.9 712.3,121.5 726.7,119.1 741.0,103.4 755.3,111.1 769.7,96.6 784.0,109.5 798.3,115.1 812.7,117.1 827.0,121.6 841.3,125.3 855.7,125.0 870.0,81.4" fill="none" stroke="#2f6db5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="81.4" r="3.5" fill="#2f6db5"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-08-17</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-19</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.17~11.19 수익률 -1.1%</span>
+      <span>구간 최고 $90.20 · 최저 $75.38 · 52주 최저는 점선, 52주 최고는 축 범위 밖이라 라벨로 표시</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 52주 고점($125.36) 대비 -31%로, 구간 중에는 8.19 $90.20에서 10.02 $75.38까지 -16% 밀렸다. 매출 추정치가 90일간 -4.7% 하향되며 성장 둔화 우려가 이어졌고, 11.09 모건스탠리의 비중유지 하향(목표가 $129→$90)에 -3.1% 빠졌다. 11.19 3분기 이익 서프라이즈로 하루 +11.0% 반등했다 (Investing.com, MarketBeat, MarketScreener).</div>
+    <div class="source-note">※ 출처: stockanalysis.com(08.17~10.26 일별), 10.30~11.19 종가는 debelegger.nl·Investing.com·StockTitan·Quiver·Gotrade·Yahoo Finance 확인값 · 10.27~29, 11.04~05, 11.12~13 종가는 확인하지 못해 제외 · 차트는 11.19까지</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 (최근 3년, E열은 est-line으로 대체) -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만위안(CNY) · EPS는 ADS당 위안</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>247,639</td><td>393,836</td><td>431,846</td></tr>
+          <tr><td>영업이익</td><td>58,699</td><td>108,423</td><td>93,102</td></tr>
+          <tr><td>영업이익률</td><td>23.7%</td><td>27.5%</td><td>21.6%</td></tr>
+          <tr><td>순이익</td><td>60,027</td><td>112,435</td><td>97,843</td></tr>
+          <tr><td>EPS</td><td>41.15</td><td>76.00</td><td>66.00</td></tr>
+          <tr><td>PER</td><td>23.0배</td><td>8.7배</td><td>11.5배</td></tr>
+          <tr><td>ROE</td><td>39.4%</td><td>44.9%</td><td>26.9%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">2026E 컨센서스: 매출 466,020백만위안 · EPS(non-GAAP) 68.57위안 (32명, 09.10 집계)</div>
+    <div class="source-note">※ 출처: stockanalysis.com (financials, ratios, forecast)</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>이익 체력 확인</b> — 3분기 조정 EPS 21.04위안(예상 18.93위안, +11%), 조정 영업이익률 30.1%(전년 25.0%)</li>
+          <li><b>깊은 할인</b> — Forward PER 7.5배로 자사 3년 평균 PER(14.4배)의 절반, PBR 1.84배</li>
+          <li><b>막대한 현금</b> — 분기 말 현금·단기투자 $67.9B로 시가총액의 약 56%</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>매출 정체</b> — 3분기 매출 1,083억위안으로 전년과 같고 컨센서스(1,162억위안) 대비 -6.7%</li>
+          <li><b>테무 규제 비용</b> — 유럽 신규 소포 관세 영향으로 테무가 포함된 거래서비스 매출 -12%</li>
+          <li><b>주주환원 부재(구조적)</b> — 무배당 · 모건스탠리는 "축적 현금이 주주환원으로 이어지지 않을 우려"를 들어 목표가를 $129→$90으로 하향</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">2026년 3분기 · EPS 서프라이즈 +11.1% / 매출 -6.7% 미달</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>108,340백만위안</td><td>116,160백만위안</td><td>-6.7%</td><td>≈0% (보합)</td></tr>
+            <tr><td>영업이익(조정)</td><td>32,640백만위안</td><td>27,850백만위안</td><td>+17.2%</td><td>+20.5%</td></tr>
+            <tr><td>EPS (조정, ADS당)</td><td>21.04위안</td><td>18.93위안</td><td>+11.1%</td><td>-0.2%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">발표일 2026.11.19 장 개장 전 (최신 실적). 영업비용을 12% 줄여 매출 부진을 이익으로 만회했다. 광고 매출은 +12% 늘었지만 거래서비스 매출은 -12% 줄었다. 별도 가이던스는 제시하지 않았다. 컨센서스 EPS는 매체에 따라 18.54~18.93위안이다.</p>
+      <div class="source-note">※ 출처: SEC EDGAR 6-K, Investing.com, Benzinga, Yahoo Finance(Investopedia)</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 5건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.19</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[6-K] 2026년 3분기 실적</span><div class="tl-desc">조정 EPS와 영업이익이 예상을 크게 넘으며 실적 감소 흐름을 끊었다. 주가 +11.0%.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.19</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Yahoo Finance</span><span class="tl-title">테무 포함 거래서비스 매출 -12%</span><div class="tl-desc">유럽의 새 소포 관세가 해외 사업에 부담이 되고 있다. 매출 정체의 핵심 원인이다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.09</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · MarketBeat</span><span class="tl-title">모건스탠리, 비중확대→비중유지 하향</span><div class="tl-desc">목표가를 $129에서 $90으로 낮췄다. 중국 이커머스 저성장과 주주환원 불확실성을 이유로 들었고, 당일 주가는 -3.1%.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.29</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · MarketBeat</span><span class="tl-title">도이치뱅크, 보유→매수 상향</span><div class="tl-desc">실적 발표를 앞두고 나온 긍정적 의견 변화다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.09.07</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · MarketBeat</span><span class="tl-title">Arete, 매수→중립 하향</span><div class="tl-desc">목표가 $93을 제시했다.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $107.31 (11.10, MarketBeat) · 실적 후 변경 미반영</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>Morgan Stanley</td><td>비중유지</td><td>$90 (←$129)</td><td>2026.11.09</td></tr>
+            <tr><td>Arete Research</td><td>중립</td><td>$93</td><td>2026.09.07</td></tr>
+            <tr><td>Benchmark</td><td>매수</td><td>$114 (←$127)</td><td>2026.08.25</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: MarketBeat, Benzinga</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">PDD는 매출이 1년째 제자리이지만 비용 통제로 3분기 이익이 예상을 크게 넘으며 이익 체력이 여전하다는 점을 보여 줬다. Forward PER 7.5배, PBR 1.84배는 ROE 20%대 기업으로서는 매우 낮은 수준이다. 이 할인은 매출 정체, 테무의 해외 규제 비용, 쌓인 현금($67.9B)을 주주에게 돌려주지 않는 정책 때문이다. 다음 변수는 4분기 매출 반등 여부와 주주환원 정책 변화다. 중국 플랫폼 리스크를 감수하고 저평가 해소를 기다릴 수 있는 가치 투자자에게 맞는 종목이다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insmed 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">INSM · NASDAQ</div>
+        <div class="company-name">Insmed</div>
+        <div class="company-desc">호흡기 희귀질환 치료제 기업 · 브린수프리(기관지확장증)·아리케이스(MAC 폐질환) 판매</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$144.46</div>
+        <div class="chg up">▲ 20.58% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.19 종가 · Investing.com · 작성 2026.11.20</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>$31.7B</b></span>
+      <span>섹터 <b>헬스케어 · 바이오텍</b></span>
+      <span>52주 범위 <b>$90.39 ~ $212.75</b> (현재 위치 44%)</span>
+      <span>컨센서스 <b>강력매수</b> · 목표가 <b>$190</b> (+31.5% · 실적 후 3곳 평균)</span>
+    </div>
+    <div class="verdict">적자 바이오라 PER 비교는 불가하고 매출 대비 약 17배 수준. 브린수프리 고성장은 3분기 실적으로 확인됐지만, 오늘 +20.6%는 아직 확정되지 않은 사노피 인수 기대에 크게 기대고 있음</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 &amp; 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">적자</div><div class="m-sub">순손실 기업 · 비교 불가</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">적자</div><div class="m-sub">2026E EPS -$1.59</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">43.6배</div><div class="m-sub">BPS $3.31 (2026.09말)</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">-87.2%</div><div class="m-sub">TTM 2026.06 기준</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">-$4.09</div><div class="m-sub">TTM 2026.06 · 3Q -$0.46(전년 -$1.75)</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">98%</div><div class="m-sub">2026.06 기준 (D/E)</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">-17.0%</div><div class="m-sub">최근 분기(3Q) · 전년 -257.2%</div></div>
+    </div>
+    <div class="val-comment">순손실 기업이라 PER로는 싸고 비싸고를 말할 수 없다. 시가총액 $31.7B는 회사의 2026년 두 제품 매출 가이던스 합계($1.81~1.87B)의 약 17배로, 자기자본이 작아 PBR도 43배에 이른다. 결국 가격은 브린수프리의 피크 매출 기대와 인수 프리미엄으로 설명되는 구조다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com 통계(2026.10.26 기준), Insmed 3분기 실적 8-K(SEC EDGAR, 자기자본·주식수 기준 BPS 재계산) · 최신 종가 기준 재계산 · 비교기준: 매출 배수(적자 기업이라 PER 비교 불가)</div>
+  </div>
+
+  <!-- ③ 주가 추이 -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d14343" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#d14343" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <text x="868" y="10" font-size="9" fill="#6b7280" text-anchor="end">▲ 52주 최고 212.75 (2025.12.02) (축 범위 밖)</text><line x1="10" y1="160.3" x2="870" y2="160.3" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="171.3" font-size="9" fill="#6b7280" text-anchor="end">52주 최저 90.39</text>
+  <path d="M10.0,174 L10.0,79.3 L22.8,79.0 L35.7,74.3 L48.5,86.2 L61.3,84.8 L74.2,88.6 L87.0,88.8 L99.9,87.7 L112.7,94.1 L125.5,100.2 L138.4,93.2 L151.2,93.9 L164.0,82.9 L176.9,82.8 L189.7,83.7 L202.5,86.7 L215.4,78.3 L228.2,81.6 L241.0,77.0 L253.9,85.8 L266.7,97.3 L279.6,91.6 L292.4,88.6 L305.2,97.1 L318.1,95.0 L330.9,95.3 L343.7,100.6 L356.6,93.8 L369.4,101.7 L382.2,102.1 L395.1,106.4 L407.9,109.6 L420.7,121.5 L433.6,116.1 L446.4,131.6 L459.3,128.6 L472.1,136.1 L484.9,138.8 L497.8,138.5 L510.6,142.9 L523.4,146.7 L536.3,144.5 L549.1,141.5 L561.9,147.8 L574.8,149.9 L587.6,149.1 L600.4,152.5 L613.3,150.4 L626.1,153.9 L639.0,154.1 L651.8,150.6 L664.6,146.3 L677.5,115.1 L690.3,112.9 L703.1,119.9 L716.0,130.3 L728.8,118.5 L741.6,121.1 L754.5,109.1 L767.3,105.4 L780.1,98.2 L793.0,95.5 L805.8,101.2 L818.7,94.6 L831.5,90.9 L844.3,93.1 L857.2,97.5 L870.0,44.9 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,79.3 22.8,79.0 35.7,74.3 48.5,86.2 61.3,84.8 74.2,88.6 87.0,88.8 99.9,87.7 112.7,94.1 125.5,100.2 138.4,93.2 151.2,93.9 164.0,82.9 176.9,82.8 189.7,83.7 202.5,86.7 215.4,78.3 228.2,81.6 241.0,77.0 253.9,85.8 266.7,97.3 279.6,91.6 292.4,88.6 305.2,97.1 318.1,95.0 330.9,95.3 343.7,100.6 356.6,93.8 369.4,101.7 382.2,102.1 395.1,106.4 407.9,109.6 420.7,121.5 433.6,116.1 446.4,131.6 459.3,128.6 472.1,136.1 484.9,138.8 497.8,138.5 510.6,142.9 523.4,146.7 536.3,144.5 549.1,141.5 561.9,147.8 574.8,149.9 587.6,149.1 600.4,152.5 613.3,150.4 626.1,153.9 639.0,154.1 651.8,150.6 664.6,146.3 677.5,115.1 690.3,112.9 703.1,119.9 716.0,130.3 728.8,118.5 741.6,121.1 754.5,109.1 767.3,105.4 780.1,98.2 793.0,95.5 805.8,101.2 818.7,94.6 831.5,90.9 844.3,93.1 857.2,97.5 870.0,44.9" fill="none" stroke="#d14343" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="44.9" r="3.5" fill="#d14343"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-08-17</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-19</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.17~11.19 수익률 +12.6%</span>
+      <span>구간 최고 $144.46 · 최저 $93.33 · 52주 최저는 점선, 52주 최고는 축 범위 밖이라 라벨로 표시</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 8월 $128에서 10.26 구간 저점 $93.33까지 -27% 밀렸다(10.05 CFO 사임 발표일 -6.6%). 이후 10.29 3분기 매출이 예상을 넘으며 하루 +15.1%, 11.19 블룸버그의 사노피 인수 검토 보도로 +20.6% 급등해 저점 대비 +55% 반등했다 (Investing.com, SEC EDGAR, Benzinga).</div>
+    <div class="source-note">※ 출처: stockanalysis.com(08.17~10.16 일별), Investing.com(10.19~11.19 일별) · 차트는 11.19까지(헤더 가격 기준일과 같음)</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 (최근 3년, E열은 est-line으로 대체) -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>305.2</td><td>363.7</td><td>606.4</td></tr>
+          <tr><td>영업이익</td><td>-680.9</td><td>-786.6</td><td>-994.8</td></tr>
+          <tr><td>영업이익률</td><td>-223.1%</td><td>-216.3%</td><td>-164.0%</td></tr>
+          <tr><td>순이익</td><td>-749.6</td><td>-913.8</td><td>-1,277</td></tr>
+          <tr><td>EPS</td><td>-$5.34</td><td>-$5.57</td><td>-$6.42</td></tr>
+          <tr><td>ROE</td><td>N/A</td><td>N/A</td><td>-249.3%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">2026E 컨센서스: 매출 $1,810M · EPS(non-GAAP) -$1.59 (24명, 10.26 집계) · 회사 가이던스: 브린수프리 $1,350~1,400M + 아리케이스 $460~470M</div>
+    <div class="source-note">※ 출처: stockanalysis.com (financials, ratios, forecast) · Insmed 3분기 실적 발표(2026.10.29)</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>인수 프리미엄 가능성</b> — 사노피 인수 검토 보도 후 RBC는 인수 시 주당 $170~210(현재가 대비 +18~45%)로 추정</li>
+          <li><b>브린수프리 고성장</b> — 3분기 매출 $400.1M으로 전분기 대비 +29%, 연간 가이던스 하단을 $1.35B로 상향</li>
+          <li><b>파이프라인 피크 매출</b> — 회사는 3개 주력 프로그램 피크 매출을 $14B 이상(브린수프리 $7B+, TPIP $6B+)으로 제시</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>인수 불발 시 되돌림</b> — Mizuho는 회사가 매각할 준비가 안 됐다고 보고, 사노피의 순부채 약 €120억으로 약 $400억 딜 감당 여부에 의문(FiercePharma)</li>
+          <li><b>브렌소카팁 적응증 확장 실패</b> — 2025.12 부비동염(BiRCh) 2b, 2026.04 화농성한선염(CEDAR) 2b 모두 1차 평가지표 미달로 개발 중단</li>
+          <li><b>적자와 현금 소진(구조적)</b> — 2025년 순손실 $1,277M, 3분기에도 순손실 $100.3M · 현금성 자산 약 $1.1B, 자기자본 $726M</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">2026년 3분기 · 매출 서프라이즈 +4.6% / EPS 소폭 하회</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$524.4M</td><td>$501.4M</td><td>+4.6%</td><td>+268.5%</td></tr>
+            <tr><td>영업이익</td><td>-$89.4M</td><td>N/A</td><td>—</td><td>적자 축소(전년 -$366.0M)</td></tr>
+            <tr><td>EPS (GAAP)</td><td>-$0.46</td><td>-$0.43</td><td>-7.0%</td><td>적자 축소(전년 -$1.75)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">발표일 2026.10.29 (최신 실적). 브린수프리 $400.1M(전분기 +29%), 아리케이스 $124.4M(+9%). 2026년 가이던스를 브린수프리 $1.35~1.4B(종전 $1.25~1.4B), 아리케이스 $460~470M(종전 $450~470M)으로 하단 상향했고, 일본에서 브린수프리 정제를 출시했다.</p>
+      <div class="source-note">※ 출처: Insmed 3분기 실적 8-K(SEC EDGAR) · 컨센서스: GuruFocus</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 6건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.19</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · Bloomberg(Benzinga 인용)</span><span class="tl-title">사노피, 인스메드 인수 검토</span><div class="tl-desc">자문사와 인수를 검토 중이라는 보도에 장중 +20%대 급등. 듀피젠트 특허 만료에 대비한 성장 동력 확보 목적으로 풀이된다. 확정 합의는 없다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.19</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · Seeking Alpha</span><span class="tl-title">RBC "인수 시 주당 $170~210 가치"</span><div class="tl-desc">20~50% 프리미엄이 가능하다고 봤다. 인수 가격 기대의 기준점이다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.19</div>
+        <div><span class="dot"></span><span class="tl-kind">뉴스 · TipRanks(The Fly)</span><span class="tl-title">Mizuho "인스메드는 매각 준비가 안 됐을 것"</span><div class="tl-desc">경영진의 기존 입장을 근거로 딜 성사에는 신중하지만, Outperform·목표가 $158은 유지했다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.29</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[8-K] 2026년 3분기 실적</span><div class="tl-desc">매출 $524.4M으로 컨센서스를 넘었고, 두 제품 연간 가이던스를 모두 상향했다. 다음 날 주가는 +15.1%.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.05</div>
+        <div><span class="dot neg"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[8-K] CFO 사임 발표</span><div class="tl-desc">사라 본스타인 CFO가 10.30자로 물러났다. 연간 가이던스는 재확인했지만 당일 주가는 -6.6%.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.04.07</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · Rallies.ai</span><span class="tl-title">브렌소카팁 화농성한선염 2b(CEDAR) 실패</span><div class="tl-desc">1·2차 평가지표를 모두 놓쳐 해당 적응증 개발을 중단했다. 단일 물질 의존도가 커졌다.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">실적 후 3곳 평균 $190 · 전체 컨센서스 $196(24곳, 10.26)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>H.C. Wainwright</td><td>매수</td><td>$220</td><td>2026.11.04</td></tr>
+            <tr><td>BMO Capital</td><td>Outperform</td><td>$192</td><td>2026.11.19</td></tr>
+            <tr><td>Mizuho</td><td>Outperform</td><td>$158</td><td>2026.11.19</td></tr>
+            <tr><td>Goldman Sachs</td><td>매수</td><td>$188</td><td>2026.09.24</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: Finviz, TipRanks(The Fly), stockanalysis.com</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">인스메드는 브린수프리 출시 2년 차에 분기 매출 $5억대에 올라섰고, 3분기 실적과 가이던스 상향으로 성장 스토리는 숫자로 확인됐다. 다만 아직 순손실 기업이라 PER로는 평가할 수 없고, 시가총액이 올해 예상 매출의 약 17배라 높은 성장 기대가 이미 가격에 들어 있다. 11.19 급등분은 사노피의 "검토" 단계 보도에 기댄 것이어서, 딜이 무산되면 실적 발표 직후 수준($110~120)까지 되돌아갈 수 있다. 인수 프리미엄과 높은 변동성을 함께 감수할 수 있는 이벤트 지향 투자자에게 맞는 종목이다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>

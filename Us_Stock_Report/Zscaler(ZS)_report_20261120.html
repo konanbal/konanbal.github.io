@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zscaler 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">ZS · NASDAQ</div>
+        <div class="company-name">Zscaler</div>
+        <div class="company-desc">클라우드 기반 제로트러스트 보안 플랫폼 · SASE·AI 보안·데이터 보안</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$205.71</div>
+        <div class="chg up">▲ 3.98% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.19 종가 · FinzData·미국 시장 리포트 · 작성 2026.11.20</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>$33.5B</b></span>
+      <span>섹터 <b>기술 · 사이버보안 소프트웨어</b></span>
+      <span>52주 범위 <b>$114.63 ~ $316.85</b> (현재 위치 45%)</span>
+      <span>컨센서스 <b>매수</b> · 목표가 <b>$235.19</b> (+14.3%)</span>
+    </div>
+    <div class="verdict">Forward PER 42배로 자사 3년 평균(58배)보다 낮지만, FY2027 매출 성장 둔화(17%)가 반영된 가격. 12.02 1분기 실적에서 순신규 ARR이 가이던스를 넘는지가 관건</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 &amp; 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">적자</div><div class="m-sub">GAAP 순손실 · 비교 불가</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">41.9배</div><div class="m-sub">FY2027E 기준 · 자사 3년 평균 58.3배</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">12.91배</div><div class="m-sub">BPS $15.93</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">-2.9%</div><div class="m-sub">FY2026 기준</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">-$0.39</div><div class="m-sub">YoY 적자 확대 (FY25 -$0.27)</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">없음</div><div class="m-sub">무배당</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">72%</div><div class="m-sub">FY2026 기준 (D/E)</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">-1.7%</div><div class="m-sub">최근 분기(4Q FY26) · 전년 -4.5%</div></div>
+    </div>
+    <div class="val-comment">GAAP으로는 소폭 적자라 PER은 의미가 없다. Forward PER 41.9배는 자사 FY2024~2026 Forward PER 평균(58.3배)보다 낮은데, 이는 FY2027 매출 성장 가이던스가 16.6~17.5%로 FY2026(25%)에서 크게 둔화된 것을 반영한 값이다. 성장 속도가 다시 붙는지에 따라 할인 해소 여부가 갈린다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com 통계·재무·비율(2026.11.13 기준) · 최신 종가(11.19) 기준 재계산 · 비교기준: 자사 FY2024~2026 Forward PER 평균</div>
+  </div>
+
+  <!-- ③ 주가 추이 -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d14343" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#d14343" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <text x="868" y="10" font-size="9" fill="#6b7280" text-anchor="end">▲ 52주 최고 316.85 (축 범위 밖)</text><text x="868" y="171" font-size="9" fill="#6b7280" text-anchor="end">▼ 52주 최저 114.63 (2026.04.10) (축 범위 밖)</text>
+  <path d="M10.0,174 L10.0,128.6 L23.9,129.8 L37.7,140.8 L51.6,133.1 L65.5,139.5 L79.4,148.2 L93.2,146.1 L107.1,126.8 L121.0,130.3 L134.8,125.5 L148.7,136.9 L162.6,143.3 L176.5,137.6 L190.3,146.7 L204.2,155.6 L218.1,150.9 L231.9,153.8 L245.8,152.6 L259.7,121.7 L273.5,119.3 L287.4,121.9 L301.3,115.2 L315.2,115.4 L329.0,104.2 L342.9,100.8 L356.8,95.9 L370.6,95.7 L384.5,120.2 L398.4,113.0 L412.3,114.2 L426.1,113.0 L440.0,113.7 L453.9,116.2 L467.7,110.3 L481.6,98.4 L495.5,96.9 L509.4,93.2 L523.2,74.0 L537.1,83.0 L551.0,79.7 L564.8,88.7 L578.7,89.1 L592.6,103.9 L606.5,98.1 L620.3,95.8 L634.2,76.7 L648.1,69.4 L661.9,49.6 L675.8,43.6 L689.7,85.3 L703.5,83.8 L717.4,84.5 L731.3,107.9 L745.2,115.0 L759.0,113.4 L772.9,118.1 L786.8,119.4 L800.6,120.0 L814.5,120.9 L828.4,122.7 L842.3,129.2 L856.1,114.8 L870.0,105.8 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,128.6 23.9,129.8 37.7,140.8 51.6,133.1 65.5,139.5 79.4,148.2 93.2,146.1 107.1,126.8 121.0,130.3 134.8,125.5 148.7,136.9 162.6,143.3 176.5,137.6 190.3,146.7 204.2,155.6 218.1,150.9 231.9,153.8 245.8,152.6 259.7,121.7 273.5,119.3 287.4,121.9 301.3,115.2 315.2,115.4 329.0,104.2 342.9,100.8 356.8,95.9 370.6,95.7 384.5,120.2 398.4,113.0 412.3,114.2 426.1,113.0 440.0,113.7 453.9,116.2 467.7,110.3 481.6,98.4 495.5,96.9 509.4,93.2 523.2,74.0 537.1,83.0 551.0,79.7 564.8,88.7 578.7,89.1 592.6,103.9 606.5,98.1 620.3,95.8 634.2,76.7 648.1,69.4 661.9,49.6 675.8,43.6 689.7,85.3 703.5,83.8 717.4,84.5 731.3,107.9 745.2,115.0 759.0,113.4 772.9,118.1 786.8,119.4 800.6,120.0 814.5,120.9 828.4,122.7 842.3,129.2 856.1,114.8 870.0,105.8" fill="none" stroke="#d14343" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="105.8" r="3.5" fill="#d14343"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-08-18</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-19</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.18~11.19 수익률 +10.8%</span>
+      <span>구간 최고 $260.45 · 최저 $161.94 · y축은 구간 고저 ±10%, 52주 최고·최저는 축 밖이라 라벨로 표시</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 10.06 투자자의 날 이후 랠리로 10.26 $260.45까지 올랐다가 11.17 $185.19까지 -29% 밀렸다. 10.29 포티넷 실적 쇼크, 10.30 아마존·인텔 실적 실망(나스닥 -2.86%), 11.05 나스닥 -5.5% 급락일 -9.2%가 겹쳤다. 자체 악재는 없었고, 11.19 팔로알토 호실적에 업종이 반등했다 (TIKR, GuruFocus).</div>
+    <div class="source-note">※ 출처: stockanalysis.com(08.18~10.26 일별), 11.02~11.19 종가는 Zscaler IR·Investing.com·FinzData 확인값 · 10.27~10.30 종가는 확인하지 못해 제외 · 차트는 11.19까지</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 (최근 3년, E열은 est-line으로 대체) -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러 (회계연도 7월 결산)</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>FY2024</th><th>FY2025</th><th>FY2026</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>2,168</td><td>2,673</td><td>3,353</td></tr>
+          <tr><td>영업이익</td><td>-121.5</td><td>-122.2</td><td>-118.0</td></tr>
+          <tr><td>영업이익률</td><td>-5.6%</td><td>-4.6%</td><td>-3.5%</td></tr>
+          <tr><td>순이익</td><td>-57.7</td><td>-41.5</td><td>-63.2</td></tr>
+          <tr><td>EPS</td><td>-$0.39</td><td>-$0.27</td><td>-$0.39</td></tr>
+          <tr><td>ROE</td><td>-5.8%</td><td>-2.7%</td><td>-2.9%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">FY2027E 컨센서스: 매출 $3,930M · EPS(non-GAAP) $4.91 (47명, 10.26 집계) · 회사 가이던스: 매출 $3,908~3,938M · EPS $4.86~4.90</div>
+    <div class="source-note">※ 출처: stockanalysis.com (financials, ratios, forecast) · 가이던스: Investing.com</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>업종 수요 재확인</b> — 11.19 팔로알토 가이던스 상향에 사이버보안주가 랠리했고, ZS도 장중 +8.2%까지 올랐다</li>
+          <li><b>순신규 ARR 가속</b> — 4분기 Red Canary 제외 순신규 ARR 성장률 17%(FY2025는 7%)</li>
+          <li><b>장기 성장 경로</b> — 투자자의 날에 FY2031 ARR $8~10B 경로를 제시(현재 $3.77B)</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>성장 둔화 가이던스</b> — FY2027 매출 성장 16.6~17.5%로 FY2026 25%에서 감속</li>
+          <li><b>업종 동반 급락</b> — 10.26 고점 대비 11.17까지 -29%, 11.05 하루 -9.2%로 자체 뉴스 없이 업종에 휘둘림</li>
+          <li><b>GAAP 적자·인수 의존(구조적)</b> — FY2026 GAAP 순손실 $63M · 4분기 ARR 성장의 일부가 Red Canary 인수(ARR $141M)에서 왔고, 인수 고객 이탈 증가가 지적됨</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">FY2026 4분기 · 어닝 서프라이즈 +9.2% · 다음 발표 2026.12.02</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$898.2M</td><td>$877M</td><td>+2.4%</td><td>+25%</td></tr>
+            <tr><td>EPS (non-GAAP)</td><td>$1.19</td><td>$1.09</td><td>+9.2%</td><td>+33.7%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">발표일 2026.09.03 (최신 실적, 다음 발표 2026.12.02 예정). ARR은 $3.77B(+25%)로 예상($3.75B)을 넘었다. FY2027 1분기 가이던스는 매출 $935~939M, EPS $1.15~1.16이다. 연간 가이던스는 매출 $3.908~3.938B, EPS $4.86~4.90로 성장 둔화를 시사해 발표 다음 날 주가가 떨어졌다.</p>
+      <div class="source-note">※ 출처: CNBC, Investing.com, SEC EDGAR 8-K</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 6건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.19</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · GuruFocus(Reuters 인용)</span><span class="tl-title">팔로알토 실적에 사이버보안주 랠리</span><div class="tl-desc">AI 기반 공격에 대비한 보안 지출이 늘 것이라는 기대에 ZS가 장중 +8.2%까지 올랐다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.11.05</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · TIKR</span><span class="tl-title">나스닥 -5.5% 급락일 ZS -9.2%</span><div class="tl-desc">AI 거래 되돌림에 보안주가 동반 급락했다. 일주일 새 -14%.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.29</div>
+        <div><span class="dot neg"></span><span class="tl-kind">뉴스 · TIKR</span><span class="tl-title">포티넷 실적 쇼크, 보안주 동반 약세</span><div class="tl-desc">포티넷 -20.1%에 ZS는 약 -3% 하락했다. 업종 내 성장 둔화 우려의 출발점이다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.21</div>
+        <div><span class="dot"></span><span class="tl-kind">뉴스 · Trefis</span><span class="tl-title">DA Davidson, 중립·목표가 $215로 신규 커버</span><div class="tl-desc">당일 주가는 +7.8% 올라 목표가를 넘어섰다. 밸류에이션 논쟁이 시작된 지점이다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.10.06</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · Kalkine</span><span class="tl-title">투자자의 날: 가이던스 유지, 장기 ARR $8B 경로 제시</span><div class="tl-desc">이튿날 Citi($245)·TD Cowen($230)·Wedbush($240) 등이 목표가를 올렸다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.09.03</div>
+        <div><span class="dot"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[8-K] FY2026 4분기 실적</span><div class="tl-desc">매출·EPS 모두 예상을 넘었지만, FY2027 성장 둔화 가이던스로 주가는 하락했다.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑧ 접기: 애널리스트 의견 -->
+  <details class="card">
+    <summary>애널리스트 의견 <span class="summary-hint">평균 목표가 $235.19 · 47곳 (10.26 기준)</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행일</th></tr></thead>
+          <tbody>
+            <tr><td>DA Davidson</td><td>중립</td><td>$215</td><td>2026.10.21</td></tr>
+            <tr><td>Citi</td><td>목표가 상향</td><td>$245 (←$205)</td><td>2026.10.07</td></tr>
+            <tr><td>Wedbush</td><td>Outperform</td><td>$240</td><td>2026.10.07</td></tr>
+            <tr><td>RBC Capital</td><td>Outperform</td><td>$236</td><td>2026.10.07</td></tr>
+            <tr><td>TD Cowen</td><td>매수</td><td>$230 (←$200)</td><td>2026.10.07</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-note">※ 출처: Trefis, Stocktwits, MarketBeat, stockanalysis.com</div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">지스케일러는 FY2026에 매출과 ARR을 25% 늘리고 4분기 순신규 ARR 가속까지 보여 줬지만, FY2027 성장 가이던스가 17% 안팎으로 꺾이면서 밸류에이션이 재조정됐다. Forward PER 41.9배는 자사 평균보다 낮아 과거보다는 덜 비싸지만, GAAP 기준으로는 여전히 소폭 적자다. 10월 말 이후 업종 매도에 -29% 밀렸다가 팔로알토 호실적으로 반등을 시작한 상황이다. 12.02 1분기 실적에서 순신규 ARR이 가이던스를 넘으면 할인 해소의 계기가 될 수 있다. 실적 이벤트 전후의 높은 변동성을 감수할 수 있는 성장주 투자자에게 맞는 종목이다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>

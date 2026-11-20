@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio-Techne 분석 보고서</title>
+<style>
+  :root {
+    /* 차분한 네이비 기조 + 옅은 틴트. 새 색을 추가하지 말고 이 변수만 쓴다 */
+    --text: #1f2937;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --brand: #1e3a5f;       /* 기조색: 헤더 띠·카드 제목 막대·표 머리글 글자 */
+    --brand-soft: #eef3f9;  /* 옅은 네이비 틴트: 결론 박스·핵심 지표·표 머리글·종합 요약 배경 */
+    --brand-line: #cbd8e8;
+    --accent: #2f5d8a;      /* 보조 강조: 추정치(E), 라벨 */
+    --up: #d14343;          /* 상승 (국내 관례: 상승 빨강 / 하락 파랑) */
+    --down: #2f6db5;        /* 하락 */
+    --good: #2f855a;        /* 기회·호재 */
+    --good-soft: #f0f7f2;
+    --bad: #c53030;         /* 리스크 */
+    --bad-soft: #fcf2f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ① 헤더 */
+  .header { background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--brand); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+  .ticker { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .5px; }
+  .company-name { font-size: 26px; font-weight: 700; color: var(--brand); }
+  .company-desc { font-size: 13px; color: var(--muted); }
+  .price-box { text-align: right; margin-left: auto; }
+  .price { font-size: 28px; font-weight: 700; }
+  .chg { font-size: 14px; font-weight: 600; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
+  .asof { font-size: 11px; color: var(--muted); }
+  .meta-row { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: .875rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .meta-row b { color: var(--text); font-weight: 600; }
+  .verdict { margin-top: 1rem; padding: .75rem 1rem; background: var(--brand-soft); border-left: 3px solid var(--brand); border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .verdict::before { content: '한 줄 결론 · '; color: var(--brand); font-weight: 700; }
+
+  /* 공통 카드 */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--brand); margin-bottom: .875rem; display: flex; align-items: center; }
+  .card-title::before, details.card > summary::before { content: ''; display: inline-block; width: 4px; height: 15px; background: var(--brand); border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+  .source-note { font-size: 11px; color: var(--muted); margin-top: .75rem; }
+
+  /* ② 밸류에이션 지표 — 첫 줄(PER·Forward PER·PBR·ROE)만 옅게 틴트 */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .metric { padding: .75rem 1rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric:nth-child(-n+4) { background: var(--brand-soft); }
+  .metric:nth-child(4n) { border-right: none; }
+  .metric:nth-last-child(-n+4) { border-bottom: none; }
+  .m-label { font-size: 12px; color: var(--accent); font-weight: 500; }
+  .m-value { font-size: 20px; font-weight: 700; color: var(--brand); }
+  .m-sub { font-size: 11px; color: var(--muted); }
+  .val-comment { font-size: 13px; margin-top: .75rem; }
+
+  /* ③ 표 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  td:first-child { color: var(--muted); }
+  thead th { color: var(--brand); font-weight: 600; font-size: 12px; background: var(--brand-soft); border-bottom: 1px solid var(--brand-line); }
+  td.est, th.est { color: var(--accent); }
+  td.est { background: #f8fafd; }
+  .table-wrap { overflow-x: auto; }
+
+  /* ④ 기회 / 리스크 — 옅은 초록·빨강 패널 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panel { padding: .75rem 1rem; border-radius: 8px; }
+  .panel.good { background: var(--good-soft); }
+  .panel.bad { background: var(--bad-soft); }
+  .col-title { font-size: 13px; font-weight: 700; margin-bottom: .375rem; }
+  .col-title.good { color: var(--good); } .col-title.bad { color: var(--bad); }
+  .plain-list { list-style: none; font-size: 13px; }
+  .plain-list li { padding: 5px 0; border-bottom: 1px dashed rgba(100,116,139,.25); }
+  .plain-list li:last-child { border-bottom: none; }
+
+  /* ⑤ 접기 섹션 */
+  details.card { padding: 0; }
+  details.card > summary { cursor: pointer; list-style: none; padding: 1rem 1.5rem; font-size: 15px; font-weight: 700; color: var(--brand); display: flex; align-items: center; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::after { content: '펼치기 ▾'; font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
+  details.card[open] > summary::after { content: '접기 ▴'; }
+  details.card[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .75rem; }
+  .summary-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .details-body { padding: 0 1.5rem 1.25rem; }
+
+  .tl-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--muted); font-size: 12px; }
+  .tl-kind { font-size: 11px; color: var(--accent); background: var(--brand-soft); padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+  .tl-title { font-weight: 600; }
+  .tl-desc { color: var(--muted); font-size: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; background: #94a3b8; }
+  .dot.pos { background: var(--good); } .dot.neg { background: var(--bad); }
+
+  /* ⑥ 종합 요약 — 옅은 네이비 카드 */
+  .card.summary-card { background: var(--brand-soft); border-color: var(--brand-line); }
+  .summary-text { font-size: 14px; line-height: 1.8; }
+  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--brand-line); }
+
+  /* 기준일 경고 · 주가 해설 · E열 대체 줄 · 직전 대비 변화 (기존 변수만 사용) */
+  .stale { font-size: 11px; color: var(--bad); font-weight: 500; margin-left: 4px; }
+  .chart-note { font-size: 13px; margin-top: .625rem; padding: .5rem .75rem; background: var(--brand-soft); border-radius: 6px; }
+  .chart-note b, .change-note b { color: var(--brand); }
+  .est-line { font-size: 12px; color: var(--accent); margin-top: .5rem; }
+  td.up { color: var(--up); font-weight: 600; } td.down { color: var(--down); font-weight: 600; }
+  .change-note { font-size: 13px; margin-top: .75rem; }
+  .plain-list li b { font-weight: 600; }
+
+  /* 인쇄·PDF: 흰 배경, 카드가 쪽 사이에서 잘리지 않게, 펼치기 안내 숨김 (펼치기는 하단 script가 처리) */
+  @media print {
+    body { background: #fff; }
+    .container { max-width: none; padding: 0; }
+    .card, .header { break-inside: avoid; }
+    details.card > summary::after, details.card[open] > summary::after { content: none; }
+  }
+
+  @media (max-width: 640px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .metric:nth-child(4n) { border-right: 1px solid var(--border); }
+    .metric:nth-child(2n) { border-right: none; }
+    .metric:nth-last-child(-n+4) { border-bottom: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .price-box { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ① 헤더: 기본 정보 + 한 줄 결론 -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="ticker">TECH · NASDAQ</div>
+        <div class="company-name">Bio-Techne</div>
+        <div class="company-desc">생명과학 시약·항체·단백질 분석 장비·분자진단 기업 · 머크 KGaA가 인수 진행 중</div>
+      </div>
+      <div class="price-box">
+        <div class="price">$72.70</div>
+        <div class="chg down">▼ 0.07% (전일 대비)</div>
+        <div class="asof">데이터 기준 2026.11.19 종가 · Investing.com · 작성 2026.11.20</div>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span>시가총액 <b>$11.4B</b></span>
+      <span>섹터 <b>헬스케어 · 생명과학 도구</b></span>
+      <span>52주 범위 <b>$43.20 ~ $72.88</b> (현재 위치 99%)</span>
+      <span>컨센서스 <b>중립</b> · 목표가 <b>$70.50</b> (-3.0% · 인수가 $73)<span class="stale">(08.13 기준 · 실적 후 변경 미반영)</span></span>
+    </div>
+    <div class="verdict">주가가 머크 KGaA의 현금 인수가 $73에 묶인 합병차익 구간이고 남은 스프레드는 0.4%. 투자 판단은 실적보다 거래 종결 시점(올해 말~내년 초)에 달려 있음</div>
+  </div>
+
+  <!-- ② 밸류에이션 & 핵심 지표 (8칸 고정) -->
+  <div class="card">
+    <div class="card-title">밸류에이션 &amp; 핵심 지표</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-label">PER (TTM)</div><div class="m-value">62.7배</div><div class="m-sub">자사 3년 평균 79.2배</div></div>
+      <div class="metric"><div class="m-label">Forward PER</div><div class="m-value">35.6배</div><div class="m-sub">FY2027E 기준</div></div>
+      <div class="metric"><div class="m-label">PBR</div><div class="m-value">5.38배</div><div class="m-sub">BPS $13.51</div></div>
+      <div class="metric"><div class="m-label">ROE</div><div class="m-value">9.0%</div><div class="m-sub">FY2026 기준</div></div>
+      <div class="metric"><div class="m-label">EPS (TTM)</div><div class="m-value">$1.16</div><div class="m-sub">YoY +152%</div></div>
+      <div class="metric"><div class="m-label">배당수익률</div><div class="m-value">0.44%</div><div class="m-sub">주당배당 $0.32</div></div>
+      <div class="metric"><div class="m-label">부채비율</div><div class="m-value">14%</div><div class="m-sub">FY2026 기준 (D/E)</div></div>
+      <div class="metric"><div class="m-label">영업이익률</div><div class="m-value">12.2%</div><div class="m-sub">최근 분기(1Q FY27) · 전년 16.6%</div></div>
+    </div>
+    <div class="val-comment">PER 62.7배는 자사 3년 평균(79.2배)보다 낮지만 의미 있는 비교는 아니다. 주가는 6월 합의된 인수가 $73에 고정돼 있고, 현재가 $72.70과의 차이는 0.4%뿐이다. 이 스프레드가 거래 종결 위험과 남은 기간의 금리 비용을 반영한 값이다.</div>
+    <div class="source-note">※ 출처: stockanalysis.com 통계·재무·비율(2026.10.23 기준) · 최신 종가(11.19) 기준 재계산 · 영업이익률은 Quartr(1Q FY27) · 비교기준: 자사 FY2024~2026 PER 평균, 인수가 $73</div>
+  </div>
+
+  <!-- ③ 주가 추이 -->
+  <div class="card">
+    <div class="card-title">주가 추이</div>
+    <svg viewBox="0 0 880 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+  <defs>
+    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d14343" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#d14343" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="10" y1="90.0" x2="870" y2="90.0" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3"/><text x="868" y="86.0" font-size="9" fill="#6b7280" text-anchor="end">52주 최고 72.88</text><text x="868" y="171" font-size="9" fill="#6b7280" text-anchor="end">▼ 52주 최저 43.20 (축 범위 밖)</text>
+  <path d="M10.0,174 L10.0,95.0 L22.6,95.1 L35.3,96.9 L47.9,94.2 L60.6,96.3 L73.2,95.9 L85.9,95.1 L98.5,95.8 L111.2,95.2 L123.8,94.3 L136.5,95.6 L149.1,96.0 L161.8,97.3 L174.4,96.1 L187.1,94.5 L199.7,94.7 L212.4,96.0 L225.0,96.6 L237.6,98.4 L250.3,98.0 L262.9,96.4 L275.6,95.7 L288.2,95.8 L300.9,94.9 L313.5,95.3 L326.2,94.3 L338.8,93.5 L351.5,93.8 L364.1,93.2 L376.8,92.8 L389.4,93.9 L402.1,95.2 L414.7,94.3 L427.4,95.0 L440.0,95.0 L452.6,93.1 L465.3,94.7 L477.9,93.7 L490.6,94.5 L503.2,94.4 L515.9,93.3 L528.5,94.2 L541.2,94.0 L553.8,93.8 L566.5,93.2 L579.1,94.1 L591.8,93.1 L604.4,92.5 L617.1,92.7 L629.7,93.5 L642.4,92.0 L655.0,92.9 L667.6,92.0 L680.3,91.8 L692.9,92.3 L705.6,92.2 L718.2,92.3 L730.9,91.6 L743.5,92.3 L756.2,91.0 L768.8,90.5 L781.5,90.6 L794.1,90.8 L806.8,90.4 L819.4,90.8 L832.1,90.9 L844.7,92.6 L857.4,91.4 L870.0,91.9 L870.0,174 Z" fill="url(#chartFill)" stroke="none"/>
+  <polyline points="10.0,95.0 22.6,95.1 35.3,96.9 47.9,94.2 60.6,96.3 73.2,95.9 85.9,95.1 98.5,95.8 111.2,95.2 123.8,94.3 136.5,95.6 149.1,96.0 161.8,97.3 174.4,96.1 187.1,94.5 199.7,94.7 212.4,96.0 225.0,96.6 237.6,98.4 250.3,98.0 262.9,96.4 275.6,95.7 288.2,95.8 300.9,94.9 313.5,95.3 326.2,94.3 338.8,93.5 351.5,93.8 364.1,93.2 376.8,92.8 389.4,93.9 402.1,95.2 414.7,94.3 427.4,95.0 440.0,95.0 452.6,93.1 465.3,94.7 477.9,93.7 490.6,94.5 503.2,94.4 515.9,93.3 528.5,94.2 541.2,94.0 553.8,93.8 566.5,93.2 579.1,94.1 591.8,93.1 604.4,92.5 617.1,92.7 629.7,93.5 642.4,92.0 655.0,92.9 667.6,92.0 680.3,91.8 692.9,92.3 705.6,92.2 718.2,92.3 730.9,91.6 743.5,92.3 756.2,91.0 768.8,90.5 781.5,90.6 794.1,90.8 806.8,90.4 819.4,90.8 832.1,90.9 844.7,92.6 857.4,91.4 870.0,91.9" fill="none" stroke="#d14343" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="870.0" cy="91.9" r="3.5" fill="#d14343"/>
+  <text x="10.0" y="187" font-size="10" fill="#6b7280">2026-08-14</text>
+  <text x="870.0" y="187" font-size="10" fill="#6b7280" text-anchor="end">2026-11-19</text>
+</svg>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px;">
+      <span>2026.08.14~11.19 수익률 +0.4%</span>
+      <span>구간 최고 $72.84 · 최저 $72.08 · 52주 최고는 점선, 52주 최저는 축 범위 밖이라 라벨로 표시</span>
+    </div>
+    <div class="chart-note"><b>왜 움직였나</b> · 뚜렷한 개별 악재·호재 없이 인수가 $73 바로 아래 1% 이내에서 움직였다. 6.25 머크 KGaA의 주당 $73 현금 인수 합의 이후, 9.18 미국 반독점(HSR) 대기기간 만료와 9.23 주주총회 승인으로 종결 확률이 높아지면서 스프레드가 좁혀졌다 (Investing.com, SEC EDGAR).</div>
+    <div class="source-note">※ 출처: stockanalysis.com(08.14~10.16 일별), Investing.com(10.19~11.19 일별) · 차트는 11.19까지(헤더 가격 기준일과 같음)</div>
+  </div>
+
+  <!-- ④ 연간 실적 추이 (최근 3년, E열은 est-line으로 대체) -->
+  <div class="card">
+    <div class="card-title">연간 실적 추이 <span class="summary-hint">단위: 백만달러 (회계연도 6월 결산)</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>구분</th><th>FY2024</th><th>FY2025</th><th>FY2026</th></tr></thead>
+        <tbody>
+          <tr><td>매출액</td><td>1,159</td><td>1,220</td><td>1,215</td></tr>
+          <tr><td>영업이익</td><td>248.6</td><td>223.4</td><td>274.6</td></tr>
+          <tr><td>영업이익률</td><td>21.5%</td><td>18.3%</td><td>22.6%</td></tr>
+          <tr><td>순이익</td><td>168.1</td><td>73.4</td><td>181.8</td></tr>
+          <tr><td>EPS</td><td>$1.05</td><td>$0.46</td><td>$1.16</td></tr>
+          <tr><td>PER</td><td>67.2배</td><td>109.9배</td><td>60.5배</td></tr>
+          <tr><td>ROE</td><td>8.3%</td><td>3.7%</td><td>9.0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="est-line">FY2027E 컨센서스: 매출 약 $1,300M · EPS(non-GAAP) $2.04 (13명, 08.13 집계)</div>
+    <div class="source-note">※ 출처: stockanalysis.com (financials, ratios, forecast)</div>
+  </div>
+
+  <!-- ⑤ 기회 / 리스크 -->
+  <div class="card">
+    <div class="two-col">
+      <div class="panel good">
+        <div class="col-title good">기회 요인</div>
+        <ul class="plain-list">
+          <li><b>확정된 현금 회수</b> — 주당 $73 현금 인수로 현재가 대비 +0.4%가 확정적 상단</li>
+          <li><b>거래 장애물 해소</b> — 9.18 HSR 대기기간 만료, 9.23 주주총회 승인 완료</li>
+          <li><b>본업 개선</b> — 1분기 단백질과학 부문 유기적 매출 +9%, 로열티 매출 $14.5M(전년 $5.6M)</li>
+        </ul>
+      </div>
+      <div class="panel bad">
+        <div class="col-title bad">리스크 요인</div>
+        <ul class="plain-list">
+          <li><b>상승 여력 없음</b> — 인수가 $73 고정으로 52주 최고가 $72.88에서 막혀 있음</li>
+          <li><b>종결 지연·무산</b> — 남은 규제 승인 대기, 종결 시점은 "2026년 말~2027년 초"로만 제시</li>
+          <li><b>딜 무산 시 하락(구조적)</b> — 인수가는 1개월 평균가 대비 36% 프리미엄. 무산되면 1분기 GAAP 영업이익 -23%($47.7M→$36.6M)인 본업 가치로 돌아감</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 접기: 최근 실적 속보 -->
+  <details class="card">
+    <summary>최근 실적 속보 <span class="summary-hint">FY2027 1분기 · EPS 서프라이즈 +10%</span></summary>
+    <div class="details-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>실제</th><th>컨센서스</th><th>차이</th><th>YoY</th></tr></thead>
+          <tbody>
+            <tr><td>매출</td><td>$299.7M</td><td>N/A</td><td>초과(Zacks)</td><td>+4.6%</td></tr>
+            <tr><td>영업이익(GAAP)</td><td>$36.6M</td><td>N/A</td><td>—</td><td>-23.3%</td></tr>
+            <tr><td>EPS (조정)</td><td>$0.44</td><td>$0.40</td><td>+10%</td><td>+4.8%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;margin-top:.75rem;">발표일 2026.11.06 (최신 실적). 단백질과학 매출 $219.7M(+9%, 유기적 +9%), 로열티 매출 $14.5M(전년 $5.6M). 순이익은 $28.3M(전년 $38.2M)으로 줄었다. 합병 진행 중이라 별도 가이던스는 없고, 종결은 2026년 말~2027년 초로 예상한다.</p>
+      <div class="source-note">※ 출처: Zacks, Quartr</div>
+    </div>
+  </details>
+
+  <!-- ⑦ 접기: 공시·뉴스 타임라인 -->
+  <details class="card">
+    <summary>공시·뉴스 타임라인 <span class="summary-hint">최근 4건</span></summary>
+    <div class="details-body">
+      <div class="tl-item">
+        <div class="tl-date">2026.11.06</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · Quartr·Zacks</span><span class="tl-title">FY2027 1분기 실적</span><div class="tl-desc">조정 EPS $0.44로 컨센서스를 10% 넘었고 매출은 +4.6%. 합병 종결 일정은 그대로 유지했다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.09.23</div>
+        <div><span class="dot pos"></span><span class="tl-kind">공시 · SEC EDGAR</span><span class="tl-title">[8-K] 주주총회, 머크 KGaA 합병 승인</span><div class="tl-desc">거래 종결의 핵심 관문을 통과했다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.09.18</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · Investing.com</span><span class="tl-title">미국 HSR 반독점 대기기간 만료</span><div class="tl-desc">미국 규제 절차가 끝나 남은 것은 기타 규제 승인과 종결 조건이다.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.06.25</div>
+        <div><span class="dot pos"></span><span class="tl-kind">뉴스 · LabMedica</span><span class="tl-title">머크 KGaA, 주당 $73 현금 인수 합의</span><div class="tl-desc">기업가치 약 $11.3B, 1개월 평균가 대비 36% 프리미엄. 이날 이후 주가가 인수가에 수렴했다.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ⑨ 종합 요약 -->
+  <div class="card summary-card">
+    <div class="card-title">종합 요약</div>
+    <div class="summary-text">바이오테크니는 사실상 머크 KGaA의 주당 $73 현금 인수가에 묶인 종목이다. 현재가 $72.70과의 차이 0.4%가 남은 수익의 전부이고, 1분기 실적(EPS +10% 서프라이즈)도 주가에는 거의 영향을 주지 못했다. 반독점 대기기간 만료와 주주 승인을 거쳐 종결 확률은 높지만, 시점이 "2026년 말~2027년 초"로만 제시돼 있고 무산되면 인수 프리미엄(36%)이 사라질 수 있다. 새로 매수하기보다는 종결까지 보유하거나 짧은 기간 현금성 수익을 노리는 합병차익 투자자에게 맞는 종목이다.</div>
+    <div class="disclaimer">본 보고서는 투자 참고 목적으로 작성되었으며 투자 권유가 아닙니다. 모든 투자 결정과 책임은 투자자 본인에게 있습니다.</div>
+  </div>
+
+</div>
+<script>
+  /* 인쇄·PDF 저장 시 접힌 섹션을 모두 펼친다 */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details').forEach(function (d) { d.open = true; });
+  });
+</script>
+</body>
+</html>
