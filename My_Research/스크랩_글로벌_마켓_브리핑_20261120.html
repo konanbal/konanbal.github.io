@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>글로벌 마켓 브리핑 — 2026.11.20</title>
+<style>
+  :root{
+    --navy:#0b2a4f; --orange:#f07d1a; --up:#e0282e; --down:#1f62d6;
+    --ink:#1d2330; --muted:#6b7280; --line:#e5e7eb; --bg:#f5f6f8; --card:#fff;
+    --up-bg:#fdecec;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:24px 16px 48px}
+  header.cover{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .cover .top{padding:36px 32px 28px;text-align:center}
+  .cover .meta{font-weight:600;color:var(--navy);letter-spacing:.2px}
+  .cover .meta span{color:var(--muted);font-weight:500;margin-left:8px}
+  .cover h1{margin:10px 0 18px;font-size:clamp(40px,8vw,64px);line-height:1.1;font-weight:900;letter-spacing:-1px}
+  .cover h1 .l1{color:var(--navy);display:block}
+  .cover h1 .l2{color:var(--orange);display:block}
+  .cover .sub{font-size:clamp(18px,3vw,24px);color:#333;margin:0}
+  .cover .bar{background:var(--navy);color:#fff;display:flex;justify-content:space-between;
+    align-items:center;padding:14px 28px;font-size:14px;flex-wrap:wrap;gap:8px}
+  .cover .bar b{letter-spacing:.5px}
+  .cover .bar a{color:#fff}
+  nav.toc{margin:20px 0 4px;display:flex;flex-wrap:wrap;gap:8px}
+  nav.toc a{font-size:13px;text-decoration:none;color:var(--navy);background:#fff;
+    border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+  nav.toc a:hover{border-color:var(--navy)}
+  section{background:var(--card);border-radius:14px;padding:26px 28px;margin-top:18px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .kicker{color:var(--orange);font-weight:700;font-size:13px;letter-spacing:.8px;text-transform:uppercase}
+  h2{margin:4px 0 18px;font-size:26px;color:var(--navy);line-height:1.3}
+  .note{color:var(--muted);font-size:13px;margin:14px 0 0}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  thead th{background:var(--navy);color:#fff;font-weight:600}
+  .up{color:var(--up);font-weight:700}
+  .down{color:var(--down);font-weight:700}
+  /* sector bars */
+  .bars{display:grid;grid-template-columns:90px 1fr;row-gap:8px;column-gap:12px;align-items:center}
+  .bars .lab{text-align:right;font-size:14px}
+  .bars .track{position:relative;height:22px}
+  .bars .zero{position:absolute;top:-4px;bottom:-4px;border-left:1px solid #9ca3af}
+  .bars .b{position:absolute;top:0;height:100%;border-radius:3px}
+  .bars .b.pos{background:var(--up)}
+  .bars .b.neg{background:var(--down)}
+  .bars .v{position:absolute;top:0;line-height:22px;font-size:12px;font-weight:700;white-space:nowrap}
+  .bars .v.pos{color:var(--up)} .bars .v.neg{color:var(--down)}
+  /* takeaways */
+  ol.points{list-style:none;padding:0;margin:0;counter-reset:p}
+  ol.points li{counter-increment:p;position:relative;padding:12px 14px 12px 50px;
+    border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:#fafbfc}
+  ol.points li::before{content:counter(p);position:absolute;left:14px;top:12px;width:24px;height:24px;
+    border-radius:50%;background:var(--navy);color:#fff;font-size:13px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+  /* stock cards */
+  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .card{border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card.hl{background:var(--up-bg);border-color:#f3b4b4}
+  .card.hl-down{background:#eaf2fd;border-color:#a9c6f2}
+  .card .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+  .card .nm{font-weight:800;font-size:18px}
+  .card p{margin:0;font-size:14px;color:#374151}
+  /* driver box */
+  .driver{margin-top:16px;border-left:4px solid var(--orange);background:#fff8f1;
+    padding:12px 16px;border-radius:0 8px 8px 0}
+  .driver h3{margin:0 0 6px;font-size:15px;color:var(--orange)}
+  .driver p{margin:0 0 6px;font-size:14.5px}
+  .driver p:last-child{margin-bottom:0}
+  .compliance ul{margin:0 0 12px;padding-left:18px}
+  .compliance p{font-size:14px;color:#4b5563;margin:0}
+  footer{text-align:center;color:var(--muted);font-size:12.5px;margin-top:24px}
+  @media (max-width:600px){
+    section{padding:20px 18px}
+    .cards{grid-template-columns:1fr}
+    .bars{grid-template-columns:72px 1fr}
+  }
+  @media print{
+    body{background:#fff}
+    section,header.cover{box-shadow:none;break-inside:avoid;border:1px solid var(--line)}
+    nav.toc{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="cover">
+  <div class="top">
+    <div class="meta">Investment Strategy <span>2026.11.20 · Daily</span></div>
+    <h1><span class="l1">글로벌</span><span class="l2">마켓 브리핑</span></h1>
+    <p class="sub">앤트로픽 상장<br>미국증시 ‘전강후약’..2%대↓</p>
+  </div>
+  <div class="bar">
+    <b>Mirae Asset Securities Research</b>
+    <span>김주연 · <a href="mailto:jooyoun.kim@miraeasset.com">jooyoun.kim@miraeasset.com</a></span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="목차">
+  <a href="#indices">미국증시 주요지수</a>
+  <a href="#sectors">S&amp;P500 업종</a>
+  <a href="#t1">앤트로픽 상장</a>
+  <a href="#t2">기술적 지지선 이탈</a>
+  <a href="#t3">고용·제조업</a>
+  <a href="#up">상승 특징종목</a>
+  <a href="#down">하락 특징종목</a>
+  <a href="#bond">채권</a>
+  <a href="#fx">외환</a>
+  <a href="#cmdty">상품</a>
+  <a href="#compliance">Compliance</a>
+</nav>
+
+<section id="indices">
+  <div class="kicker">Key Indices</div>
+  <h2>미국증시 주요지수</h2>
+  <table>
+    <thead><tr><th>지수</th><th>종가</th><th>등락률</th></tr></thead>
+    <tbody>
+      <tr><td>다우존스 산업평균</td><td>49,097.06</td><td class="down">-2.19%</td></tr>
+      <tr><td>S&amp;P500</td><td>7,175.83</td><td class="down">-2.02%</td></tr>
+      <tr><td>나스닥 종합</td><td>23,879.19</td><td class="down">-2.25%</td></tr>
+      <tr><td>나스닥 100</td><td>26,517.05</td><td class="down">-2.21%</td></tr>
+      <tr><td>러셀 2000</td><td>2,655.10</td><td class="down">-2.18%</td></tr>
+      <tr><td>필라델피아 반도체</td><td>9,419.72</td><td class="down">-2.41%</td></tr>
+      <tr><td>VIX</td><td>28.44</td><td class="up">+15.80%</td></tr>
+    </tbody>
+  </table>
+  <p class="note">주: 작성 시점 기준</p>
+</section>
+
+<section id="sectors">
+  <div class="kicker">Key Indices</div>
+  <h2>S&amp;P500 업종 지수 <small style="font-size:14px;color:var(--muted);font-weight:500">(등락률, %)</small></h2>
+  <div class="bars" id="barbox"></div>
+  <p class="note">주: 작성 시점 기준</p>
+</section>
+
+<section id="t1">
+  <div class="kicker">Key Takeaways #1</div>
+  <h2>앤트로픽 나스닥 상장, 기술주 약세</h2>
+  <ol class="points">
+    <li>‘클로드’ 개발사 앤트로픽, 티커 ‘ANT’로 나스닥 상장</li>
+    <li>공모가 대비 34.3% 오른 $111.5에 거래 시작..$97.17에 마감</li>
+    <li>앤트로픽 초반 급등 후 내림세..기술주 매도세 확산</li>
+    <li>‘AMD’ 공매도 보고서∙순환금융 취약점 지적도 투심 악화 요인</li>
+  </ol>
+  <p class="note">주: 작성 시점 기준</p>
+</section>
+
+<section id="t2">
+  <div class="kicker">Key Takeaways #2</div>
+  <h2>미국증시 주요 지수, 기술적 지지선 이탈</h2>
+  <ol class="points">
+    <li>다우, 5개월만에 5만선 이탈..S&amp;P500∙나스닥, 6개월래 최저</li>
+    <li>다우, 고점 대비 10.32% 하락..나스닥 이어 ‘조정구간’ 진입</li>
+    <li>다우∙S&amp;P500∙나스닥 지수, 200일선 이어 240일선 일제히 이탈</li>
+    <li>3대 지수 모두 3월 이후 첫 장기 이평선 이탈..기술적 경계감</li>
+  </ol>
+  <p class="note">주: 작성 시점 기준</p>
+</section>
+
+<section id="t3">
+  <div class="kicker">Key Takeaways #3</div>
+  <h2>안정적 고용, 동부지역 제조업은 ‘부진’</h2>
+  <ol class="points">
+    <li>주간 신규실업수당 청구건수 1천건 증가, 20.3만건..‘예상 상회’</li>
+    <li>9월 중순 이후 20만건 안팎 등락..비교적 안정적인 수준</li>
+    <li>11월 필라델피아 제조업 지수 6.3 ‘예상 대폭 하회’</li>
+    <li>응답 업체 48.1% “제품 판매 가격 올려”</li>
+  </ol>
+  <p class="note">주: 작성 시점 기준</p>
+</section>
+
+<section id="up">
+  <div class="kicker">Key Stocks — Up</div>
+  <h2>상승 특징종목</h2>
+  <div class="cards">
+    <div class="card hl"><div class="hd"><span class="nm">앤트로픽</span><span class="up">+17.07%</span></div>
+      <p>공모가 대비 34.3% 상승한 $111.5에 거래 시작. 장 중 $115 돌파 후 오름폭 축소, $100 하회</p></div>
+    <div class="card"><div class="hd"><span class="nm">옥타</span><span class="up">+5.75%</span></div>
+      <p>미국 주요 정부기관과 기업서 잇따른 시스템 장애 발생. 사이버 보안 수요 확대 기대</p></div>
+    <div class="card"><div class="hd"><span class="nm">팔로 알토 네트웍스</span><span class="up">+6.42%</span></div>
+      <p>업종 투자심리 우호적인 가운데 연간 실적 전망 상향. 인프라 기업 어플라이드 컴퓨트 인수 발표</p></div>
+    <div class="card"><div class="hd"><span class="nm">웨스턴 디지털</span><span class="up">+2.98%</span></div>
+      <p>앤트로픽 상장으로 AI 모델 작동에 필수적인 대용량 데이터 저장 인프라 수요 증가 기대</p></div>
+    <div class="card"><div class="hd"><span class="nm">인텔</span><span class="up">+1.92%</span></div>
+      <p>CEO “첨단 반도체 공정 18A-P의 첫 외부고객과 계약 체결”</p></div>
+    <div class="card"><div class="hd"><span class="nm">코히어런트</span><span class="up">+0.99%</span></div>
+      <p>이사회, 최대 20억 달러 규모 자사주 매입 프로그램 승인</p></div>
+  </div>
+  <p class="note">주: 작성 시점 기준</p>
+</section>
+
+<section id="down">
+  <div class="kicker">Key Stocks — Down</div>
+  <h2>하락 특징종목</h2>
+  <div class="cards">
+    <div class="card hl-down"><div class="hd"><span class="nm">네비우스</span><span class="down">-9.39%</span></div>
+      <p>엔비디아 임시 CEO, 네오 클라우드 등 AI 생태계 지원 방향 변화 가능성 시사</p></div>
+    <div class="card"><div class="hd"><span class="nm">AMD</span><span class="down">-7.72%</span></div>
+      <p>투자회사 헌터브룩, AMD의 대중국 반도체 수출 규제 위반 의혹 담은 공매도 보고서 공개</p></div>
+    <div class="card"><div class="hd"><span class="nm">유나이티드헬스</span><span class="down">-5.55%</span></div>
+      <p>미국 정부 보험금 환수 확대와 전국민 건강보험 도입 논의 속 3거래일 연속 하락</p></div>
+    <div class="card"><div class="hd"><span class="nm">윌리엄스 소노마</span><span class="down">-15.16%</span></div>
+      <p>주력 브랜드 ‘포터리반’ 전분기 동일점포 매출 1.8% 증가, 전분기 대비 대폭 둔화</p></div>
+    <div class="card"><div class="hd"><span class="nm">뉴몬트</span><span class="down">-4.29%</span></div>
+      <p>국제 금 가격 연준 통화 긴축 경계감과 달러 강세 압력에 14개월래 최저 수준으로 하락</p></div>
+    <div class="card"><div class="hd"><span class="nm">프리포트 맥모란</span><span class="down">-4.53%</span></div>
+      <p>국제 구리 가격 7개월래 최저 수준으로 하락</p></div>
+  </div>
+  <p class="note">주: 작성 시점 기준</p>
+</section>
+
+<section id="bond">
+  <div class="kicker">FICC</div>
+  <h2>채권 동향</h2>
+  <table>
+    <thead><tr><th>구분</th><th>금리</th><th>변동</th></tr></thead>
+    <tbody>
+      <tr><td>미 2년물</td><td>4.7618%</td><td class="down">-4.24bp</td></tr>
+      <tr><td>미 10년물</td><td>5.0461%</td><td class="down">-2.22bp</td></tr>
+      <tr><td>미 30년물</td><td>5.4024%</td><td class="down">-0.75bp</td></tr>
+    </tbody>
+  </table>
+  <div class="driver">
+    <h3>변동요인</h3>
+    <p>국채금리 단기물 중심 하락. 앤트로픽 급등 출발 뒤 급격한 상승폭 축소, 위험회피 심리 재자극으로 이어져 국채 금리 하락(국채 가격 상승) 압력. 주간 고용 지표와 필라델피아 제조업 활동 지수 부진도 금리 하락 요인.</p>
+  </div>
+  <p class="note">주: 작성 시점 기준</p>
+</section>
+
+<section id="fx">
+  <div class="kicker">FICC</div>
+  <h2>외환 동향</h2>
+  <table>
+    <thead><tr><th>구분</th><th>종가</th><th>변동</th></tr></thead>
+    <tbody>
+      <tr><td>달러인덱스(DXY)</td><td>103.913</td><td class="up">+0.05%</td></tr>
+      <tr><td>달러-원</td><td>1,335.1</td><td class="down">-0.10원</td></tr>
+      <tr><td>달러-원 NDF 1M</td><td>1,334.24</td><td class="down">-0.18원</td></tr>
+    </tbody>
+  </table>
+  <div class="driver">
+    <h3>변동요인</h3>
+    <p>미국 달러화 가치 이틀째 상승. 증시 기술주 매도 쏟아져 안전 자산 선호 심리 따른 달러 강세 견인. 도이체방크 “미국 기술주 약세 구간 해외 투자자 미국 주식 매수 이어져 달러 수요 뒷받침”</p>
+  </div>
+  <p class="note">주: 작성 시점 기준</p>
+</section>
+
+<section id="cmdty">
+  <div class="kicker">FICC</div>
+  <h2>상품 동향</h2>
+  <table>
+    <thead><tr><th>구분</th><th>종가</th><th>등락률</th></tr></thead>
+    <tbody>
+      <tr><td>WTI (12월물)</td><td>83.21달러</td><td class="up">+0.61%</td></tr>
+      <tr><td>브렌트유 (1월물)</td><td>91.98달러</td><td class="up">+0.65%</td></tr>
+    </tbody>
+  </table>
+  <div class="driver">
+    <h3>변동요인</h3>
+    <p>미국의 대이란 추가 공습 검토 보도에 장 중 유가 상승 폭 확대. 트럼프 “이란 공격 여부 결정, 내년으로 미룰 것” 발언에 오름폭 축소 마감.</p>
+    <p>국제 금가격은 연준의 긴축적 통화정책에 대한 경계감과 달러 강세 압력 속 추가 하락, 장 중 지난해 9월 중순 이후 최저치 경신.</p>
+  </div>
+  <p class="note">주: 작성 시점 기준</p>
+</section>
+
+<section id="compliance" class="compliance">
+  <div class="kicker">Compliance</div>
+  <h2>Compliance</h2>
+  <ul>
+    <li>당사는 본 자료를 제3자에게 사전 제공한 사실이 없습니다.</li>
+    <li>본 자료는 외부의 부당한 압력이나 간섭없이 애널리스트의 의견이 정확하게 반영되었음을 확인합니다.</li>
+  </ul>
+  <p>본 조사분석자료는 당사의 리서치센터가 신뢰할 수 있는 자료 및 정보로부터 얻은 것이나, 당사가 그 정확성이나 완전성을 보장할 수 없으므로 투자자 자신의 판단과 책임하에 종목 선택이나 투자시기에 대한 최종 결정을 하시기 바랍니다. 따라서 본 조사분석자료는 어떠한 경우에도 고객의 증권투자 결과에 대한 법적 책임소재의 증빙자료로 사용될 수 없습니다. 본 조사분석자료의 지적재산권은 당사에 있으므로 당사의 허락 없이 무단 복제 및 배포할 수 없습니다.</p>
+</section>
+
+<footer>Mirae Asset Securities Research · 2026년 11월 20일 글로벌 마켓 브리핑</footer>
+</div>
+
+<script>
+  // S&P500 업종 등락률 (%)
+  const sectors = [
+    ["에너지", -0.68], ["유틸리티", -1.15], ["금융", -1.49], ["필수소비재", -1.54],
+    ["부동산", -1.59], ["소재", -1.89], ["정보기술", -1.94], ["산업재", -1.99],
+    ["헬스케어", -2.28], ["커뮤니케이션", -2.47], ["경기소비재", -3.03]
+  ];
+  // 0 기준선 위치를 데이터 범위에 맞춰 잡음 (양·음 혼재면 비례 배치)
+  const lo = Math.min(0, ...sectors.map(s => s[1])), hi = Math.max(0, ...sectors.map(s => s[1]));
+  const PAD = 12, span = 100 - 2 * PAD;            // 좌우 여백(%)은 값 라벨 자리
+  const x = v => PAD + (v - lo) / (hi - lo) * span;
+  const box = document.getElementById("barbox");
+  sectors.forEach(([name, v]) => {
+    const lab = document.createElement("div"); lab.className = "lab"; lab.textContent = name;
+    const t = document.createElement("div"); t.className = "track";
+    const z = document.createElement("div"); z.className = "zero"; z.style.left = x(0) + "%";
+    const b = document.createElement("div"), s = document.createElement("div");
+    const cls = v >= 0 ? "pos" : "neg";
+    b.className = "b " + cls; s.className = "v " + cls;
+    const a = Math.min(x(0), x(v)), w = Math.max(Math.abs(x(v) - x(0)), 0.4);
+    b.style.left = a + "%"; b.style.width = w + "%";
+    s.textContent = (v > 0 ? "+" : "") + v.toFixed(2);
+    if (v >= 0) s.style.left = "calc(" + (a + w) + "% + 6px)";
+    else s.style.right = "calc(" + (100 - a) + "% + 6px)";
+    t.append(z, b, s); box.append(lab, t);
+  });
+</script>
+</body>
+</html>
