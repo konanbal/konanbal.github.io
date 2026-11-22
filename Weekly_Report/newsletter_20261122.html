@@ -16,9 +16,10 @@
   ul { padding-left:20px; margin:8px 0; }
   li { margin:4px 0; }
   table { width:100%; border-collapse:collapse; font-size:14px; margin:8px 0 14px; }
-  th, td { border-bottom:1px solid #e5e7eb; padding:7px 6px; text-align:left; }
-  th { background:#eff6ff; color:#1e3a8a; }
-  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  th, td { border-bottom:1px solid #e5e7eb; padding:7px 8px; text-align:left; vertical-align:middle; }
+  th { background:#eff6ff; color:#1e3a8a; white-space:nowrap; }
+  td:first-child { white-space:nowrap; }
+  th.num, td.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .down { color:#2563eb; font-weight:600; }
   .up { color:#dc2626; font-weight:600; }
   .insight { background:#eff6ff; border-left:4px solid #1d4ed8; padding:12px 14px; border-radius:6px; margin-top:14px; font-size:15px; }
@@ -56,7 +57,7 @@
   <h2>📈 국내 주식·증시</h2>
   <h3>핵심 숫자</h3>
   <table>
-    <tr><th>지표</th><th>11/13 종가</th><th>11/20 종가</th><th>주간 등락</th></tr>
+    <tr><th>지표</th><th class="num">11/13 종가</th><th class="num">11/20 종가</th><th class="num">주간 등락</th></tr>
     <tr><td>코스피</td><td class="num">5,290.53</td><td class="num">4,869.96</td><td class="num down">−7.95%</td></tr>
     <tr><td>코스닥</td><td class="num">699.66</td><td class="num">645.68</td><td class="num down">−7.72%</td></tr>
   </table>
@@ -76,14 +77,14 @@
   <h2>🌐 글로벌 매크로</h2>
   <h3>핵심 숫자</h3>
   <table>
-    <tr><th>지표</th><th>수준 (11/20 기준)</th><th>비고</th></tr>
+    <tr><th>지표</th><th class="num">수준 (11/20 기준)</th><th>비고</th></tr>
     <tr><td>원/달러 환율</td><td class="num">1,336.2원</td><td>전일 대비 +6.2원 (서울 외환시장 15:30)</td></tr>
     <tr><td>달러인덱스</td><td class="num">약 103.75</td><td>4주 연속 주간 상승 흐름</td></tr>
     <tr><td>미 10년물 국채</td><td class="num">약 4.95%</td><td>주간 약 −20bp</td></tr>
     <tr><td>미 2년물 국채</td><td class="num">약 4.66%</td><td>주간 약 −20bp</td></tr>
     <tr><td>WTI</td><td class="num">$83.98</td><td>주간 −5.17% (3주 연속 하락)</td></tr>
     <tr><td>브렌트유</td><td class="num">$92.57</td><td>주간 −3.41%</td></tr>
-    <tr><td>금 현물</td><td class="num">장중 저점 $3,513.54</td><td>주간 약 −8%, 2025년 9월 이후 최저</td></tr>
+    <tr><td>금 현물</td><td class="num">$3,513.54</td><td>장중 저점 · 주간 약 −8%, 2025년 9월 이후 최저</td></tr>
   </table>
   <ul>
     <li><strong>연준</strong>: 크리스토퍼 월러 연준 이사가 18일 CNBC 인터뷰에서 12월 8~9일 FOMC에서 0.5%p 인상이 필요할 수 있다며 인플레이션에 대한 강한 우려를 밝혔습니다.</li>
@@ -100,7 +101,7 @@
   <h2>🇺🇸 미국 주식·증시</h2>
   <h3>핵심 숫자</h3>
   <table>
-    <tr><th>지수</th><th>11/20 종가</th><th>일간</th><th>주간</th><th>연초 대비</th></tr>
+    <tr><th>지수</th><th class="num">11/20 종가</th><th class="num">일간</th><th class="num">주간</th><th class="num">연초 대비</th></tr>
     <tr><td>S&amp;P500</td><td class="num">6,910.39</td><td class="num down">−3.7%</td><td class="num down">−8.6%</td><td class="num up">+0.9%</td></tr>
     <tr><td>나스닥</td><td class="num">22,617.73</td><td class="num down">−5.3%</td><td class="num down">−10.0%</td><td class="num down">−2.7%</td></tr>
     <tr><td>다우</td><td class="num">48,147.33</td><td class="num down">−1.9%</td><td class="num down">−8.0%</td><td class="num up">+0.2%</td></tr>
