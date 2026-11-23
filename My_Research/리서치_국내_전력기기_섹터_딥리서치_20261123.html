@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>국내 전력기기 섹터 딥리서치 (2026.11.23 기준)</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#fff; --ink:#1c2230; --sub:#5b6474; --line:#e3e6eb;
+    --accent:#1f5fbf; --accent-soft:#e8f0fc; --neg:#c62828;
+    --fact:#1f6f43; --fact-bg:#e6f4ec; --calc:#6a4bbd; --calc-bg:#efeafb;
+    --fcst:#a15c00; --fcst-bg:#fdf1e0; --judg:#245e8f; --judg-bg:#e5f0f8;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+    font-size:15.5px;line-height:1.7;word-break:keep-all}
+  header{background:linear-gradient(135deg,#0f2a52,#1f5fbf);color:#fff;padding:40px 24px 32px}
+  header .in{max-width:1400px;margin:0 auto}
+  header .kicker{font-size:13px;letter-spacing:.08em;opacity:.8}
+  header h1{margin:6px 0 8px;font-size:28px;line-height:1.35}
+  header .meta{font-size:14px;opacity:.85}
+  .legend{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px}
+  .legend span{background:rgba(255,255,255,.14);padding:3px 10px;border-radius:999px}
+  .wrap{max-width:1400px;margin:0 auto;padding:24px;display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:start}
+  nav{position:sticky;top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 10px}
+  nav b{display:block;font-size:12px;color:var(--sub);padding:0 8px 6px;letter-spacing:.06em}
+  nav a{display:block;padding:6px 8px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:14px}
+  nav a:hover{background:var(--accent-soft);color:var(--accent)}
+  main{min-width:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 28px;margin-bottom:20px}
+  h2{margin:0 0 12px;font-size:21px;padding-bottom:10px;border-bottom:2px solid var(--accent-soft);scroll-margin-top:16px}
+  h3{margin:24px 0 8px;font-size:17px;color:#24324a}
+  p{margin:8px 0}
+  ol,ul{padding-left:22px} li{margin:6px 0} li p{margin:0} .card:first-child ol li p{display:inline}
+  a{color:var(--accent)}
+  .card:first-child ol li{background:#f8fafd;border-left:3px solid var(--accent);padding:8px 12px;border-radius:6px;list-style-position:inside;margin-left:-22px}
+  .tbl{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+  th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  thead th{background:#f0f3f8;color:#2b3547;font-weight:700;white-space:nowrap;position:sticky;top:0}
+  tbody tr:nth-child(even){background:#fafbfc}
+  tbody tr:hover{background:var(--accent-soft)}
+  td:first-child{font-weight:600;white-space:nowrap}
+  .neg{color:var(--neg);font-weight:600}
+  .tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin-right:2px;vertical-align:1px}
+  .tag.fact{color:var(--fact);background:var(--fact-bg)}
+  .tag.calc{color:var(--calc);background:var(--calc-bg)}
+  .tag.fcst{color:var(--fcst);background:var(--fcst-bg)}
+  .tag.judg{color:var(--judg);background:var(--judg-bg)}
+  footer{max-width:1400px;margin:0 auto;padding:0 24px 40px;color:var(--sub);font-size:13px}
+  @media (max-width:900px){
+    .wrap{grid-template-columns:1fr;padding:14px}
+    nav{position:static;display:flex;flex-wrap:wrap;gap:4px}
+    nav b{width:100%}
+    .card{padding:18px 16px}
+    header h1{font-size:22px}
+  }
+  @media print{
+    nav{display:none} .wrap{display:block} body{background:#fff}
+    .card{break-inside:avoid-page;border:none;padding:0 0 12px}
+    header{background:#fff;color:#000;padding:0 0 12px} header .legend span{background:#eee}
+  }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="kicker">SECTOR DEEP RESEARCH · 개인투자자 6~12개월 관점</div>
+  <h1>국내 전력기기 섹터 딥리서치</h1>
+  <div class="meta">기준일 2026.11.23 · 작성 코난발 · 주가는 11/20 종가(일부 11/23)</div>
+  <div class="legend"><span>사실 = 공시·통계</span><span>계산 = 공개 수치로 직접 계산</span><span>전망 = 증권사·조사기관 추정</span><span>판단 = 해석</span></div>
+</div></header>
+<div class="wrap">
+  <nav><b>목차</b>
+<a href="#핵심-요약">핵심 요약</a>
+<a href="#섹터-개요">1. 섹터 개요</a>
+<a href="#밸류체인">2. 밸류체인</a>
+<a href="#주요-기업-상세-비교">3. 주요 기업 상세 비교</a>
+<a href="#최근-6개월-핵심-이슈">4. 최근 6개월 핵심 이슈</a>
+<a href="#수급과-밸류에이션">5. 수급과 밸류에이션</a>
+<a href="#리스크">6. 리스크</a>
+<a href="#시나리오-612개월">7. 시나리오 (6~12개월)</a>
+<a href="#모니터링-지표-매월-확인-5개">8. 모니터링 지표 (매월 확인 5개)</a>
+<a href="#출처-목록">출처 목록</a>
+  </nav>
+  <main>
+<section class="card"><h2 id="핵심-요약">핵심 요약</h2>
+<p>수주와 이익은 사상 최대인데 주가는 5월 고점 대비 65~73% 빠졌습니다. 지금 판단의 핵심은 업황이 아니라 "멀티플이 어디서 멈추는가"입니다.</p>
+<ol type="1">
+<li><p><strong><span class="tag fact">사실</span> 업황은 꺾이지 않았다.</strong> 3Q26 말 수주잔고는 효성중공업 18.9조원(+71% YoY), LS ELECTRIC 7.04조원(+73%), HD현대일렉트릭 88.4억달러로 모두 사상 최대입니다. 3Q 신규수주도 효성 +122%, LS ELECTRIC +133%였습니다.</p></li>
+<li><p><strong><span class="tag fact">사실</span> 주가는 반토막 이하.</strong> 5월 고점 대비 HD현대일렉트릭 <span class="neg">-73%</span>, LS ELECTRIC <span class="neg">-66%</span>, 효성중공업 <span class="neg">-65%</span>(11/20 종가 기준). 원인은 이익 훼손보다 AI 인프라주 전반의 밸류에이션 붕괴, 미국 중간선거 후 데이터센터 규제 우려, 고금리입니다.</p></li>
+<li><p><strong><span class="tag calc">계산</span> 밸류에이션은 2025년 4월 조정기 수준으로 내려왔다.</strong> HD현대일렉트릭은 2025년 EPS 기준 PER 19.0배, 선행 PER 약 12배(환산)로, 2025년 4월 3사 합산 PER 14배와 비슷합니다. 반면 LS ELECTRIC은 2025년 EPS 기준 56.7배로 여전히 높습니다.</p></li>
+<li><p><strong><span class="tag fcst">전망·반론</span> 약세 논리도 실재한다.</strong> 데이터센터 발주 지연, 신규 수주 단가·리드타임 정체, 2027~2028년 국내외 증설 물량, 대형 변압기 232조 관세 한시 15% 적용 종료(2027년 말)가 이익 추정치를 낮출 수 있습니다.</p></li>
+<li><p><strong><span class="tag judg">판단 기준</span> 6~12개월의 분기점은 네 가지 신호입니다.</strong> HD현대일렉트릭의 빅테크 3곳 장기공급계약 확정 공시, 4Q26 이연 매출의 정상 인식, 하이퍼스케일러의 2027년 설비투자 가이던스, 월별 대미 변압기 수출 단가입니다.</p></li>
+</ol>
+<h3 id="주요-기업-비교표">주요 기업 비교표</h3>
+<div class="tbl"><table style="width:100%;">
+
+<thead>
+<tr class="header">
+<th>종목</th>
+<th>구간</th>
+<th>주가(원, 기준일)</th>
+<th>5월 고점 대비</th>
+<th>3Q26 매출</th>
+<th>3Q26 영업이익률</th>
+<th>PER(2025 EPS 기준)</th>
+<th>PBR</th>
+<th>ROE(최근 4분기)</th>
+<th>3Q26 말 수주잔고</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>HD현대일렉트릭</td>
+<td>초고압 변압기·배전</td>
+<td>386,500 (11/20)</td>
+<td><span class="neg">-73%</span></td>
+<td>1.18조원</td>
+<td>24.1%</td>
+<td>19.0배</td>
+<td>6.5배</td>
+<td>41.5%</td>
+<td>88.4억달러</td>
+</tr>
+<tr class="even">
+<td>효성중공업</td>
+<td>초고압 변압기·GIS (건설 포함)</td>
+<td>1,651,000 (11/20)</td>
+<td><span class="neg">-65%</span></td>
+<td>1.74조원</td>
+<td>14.0%</td>
+<td>29.6배</td>
+<td>6.2배</td>
+<td>24.4%</td>
+<td>18.9조원(중공업)</td>
+</tr>
+<tr class="odd">
+<td>LS ELECTRIC</td>
+<td>배전반·초고압 변압기</td>
+<td>108,400 (11/20)</td>
+<td><span class="neg">-66%</span></td>
+<td>1.88조원</td>
+<td>12.4%</td>
+<td>56.7배</td>
+<td>확인 불가</td>
+<td>14.7%</td>
+<td>7.04조원</td>
+</tr>
+<tr class="even">
+<td>산일전기</td>
+<td>특수·배전 변압기</td>
+<td>102,400 (11/20)</td>
+<td>확인 불가</td>
+<td>1,460억원</td>
+<td>30.5%</td>
+<td>20.9배</td>
+<td>확인 불가</td>
+<td>29.2%</td>
+<td>확인 불가</td>
+</tr>
+<tr class="odd">
+<td>일진전기</td>
+<td>변압기·GIS·전선</td>
+<td>53,200 (11/23)</td>
+<td>확인 불가</td>
+<td>6,376억원</td>
+<td>11.0%</td>
+<td>24.4배</td>
+<td>3.9배</td>
+<td>19.1%</td>
+<td>22.5억달러</td>
+</tr>
+<tr class="even">
+<td>대한전선</td>
+<td>초고압·해저케이블</td>
+<td>16,780 (11/20)</td>
+<td>확인 불가</td>
+<td>1.18조원</td>
+<td>2.6%</td>
+<td>37.1배</td>
+<td>1.8배</td>
+<td>5.5%</td>
+<td>4.31조원</td>
+</tr>
+<tr class="odd">
+<td>LS(지주)</td>
+<td>LS전선·LS ELECTRIC 등</td>
+<td>164,000 (11/23)</td>
+<td>확인 불가</td>
+<td>10.81조원</td>
+<td>4.5%</td>
+<td>19.4배</td>
+<td>0.9배</td>
+<td>5.6%</td>
+<td>확인 불가</td>
+</tr>
+</tbody>
+</table></div>
+<p>표 읽는 법: PER은 기준일 주가를 2025년 연간 EPS(데이터 제공사 표기값)로 나눈 계산값입니다. PBR·ROE는 <a target="_blank" rel="noopener" href="https://alphasquare.co.kr/home/stock-summary?code=267260">알파스퀘어</a> 업종 비교표의 최근 4분기 값으로, 기준 시점이 종목마다 다를 수 있습니다. LS ELECTRIC 고점은 액면분할(5:1, 2026.4.13) 이후 가격 기준입니다. 매출·이익은 각 사 잠정실적 공시와 이를 보도한 기사 기준입니다(출처는 3장과 출처 목록).</p>
+</section><section class="card"><h2 id="섹터-개요">1. 섹터 개요</h2>
+<p>글로벌 변압기 시장은 연 5~8% 성장하는 보통 산업이지만, 북미·유럽의 공급 부족이 한국 업체의 가격·마진을 끌어올렸습니다. 성장률보다 수급 격차가 이 섹터의 본질입니다.</p>
+<p><strong>시장 규모와 CAGR <span class="tag fcst">전망: 조사기관 추정, 기관마다 편차 큼</span></strong></p>
+<div class="tbl"><table>
+
+<thead>
+<tr class="header">
+<th>지표</th>
+<th>규모</th>
+<th>성장률</th>
+<th>출처(발표 시점)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>글로벌 변압기 시장</td>
+<td>2026E 657억달러 → 2033F 968억달러</td>
+<td>CAGR 5.7%</td>
+<td><a target="_blank" rel="noopener" href="https://www.persistencemarketresearch.com/market-research/transformer-market.asp">Persistence</a> (2026.4)</td>
+</tr>
+<tr class="even">
+<td>글로벌 전력변압기 시장</td>
+<td>2026E 282억달러 → 2033F 464억달러</td>
+<td>CAGR 7.4%</td>
+<td><a target="_blank" rel="noopener" href="https://persistencemarketresearch.com/market-research/power-transformer-market.asp">Persistence</a> (2026.5)</td>
+</tr>
+<tr class="odd">
+<td>유럽·북미 전력변압기 수요(공급 가능분)</td>
+<td>2030년 약 1,000GVA</td>
+<td>CAGR 약 8.3%</td>
+<td><a target="_blank" rel="noopener" href="https://www.mckinsey.com/industries/electric-power-and-natural-gas/our-insights/the-transformer-supercycle-why-demand-is-outrunning-supply">McKinsey</a> (2026.9)</td>
+</tr>
+<tr class="even">
+<td>미국 데이터센터용 전기장비</td>
+<td>200억달러 → 2030년 650억달러</td>
+<td>약 3배</td>
+<td><a target="_blank" rel="noopener" href="https://www.eenews.net/articles/data-centers-to-triple-us-power-equipment-market-to-65b/">Wood Mackenzie(E&amp;E News)</a></td>
+</tr>
+<tr class="odd">
+<td>글로벌 전력망 설비투자</td>
+<td>2026년 6,500억달러 초과</td>
+<td>확인 불가</td>
+<td><a target="_blank" rel="noopener" href="https://www.pv-magazine.com/2026/06/06/global-grid-capex-to-surpass-650-billion-in-2026-says-rystad-energy/">Rystad(pv magazine)</a> (2026.6)</td>
+</tr>
+</tbody>
+</table></div>
+<p>한국 전력기기 산업 전체의 국내 시장 규모(협회 통계)는 확인 불가입니다. 대신 수출 통계가 있습니다.</p>
+<p><strong>수급 격차 <span class="tag fact">사실·추정 혼합, McKinsey 2026.9</span></strong></p>
+<ul>
+<li><p>2025년 유럽·북미 전력변압기 수요 914GVA, 공급 566GVA로 38% 부족. 발표된 증설분(약 186GVA, 2030년까지)은 수요 증가분(약 150GVA)을 조금 넘는 수준.</p></li>
+<li><p>가격은 2021년 대비 50% 넘게 올랐고, 리드타임은 약 1년에서 최장 5년으로 늘었음. 균형은 2030년대 이후로 봄.</p></li>
+<li><p>반대 데이터: Rystad는 리드타임과 가격이 모두 정체됐고 단가가 현 수준 이상 오르지 않을 것으로 봤습니다(2026.6). "더 오르지 않는 고점 가격"과 "계속 오르는 가격"은 주가에 완전히 다른 신호입니다.</p></li>
+</ul>
+<p><strong>국내 기업 실적 규모 <span class="tag fact">사실</span></strong></p>
+<ul>
+<li><p>2025년 전선·변압기·차단기 등 전력기기 수출(1~11월)은 71.3억달러로 전년 동기 대비 11.3% 증가(관세청, <a target="_blank" rel="noopener" href="https://newstomato.com/ReadNews.aspx?no=1283810">뉴스토마토</a>). 2026년 연간 품목별 수치는 확인 불가.</p></li>
+<li><p>2025년 3사 매출: HD현대일렉트릭 4.08조원(+22.8%), 효성중공업 5.97조원(+21.9%), LS ELECTRIC 약 4.97조원(+9%).</p></li>
+</ul>
+<p><strong>성장 동력</strong></p>
+<ol type="1">
+<li><p>AI 데이터센터: 하이퍼스케일러가 변압기·배전기기를 묶어 장기계약으로 직접 조달하기 시작했습니다. HD현대일렉트릭은 2026년 7월 빅테크와 최대 1조1,212억원 규모 기본계약을 맺었습니다.</p></li>
+<li><p>노후 전력망 교체: 미국 변압기·전선의 70%가 설치 25년 이상 지났다는 미 에너지부 자료가 인용됩니다(<a target="_blank" rel="noopener" href="https://v.daum.net/v/20250428160010250">다음/연합</a>).</p></li>
+<li><p>재생에너지 연계·HVDC: 정부는 2030년까지 새만금~서화성 서해안 HVDC를 구축할 계획입니다(<a target="_blank" rel="noopener" href="https://eiec.kdi.re.kr/policy/materialView.do?num=287614">기후에너지환경부/KDI</a>). 국내 발주는 미국 대비 규모는 작지만 경기와 무관한 바닥 수요입니다.</p></li>
+</ol>
+</section><section class="card"><h2 id="밸류체인">2. 밸류체인</h2>
+<p>마진과 병목이 모두 중류의 초고압 변압기에 몰려 있습니다. 같은 ‘전력기기’라도 전선은 영업이익률 2~5%, 초고압 변압기 중심 기업은 14~30%로 다른 산업처럼 움직입니다.</p>
+<div class="tbl"><table>
+
+<thead>
+<tr class="header">
+<th>구간</th>
+<th>주요 제품</th>
+<th>국내 대표 기업</th>
+<th>수익성 근거 <span class="tag fact">사실</span></th>
+<th>병목 여부</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>상류(원자재·부품)</td>
+<td>방향성 전기강판(GOES), 구리, 절연유, 부싱</td>
+<td>이 보고서에서 확인 불가</td>
+<td>GOES가 변압기 원가의 약 20%(<a target="_blank" rel="noopener" href="https://www.kingsresearch.com/report/power-transformer-market-3102">Kings Research</a>)</td>
+<td>중간: GOES 부족이 제약 요인으로 거론</td>
+</tr>
+<tr class="even">
+<td>중류 ① 초고압 송전기기</td>
+<td>345~765kV 변압기, 리액터, GIS·차단기</td>
+<td>HD현대일렉트릭, 효성중공업, LS ELECTRIC, 일진전기</td>
+<td>HD 3Q26 OPM 24.1%, 효성 중공업부문 4Q25 OPM 20.2%</td>
+<td><strong>핵심 병목</strong>: 리드타임 최장 5년, 슬롯 2031년까지 예약(GE Vernova 언급)</td>
+</tr>
+<tr class="odd">
+<td>중류 ② 특수·배전 변압기</td>
+<td>신재생·ESS·데이터센터용 변압기</td>
+<td>산일전기, HD현대일렉트릭(배전변압기)</td>
+<td>산일전기 3Q26 OPM 30.5%</td>
+<td>낮음~중간: 리드타임이 짧아 수주가 빨리 매출화</td>
+</tr>
+<tr class="even">
+<td>중류 ③ 배전반·배전기기</td>
+<td>저·중압 배전반, 차단기, 버스덕트</td>
+<td>LS ELECTRIC, HD현대일렉트릭, LS에코에너지</td>
+<td>LS ELECTRIC 전사 OPM 12.4%, LS에코에너지 3Q26 6.3%</td>
+<td>낮음: 경쟁사가 많고 데이터센터 공사 일정에 직결</td>
+</tr>
+<tr class="odd">
+<td>중류 ④ 전선·케이블</td>
+<td>초고압·해저·HVDC 케이블</td>
+<td>LS전선(LS), 대한전선, 일진전기</td>
+<td>대한전선 3Q26 OPM 2.6%, LS(지주) 4.5%</td>
+<td>해저케이블·시공선은 병목, 일반 전선은 구리 가격 전가 구조</td>
+</tr>
+<tr class="even">
+<td>하류(발주처)</td>
+<td>송배전망 운영, 데이터센터 건설</td>
+<td>한국전력, 미국 유틸리티·하이퍼스케일러</td>
+<td>한전은 요금·채권 한도가 투자 제약</td>
+<td>인허가·계통연계 대기가 현재 가장 큰 병목</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>마진이 높은 구간</strong>: 미국향 초고압 변압기와 특수 변압기입니다. 효성중공업은 태풍으로 미국향 GIS 약 1억달러 선적이 밀려 중공업 내 미국 매출 비중이 38%→29%로 줄었는데도 이익을 방어했습니다(<a target="_blank" rel="noopener" href="https://news.bizwatch.co.kr/article/industry/2026/11/04/0040">비즈워치</a>). 미국 비중이 수익성을 가르는 변수라는 뜻입니다.</p>
+<p><strong>병목이 옮겨가는 중</strong>: 장비 자체보다 미국 데이터센터의 전력 인허가·지역 반대가 제약이 되는 구간으로 들어섰습니다. 병목이 발주처 쪽으로 넘어가면 제조사의 가격 결정력은 약해집니다(6장 리스크 참조). 출처: <a target="_blank" rel="noopener" href="https://stock.pstatic.net/stock-research/company/15/20260413_company_268182000.pdf">대신증권 효성중공업(2026.4.13)</a>, <a target="_blank" rel="noopener" href="https://dealsite.co.kr/articles/157134">딜사이트(효성 4Q25)</a>, <a target="_blank" rel="noopener" href="https://news.bizwatch.co.kr/article/industry/2026/11/17/0009">비즈워치(LS그룹 3Q26)</a>.</p>
+</section><section class="card"><h2 id="주요-기업-상세-비교">3. 주요 기업 상세 비교</h2>
+<p>3년 흐름으로 보면 이익은 계속 늘었지만, 2026년 3분기에 ‘매출은 늘고 마진은 주춤’한 기업(HD현대일렉트릭·산일전기·대한전선)과 이익이 가속한 기업(LS ELECTRIC·일진전기)이 갈렸습니다.</p>
+<h3 id="실적-흐름-사실-공시잠정실적">실적 흐름 <span class="tag fact">사실: 공시·잠정실적</span></h3>
+<div class="tbl"><table>
+
+<thead>
+<tr class="header">
+<th>종목</th>
+<th>2024 매출 / 영업이익</th>
+<th>2025 매출 / 영업이익</th>
+<th>3Q26 매출 / 영업이익 (YoY)</th>
+<th>3Q26 OPM (전분기)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a target="_blank" rel="noopener" href="https://www.inews24.com/view/1936713">HD현대일렉트릭</a></td>
+<td>3.32조 / 6,689억¹</td>
+<td>4.08조 / 9,953억</td>
+<td>1.18조 (+18.5%) / 2,845억 (+15.1%)</td>
+<td>24.1% (25.1%)</td>
+</tr>
+<tr class="even">
+<td><a target="_blank" rel="noopener" href="https://zdnet.co.kr/view?no=20260206190629">효성중공업</a></td>
+<td>4.90조 / 3,625억¹</td>
+<td>5.97조 / 7,470억</td>
+<td>1.74조 (+7.2%) / 2,435억 (+10.8%)</td>
+<td>14.0% (15.7%)</td>
+</tr>
+<tr class="odd">
+<td><a target="_blank" rel="noopener" href="https://news.bizwatch.co.kr/article/industry/2026/10/21/0034/">LS ELECTRIC</a></td>
+<td>4.55조 / 3,900억</td>
+<td>4.97조 / 4,269억</td>
+<td>1.88조 (+54.4%) / 2,335억 (+131.7%)</td>
+<td>12.4% (11.3%)</td>
+</tr>
+<tr class="even">
+<td><a target="_blank" rel="noopener" href="https://etfshopping.com/stock/062040/earnings">산일전기</a></td>
+<td>3,340억 / 1,092억</td>
+<td>5,019억 / 1,786억</td>
+<td>1,460억 (+10.0%) / 445억 (+4.6%)</td>
+<td>30.5% (37.8%)</td>
+</tr>
+<tr class="odd">
+<td><a target="_blank" rel="noopener" href="https://dealsite.co.kr/articles/172542">일진전기</a></td>
+<td>확인 불가</td>
+<td>확인 불가 / 1,512억</td>
+<td>6,376억 (+41.6%) / 700억 (+98.3%)</td>
+<td>11.0% (확인 불가)</td>
+</tr>
+<tr class="even">
+<td><a target="_blank" rel="noopener" href="https://www.metroseoul.co.kr/article/20261029500564">대한전선</a></td>
+<td>확인 불가</td>
+<td>3.64조 / 1,286억</td>
+<td>1.18조 (+37.6%) / 309억 (+4.5%)</td>
+<td>2.6% (전분기 대비 영업이익 <span class="neg">-49%</span>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>¹ 2025년 공시 증가율로 역산한 값. LS ELECTRIC 2024년은 <a target="_blank" rel="noopener" href="https://file.alphasquare.co.kr/media/pdfs/market-report/%EC%9C%A0%ED%8B%B8%EB%A6%AC%ED%8B%B0%EC%84%B1%EC%9E%A5%EC%84%B1%EA%B3%BC20251202%EB%8C%80%EC%8B%A0%EC%A6%9D%EA%B6%8C.">대신증권 표</a> 기준. 전분기 OPM은 공시 증감률로 계산했습니다.</p>
+<h3 id="기업별-포인트-강점-약점">기업별 포인트 (강점 / 약점)</h3>
+<ul>
+<li><p><strong>HD현대일렉트릭</strong> — 강점: 업계 최고 마진, 3Q 북미 매출 비중 38%, 울산 신공장 11월 양산(연 40~50대 추가, 연 2,000억원+ 매출 효과 기대), 배전변압기 매출 2027년 최대 3,000억원 전망(회사). 약점: 3Q 신규수주가 전년 동기 대비 19.1% 감소(상반기 대형 수주 기저), 국내 비중 상승과 일부 해외 프로젝트 수익성 하락으로 마진이 전분기보다 낮아짐.</p></li>
+<li><p><strong>효성중공업</strong> — 강점: 수주잔고 18.9조원 중 미국 60%, 3Q 신규수주의 68%가 미국, 1~9월 영업현금흐름 1조964억원(선수금 유입, <a target="_blank" rel="noopener" href="https://sateconomy.co.kr/news/view/1065574869993248">토요경제</a>), 10/30 지멘스와 데이터센터 전략적 파트너십. 약점: 매출의 약 35%가 건설 부문(1Q26)이고 과거 PF 대위변제 사례, 3Q는 물류 차질로 시장 기대 하회(이연분은 4Q 인식 예정).</p></li>
+<li><p><strong>LS ELECTRIC</strong> — 강점: 3Q 영업이익이 컨센서스를 20.4% 상회, 수주잔고 중 초고압 변압기 3.17조·배전반 2.25조원, 초고압 변압기 생산능력 2026년 8,000억→2028년 1조원+ 계획. 약점: 3사 중 마진 최저, PER 최고(2025 EPS 기준 56.7배), 배전반은 데이터센터 공사 일정에 가장 민감.</p></li>
+<li><p><strong>산일전기</strong> — 강점: OPM 30%대, 3Q 안산시 변압기 수출 1,843억원으로 사상 최대, 출고 후 미인식 물량 780억원은 4Q 인식 예상(<a target="_blank" rel="noopener" href="https://newsfc.co.kr/news/articleView.html?idxno=82255">금융소비자뉴스</a>). 약점: 환율 변동에 따른 원가율 상승, 신재생·ESS 고객 의존.</p></li>
+<li><p><strong>일진전기</strong> — 강점: 영업이익 2배 가까이 성장, 수주잔고 해외 72%. 약점: 대형 3사 대비 제품·고객 레퍼런스가 작음.</p></li>
+<li><p><strong>대한전선·LS(지주)</strong> — 강점: 수주잔고 사상 최대(대한전선 4.31조원), HVDC·해저케이블 국내 발주 수혜. 약점: 마진이 낮고 구리 가격이 매출을 크게 흔듬. LS는 PBR 0.9배의 지주사 할인이 지속되고 있습니다.</p></li>
+</ul>
+</section><section class="card"><h2 id="최근-6개월-핵심-이슈">4. 최근 6개월 핵심 이슈</h2>
+<p>지난 6개월은 “수주는 늘고 주가는 빠진” 구간이었습니다. 악재는 대부분 섹터 밖(AI 투자 회의론, 금리, 미국 정치)에서 왔고, 섹터 안의 악재는 마진 둔화와 매출 이연 정도였습니다.</p>
+<div class="tbl"><table style="width:100%;">
+
+<thead>
+<tr class="header">
+<th>날짜</th>
+<th>구분</th>
+<th>내용</th>
+<th>방향</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2026.11.18</td>
+<td>수주(예정)</td>
+<td>HD현대일렉트릭, 빅테크 3곳과의 신규 장기공급계약 결과를 11월 말 확정 예상이라고 밝힘(<a target="_blank" rel="noopener" href="https://huffingtonpost.kr/article/262193">허프포스트코리아</a>). 11/23 현재 공시 확인 불가</td>
+<td>대기</td>
+</tr>
+<tr class="even">
+<td>2026.11.18</td>
+<td>원자재</td>
+<td>구리 가격 5.3% 급락, 7개월 만의 최저(<a target="_blank" rel="noopener" href="https://www.kita.net/board/totalTradeNews/totalTradeNewsDetail.do?no=106293&amp;siteId=2">무역협회</a>). 변압기 원가에는 우호, 전선 매출에는 부담</td>
+<td>혼재</td>
+</tr>
+<tr class="odd">
+<td>2026.11.15</td>
+<td>시장</td>
+<td>FT 집계 6월 이후 글로벌 데이터센터 건설 관련주 시총 4.2조달러 감소, 직전 12개월 증가분(9.4조달러)의 절반(<a target="_blank" rel="noopener" href="https://mbiz.heraldcorp.com/article/10937629">코리아헤럴드</a>)</td>
+<td>악재</td>
+</tr>
+<tr class="even">
+<td>2026.11.11</td>
+<td>실적</td>
+<td>일진전기 3Q 영업이익 700억원(+98%)</td>
+<td>호재</td>
+</tr>
+<tr class="odd">
+<td>2026.11.04</td>
+<td>실적</td>
+<td>산일전기 3Q 영업이익 445억원, 전분기 대비 감소(선적 지연·환율)</td>
+<td>쇼크(일시성 주장)</td>
+</tr>
+<tr class="even">
+<td>2026.11.03~05</td>
+<td>정책</td>
+<td>미국 중간선거에서 민주당이 상·하원 장악, 데이터센터 규제 강화 우려로 관련주 급락(<a target="_blank" rel="noopener" href="https://www.koreancenter.or.kr/news/articleView.html?idxno=1434910">연합</a>). 규제 강화 가능성은 제한적이라는 반론도 제기(<a target="_blank" rel="noopener" href="https://news.bizwatch.co.kr/article/market/2026/11/06/0004">비즈워치</a>)</td>
+<td>악재</td>
+</tr>
+<tr class="odd">
+<td>2026.10.30</td>
+<td>실적·수주</td>
+<td>효성중공업 3Q 신규수주 3.23조원(+122%), 잔고 18.9조원(+71%). 단 물류 차질로 일부 매출 이연(<a target="_blank" rel="noopener" href="https://sateconomy.co.kr/news/view/1065616131338714">토요경제</a>)</td>
+<td>혼재</td>
+</tr>
+<tr class="even">
+<td>2026.10.27</td>
+<td>실적</td>
+<td>HD현대일렉트릭 3Q 분기 최대 매출, OPM은 전분기 대비 하락(<a target="_blank" rel="noopener" href="https://newstomato.com/ReadNews.aspx?no=1318173">뉴스토마토</a>)</td>
+<td>혼재</td>
+</tr>
+<tr class="odd">
+<td>2026.10.21</td>
+<td>실적</td>
+<td>LS ELECTRIC 3Q 영업이익 2,335억원, 컨센서스 대비 +20.4% 서프라이즈</td>
+<td>호재</td>
+</tr>
+<tr class="even">
+<td>2026.10 초</td>
+<td>금리</td>
+<td>미국 10년물 국채 5.36%, 빅테크 AI 채권 발행 급증으로 자금조달 부담 부각</td>
+<td>악재</td>
+</tr>
+<tr class="odd">
+<td>2026.09</td>
+<td>수주</td>
+<td>효성중공업, 미국 하이퍼스케일러향 765·345kV 변압기 2건 합산 3,866억원</td>
+<td>호재</td>
+</tr>
+<tr class="even">
+<td>2026.09.30</td>
+<td>정책(국내)</td>
+<td>기후에너지환경부, 서해안 HVDC(새만금~서화성) 2030년 구축·국산화 추진 재확인</td>
+<td>호재(중장기)</td>
+</tr>
+<tr class="odd">
+<td>2026.07.24</td>
+<td>통상</td>
+<td>미국 301조 최종조치, 한국에 “12.5% net of MFN” 방식 적용(<a target="_blank" rel="noopener" href="https://assets.kpmg.com/content/dam/kpmgsites/kr/pdf/2026/eri/samjong-focus/%EC%82%BC%EC%A0%95KPMG-%E7%BE%8E-%EC%A0%9C301%EC%A1%B0-%EB%B6%80%EA%B3%BC-%EA%B0%9C%EC%8B%9C%EC%99%80-%EA%B8%B0%EC%97%85%EC%9D%98-%EB%8C%80%EC%9D%91-%EB%B0%A9%EC%95%88_20260727.pdf.coredownload.inline.pdf">삼정KPMG</a>)</td>
+<td>중립~약악재</td>
+</tr>
+<tr class="even">
+<td>2026.07.02</td>
+<td>수주</td>
+<td>HD현대일렉트릭, 빅테크와 최대 1조1,212억원 장기공급 기본계약(2028년까지 분할 발주), 효성중공업 호주 3,100억원</td>
+<td>호재</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>6개월 밖이지만 현재 실적에 직결되는 정책</strong>: 2026년 4월 미국 232조 개편으로 대형 변압기 등 일부 전력기자재에 2027년까지 한시적으로 15%가 적용됩니다(<a target="_blank" rel="noopener" href="https://news.mtn.co.kr/news-detail/2026070311081899237">머니투데이방송</a>). 2028년 이후 세율은 확인 불가입니다. 중간선거 이후에도 232조 품목관세는 유지될 가능성이 높다는 분석이 있습니다(<a target="_blank" rel="noopener" href="https://www.lawtimes.co.kr/news/articleViewAmp.html?idxno=229456">법무법인 광장</a>).</p>
+</section><section class="card"><h2 id="수급과-밸류에이션">5. 수급과 밸류에이션</h2>
+<p>대형주는 성장 기대를 상당 부분 되돌린 가격입니다. HD현대일렉트릭의 선행 PER은 약 12배(환산)로 2025년 4월 조정기 수준이고, LS ELECTRIC만 여전히 프리미엄이 큽니다.</p>
+<h3 id="역사적-밴드-증권사-계산값-기준이-제각각임에-유의">역사적 밴드 <span class="tag fcst">증권사 계산값, 기준이 제각각임에 유의</span></h3>
+<div class="tbl"><table>
+
+<thead>
+<tr class="header">
+<th>시점</th>
+<th>내용</th>
+<th>출처</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2026.11.20</td>
+<td>HD현대일렉트릭 2025 EPS 기준 PER 19.0배, 선행 약 12배(환산)</td>
+<td>본 보고서 계산</td>
+</tr>
+<tr class="even">
+<td>2026.6.11</td>
+<td>국내 전력기기 2028F PER 22배, 해외 경쟁사 평균(23배)을 처음 하회</td>
+<td><a target="_blank" rel="noopener" href="https://m.news.nate.com/view/20260611n26873">NH투자증권(네이트)</a></td>
+</tr>
+<tr class="odd">
+<td>2026.5 초</td>
+<td>주가 고점: HD 142만원, 효성 460만1천원, LS ELECTRIC 31만8,500원</td>
+<td><a target="_blank" rel="noopener" href="https://v.daum.net/v/46kTonQ9yo">이투데이(다음)</a></td>
+</tr>
+<tr class="even">
+<td>2026.4.29</td>
+<td>HD현대일렉트릭 2026F PER 46.3배, PBR 16.7배</td>
+<td><a target="_blank" rel="noopener" href="https://stock.pstatic.net/stock-research/company/57/20260429_company_536768000.pdf">증권사 기업보고서</a></td>
+</tr>
+<tr class="odd">
+<td>2026.4.14</td>
+<td>전력기기 업체 평균 12개월 선행 PER 약 35배</td>
+<td><a target="_blank" rel="noopener" href="https://stock.pstatic.net/stock-research/industry/18/20260414_industry_27764000.pdf">증권사 업종보고서</a></td>
+</tr>
+<tr class="even">
+<td>2025.12</td>
+<td>3사 2026F PER 28배, 글로벌 전력기기 평균 26배</td>
+<td><a target="_blank" rel="noopener" href="https://file.alphasquare.co.kr/media/pdfs/market-report/%EC%9C%A0%ED%8B%B8%EB%A6%AC%ED%8B%B0%EC%84%B1%EC%9E%A5%EC%84%B1%EA%B3%BC20251202%EB%8C%80%EC%8B%A0%EC%A6%9D%EA%B6%8C.">대신증권</a></td>
+</tr>
+<tr class="odd">
+<td>2025.4</td>
+<td>딥시크·MS 투자 축소 쇼크 때 3사 합산 PER 22배→14배(<span class="neg">-36%</span>)</td>
+<td><a target="_blank" rel="noopener" href="https://www.sks.co.kr/data1/research/qna_file/20250402155012166_0_ko.pdf">SK증권</a></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="현재-선행-per-환산">현재 선행 PER (환산)</h3>
+<div class="tbl"><table>
+
+<thead>
+<tr class="header">
+<th>종목</th>
+<th>제공사 선행 PER (기준일·주가)</th>
+<th>11/20 종가 환산</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>HD현대일렉트릭</td>
+<td>11.71배 (11/6, 366,500원)</td>
+<td>약 12.3배</td>
+</tr>
+<tr class="even">
+<td>산일전기</td>
+<td>25.95배 (9/23, 205,500원)</td>
+<td>약 12.9배</td>
+</tr>
+<tr class="odd">
+<td>효성중공업</td>
+<td>19.08배 (10/16, 1,926,000원)</td>
+<td>약 16.4배</td>
+</tr>
+<tr class="even">
+<td>LS ELECTRIC</td>
+<td>49.01배 (10/2, 209,500원)</td>
+<td>약 25.4배</td>
+</tr>
+</tbody>
+</table></div>
+<p>환산은 <a target="_blank" rel="noopener" href="https://stockanalysis.com/quote/krx/267260/statistics/">StockAnalysis</a>의 선행 PER에 주가 변화율만 곱한 값입니다. 그동안 이익 추정치가 내려갔다면 실제 PER은 이보다 높습니다. 현 시점 컨센서스 EPS는 확인 불가입니다.</p>
+<h3 id="수급-사실">수급 <span class="tag fact">사실</span></h3>
+<ul>
+<li><p>코스피는 6월 고점 9,114.55에서 9/16 6,717.97로 26.3% 하락했고, 전력기기주는 지수보다 더 빠졌습니다.</p></li>
+<li><p>HD현대일렉트릭: 외국인 보유 33.9%(11/19), 11/20 공매도 거래 비중 9.88%, 공매도 잔고는 시총 대비 0.21%(<a target="_blank" rel="noopener" href="https://alphasquare.co.kr/home/stock-summary?code=267260">알파스퀘어</a>, <a target="_blank" rel="noopener" href="https://www.stockplus.com/m/stocks/KOREA-A267260">스톡플러스</a>).</p></li>
+<li><p>증권사 컨센서스 목표주가(HD현대일렉트릭, 11/19): 850,000원, 현 주가의 2.2배. 미래에셋증권은 10월 2028F EPS에 PER 30.8배를 적용해 110만원을 제시했습니다(<a target="_blank" rel="noopener" href="https://securities.miraeasset.com/bbs/download/2147808.pdf?attachmentId=2147808">미래에셋</a>).</p></li>
+</ul>
+<h3 id="읽는-법-판단-양쪽-논리">읽는 법 <span class="tag judg">판단: 양쪽 논리</span></h3>
+<ul>
+<li><p><strong>낙관적 해석</strong>: 3Q26 실적은 매출·이익 모두 전년보다 늘었고, 증권가는 노후 설비 교체와 광역 송전망 증설로 초고압 변압기 공급 부족과 3사 수주잔고 성장이 이어진다고 봅니다(한국투자증권, 2026.9). 주가 하락은 이익 훼손이 아니라 멀티플 정상화라는 해석입니다. 글로벌에서도 GE Vernova는 수주잔고 1,970억달러로 사상 최대를 기록하고도 주가가 하락했습니다(<a target="_blank" rel="noopener" href="https://www.webull.com/news/15900376123819008">Motley Fool</a>).</p></li>
+<li><p><strong>비관적 해석</strong>: 시장은 보통 이익 추정치 하향보다 먼저 움직입니다. 컨센서스 목표주가와 주가의 2배 격차는 애널리스트가 아직 2027~2028년 신규 수주 단가·물량 둔화를 반영하지 않았다는 뜻일 수 있습니다. 저PER은 “이익이 정점”이라는 시장의 가정을 반영한 것일 수 있습니다.</p></li>
+</ul>
+</section><section class="card"><h2 id="리스크">6. 리스크</h2>
+<p>가장 큰 리스크는 ‘수요 소멸’보다 ‘발주 지연 + 공급 증가가 맞물려 신규 수주 단가가 꺾이는 것’입니다. 수주잔고 덕분에 2027년 실적은 상대적으로 안전하고, 충격은 2028년 이후 추정치에 먼저 옵니다.</p>
+<div class="tbl"><table>
+
+<thead>
+<tr class="header">
+<th>리스크</th>
+<th>약세 논리 (bear)</th>
+<th>반론 (bull)</th>
+<th>확인 지표</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>수요 둔화</td>
+<td>미 중간선거 후 데이터센터 규제 우려, 지역 반대·빅테크 차입 확대. HD현대일렉트릭의 빅테크 계약도 실제 발주는 공사 일정에 따라 나눠 받아 지연 시 후속 발주가 늦어짐(<a target="_blank" rel="noopener" href="https://dealsite.co.kr/articles/172158">딜사이트</a>)</td>
+<td>내년 가동 예정 데이터센터 상당수가 이미 건설 중이고 취소보다 지연 가능성이 큼(<a target="_blank" rel="noopener" href="https://news.bizwatch.co.kr/article/market/2026/11/06/0002">비즈워치</a>). 유틸리티의 노후망 교체 수요는 데이터센터와 별개</td>
+<td>하이퍼스케일러 capex 가이던스, 미 데이터센터 건설지출</td>
+</tr>
+<tr class="even">
+<td>경쟁 심화·증설</td>
+<td>히타치에너지는 변압기 사업에 15억달러를 투자(<a target="_blank" rel="noopener" href="https://www.pv-magazine-india.com/2026/03/02/global-energy-transition-hits-a-hardware-bottleneck/">pv magazine</a>). 국내 3사도 동시 증설(HD 앨라배마 2공장 2027.4 준공 시 생산능력 +50%, <a target="_blank" rel="noopener" href="https://ceoscoredaily.com/page/view/2026040814344155767">CEO스코어</a>). Rystad는 단가 정체를 전망</td>
+<td>McKinsey는 발표 증설분이 수요 증가분을 조금 넘는 수준이고 2030년에도 부족이 남는다고 봄. 히타치는 고객이 확보된 만큼만 증설(<a target="_blank" rel="noopener" href="https://www.semafor.com/article/01/13/2026/electric-grid-transformer-delays-show-no-sign-of-easing">Semafor</a>)</td>
+<td>신규 수주 단가, 미국 변압기 PPI</td>
+</tr>
+<tr class="odd">
+<td>원자재</td>
+<td>구리·GOES·은 가격 변동. 전선사는 수주 확대로 운전자본 부담(<a target="_blank" rel="noopener" href="https://www.newstomato.com/readnews.aspx?no=1317999">뉴스토마토</a>)</td>
+<td>LS ELECTRIC은 배전기기 판가 인상을 완료해 전가 가능 구조(<a target="_blank" rel="noopener" href="https://stock.pstatic.net/stock-research/company/63/20260422_company_402235000.pdf">유진투자증권</a>). 최근 구리 하락은 변압기 원가에 유리</td>
+<td>LME 구리, 전선사 영업현금흐름</td>
+</tr>
+<tr class="even">
+<td>금리·환율</td>
+<td>미 10년물 5%대는 데이터센터 자금조달 비용을 키우고 고PER 주식을 누름. 원화 강세 시 원가율 상승(산일전기 3Q)</td>
+<td>HD현대일렉트릭의 2026 가이던스는 환율 1,350원 기준으로 보수적(<a target="_blank" rel="noopener" href="https://www.hankyung.com/article/2026011978876">한국경제</a>). 현지 공장은 환율 노출을 줄임</td>
+<td>원/달러, 미 10년물</td>
+</tr>
+<tr class="odd">
+<td>정책 변화</td>
+<td>대형 변압기 232조 15%는 2027년까지 한시. 2028년 이후 세율은 확인 불가. 분점정부로 정책 예측성 하락</td>
+<td>현지 공장(HD 앨라배마, 효성 멤피스) 보유 업체는 우회 가능. 데이터센터의 전력 직접조달 요구는 장기적으로 전력 공급 사업에 긍정적(<a target="_blank" rel="noopener" href="https://www.lawtimes.co.kr/news/articleViewAmp.html?idxno=229456">광장</a>)</td>
+<td>232조 후속 포고령, 미 의회 데이터센터 법안</td>
+</tr>
+<tr class="even">
+<td>실행</td>
+<td>태풍·물류 차질로 매출 이연(효성·산일), 임금 인상, 증설 초기 비용, 효성의 건설 부문 PF</td>
+<td>이연분은 취소가 아니라 4Q 인식 예정(회사 설명)</td>
+<td>4Q26 매출·OPM</td>
+</tr>
+</tbody>
+</table></div>
+<p>이 섹터는 고점 대비 65~73% 하락한 상태라 기대치가 많이 낮아졌지만, 바닥 확인은 별개입니다. 2025년 4월에는 PER 14배까지 내려간 뒤 반등해 같은 해 10월 사상 최고가를 썼지만, 그때는 이익 추정치가 오르는 구간이었습니다. 산일전기처럼 9월 하순(205,500원) 대비 두 달 만에 주가가 절반이 된 종목도 있습니다.</p>
+</section><section class="card"><h2 id="시나리오-612개월">7. 시나리오 (6~12개월)</h2>
+<p>어느 시나리오든 2027년 매출은 수주잔고가 상당 부분 정해 두었습니다. 갈리는 것은 신규 수주의 단가·물량과, 그것을 보고 시장이 붙이는 멀티플입니다. 아래는 주가 목표가 아니라 조건과 신호의 정리입니다.</p>
+<div class="tbl"><table>
+
+<thead>
+<tr class="header">
+<th>시나리오</th>
+<th>전제 조건</th>
+<th>이익·밸류에이션 함의</th>
+<th>확인해야 할 신호</th>
+<th>상대적으로 유리한 구간</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>강세</td>
+<td>하이퍼스케일러가 2027년 capex를 유지·상향, 데이터센터 규제가 지역 보호 수준에 그침, 금리 하향</td>
+<td>이익 추정치 유지·상향 + 멀티플 일부 회복. 낙폭이 컸던 종목의 반등 탄력이 큼</td>
+<td>HD현대일렉트릭 빅테크 장기계약 공시, 분기 신규수주/매출(book-to-bill) 1 초과 지속, 대미 변압기 수출 단가 상승, 외국인 순매수 전환</td>
+<td>배전·데이터센터 노출이 큰 기업(LS ELECTRIC, HD현대일렉트릭 배전), 낙폭이 컸던 중소형주</td>
+</tr>
+<tr class="even">
+<td>기본</td>
+<td>데이터센터는 취소보다 지연, 노후망·송전망 발주는 유지, 단가는 횡보(Rystad 시나리오)</td>
+<td>이익은 잔고 소화로 증가하지만 멀티플은 낮게 유지. 주가는 이익 증가분 정도로 제한</td>
+<td>4Q26 이연 매출 정상 인식(효성 GIS 1억달러, 산일 780억원), OPM의 전분기 수준 회복, 2027 신규수주 가이던스가 2026년 수준</td>
+<td>수주잔고 가시성이 길고 PER이 낮은 초고압 변압기 구간(HD현대일렉트릭, 효성중공업 중공업)</td>
+</tr>
+<tr class="odd">
+<td>약세</td>
+<td>빅테크 capex 삭감·데이터센터 프로젝트 취소, 경쟁사 증설 가동, 232조 세율 상향 우려, 고금리 지속</td>
+<td>신규 수주 단가 하락 → 2028년 이후 이익 추정치 하향 + 추가 멀티플 축소(이익·배수 동반 하락)</td>
+<td>분기 book-to-bill 1 미만, 대미 변압기 수출 단가 하락, 미 변압기 PPI 하락 전환, 계약 취소·납기 연기 공시, 컨센서스 목표주가 대량 하향</td>
+<td>국내 내수(한전·HVDC) 비중이 높거나 자산 대비 주가가 낮은 구간(LS 지주 PBR 0.9배 등)이 상대적으로 방어적일 수 있음</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>구간·종목 판단을 위한 틀 <span class="tag judg">판단</span></strong></p>
+<ul>
+<li><p><strong>가시성 대 탄력</strong>: 초고압 변압기(리드타임 3~5년)는 수주가 이미 2028년 이후 매출까지 채워 기본·약세 시나리오에서 상대적으로 버틸 구조입니다. 배전반·특수 변압기는 수주가 빨리 매출로 바뀌어 강세에서 더 오르고 약세에서 더 빨리 꺾입니다.</p></li>
+<li><p><strong>밸류에이션 차이</strong>: 같은 섹터 안에서도 선행 PER(환산)이 12배(HD현대일렉트릭·산일전기)에서 25배(LS ELECTRIC)까지 벌어져 있습니다. 강세 논리가 틀렸을 때의 하락 여지는 고PER 쪽이 큽니다.</p></li>
+<li><p><strong>구조 리스크</strong>: 효성중공업은 건설 부문이, LS·대한전선은 구리 가격이 실적을 흔듭니다. 전력기기 업황만으로 주가가 설명되지 않는 부분입니다.</p></li>
+<li><p><strong>진입 방식</strong>: 변동성이 크고 바닥이 확인되지 않았으므로, 위 신호가 하나씩 확인될 때마다 비중을 나누는 방식과 한 번에 판단하는 방식의 위험이 다릅니다. 이 보고서는 투자 권유가 아니며, 최종 판단은 본인의 위험 감내 범위와 최신 공시를 기준으로 하시길 바랍니다.</p></li>
+</ul>
+</section><section class="card"><h2 id="모니터링-지표-매월-확인-5개">8. 모니터링 지표 (매월 확인 5개)</h2>
+<p>아래 다섯 개면 “물량·단가·전방 투자·개별 수주·외부 변수”를 모두 볼 수 있습니다.</p>
+<div class="tbl"><table>
+
+<thead>
+<tr class="header">
+<th>#</th>
+<th>지표</th>
+<th>발표 주기·출처</th>
+<th>읽는 법</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>대미 초고압 변압기 수출액·단가(1만kVA 초과)</td>
+<td>매월 중순, 관세청 수출입무역통계</td>
+<td>물량 증가 + 단가 유지면 강세, 단가 하락이 먼저 보이면 약세 선행 신호</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>미국 변압기 생산자물가(PPI)</td>
+<td>매월, 미 노동통계국(FRED 제공)</td>
+<td>상승 지속이면 공급 부족 유지, 꺾이면 Rystad식 ‘단가 정체’ 현실화</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>미국 데이터센터 건설지출 + 하이퍼스케일러 capex 가이던스</td>
+<td>건설지출은 매월(미 상무부), capex는 분기 실적 발표</td>
+<td>발주 지연인지 취소인지를 가르는 지표</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>3사 ‘단일판매·공급계약체결’ 공시와 분기 수주잔고</td>
+<td>수시, DART</td>
+<td>빅테크 장기계약·계약 정정(금액 축소·기간 연장) 여부, 신규수주/매출 비율</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>원/달러 환율과 LME 구리(월평균)</td>
+<td>매일, 한국은행·LME</td>
+<td>원화 강세는 변압기 수출사 마진에 부담, 구리는 전선사 매출·현금흐름에 직결</td>
+</tr>
+</tbody>
+</table></div>
+<p>가까운 일정: HD현대일렉트릭 빅테크 장기계약 결과(회사 예고 11월 말), 12월 중순 11월 수출입 확정치, 2027년 1월 말~2월 초 4Q26 실적과 2027 가이던스.</p>
+</section><section class="card"><h2 id="출처-목록">출처 목록</h2>
+<p>기준일: 2026년 11월 23일. 주가는 11/20 종가(일진전기·LS는 11/23)입니다. 원문 공시(DART)는 직접 열람하지 못해, 공시를 보도한 주요 언론과 KIND 분기보고서로 대신했습니다.</p>
+<p><strong>공시·정부</strong></p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://kind.krx.co.kr/external/2026/05/14/001423/20260514003098/11013.htm">효성중공업 2026년 1분기 분기보고서(KIND)</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://m.korea.kr/briefing/pressReleaseView.do?newsId=156789294">관세청 2026년 10월 수출입 현황(확정치)</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://eiec.kdi.re.kr/policy/materialView.do?num=287614">기후에너지환경부 HVDC 토론회(KDI)</a></p></li>
+</ul>
+<p><strong>기업 실적·수주(언론)</strong></p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://newstomato.com/ReadNews.aspx?no=1318173">HD현대일렉트릭 3Q26(뉴스토마토)</a>, <a target="_blank" rel="noopener" href="https://www.inews24.com/view/1936713">2025 연간(아이뉴스24)</a>, <a target="_blank" rel="noopener" href="https://huffingtonpost.kr/article/262193">빅테크 계약(허프포스트코리아)</a>, <a target="_blank" rel="noopener" href="https://news.mtn.co.kr/article/2026102715471115008">배전변압기 전망(머니투데이방송)</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://sateconomy.co.kr/news/view/1065616131338714">효성중공업 3Q26(토요경제)</a>, <a target="_blank" rel="noopener" href="https://zdnet.co.kr/view?no=20260206190629">2025 연간(ZDNet)</a>, <a target="_blank" rel="noopener" href="https://sateconomy.co.kr/news/view/1065574869993248">현금흐름(토요경제)</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://news.bizwatch.co.kr/article/industry/2026/10/21/0034/">LS ELECTRIC 3Q26(비즈워치)</a>, <a target="_blank" rel="noopener" href="https://biz.newdaily.co.kr/site/data/html/2026/04/14/2026041400095.amp.html">액면분할(뉴데일리)</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://newsfc.co.kr/news/articleView.html?idxno=82255">산일전기 3Q26(금융소비자뉴스)</a>, <a target="_blank" rel="noopener" href="https://dealsite.co.kr/articles/172542">일진전기 3Q26(딜사이트)</a>, <a target="_blank" rel="noopener" href="https://www.metroseoul.co.kr/article/20261029500564">대한전선 3Q26(메트로신문)</a>, <a target="_blank" rel="noopener" href="https://news.bizwatch.co.kr/article/industry/2026/11/17/0009">LS그룹 3Q26(비즈워치)</a></p></li>
+</ul>
+<p><strong>시장·정책·주가</strong></p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.lawtimes.co.kr/news/articleViewAmp.html?idxno=229456">미 중간선거와 통상(법무법인 광장)</a>, <a target="_blank" rel="noopener" href="https://www.koreancenter.or.kr/news/articleView.html?idxno=1434910">데이터센터 규제 우려(연합)</a>, <a target="_blank" rel="noopener" href="https://news.bizwatch.co.kr/article/market/2026/11/06/0004">반론(비즈워치)</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://mbiz.heraldcorp.com/article/10937629">FT 데이터센터주 4.2조달러(코리아헤럴드)</a>, <a target="_blank" rel="noopener" href="https://v.daum.net/v/46kTonQ9yo">전력기기주 하락(이투데이)</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://news.mtn.co.kr/news-detail/2026070311081899237">232조 변압기 15%(머니투데이방송)</a>, <a target="_blank" rel="noopener" href="https://assets.kpmg.com/content/dam/kpmgsites/kr/pdf/2026/eri/samjong-focus/%EC%82%BC%EC%A0%95KPMG-%E7%BE%8E-%EC%A0%9C301%EC%A1%B0-%EB%B6%80%EA%B3%BC-%EA%B0%9C%EC%8B%9C%EC%99%80-%EA%B8%B0%EC%97%85%EC%9D%98-%EB%8C%80%EC%9D%91-%EB%B0%A9%EC%95%88_20260727.pdf.coredownload.inline.pdf">301조(삼정KPMG)</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://www.mckinsey.com/industries/electric-power-and-natural-gas/our-insights/the-transformer-supercycle-why-demand-is-outrunning-supply">McKinsey 변압기 슈퍼사이클</a>, <a target="_blank" rel="noopener" href="https://www.pv-magazine.com/2026/06/06/global-grid-capex-to-surpass-650-billion-in-2026-says-rystad-energy/">Rystad 전력망 투자(pv magazine)</a>, <a target="_blank" rel="noopener" href="https://www.eenews.net/articles/data-centers-to-triple-us-power-equipment-market-to-65b/">Wood Mackenzie(E&amp;E News)</a></p></li>
+<li><p>주가·지표: <a target="_blank" rel="noopener" href="https://markets.hankyung.com/stock/267260">한경코리아마켓</a>, <a target="_blank" rel="noopener" href="https://alphasquare.co.kr/home/stock-summary?code=298040">알파스퀘어</a>, <a target="_blank" rel="noopener" href="https://stockanalysis.com/quote/krx/267260/statistics/">StockAnalysis</a></p></li>
+</ul>
+<p><strong>증권사 리포트(전망치는 해당 증권사 추정)</strong></p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://file.alphasquare.co.kr/media/pdfs/market-report/%EC%9C%A0%ED%8B%B8%EB%A6%AC%ED%8B%B0%EC%84%B1%EC%9E%A5%EC%84%B1%EA%B3%BC20251202%EB%8C%80%EC%8B%A0%EC%A6%9D%EA%B6%8C.">대신증권 유틸리티/전력인프라(2025.12)</a>, <a target="_blank" rel="noopener" href="https://www.sks.co.kr/data1/research/qna_file/20250402155012166_0_ko.pdf">SK증권 전력기기(2025.4)</a>, <a target="_blank" rel="noopener" href="https://securities.miraeasset.com/bbs/download/2147808.pdf?attachmentId=2147808">미래에셋증권 HD현대일렉트릭(2026.10)</a>, <a target="_blank" rel="noopener" href="https://stock.pstatic.net/stock-research/company/63/20260422_company_402235000.pdf">유진투자증권 LS ELECTRIC(2026.4)</a>, <a target="_blank" rel="noopener" href="https://stock.pstatic.net/stock-research/company/15/20260413_company_268182000.pdf">대신증권 효성중공업(2026.4)</a></p></li>
+</ul>
+</section>
+  </main>
+</div>
+<footer>본 자료는 투자 권유가 아니며, 수치는 각 출처의 기준 시점을 따릅니다. "확인 불가"는 출처에서 검증하지 못한 항목입니다.</footer>
+</body>
+</html>
