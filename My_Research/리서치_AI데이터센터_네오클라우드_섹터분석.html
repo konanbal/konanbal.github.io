@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026년 11월 AI 데이터센터 & 네오클라우드 섹터 심층 분석</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #FAF8F5;
+      color: #1E293B;
+      overflow-x: hidden;
+    }
+    .chart-container {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+      height: 300px;
+      max-height: 380px;
+    }
+    @media (min-width: 768px) {
+      .chart-container {
+        height: 340px;
+      }
+    }
+    .nav-pill.active {
+      background-color: #0F766E;
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+    .card-warm {
+      background-color: #FFFFFF;
+      border: 1px solid #E7E5E4;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .tab-btn.active {
+      background-color: #1E293B;
+      color: #FFFFFF;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-teal-100 selection:text-teal-900">
+
+<!-- Chosen Palette: Warm Stone & Deep Teal Harmony (Background: #FAF8F5, Surface: #FFFFFF / #F5F2EB, Primary Accent: #0F766E Deep Teal, Secondary Risk/Alert Accent: #B45309 Warm Amber, Neutral Slate Text: #1E293B) -->
+<!-- Application Structure Plan: Designed as a non-linear institutional equity research dashboard organized into 5 functional modules: (1) Executive Thesis & Macro/CAPEX Dynamics, (2) 3-Tier Value Chain & Physical Bottleneck Explorer, (3) 5-Company Peer Comparison & Balance Sheet Tear-Sheet, (4) 6-12M Bull/Bear Scenario & Earnings Call Monitor, and (5) Barbell Allocation Strategy & US/KR ETF Screener. This structure prioritizes investor decision-making—allowing users to first grasp the macro capital paradox, isolate where pricing power resides in the supply chain, compare individual stock balance sheets, and finally translate insights into portfolio action. -->
+<!-- Visualization & Content Choices: 1) Big Tech CAPEX Trajectory & 2026 Breakdown -> Goal: Show sustained demand vs FCF strain -> Interactive Bar/Line Chart (Chart.js Canvas) with toggle -> Clear comparison of quarterly acceleration and company shares. 2) Bottleneck Lead Times vs GPU Rental Deflation -> Goal: Prove pricing power lies in power/cooling equipment rather than H100 rental -> Switchable Horizontal Bar Chart (Chart.js Canvas) -> Visually contrasts 44-58 month transformer delays against 70%+ H100 rate drops. 3) 3-Stage Value Chain -> Goal: Organize supply chain -> Interactive HTML/CSS Grid cards with dynamic detail pane (No SVG/Mermaid). 4) Peer Comparison -> Goal: Compare 5 key players across growth, margin, leverage, and valuation -> Interactive Multi-Metric Bar Chart (Chart.js Canvas) + Clickable Comparison Table with dynamic company tear-sheet. 5) ETF Screener -> Goal: Actionable investment selection -> Filterable HTML Table (All/US/KR). -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+  <header class="sticky top-0 z-40 bg-[#FAF8F5]/95 backdrop-blur border-b border-stone-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-teal-700 text-white font-bold text-sm">AI</span>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">AI 데이터센터 & 네오클라우드 심층 리서치</h1>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">2026년 11월 기준</span>
+          </div>
+          <p class="text-xs text-slate-500">자본의 역설(Capital Paradox)과 물리적 병목 구간의 승리자</p>
+        </div>
+      </div>
+      <nav class="flex flex-wrap gap-1.5" id="main-nav">
+        <button data-target="sec-macro" class="nav-pill active px-3 py-1.5 rounded-lg text-xs sm:text-sm text-slate-700 hover:bg-stone-200/70 transition">1. 매크로·CAPEX</button>
+        <button data-target="sec-chain" class="nav-pill px-3 py-1.5 rounded-lg text-xs sm:text-sm text-slate-700 hover:bg-stone-200/70 transition">2. 밸류체인·병목</button>
+        <button data-target="sec-peers" class="nav-pill px-3 py-1.5 rounded-lg text-xs sm:text-sm text-slate-700 hover:bg-stone-200/70 transition">3. 5대 기업 비교</button>
+        <button data-target="sec-scenarios" class="nav-pill px-3 py-1.5 rounded-lg text-xs sm:text-sm text-slate-700 hover:bg-stone-200/70 transition">4. Bull/Bear·지표</button>
+        <button data-target="sec-strategy" class="nav-pill px-3 py-1.5 rounded-lg text-xs sm:text-sm text-slate-700 hover:bg-stone-200/70 transition">5. 투자전략·ETF</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
+
+    <section class="card-warm rounded-2xl p-5 sm:p-7 bg-gradient-to-br from-white to-[#F5F2EB]">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="space-y-3 max-w-3xl">
+          <div class="inline-flex items-center gap-2 text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-md">
+            <span>📌</span>
+            <span>EXECUTIVE SUMMARY | 기관 투자자용 섹터 노트</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
+            무조건적 확장에서 <span class="text-teal-700">자본 효율성</span>과 <span class="text-amber-700">전력·냉각 병목 해소</span>의 시대로 전환
+          </h2>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            빅테크 4개사의 2026년 합산 CAPEX 가이던스는 <strong>약 7,200억~7,400억 달러</strong>로 견조하나, 미 연준의 12월 추가 금리 인상 전망(97.3%)과 미 10년물 국채 금리 5% 돌파로 외부 차입 의존형 네오클라우드의 주가 변동성이 극대화되었습니다. 초과이윤의 원천은 GPU 단순 임대가 아닌 <strong>대형 변압기(리드타임 44~58개월)와 고밀도 액체냉각 장비</strong>에 집중되어 있습니다.
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 sm:min-w-[340px]">
+          <div class="p-3.5 rounded-xl bg-white border border-stone-200">
+            <div class="text-xs text-slate-500">빅테크 4사 26년 CAPEX</div>
+            <div class="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">$7,200~7,400억</div>
+            <div class="text-[11px] text-teal-700 font-medium mt-1">▲ Q3 단일 분기 $2,020억 집행</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-stone-200">
+            <div class="text-xs text-slate-500">대형 변압기 리드타임</div>
+            <div class="text-lg sm:text-xl font-bold text-teal-700 mt-0.5">44 ~ 58개월</div>
+            <div class="text-[11px] text-slate-600 font-medium mt-1">⚡ 2030년 이전 인도 난항</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-stone-200">
+            <div class="text-xs text-slate-500">H100 시간당 임대 단가</div>
+            <div class="text-lg sm:text-xl font-bold text-amber-700 mt-0.5">$2.89 ~ $3.09</div>
+            <div class="text-[11px] text-amber-700 font-medium mt-1">▼ 23H2 고점($7.5~11) 대비 급락</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-stone-200">
+            <div class="text-xs text-slate-500">미국 10년물 국채 금리</div>
+            <div class="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">4.95% ~ 5.15%</div>
+            <div class="text-[11px] text-rose-700 font-medium mt-1">⚠️ 12월 FOMC 인상 확률 97.3%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-macro" class="scroll-mt-20 space-y-5">
+      <div class="border-l-4 border-teal-700 pl-4">
+        <h2 class="text-xl font-bold text-slate-900">1. 섹터 매크로 환경 및 핵심 성장 동력 (Industry Catalyst)</h2>
+        <p class="text-sm text-slate-600 mt-1">
+          본 섹션에서는 하이퍼스케일러의 분기별·기업별 CAPEX 집행 추이와 2026년 11월 현재 금리·환율·원자재·규제 환경이 인프라 사업자의 자본 조달 및 수익성에 미치는 영향을 분석합니다. 차트 탭과 매크로 카드를 클릭해 세부 수치를 확인하세요.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 card-warm rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <h3 class="text-base font-bold text-slate-900" id="capex-chart-title">빅테크 4사 분기별 합산 CAPEX 추이 (억 달러)</h3>
+                <p class="text-xs text-slate-500" id="capex-chart-desc">2025년 3분기 $970억에서 2026년 3분기 $2,020억으로 매 분기 계단식 증가</p>
+              </div>
+              <div class="inline-flex rounded-lg bg-stone-100 p-1 border border-stone-200">
+                <button id="btn-capex-q" class="tab-btn active px-3 py-1 rounded-md text-xs font-medium transition">분기별 추이</button>
+                <button id="btn-capex-co" class="tab-btn px-3 py-1 rounded-md text-xs font-medium text-slate-600 transition">기업별 연간 가이던스</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="capexChart"></canvas>
+            </div>
+          </div>
+          <div class="mt-4 p-3 rounded-xl bg-stone-50 border border-stone-200 text-xs text-slate-600 leading-relaxed">
+            <strong>💡 3분기 어닝콜 핵심 시사점:</strong> MSFT의 연간 가이던스 소폭 조정($1,750억→$1,700억)은 수요 둔화가 아닌 3자 임차 데이터센터 완공 지연에 따른 2027년 상반기 이연 때문입니다(Azure 성장률 48%, 차기 분기 49~50% 전망). 반면 아마존·알파벳의 분기 FCF가 마이너스로 전환되며 자본시장의 초점이 ROIC로 이동했습니다.
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 card-warm rounded-2xl p-5 flex flex-col justify-between space-y-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">거시경제 및 글로벌 정책 변수 탐색기</h3>
+            <p class="text-xs text-slate-500 mt-0.5">아래 4가지 핵심 매크로 변수를 클릭하여 섹터 내 수혜·피해 경로를 확인하세요.</p>
+            <div class="grid grid-cols-2 gap-2 mt-3" id="macro-selector">
+              <button data-macro="rates" class="macro-btn active text-left p-3 rounded-xl border-2 border-teal-700 bg-teal-50/60 transition">
+                <div class="text-xs font-semibold text-teal-800">📈 금리 & 신용</div>
+                <div class="text-sm font-bold text-slate-900 mt-0.5">미 10년물 ~5.0%</div>
+              </button>
+              <button data-macro="fx" class="macro-btn text-left p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition">
+                <div class="text-xs font-semibold text-slate-500">💵 환율 (DXY)</div>
+                <div class="text-sm font-bold text-slate-900 mt-0.5">104선 (19개월 고점)</div>
+              </button>
+              <button data-macro="copper" class="macro-btn text-left p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition">
+                <div class="text-xs font-semibold text-slate-500">🧱 원자재 (구리)</div>
+                <div class="text-sm font-bold text-slate-900 mt-0.5">$12,000/t 하회</div>
+              </button>
+              <button data-macro="policy" class="macro-btn text-left p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition">
+                <div class="text-xs font-semibold text-slate-500">🏛️ 전력망 규제·정책</div>
+                <div class="text-sm font-bold text-slate-900 mt-0.5">미 승인유예 vs 한 특별법</div>
+              </button>
+            </div>
+          </div>
+
+          <div id="macro-detail-box" class="p-4 rounded-xl bg-[#F5F2EB] border border-stone-200 space-y-2.5 flex-1 flex flex-col justify-center">
+            <div class="flex items-center justify-between">
+              <span id="macro-detail-title" class="text-sm font-bold text-slate-900">고금리 고착화 및 프로젝트 파이낸싱 압박</span>
+              <span id="macro-detail-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-rose-100 text-rose-800">네오클라우드 부정적</span>
+            </div>
+            <p id="macro-detail-body" class="text-xs text-slate-700 leading-relaxed">
+              실효 연방기금금리(EFFR) 3.88% 상황에서 견조한 CPI 발표 이후 12월 FOMC 25bp 인상 확률이 97.3%까지 상승했습니다. 미국 10년물 금리가 4.95~5.15% 구간에 머물면서 하이일드 채권 및 담보대출에 의존하는 네오클라우드(CRWV, APLD 등)의 이자비용이 급증하고 있습니다.
+            </p>
+            <div id="macro-detail-impact" class="text-xs font-medium text-teal-800 pt-1 border-t border-stone-300/70">
+              ▸ 핵심 영향: 순현금 구조 장비주(Vertiv) 및 투자등급 리츠(DLR)의 상대적 방어력 부각
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-chain" class="scroll-mt-20 space-y-5">
+      <div class="border-l-4 border-teal-700 pl-4">
+        <h2 class="text-xl font-bold text-slate-900">2. 밸류체인 구조 및 병목 구간(Bottleneck) 심층 분석</h2>
+        <p class="text-sm text-slate-600 mt-1">
+          AI 인프라 공급망을 업스트림·미드스트림·다운스트림 3단계로 분해하여 초과이윤이 집중되는 핵심 병목 구간을 규명합니다. 각 단계 카드를 선택해 수급 특성을 확인하고, 우측 차트에서 전력기기 리드타임과 GPU 임대료 하락 추이를 비교해 보세요.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-6 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="vc-stages">
+            <button data-stage="upstream" class="vc-btn text-left p-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition">
+              <div class="text-xs font-semibold text-slate-500">STAGE 01</div>
+              <div class="text-sm font-bold text-slate-900 mt-1">업스트림</div>
+              <div class="text-xs text-slate-600 mt-0.5">원자재·부지·발전</div>
+              <span class="inline-block mt-2 text-[11px] px-2 py-0.5 rounded bg-stone-100 text-slate-700">기반 선점 필수</span>
+            </button>
+            <button data-stage="midstream" class="vc-btn active text-left p-4 rounded-xl border-2 border-teal-700 bg-teal-50/70 transition relative">
+              <div class="text-xs font-bold text-teal-800">STAGE 02 ★최대 병목</div>
+              <div class="text-sm font-bold text-slate-900 mt-1">미드스트림</div>
+              <div class="text-xs text-slate-600 mt-0.5">변압기·액체냉각·칩</div>
+              <span class="inline-block mt-2 text-[11px] font-semibold px-2 py-0.5 rounded bg-teal-700 text-white">최고 가격 결정력</span>
+            </button>
+            <button data-stage="downstream" class="vc-btn text-left p-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition">
+              <div class="text-xs font-semibold text-slate-500">STAGE 03</div>
+              <div class="text-sm font-bold text-slate-900 mt-1">다운스트림</div>
+              <div class="text-xs text-slate-600 mt-0.5">리츠·네오클라우드</div>
+              <span class="inline-block mt-2 text-[11px] px-2 py-0.5 rounded bg-amber-100 text-amber-800">양극화·마진 압박</span>
+            </button>
+          </div>
+
+          <div id="vc-detail-panel" class="card-warm rounded-2xl p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 id="vc-title" class="text-base font-bold text-slate-900">미드스트림 (핵심 부품·제조): 공급망 최대 병목 및 초과이윤 구간</h3>
+              <span id="vc-margin-badge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-100 text-teal-800">조정 OPM 25%+ / 수주잔고 폭증</span>
+            </div>
+            <p id="vc-desc" class="text-sm text-slate-700 leading-relaxed">
+              대형 전력 변압기(44~58개월 리드타임)와 차세대 고밀도 랙(GB200/300, Vera Rubin NVL72) 전환에 필수적인 액체냉각(CDU) 및 배전 설비에서 극심한 공급 부족이 발생하고 있습니다. Vertiv는 Q3 유기적 수주가 전년 대비 100% 이상 급증하고 조정 영업이익률 25.2%(미주 29.4%)를 달성하며 강력한 가격 결정력을 입증했습니다.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-stone-200 text-xs">
+              <div class="p-3 rounded-lg bg-stone-50">
+                <span class="font-semibold text-slate-800 block mb-1">핵심 구성 요소</span>
+                <span id="vc-components" class="text-slate-600">AI 가속기(B200/Vera Rubin), 기업용 SSD, 대형 변압기, 개폐기, 액체냉각(CDU)</span>
+              </div>
+              <div class="p-3 rounded-lg bg-stone-50">
+                <span class="font-semibold text-slate-800 block mb-1">대표 플레이어</span>
+                <span id="vc-players" class="text-slate-600">Vertiv, GE Vernova, Hitachi Energy, Siemens Energy, NVIDIA, Quanta Services</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 card-warm rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <h3 class="text-base font-bold text-slate-900" id="bottleneck-chart-title">글로벌 대형 변압기 제조사별 리드타임 (개월)</h3>
+                <p class="text-xs text-slate-500" id="bottleneck-chart-desc">GridReadiness 26Q3 기준: 주요 서구권 제조사 발주 시 2030년 이전 인도 불가</p>
+              </div>
+              <div class="inline-flex rounded-lg bg-stone-100 p-1 border border-stone-200">
+                <button id="btn-bn-leadtime" class="tab-btn active px-3 py-1 rounded-md text-xs font-medium transition">변압기 리드타임</button>
+                <button id="btn-bn-gpu" class="tab-btn px-3 py-1 rounded-md text-xs font-medium text-slate-600 transition">GPU 임대료 추이</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="bottleneckChart"></canvas>
+            </div>
+          </div>
+          <div id="bottleneck-footnote" class="mt-3 text-xs text-slate-600 bg-stone-50 p-3 rounded-xl border border-stone-200">
+            <strong>📌 규격 장벽 주의:</strong> 한국(18~26개월)·유럽(20~30개월) 제조사가 상대적으로 짧은 납기를 제시하나, 미국(ANSI/IEEE 60Hz)과 유럽(IEC 50Hz) 간 규격 인증 장벽으로 단기 대체가 제한적입니다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-peers" class="scroll-mt-20 space-y-5">
+      <div class="border-l-4 border-teal-700 pl-4">
+        <h2 class="text-xl font-bold text-slate-900">3. 주요 플레이어 5선 비교 및 옥석 가리기 (Peer Comparison)</h2>
+        <p class="text-sm text-slate-600 mt-1">
+          순수 네오클라우드(CoreWeave, Nebius), 채굴 전환 호스트(Applied Digital), 병목 장비주(Vertiv), 데이터센터 리츠(Digital Realty)의 2026년 3분기 실적과 재무 건전성을 입체적으로 비교합니다. 차트 지표를 전환하거나 표에서 기업을 클릭해 심층 분석 노트를 확인하세요.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 card-warm rounded-2xl p-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <h3 class="text-base font-bold text-slate-900" id="peer-chart-title">5대 기업 최근 분기 매출 성장률(YoY, %) 비교</h3>
+              <p class="text-xs text-slate-500" id="peer-chart-desc">외형 성장률은 후발 네오클라우드가 높으나 수익성 및 재무 안정성은 정반대 양상</p>
+            </div>
+            <div class="inline-flex flex-wrap gap-1 rounded-lg bg-stone-100 p-1 border border-stone-200">
+              <button data-metric="growth" class="peer-metric-btn tab-btn active px-2.5 py-1 rounded-md text-xs font-medium transition">매출 성장률</button>
+              <button data-metric="margin" class="peer-metric-btn tab-btn px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 transition">수익성(OPM/EBITDA)</button>
+              <button data-metric="capex" class="peer-metric-btn tab-btn px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 transition">FY26 CAPEX 부담</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="peerChart"></canvas>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 card-warm rounded-2xl p-5 bg-gradient-to-b from-white to-stone-50 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 pb-3 border-b border-stone-200">
+              <div>
+                <span id="tear-role" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-teal-100 text-teal-800">미드스트림 전력·냉각 병목 1순위</span>
+                <h3 id="tear-name" class="text-lg font-bold text-slate-900 mt-1">Vertiv Holdings (VRT)</h3>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-slate-500">26년 11월 시총</div>
+                <div id="tear-mcap" class="text-base font-bold text-slate-900">$639억</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5 my-3 text-xs">
+              <div class="p-2.5 rounded-lg bg-white border border-stone-200">
+                <span class="text-slate-500 block">Q3 매출 / YoY</span>
+                <span id="tear-rev" class="font-bold text-slate-900 text-sm">$43.1억 (+61.2%)</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-white border border-stone-200">
+                <span class="text-slate-500 block">수익성 마진</span>
+                <span id="tear-margin" class="font-bold text-teal-700 text-sm">조정 OPM 25.2%</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-white border border-stone-200">
+                <span class="text-slate-500 block">재무 레버리지</span>
+                <span id="tear-debt" class="font-bold text-slate-900 text-sm">순현금 (-0.2배)</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-white border border-stone-200">
+                <span class="text-slate-500 block">핵심 밸류에이션</span>
+                <span id="tear-val" class="font-bold text-slate-900 text-sm">Fwd PER 17.9x (PEG 0.45)</span>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs text-slate-700 leading-relaxed">
+              <p id="tear-summary">
+                Q3 조정 EPS($2.21)가 컨센서스를 21.4% 상회하고 연간 가이던스를 전 지표에서 상향했습니다. 연간 CAPEX 비중이 매출의 약 4.0%에 불과한 경량 자산(Asset-light) 모델로, 11월 섹터 조정에 따른 멀티플 압축은 높은 안전마진을 제공합니다.
+              </p>
+              <div id="tear-risk" class="p-2.5 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-900">
+                <strong>핵심 체크포인트:</strong> Q4 조정 영업이익률 가이던스(25.8%) 달성 여부 및 대형 고객사 액체냉각 채택 속도
+              </div>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-400 pt-3 mt-3 border-t border-stone-200">
+            * 하단 비교표의 기업 행을 클릭하면 해당 기업의 상세 재무 노트가 표시됩니다.
+          </div>
+        </div>
+      </div>
+
+      <div class="card-warm rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-stone-100 border-b border-stone-200 text-slate-700 font-semibold">
+                <th class="py-3 px-4">기업명 (티커)</th>
+                <th class="py-3 px-4">비즈니스 모델</th>
+                <th class="py-3 px-4">Q3 매출 (YoY)</th>
+                <th class="py-3 px-4">영업이익률 / EBITDA</th>
+                <th class="py-3 px-4">수주 잔고 / 파이프라인</th>
+                <th class="py-3 px-4">재무 건전성 & CAPEX</th>
+                <th class="py-3 px-4">밸류에이션 (11월 기준)</th>
+              </tr>
+            </thead>
+            <tbody id="peer-table-body" class="divide-y divide-stone-200">
+              <tr data-ticker="CRWV" class="peer-row cursor-pointer hover:bg-teal-50/40 transition">
+                <td class="py-3.5 px-4 font-bold text-slate-900">CoreWeave<br><span class="text-xs font-normal text-slate-500">CRWV · 시총 $220억</span></td>
+                <td class="py-3.5 px-4 text-xs text-slate-700">임차 DC 기반 대규모 GPU 클러스터 & Forge</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-900">$36.6억<br><span class="text-xs text-teal-700">+168.2% YoY</span></td>
+                <td class="py-3.5 px-4 text-xs">GAAP OPM 5.7%<br><span class="text-slate-500">Adj. EBITDA 61.6%</span></td>
+                <td class="py-3.5 px-4 font-semibold text-slate-800">$1,325억<br><span class="text-xs font-normal text-slate-500">+138% YoY</span></td>
+                <td class="py-3.5 px-4 text-xs text-rose-700">총차입 $469억+ (순부채/EBITDA ~9배)<br>FY26 CAPEX $370~390억</td>
+                <td class="py-3.5 px-4 text-xs">EV/EBITDA 16.1x<br>FY26E PSR 1.67x</td>
+              </tr>
+              <tr data-ticker="NBIS" class="peer-row cursor-pointer hover:bg-teal-50/40 transition">
+                <td class="py-3.5 px-4 font-bold text-slate-900">Nebius Group<br><span class="text-xs font-normal text-slate-500">NBIS · 시총 ~$238억</span></td>
+                <td class="py-3.5 px-4 text-xs text-slate-700">자체+임차 혼합 풀스택 AI 클라우드 & 추론</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-900">$9.81억<br><span class="text-xs text-teal-700">+571.3% YoY</span></td>
+                <td class="py-3.5 px-4 text-xs">GAAP OPM 5.1%<br><span class="text-slate-500">Adj. EBITDA 47.5%</span></td>
+                <td class="py-3.5 px-4 text-xs">26년 선수금 $100억<br><span class="text-slate-500">27년 $170~200억 예상</span></td>
+                <td class="py-3.5 px-4 text-xs text-slate-700">현금 $74억 / 총부채 ~$102억<br>FY27 CAPEX 75~85% 선수금·ABS 조달</td>
+                <td class="py-3.5 px-4 text-xs">FY26E PSR ~7.7x<br><span class="font-semibold text-teal-700">FY27E PSR ~1.9x(추정)</span></td>
+              </tr>
+              <tr data-ticker="APLD" class="peer-row cursor-pointer hover:bg-teal-50/40 transition">
+                <td class="py-3.5 px-4 font-bold text-slate-900">Applied Digital<br><span class="text-xs font-normal text-slate-500">APLD · 시총 $42~50억</span></td>
+                <td class="py-3.5 px-4 text-xs text-slate-700">파워드 쉘 장기 리스 & 테넌트 설비 구축</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-900">$3.42억 (Q1 FY27)<br><span class="text-xs text-teal-700">+322% YoY</span></td>
+                <td class="py-3.5 px-4 text-xs text-rose-700">GAAP 순손실 $2.21억<br><span class="text-slate-500">Adj. EBITDA 18.8%</span></td>
+                <td class="py-3.5 px-4 text-xs">계약 백로그 ~$360억<br><span class="text-slate-500">1.41GW (연장시 $860억)</span></td>
+                <td class="py-3.5 px-4 text-xs text-rose-700">부채비율 397% (부채 $63.8억)<br>800MW 추가 조달·희석 부담</td>
+                <td class="py-3.5 px-4 text-xs">Trailing PSR ~6.0x<br>Fwd PER N/A</td>
+              </tr>
+              <tr data-ticker="VRT" class="peer-row cursor-pointer bg-teal-50/60 hover:bg-teal-50/80 transition">
+                <td class="py-3.5 px-4 font-bold text-teal-900">Vertiv Holdings ★<br><span class="text-xs font-normal text-teal-700">VRT · 시총 $639억</span></td>
+                <td class="py-3.5 px-4 text-xs text-slate-700">전력·열관리(액체냉각) 장비 제조·유지보수</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-900">$43.1억<br><span class="text-xs text-teal-700">+61.2% YoY (+31.9% QoQ)</span></td>
+                <td class="py-3.5 px-4 text-xs font-semibold text-teal-800">GAAP OPM 22.8%<br>Adj. OPM 25.2%</td>
+                <td class="py-3.5 px-4 text-xs">이연수익 $41.2억<br><span class="text-teal-700 font-semibold">Q3 유기적 수주 +100%↑</span></td>
+                <td class="py-3.5 px-4 text-xs font-semibold text-teal-800">순현금 (레버리지 -0.2배)<br>CAPEX 매출의 ~4.0%</td>
+                <td class="py-3.5 px-4 text-xs font-semibold text-slate-900">Fwd PER 17.9x<br>PEG 0.45x / PSR 4.36x</td>
+              </tr>
+              <tr data-ticker="DLR" class="peer-row cursor-pointer hover:bg-teal-50/40 transition">
+                <td class="py-3.5 px-4 font-bold text-slate-900">Digital Realty<br><span class="text-xs font-normal text-slate-500">DLR · 시총 $615~680억</span></td>
+                <td class="py-3.5 px-4 text-xs text-slate-700">글로벌 65개 시장 자체 보유 데이터센터 리츠</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-900">$19.0억<br><span class="text-xs text-teal-700">+20.6% YoY</span></td>
+                <td class="py-3.5 px-4 text-xs">Adj. EBITDA 51.4%<br><span class="text-slate-500">Core FFO $2.10/주</span></td>
+                <td class="py-3.5 px-4 text-xs">미청구 잔고 $25억<br><span class="text-slate-500">개발 파이프라인 1.5GW</span></td>
+                <td class="py-3.5 px-4 text-xs text-slate-700">순부채/EBITDA 5.2배 (Baa1)<br>FY26 순CAPEX $42.5~47.5억</td>
+                <td class="py-3.5 px-4 text-xs">P/Core FFO(26E) ~20.5x<br>EV/EBITDA 25.1~26.5x</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-scenarios" class="scroll-mt-20 space-y-5">
+      <div class="border-l-4 border-teal-700 pl-4">
+        <h2 class="text-xl font-bold text-slate-900">4. Bull Case vs. Bear Case 및 핵심 선행 지표</h2>
+        <p class="text-sm text-slate-600 mt-1">
+          향후 6~12개월 내 섹터 멀티플의 방향성을 결정할 상승 촉매와 구조적 리스크를 대조하고, 분기 실적 발표 전후로 기관 투자자가 반드시 추적해야 할 4대 선행 지표와 어닝콜 키워드를 정리했습니다.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="card-warm rounded-2xl p-5 border-t-4 border-t-teal-700 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-teal-900">🚀 Bull Case: 멀티플 리레이팅 트리거 (3가지)</h3>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-teal-50 text-teal-800">6~12개월 상방 요인</span>
+          </div>
+          <div class="space-y-3">
+            <div class="p-3.5 rounded-xl bg-stone-50 border border-stone-200">
+              <div class="text-sm font-bold text-slate-900">1. Vera Rubin 전환 및 이연 백로그의 매출화</div>
+              <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                코어위브가 Vera Rubin NVL72 가동으로 GB200 대비 토큰 처리량을 4.8배 높였고, 네비우스의 추론 플랫폼 계약 가치가 전분기 대비 17배 급증했습니다. 2026년 하반기 지연된 3자 데이터센터 물량이 2027년 상반기 가동되면 이연 매출과 ARR 인식이 본격 재개됩니다.
+              </p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-stone-50 border border-stone-200">
+              <div class="text-sm font-bold text-slate-900">2. 빅테크 2027년 CAPEX 공식 확정 및 숏커버링</div>
+              <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                2027년 1~2월 실적 시즌에서 빅테크들이 엔비디아·월가 추정치(약 $1.3조 또는 +66% YoY)에 부합하는 2027년 가이던스를 확정할 경우, 유통주식 공매도 비율이 21.85%에 달하는 CRWV 등 과매도 종목에서 가파른 숏커버링이 유발될 수 있습니다.
+              </p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-stone-50 border border-stone-200">
+              <div class="text-sm font-bold text-slate-900">3. 전력·냉각 병목 장기화에 따른 장비주 구조적 재평가</div>
+              <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                변압기 44~58개월 리드타임이 고착화된 가운데 Vertiv의 Q4 조정 OPM 가이던스(25.8%)처럼 마진 레벨업이 2027년에도 지속되면, 병목 장비주는 경기민감 산업재가 아닌 구조적 성장 인프라주로 밸류에이션 리레이팅을 받게 됩니다.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-warm rounded-2xl p-5 border-t-4 border-t-amber-600 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-amber-900">⚠️ Bear Case: 구조적 리스크 및 마진 압박 (3가지)</h3>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-800">가이던스 하향 위험</span>
+          </div>
+          <div class="space-y-3">
+            <div class="p-3.5 rounded-xl bg-stone-50 border border-stone-200">
+              <div class="text-sm font-bold text-slate-900">1. 5% 국채 금리 안착에 따른 네오클라우드 신용 경색</div>
+              <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                은행권의 AI DC 담보대출 심사 강화와 12월 연준 금리 인상이 맞물리며 고레버리지 기업의 조달 여건이 악화되고 있습니다. CRWV의 분기 이자비용($10.5~11.5억 전망) 급증과 APLD·IREN의 미확정 CAPEX 조달은 지분 희석성 증자나 프로젝트 지연을 초래할 수 있습니다.
+              </p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-stone-50 border border-stone-200">
+              <div class="text-sm font-bold text-slate-900">2. GPU 감가상각 연한(5년 가정) 미스매치와 구형 칩 디플레</div>
+              <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                H100 중고가가 2023년 고점($40,000) 대비 85% 하락한 $6,000~22,000까지 내려왔고 임대료도 $2~3대로 주저앉았습니다. 실제 경제적 내용연수가 3년으로 단축될 경우 50~60%대 조정 EBITDA 마진은 유지보수성 감가상각 부담을 가린 착시 지표로 전락합니다.
+              </p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-stone-50 border border-stone-200">
+              <div class="text-sm font-bold text-slate-900">3. 전력망 인허가 규제 및 빅테크의 FCF 방어성 외주 축소</div>
+              <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                미국 지자체 데이터센터 승인 유예 및 한국의 전용 그리드코드 소급 규제 논란으로 가동이 지연되면 이자비용만 누적됩니다. 또한 빅테크가 FCF 방어를 위해 자체 워크로드를 내재화하고 외부 네오클라우드 임차를 줄일 경우 후발 사업자의 유휴 설비 리스크가 현실화됩니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-warm rounded-2xl p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">🔍 분기 실적 전후 필수 추적 선행 지표 (4 Key Leading Indicators)</h3>
+            <p class="text-xs text-slate-500">각 지표를 클릭하여 임계치 해석 및 어닝콜 핵심 키워드를 확인하세요.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" id="indicator-cards">
+          <div class="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1.5">
+            <div class="text-xs font-bold text-teal-800">지표 ① 컴퓨트 가격 스프레드</div>
+            <div class="text-sm font-bold text-slate-900">Ornn GPU 시간당 임대 지수</div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              H100($2.89) 대비 H200($6.00)·B200($9.09, 네오클라우드 $6.17)의 프리미엄 유지 여부 점검. B200 호가가 $5 하단으로 조기 하락 시 자산 손상차손 경보.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1.5">
+            <div class="text-xs font-bold text-teal-800">지표 ② 물리적 병목 해소 속도</div>
+            <div class="text-sm font-bold text-slate-900">대형 변압기 리드타임</div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              현재 44~58개월(미국 평균 128~144주) 축소 여부 및 미국 계통연계 승인·한국 비수도권 계통영향평가 면제 시행령 안착 여부 추적.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1.5">
+            <div class="text-xs font-bold text-teal-800">지표 ③ 자금 조달 건전성</div>
+            <div class="text-sm font-bold text-slate-900">FCF 충당률 & 선수금 비율</div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              빅테크의 FCF 대비 CAPEX 비율과 네오클라우드의 고객 선수금·투자등급 ABS 조달 비중(NBIS 목표 75~85%) 실제 이행 여부 확인.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-1.5">
+            <div class="text-xs font-bold text-amber-800">지표 ④ 어닝콜 4대 키워드</div>
+            <div class="text-sm font-bold text-slate-900">매출의 질 & 가동 지연 문구</div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              <code class="bg-white px-1 rounded border text-[11px]">3rd-party delivery delays</code>, <code class="bg-white px-1 rounded border text-[11px]">Base rent vs Fit-out</code>, <code class="bg-white px-1 rounded border text-[11px]">Booked-not-billed</code>, <code class="bg-white px-1 rounded border text-[11px]">Vera Rubin migration</code> 추적.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-strategy" class="scroll-mt-20 space-y-5 pb-8">
+      <div class="border-l-4 border-teal-700 pl-4">
+        <h2 class="text-xl font-bold text-slate-900">5. 기관 투자 전략 및 대표 ETF 제안</h2>
+        <p class="text-sm text-slate-600 mt-1">
+          고금리 지속과 밸류체인 내 마진 양극화를 감안한 최적의 포트폴리오 배분 전략과 미국·국내 상장 핵심 ETF 7종의 운용 규모, 보수, 구성 종목 및 유동성 유의사항을 비교합니다.
+        </p>
+      </div>
+
+      <div class="card-warm rounded-2xl p-5 bg-gradient-to-r from-[#F5F2EB] to-white space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1 max-w-2xl">
+            <span class="text-xs font-bold text-teal-800 uppercase tracking-wider">RECOMMENDED PORTFOLIO ARCHITECTURE</span>
+            <h3 class="text-lg font-bold text-slate-900">전력·냉각 병목 부품주 중심의 바벨(Barbell) 전략</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              GPU 임대료 인하 경쟁과 감가상각 리스크에서 비켜나 있으면서 하이퍼스케일러와 네오클라우드의 CAPEX를 모두 흡수하는 <strong>미드스트림 병목 장비주(Vertiv, GE Vernova)를 핵심(Core)</strong>으로 두고, 우량 데이터센터 리츠(Digital Realty)와 자금 조달이 검증된 선별 네오클라우드(Nebius)를 보조적으로 편입하는 전략을 권고합니다.
+            </p>
+          </div>
+          <div class="grid grid-cols-3 gap-2.5 sm:min-w-[360px] text-center">
+            <div class="p-3 rounded-xl bg-teal-800 text-white">
+              <div class="text-[11px] opacity-85">1순위 핵심 (50~60%)</div>
+              <div class="text-sm font-bold mt-0.5">병목 장비주</div>
+              <div class="text-[11px] mt-1 text-teal-200">VRT · GEV · 전력기기</div>
+            </div>
+            <div class="p-3 rounded-xl bg-white border border-stone-300">
+              <div class="text-[11px] text-slate-500">2순위 방어 (25~30%)</div>
+              <div class="text-sm font-bold text-slate-900 mt-0.5">우량 DC 리츠</div>
+              <div class="text-[11px] mt-1 text-slate-600">DLR (Baa1 · 인컴)</div>
+            </div>
+            <div class="p-3 rounded-xl bg-amber-50 border border-amber-300">
+              <div class="text-[11px] text-amber-800">3순위 전술 (10~20%)</div>
+              <div class="text-sm font-bold text-amber-950 mt-0.5">선별 네오클라우드</div>
+              <div class="text-[11px] mt-1 text-amber-800">NBIS (후발주 축소)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-warm rounded-2xl p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">미국 및 국내 상장 AI 데이터센터·전력 인프라 ETF 비교</h3>
+            <p class="text-xs text-slate-500">상장 시장 필터를 선택하여 투자 목적에 맞는 ETF를 비교하세요.</p>
+          </div>
+          <div class="inline-flex rounded-lg bg-stone-100 p-1 border border-stone-200" id="etf-filters">
+            <button data-filter="ALL" class="etf-filter-btn tab-btn active px-3 py-1 rounded-md text-xs font-medium transition">전체 (7종)</button>
+            <button data-filter="US" class="etf-filter-btn tab-btn px-3 py-1 rounded-md text-xs font-medium text-slate-600 transition">🇺🇸 미국 상장 (4종)</button>
+            <button data-filter="KR" class="etf-filter-btn tab-btn px-3 py-1 rounded-md text-xs font-medium text-slate-600 transition">🇰🇷 국내 상장 (3종)</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-stone-100 border-b border-stone-200 text-slate-700 font-semibold">
+                <th class="py-3 px-3">구분</th>
+                <th class="py-3 px-3">티커 / 종목명</th>
+                <th class="py-3 px-3">운용사</th>
+                <th class="py-3 px-3">순자산(AUM) / 총보수</th>
+                <th class="py-3 px-3">주요 구성 종목 및 투자 특징</th>
+                <th class="py-3 px-3">환헤지 및 유의사항</th>
+              </tr>
+            </thead>
+            <tbody id="etf-table-body" class="divide-y divide-stone-200">
+              <tr data-region="US" class="etf-row hover:bg-stone-50">
+                <td class="py-3 px-3 font-semibold text-slate-600">🇺🇸 미국</td>
+                <td class="py-3 px-3 font-bold text-slate-900">DTCR<br><span class="text-xs font-normal text-slate-500">Global X Data Center & Digital Infra</span></td>
+                <td class="py-3 px-3 text-xs">Global X</td>
+                <td class="py-3 px-3 text-xs">$16.1~16.8억<br>보수 0.50%</td>
+                <td class="py-3 px-3 text-xs">부동산 67%·기술 30%; AMT(15.5%), EQIX(14.3%), DLR(14.2%), CCI(11.1%), APLD(2.6%) 등 25종목</td>
+                <td class="py-3 px-3 text-xs text-slate-600">달러 노출; 통신타워·DC 리츠 비중이 높아 금리 상승에 민감(최근 1개월 -13.3%)</td>
+              </tr>
+              <tr data-region="US" class="etf-row hover:bg-stone-50">
+                <td class="py-3 px-3 font-semibold text-slate-600">🇺🇸 미국</td>
+                <td class="py-3 px-3 font-bold text-slate-900">SRVR<br><span class="text-xs font-normal text-slate-500">Pacer Data & Infra Real Estate</span></td>
+                <td class="py-3 px-3 text-xs">Pacer Advisors</td>
+                <td class="py-3 px-3 text-xs">$2.68~2.84억<br>보수 0.49%</td>
+                <td class="py-3 px-3 text-xs">부동산 약 75%; AMT(17.6%), EQIX(16.9%), DLR(16.0%), CCI(5.7%) 등 65~76종목</td>
+                <td class="py-3 px-3 text-xs text-slate-600">달러 노출; 연간 배당수익률 약 5.1% 인컴 매력, 연초 이후 -3.9% 부진</td>
+              </tr>
+              <tr data-region="US" class="etf-row hover:bg-stone-50">
+                <td class="py-3 px-3 font-semibold text-slate-600">🇺🇸 미국</td>
+                <td class="py-3 px-3 font-bold text-slate-900">ZAP<br><span class="text-xs font-normal text-slate-500">Global X U.S. Electrification</span></td>
+                <td class="py-3 px-3 text-xs">Global X</td>
+                <td class="py-3 px-3 text-xs">약 $4.40억<br>보수 0.50%</td>
+                <td class="py-3 px-3 text-xs">미국 전력화(Electrification) 인프라 테마 ETF (2024년 12월 상장; 세부 비중 미확인)</td>
+                <td class="py-3 px-3 text-xs text-slate-600">달러 노출; 리츠 대신 미국 전력망·전력 설비 테마에 집중 투자</td>
+              </tr>
+              <tr data-region="US" class="etf-row hover:bg-stone-50">
+                <td class="py-3 px-3 font-semibold text-slate-600">🇺🇸 미국</td>
+                <td class="py-3 px-3 font-bold text-slate-900">NUKZ<br><span class="text-xs font-normal text-slate-500">Range Nuclear Renaissance Index</span></td>
+                <td class="py-3 px-3 text-xs">Range ETFs</td>
+                <td class="py-3 px-3 text-xs">AUM 미공시<br>보수 0.85%</td>
+                <td class="py-3 px-3 text-xs">글로벌 원자력 발전·인프라 관련 52종목 분산 투자 (세부 비중 미확인)</td>
+                <td class="py-3 px-3 text-xs text-slate-600">달러 노출; 총보수(0.85%)가 타 인프라 ETF 대비 높고 원전 정책 변동성 내재</td>
+              </tr>
+              <tr data-region="KR" class="etf-row bg-teal-50/50 hover:bg-teal-50/80">
+                <td class="py-3 px-3 font-semibold text-teal-800">🇰🇷 국내 ★</td>
+                <td class="py-3 px-3 font-bold text-teal-950">KODEX 미국AI전력핵심인프라<br><span class="text-xs font-normal text-teal-700">종목코드: 487230 (최우선 추천)</span></td>
+                <td class="py-3 px-3 text-xs">삼성자산운용</td>
+                <td class="py-3 px-3 text-xs font-semibold">9,634억 원<br>보수 0.45% (TER 0.48%)</td>
+                <td class="py-3 px-3 text-xs">Bloom Energy(18.4%), GE Vernova(16.6%), Vertiv(16.6%), Quanta(12.3%), Comfort Systems(10.6%), Cameco(8.3%) 등 10종목 압축</td>
+                <td class="py-3 px-3 text-xs font-medium text-teal-900">환노출형, 분기 분배; 국내 최대 유동성(일거래대금 ~147억 원) 및 병목 장비주 직결도 최상</td>
+              </tr>
+              <tr data-region="KR" class="etf-row hover:bg-stone-50">
+                <td class="py-3 px-3 font-semibold text-slate-600">🇰🇷 국내</td>
+                <td class="py-3 px-3 font-bold text-slate-900">SOL 미국AI전력인프라<br><span class="text-xs font-normal text-slate-500">종목코드: 486450</span></td>
+                <td class="py-3 px-3 text-xs">신한자산운용</td>
+                <td class="py-3 px-3 text-xs">AUM 미확인(24.10 420억)<br>보수 0.45% (TER 0.49%)</td>
+                <td class="py-3 px-3 text-xs">KEDI US AI Electric Power Infrastructure 지수 추종; 미국 전력·원자력·전력기기 분산</td>
+                <td class="py-3 px-3 text-xs text-slate-600">환노출형; 실부담비용(0.62%) 유사하나 일거래대금(약 2.6억 원) 등 유동성 점검 필요</td>
+              </tr>
+              <tr data-region="KR" class="etf-row hover:bg-stone-50">
+                <td class="py-3 px-3 font-semibold text-slate-600">🇰🇷 국내</td>
+                <td class="py-3 px-3 font-bold text-slate-900">TIGER 글로벌AI전력인프라액티브<br><span class="text-xs font-normal text-slate-500">티커 미확인 (액티브형)</span></td>
+                <td class="py-3 px-3 text-xs">미래에셋자산운용</td>
+                <td class="py-3 px-3 text-xs">AUM 미확인<br>보수 0.56%</td>
+                <td class="py-3 px-3 text-xs">Vertiv, Bloom Energy, GE Vernova 등 전력 인프라와 Kioxia, AMD, Seagate 등 DC 반도체 혼합</td>
+                <td class="py-3 px-3 text-xs text-slate-600">액티브 운용으로 전력·반도체 비중 유연 조절 가능, 패시브 대비 보수 소폭 상회</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-[11px] text-slate-500">
+          * 주: 미국 스마트그리드 대표 ETF(GRID)는 2026년 11월 최신 AUM/보수 미확인으로 제외하였으며, 국내 전력기기 수출주 대안으로는 KODEX AI전력핵심설비, RISE AI전력인프라 등이 상장되어 있습니다.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-stone-200 bg-white py-6 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <div>분석 기준 시점: <strong>2026년 11월</strong> | 2026년 3분기 실적 발표, 어닝콜 및 컨센서스 데이터 기반</div>
+      <div>본 자료는 투자 판단을 위한 참고용 심층 분석 리포트이며, 2027년 이후 수치는 시장 추정치를 포함합니다.</div>
+    </div>
+  </footer>
+
+  <script>
+    function wrapLabel(label, maxLen = 16) {
+      if (typeof label !== 'string' || label.length <= maxLen) return label;
+      const words = label.split(' ');
+      const lines = [];
+      let current = '';
+      words.forEach(word => {
+        if ((current + ' ' + word).trim().length <= maxLen) {
+          current = (current + ' ' + word).trim();
+        } else {
+          if (current) lines.push(current);
+          current = word;
+        }
+      });
+      if (current) lines.push(current);
+      return lines;
+    }
+
+    const commonTooltip = {
+      backgroundColor: '#1E293B',
+      titleColor: '#F8FAFC',
+      bodyColor: '#E2E8F0',
+      padding: 10,
+      cornerRadius: 8,
+      callbacks: {
+        title: function(items) {
+          const lbl = items[0].label;
+          return Array.isArray(lbl) ? lbl.join(' ') : lbl;
+        }
+      }
+    };
+
+    const capexCtx = document.getElementById('capexChart').getContext('2d');
+    const capexDataQuarterly = {
+      labels: ['2025 Q3', '2026 Q1', '2026 Q2', '2026 Q3'],
+      datasets: [{
+        label: '빅테크 4사 합산 분기 CAPEX (억 달러)',
+        data: [970, 1300, 1650, 2020],
+        backgroundColor: ['#94A3B8', '#0D9488', '#0F766E', '#115E59'],
+        borderRadius: 6,
+        barPercentage: 0.55
+      }]
+    };
+    const capexDataCompany = {
+      labels: [
+        wrapLabel('아마존 (26E)'),
+        wrapLabel('알파벳 (26E 중간값)'),
+        wrapLabel('마이크로소프트 (26E)'),
+        wrapLabel('메타 (26E 중간값)'),
+        wrapLabel('오라클 (FY27E 중간값)')
+      ],
+      datasets: [{
+        label: '연간 CAPEX 가이던스 (억 달러)',
+        data: [2200, 2000, 1700, 1400, 925],
+        backgroundColor: ['#0F766E', '#0D9488', '#14B8A6', '#2DD4BF', '#B45309'],
+        borderRadius: 6,
+        barPercentage: 0.55
+      }]
+    };
+
+    let capexChart = new Chart(capexCtx, {
+      type: 'bar',
+      data: capexDataQuarterly,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            ...commonTooltip,
+            callbacks: {
+              ...commonTooltip.callbacks,
+              label: (ctx) => ` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString()}억`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: '#E7E5E4' },
+            ticks: { callback: (v) => '$' + v.toLocaleString() + '억', font: { size: 11 } }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 11 } }
+          }
+        }
+      }
+    });
+
+    document.getElementById('btn-capex-q').addEventListener('click', function() {
+      this.classList.add('active');
+      this.classList.remove('text-slate-600');
+      const other = document.getElementById('btn-capex-co');
+      other.classList.remove('active');
+      other.classList.add('text-slate-600');
+      document.getElementById('capex-chart-title').textContent = '빅테크 4사 분기별 합산 CAPEX 추이 (억 달러)';
+      document.getElementById('capex-chart-desc').textContent = '2025년 3분기 $970억에서 2026년 3분기 $2,020억으로 매 분기 계단식 증가';
+      capexChart.data = capexDataQuarterly;
+      capexChart.update();
+    });
+
+    document.getElementById('btn-capex-co').addEventListener('click', function() {
+      this.classList.add('active');
+      this.classList.remove('text-slate-600');
+      const other = document.getElementById('btn-capex-q');
+      other.classList.remove('active');
+      other.classList.add('text-slate-600');
+      document.getElementById('capex-chart-title').textContent = '주요 하이퍼스케일러 연간 CAPEX 가이던스 (억 달러)';
+      document.getElementById('capex-chart-desc').textContent = '상위 5개 하이퍼스케일러 합산 투자 규모 약 8,000억 달러 근접 (2026년 기준)';
+      capexChart.data = capexDataCompany;
+      capexChart.update();
+    });
+
+    const macroData = {
+      rates: {
+        title: '고금리 고착화 및 프로젝트 파이낸싱 압박',
+        badge: '네오클라우드 부정적',
+        badgeClass: 'bg-rose-100 text-rose-800',
+        body: '실효 연방기금금리(EFFR) 3.88% 상황에서 견조한 CPI 발표 이후 12월 FOMC 25bp 인상 확률이 97.3%까지 상승했습니다. 미국 10년물 금리가 4.95~5.15% 구간에 머물면서 하이일드 채권 및 담보대출에 의존하는 네오클라우드(CRWV, APLD 등)의 이자비용이 급증하고 있습니다.',
+        impact: '▸ 핵심 영향: 순현금 구조 장비주(Vertiv) 및 투자등급 리츠(DLR)의 상대적 방어력 부각'
+      },
+      fx: {
+        title: '강달러 기조(DXY 104선)와 환노출 성과 편차',
+        badge: '국내 투자자 환노출 유리',
+        badgeClass: 'bg-teal-100 text-teal-800',
+        body: '연준의 추가 긴축 경계감으로 달러화 지수(DXY)가 104선 부근의 19개월래 최고치 수준을 유지하고 있습니다. 강달러는 미국 내 인프라 자산의 달러 표시 현금흐름 가치를 지지하며, 국내 상장 환노출형 ETF 투자자에게 환차익 완충 효과를 제공합니다.',
+        impact: '▸ 핵심 영향: KODEX 미국AI전력핵심인프라 등 환노출형 상품의 원화 환산 방어력 기여'
+      },
+      copper: {
+        title: '구리 가격 하락($12,000/t 하회)과 원가 완화',
+        badge: '전력기기 마진 긍정적',
+        badgeClass: 'bg-teal-100 text-teal-800',
+        body: 'LME 3개월물 구리 선물은 강달러와 중국 수요 둔화 우려로 11월 22일 장중 톤당 12,000달러를 하회했습니다. 배전 케이블과 버스바의 핵심 원재료인 구리 가격 하락은 중장기적으로 전력기기 제조사의 원가 부담을 덜어주는 요인입니다.',
+        impact: '▸ 핵심 영향: 원자재 하락에도 완제품 공급 부족이 지속되어 장비주 스프레드 확대'
+      },
+      policy: {
+        title: '미국 전력망 규제 강화 vs 한국 특별법 추진',
+        badge: '지역별 차별화 심화',
+        badgeClass: 'bg-amber-100 text-amber-800',
+        body: '미국 캘리포니아·텍사스 등에서는 전력망 한계와 전기요금 부담으로 신규 데이터센터 승인 유예 및 규제 논의가 확산 중입니다. 반면 한국은 비수도권 전력계통영향평가 면제 및 특구 지정을 담은 특별법을 추진 중이나, 전용 그리드코드 소급 적용 우려가 변수입니다.',
+        impact: '▸ 핵심 영향: 이미 계통연계와 가동 전력을 확보한 기존 데이터센터 부지 가치 급등'
+      }
+    };
+
+    document.querySelectorAll('.macro-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.macro-btn').forEach(b => {
+          b.className = 'macro-btn text-left p-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition';
+          b.querySelector('div:first-child').className = 'text-xs font-semibold text-slate-500';
+        });
+        this.className = 'macro-btn active text-left p-3 rounded-xl border-2 border-teal-700 bg-teal-50/60 transition';
+        this.querySelector('div:first-child').className = 'text-xs font-semibold text-teal-800';
+
+        const d = macroData[this.dataset.macro];
+        document.getElementById('macro-detail-title').textContent = d.title;
+        const badge = document.getElementById('macro-detail-badge');
+        badge.textContent = d.badge;
+        badge.className = `text-[11px] font-semibold px-2 py-0.5 rounded ${d.badgeClass}`;
+        document.getElementById('macro-detail-body').textContent = d.body;
+        document.getElementById('macro-detail-impact').textContent = d.impact;
+      });
+    });
+
+    const vcData = {
+      upstream: {
+        title: '업스트림 (원자재·기반 인프라): 방향성 전기강판 독과점 및 계통연계 대기열',
+        badge: '계통연계 대기 24개월 이상',
+        badgeClass: 'bg-stone-200 text-slate-800',
+        desc: '변압기 핵심 소재인 방향성 전기강판(GOES)의 미국 내 클리블랜드-클리프스 독점 공급 구조와 24개월 이상의 계통연계 대기열이 개발 초기 병목을 형성하고 있습니다. 부지와 발전원(원자력·연료전지)을 선점한 기업이 유리한 고지를 점하고 있습니다.',
+        components: '방향성 전기강판(GOES), 구리, 부지 및 계통연계, 원자력·가스·연료전지 발전',
+        players: 'Cleveland-Cliffs, ArcelorMittal, Cameco, Bloom Energy, GE Vernova'
+      },
+      midstream: {
+        title: '미드스트림 (핵심 부품·제조): 공급망 최대 병목 및 초과이윤 구간',
+        badge: '조정 OPM 25%+ / 수주잔고 폭증',
+        badgeClass: 'bg-teal-100 text-teal-800',
+        desc: '대형 전력 변압기(44~58개월 리드타임)와 차세대 고밀도 랙(GB200/300, Vera Rubin NVL72) 전환에 필수적인 액체냉각(CDU) 및 배전 설비에서 극심한 공급 부족이 발생하고 있습니다. Vertiv는 Q3 유기적 수주가 전년 대비 100% 이상 급증하고 조정 영업이익률 25.2%(미주 29.4%)를 달성하며 강력한 가격 결정력을 입증했습니다.',
+        components: 'AI 가속기(B200/Vera Rubin), 기업용 SSD, 대형 변압기, 개폐기, 액체냉각(CDU)',
+        players: 'Vertiv, GE Vernova, Hitachi Energy, Siemens Energy, NVIDIA, Quanta Services'
+      },
+      downstream: {
+        title: '다운스트림 (최종 서비스·플랫폼): 구형 GPU 임대료 하락과 재무 건전성 양극화',
+        badge: 'H100 임대료 $2.89~3.09/hr',
+        badgeClass: 'bg-amber-100 text-amber-800',
+        desc: 'TSMC CoWoS 증설과 블랙웰 출하로 H100 연산 희소성이 완화되며 시간당 임대료가 $2.89~$3.09 수준으로 하락했습니다. 전력 인프라 인도 지연 시 막대한 감가상각과 이자비용을 떠안는 후발 네오클라우드는 고전하는 반면, 이미 가동 전력을 확보한 데이터센터 리츠(DLR)는 11.8%의 재계약 임대료 상승률을 기록 중입니다.',
+        components: '데이터센터 리츠(코로케이션), 파워드 쉘 호스팅, 네오클라우드(GPUaaS), 추론 플랫폼',
+        players: 'Digital Realty, Equinix, CoreWeave, Nebius Group, Applied Digital'
+      }
+    };
+
+    document.querySelectorAll('.vc-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.vc-btn').forEach(b => {
+          b.className = 'vc-btn text-left p-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition';
+        });
+        this.className = 'vc-btn active text-left p-4 rounded-xl border-2 border-teal-700 bg-teal-50/70 transition relative';
+        const d = vcData[this.dataset.stage];
+        document.getElementById('vc-title').textContent = d.title;
+        const badge = document.getElementById('vc-margin-badge');
+        badge.textContent = d.badge;
+        badge.className = `text-xs font-semibold px-2.5 py-1 rounded-full ${d.badgeClass}`;
+        document.getElementById('vc-desc').textContent = d.desc;
+        document.getElementById('vc-components').textContent = d.components;
+        document.getElementById('vc-players').textContent = d.players;
+      });
+    });
+
+    const bnCtx = document.getElementById('bottleneckChart').getContext('2d');
+    const bnLeadtimeData = {
+      labels: [
+        wrapLabel('히타치 에너지 (중간값)'),
+        wrapLabel('지멘스 에너지 (중간값)'),
+        wrapLabel('GE 버노바 (중간값)'),
+        wrapLabel('유럽 제조사 (Efacec 등)'),
+        wrapLabel('한국 제조사 (현대·효성)')
+      ],
+      datasets: [{
+        label: '대형 변압기 평균 리드타임 (개월)',
+        data: [54, 52, 48, 25, 22],
+        backgroundColor: ['#115E59', '#0F766E', '#0D9488', '#64748B', '#94A3B8'],
+        borderRadius: 6,
+        barPercentage: 0.55
+      }]
+    };
+    const bnGpuData = {
+      labels: [
+        wrapLabel('23H2 H100 고점 (중간값)'),
+        wrapLabel('26.11 H100 SXM (Ornn)'),
+        wrapLabel('26.11 H200 (Ornn)'),
+        wrapLabel('26.11 B200 (네오클라우드)'),
+        wrapLabel('26.11 B200 SXM (Ornn)'),
+        wrapLabel('26.11 B300 (시장 집계)')
+      ],
+      datasets: [{
+        label: 'GPU 시간당 임대 가격 ($/hr)',
+        data: [9.25, 2.89, 6.00, 6.17, 9.09, 11.51],
+        backgroundColor: ['#94A3B8', '#B45309', '#0D9488', '#0F766E', '#115E59', '#1E293B'],
+        borderRadius: 6,
+        barPercentage: 0.55
+      }]
+    };
+
+    let bnChart = new Chart(bnCtx, {
+      type: 'bar',
+      data: bnLeadtimeData,
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            ...commonTooltip,
+            callbacks: {
+              ...commonTooltip.callbacks,
+              label: (ctx) => bnChart.data === bnLeadtimeData
+                ? ` 평균 리드타임: 약 ${ctx.parsed.x}개월`
+                : ` 시간당 임대 단가: $${ctx.parsed.x.toFixed(2)}/hr`
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid: { color: '#E7E5E4' },
+            ticks: { font: { size: 11 } }
+          },
+          y: {
+            grid: { display: false },
+            ticks: { font: { size: 11 } }
+          }
+        }
+      }
+    });
+
+    document.getElementById('btn-bn-leadtime').addEventListener('click', function() {
+      this.classList.add('active');
+      this.classList.remove('text-slate-600');
+      const other = document.getElementById('btn-bn-gpu');
+      other.classList.remove('active');
+      other.classList.add('text-slate-600');
+      document.getElementById('bottleneck-chart-title').textContent = '글로벌 대형 변압기 제조사별 리드타임 (개월)';
+      document.getElementById('bottleneck-chart-desc').textContent = 'GridReadiness 26Q3 기준: 주요 서구권 제조사 발주 시 2030년 이전 인도 불가';
+      document.getElementById('bottleneck-footnote').innerHTML = '<strong>📌 규격 장벽 주의:</strong> 한국(18~26개월)·유럽(20~30개월) 제조사가 상대적으로 짧은 납기를 제시하나, 미국(ANSI/IEEE 60Hz)과 유럽(IEC 50Hz) 간 규격 인증 장벽으로 단기 대체가 제한적입니다.';
+      bnChart.data = bnLeadtimeData;
+      bnChart.update();
+    });
+
+    document.getElementById('btn-bn-gpu').addEventListener('click', function() {
+      this.classList.add('active');
+      this.classList.remove('text-slate-600');
+      const other = document.getElementById('btn-bn-leadtime');
+      other.classList.remove('active');
+      other.classList.add('text-slate-600');
+      document.getElementById('bottleneck-chart-title').textContent = 'GPU 세대별 시간당 임대 가격 비교 ($/hr)';
+      document.getElementById('bottleneck-chart-desc').textContent = 'Ornn 컴퓨트 가격 지수(11/21 기준): 구형 H100 급락 vs 최신 B200/B300 프리미엄 방어';
+      document.getElementById('bottleneck-footnote').innerHTML = '<strong>📌 네오클라우드 마진 압박 요인:</strong> 구형 H100의 시간당 임대료가 $2.89~$3.09로 주저앉으면서 최신 칩(B200/Vera Rubin)을 적기에 조달·가동하지 못한 사업자는 수익성이 급격히 악화됩니다.';
+      bnChart.data = bnGpuData;
+      bnChart.update();
+    });
+
+    const peerCtx = document.getElementById('peerChart').getContext('2d');
+    const peerDatasets = {
+      growth: {
+        title: '5대 기업 최근 분기 매출 성장률(YoY, %) 비교',
+        desc: '외형 성장률은 후발 네오클라우드가 높으나 수익성 및 재무 안정성은 정반대 양상',
+        unit: '%',
+        data: [168.2, 571.3, 322.0, 61.2, 20.6],
+        label: 'YoY 매출 성장률 (%)'
+      },
+      margin: {
+        title: '5대 기업 조정 EBITDA 마진율 (%) 비교',
+        desc: '네오클라우드는 높은 감가상각(D&A) 탓에 조정 EBITDA와 GAAP 영업이익률(5%대) 간 괴리가 큼',
+        unit: '%',
+        data: [61.6, 47.5, 18.8, 26.5, 51.4],
+        label: '조정 EBITDA 마진 (%)'
+      },
+      capex: {
+        title: '5대 기업 2026년 연간 CAPEX 집행 규모 (억 달러)',
+        desc: 'Vertiv는 연간 CAPEX가 매출의 4% 수준인 경량 자산 모델로 압도적 현금창출력 보유',
+        unit: '억$',
+        data: [380, 270, 35, 6.5, 45],
+        label: 'FY26E CAPEX (억 달러, 추정 중간값)'
+      }
+    };
+
+    let peerChart = new Chart(peerCtx, {
+      type: 'bar',
+      data: {
+        labels: ['CoreWeave', 'Nebius Group', 'Applied Digital', 'Vertiv ★', 'Digital Realty'],
+        datasets: [{
+          label: peerDatasets.growth.label,
+          data: peerDatasets.growth.data,
+          backgroundColor: ['#64748B', '#0D9488', '#B45309', '#115E59', '#475569'],
+          borderRadius: 6,
+          barPercentage: 0.55
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            ...commonTooltip,
+            callbacks: {
+              ...commonTooltip.callbacks,
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y}`
+            }
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: '#E7E5E4' }, ticks: { font: { size: 11 } } },
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+
+    document.querySelectorAll('.peer-metric-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.peer-metric-btn').forEach(b => {
+          b.classList.remove('active');
+          b.classList.add('text-slate-600');
+        });
+        this.classList.add('active');
+        this.classList.remove('text-slate-600');
+        const m = peerDatasets[this.dataset.metric];
+        document.getElementById('peer-chart-title').textContent = m.title;
+        document.getElementById('peer-chart-desc').textContent = m.desc;
+        peerChart.data.datasets[0].label = m.label;
+        peerChart.data.datasets[0].data = m.data;
+        peerChart.update();
+      });
+    });
+
+    const tearSheets = {
+      CRWV: {
+        role: '순수 네오클라우드 외형 성장 대장주',
+        roleClass: 'bg-slate-200 text-slate-800',
+        name: 'CoreWeave (CRWV)',
+        mcap: '$220억 (11/20)',
+        rev: '$36.6억 (+168.2%)',
+        margin: 'GAAP OPM 5.7% / Adj. EBITDA 61.6%',
+        debt: '총차입 $469억+ (순부채/EBITDA ~9배)',
+        val: 'EV/EBITDA 16.1x / FY26E PSR 1.67x',
+        summary: '$1,325억의 압도적 매출 백로그와 Vera Rubin NVL72 선도 도입, 연말 ARR $200~210억 목표 상향 등 성장성은 최상입니다. 그러나 Q3 CAPEX $94.4억 집행으로 산출 FCF 적자가 $77.5억에 달하고, 순이자비용($8.46억→Q4 $10.5~11.5억 전망)이 영업이익($2.07억)을 크게 상회하고 있습니다.',
+        risk: '핵심 체크포인트: Q4 이자비용 $11억 돌파 속 신용스프레드 확대 여부 및 공매도 비율(21.85%) 숏커버링 가능성'
+      },
+      NBIS: {
+        role: '자금 조달 차별화 풀스택 네오클라우드',
+        roleClass: 'bg-teal-100 text-teal-800',
+        name: 'Nebius Group (NBIS)',
+        mcap: '~$238억 (11/19 추정)',
+        rev: '$9.81억 (+571.3%)',
+        margin: 'GAAP OPM 5.1% / AI 클라우드 EBITDA 53.2%',
+        debt: '현금 $74억 / 총부채 ~$102억',
+        val: 'FY26E PSR ~7.7x / FY27E PSR ~1.9x',
+        summary: '3자 부지 인도 지연으로 2026년 가이던스가 $30~34억 하단으로 낮아졌으나, 2027년 매출 $120~130억 및 Q4 세전 손익분기점 달성을 제시했습니다. 특히 2027년 CAPEX($400~450억)의 75~85%를 고금리 부채가 아닌 고객 선수금($170~200억)과 투자등급 ABS로 조달하는 계획이 강점입니다.',
+        risk: '핵심 체크포인트: 2027년 상반기 이연 부지 가동 정상화 및 추론 플랫폼(Token Factory) 매출 기여도'
+      },
+      APLD: {
+        role: '채굴 전환 파워드 쉘 호스트 (고위험군)',
+        roleClass: 'bg-rose-100 text-rose-800',
+        name: 'Applied Digital (APLD)',
+        mcap: '$42~50억 (11월)',
+        rev: '$3.42억 (+322%, Q1 FY27)',
+        margin: 'GAAP 순손실 $2.21억 / Adj. EBITDA 18.8%',
+        debt: '부채비율 397% (총부채 $63.8억)',
+        val: 'Trailing PSR ~6.0x / Fwd PER N/A',
+        summary: 'Q1 FY27 매출 $3.42억 중 $1.84억이 일회성 성격의 테넌트 설비 구축(Fit-out) 매출이었고 기본 임대료(Base Rent)는 $6,580만에 그쳐 분기 이자비용($7,740만)을 하회했습니다. 향후 12개월 내 800MW 개발을 위한 대규모 추가 조달이 필요해 지분 희석 및 고금리 차입 리스크가 큽니다.',
+        risk: '핵심 체크포인트: 기본 임대료 대비 이자비용 커버리지 개선 여부 및 추가 유상증자·우선주 발행 조건'
+      },
+      VRT: {
+        role: '미드스트림 전력·냉각 병목 1순위',
+        roleClass: 'bg-teal-100 text-teal-800',
+        name: 'Vertiv Holdings (VRT)',
+        mcap: '$639억 (11/20)',
+        rev: '$43.1억 (+61.2%)',
+        margin: '조정 OPM 25.2% (미주 29.4%)',
+        debt: '순현금 (-0.2배)',
+        val: 'Fwd PER 17.9x (PEG 0.45)',
+        summary: 'Q3 조정 EPS($2.21)가 컨센서스를 21.4% 상회하고 연간 가이던스를 전 지표에서 상향했습니다. 연간 CAPEX 비중이 매출의 약 4.0%에 불과한 경량 자산(Asset-light) 모델로, 11월 섹터 조정에 따른 멀티플 압축은 높은 안전마진을 제공합니다.',
+        risk: '핵심 체크포인트: Q4 조정 영업이익률 가이던스(25.8%) 달성 여부 및 대형 고객사 액체냉각 채택 속도'
+      },
+      DLR: {
+        role: '투자등급 글로벌 데이터센터 리츠',
+        roleClass: 'bg-stone-200 text-slate-800',
+        name: 'Digital Realty (DLR)',
+        mcap: '$615~680억 (11월)',
+        rev: '$19.0억 (+20.6%)',
+        margin: 'Adj. EBITDA 51.4% / Core FFO $2.10',
+        debt: '순부채/EBITDA 5.2배 (Moody’s Baa1)',
+        val: 'P/Core FFO(26E) ~20.5x / EV/EBITDA ~25.8x',
+        summary: '93.4%의 높은 가동률과 0.7%의 최저 이탈률, 11.8%의 현금 임대료 인상률(Cash Re-leasing Spread)로 이미 확보된 전력 자산의 가격 결정력을 입증하고 있습니다. 10월 평균 약 4% 금리로 $17억을 조달하고 자본 재활용을 통해 1.5GW 파이프라인(기대 수익률 11.6%)을 안정적으로 소화 중입니다.',
+        risk: '핵심 체크포인트: 미청구 계약 잔고($25억)의 순차 개시 속도 및 장기 국채 금리 5% 안착 시 리츠 밸류에이션 저항'
+      }
+    };
+
+    document.querySelectorAll('.peer-row').forEach(row => {
+      row.addEventListener('click', function() {
+        document.querySelectorAll('.peer-row').forEach(r => r.classList.remove('bg-teal-50/60'));
+        this.classList.add('bg-teal-50/60');
+        const t = tearSheets[this.dataset.ticker];
+        const roleEl = document.getElementById('tear-role');
+        roleEl.textContent = t.role;
+        roleEl.className = `text-[11px] font-semibold px-2 py-0.5 rounded ${t.roleClass}`;
+        document.getElementById('tear-name').textContent = t.name;
+        document.getElementById('tear-mcap').textContent = t.mcap;
+        document.getElementById('tear-rev').textContent = t.rev;
+        document.getElementById('tear-margin').textContent = t.margin;
+        document.getElementById('tear-debt').textContent = t.debt;
+        document.getElementById('tear-val').textContent = t.val;
+        document.getElementById('tear-summary').textContent = t.summary;
+        document.getElementById('tear-risk').innerHTML = `<strong>${t.risk.split(':')[0]}:</strong>${t.risk.split(':')[1]}`;
+      });
+    });
+
+    document.querySelectorAll('.etf-filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.etf-filter-btn').forEach(b => {
+          b.classList.remove('active');
+          b.classList.add('text-slate-600');
+        });
+        this.classList.add('active');
+        this.classList.remove('text-slate-600');
+        const filter = this.dataset.filter;
+        document.querySelectorAll('.etf-row').forEach(row => {
+          if (filter === 'ALL' || row.dataset.region === filter) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    document.querySelectorAll('#main-nav .nav-pill').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('#main-nav .nav-pill').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const target = document.getElementById(this.dataset.target);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
