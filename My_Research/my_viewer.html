@@ -60,6 +60,16 @@ a{text-decoration:none;color:inherit}
 .viewer-wrap{flex:1;display:flex;flex-direction:column;background:#fff}
 #reportFrame{width:100%;border:none;flex:1;min-height:600px;display:block}
 
+/* ── PDF (PDF.js 렌더링) ── */
+#pdfWrap{display:none;flex:1;background:#525659;padding:16px 8px 24px}
+.pdf-page{position:relative;margin:0 auto 14px;max-width:1100px;width:100%;
+          background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.pdf-page canvas{display:block;width:100%;height:100%}
+.pdf-page .pg-no{position:absolute;right:8px;bottom:6px;font-size:.7rem;color:#64748b;
+                  background:rgba(255,255,255,.85);padding:1px 6px;border-radius:4px}
+.pdf-msg{max-width:640px;margin:60px auto;text-align:center;color:#e2e8f0;font-size:.92rem;line-height:1.7}
+.pdf-msg a{color:#93c5fd;text-decoration:underline}
+
 /* ── 하단 네비 ── */
 .bottom-nav{background:var(--card);border-top:1px solid var(--border);padding:14px 24px;
              display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -136,6 +146,7 @@ a{text-decoration:none;color:inherit}
 <!-- iframe -->
 <div class="viewer-wrap">
   <iframe id="reportFrame" src="" title="리포트"></iframe>
+  <div id="pdfWrap"></div>
 </div>
 
 <!-- 하단 네비 -->
@@ -190,10 +201,11 @@ function findIdx(file){
 // ── iframe 로드 ──────────────────────────────────────────────
 document.getElementById('reportFrame').addEventListener('load', onFrameLoad);
 function onFrameLoad(){
+  // PDF는 iframe이 아니라 PDF.js(renderPdf)가 처리한다
+  if(/\.pdf$/i.test(currentFile)) return;
   document.getElementById('loading').style.display = 'none';
   document.getElementById('bottomNav').style.display = '';
   var frame = document.getElementById('reportFrame');
-  if(/\.pdf$/i.test(currentFile)){ frame.style.height = '90vh'; return; }
   // 높이 자동 조정
   try{
     var h = frame.contentWindow.document.documentElement.scrollHeight
@@ -247,18 +259,33 @@ function loadReport(file){
   document.getElementById('nextTitle').textContent = nextItem ? (nextItem.title||nextItem.name||'') : '마지막 게시물입니다';
   document.getElementById('nextDate').textContent  = nextItem ? fmt(nextItem.date) : '';
 
-  // iframe 로드
+  // 본문 로드: HTML은 iframe, PDF는 PDF.js로 전 페이지를 직접 그린다
+  // (iPad·iPhone Safari는 iframe 안 PDF를 첫 페이지만 보여 준다)
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('bottomNav').style.display = 'none';
   var frame = document.getElementById('reportFrame');
-  frame.style.height = '80vh';
-  frame.src = encodeURIComponent(file);
-
-  // PDF면 새 창 열기 버튼 노출 (모바일 브라우저는 iframe 안 PDF 표시가 불안정)
-  var btnPdf = document.getElementById('btnPdf');
+  var pdfWrap = document.getElementById('pdfWrap');
   var isPdf = /\.pdf$/i.test(file);
+  var url = encodeURIComponent(file);
+  closePdf();
+  if(isPdf){
+    frame.style.display = 'none';
+    frame.removeAttribute('srcdoc');
+    frame.src = 'about:blank';
+    pdfWrap.style.display = 'block';
+    renderPdf(url);
+  } else {
+    pdfWrap.style.display = 'none';
+    frame.style.display = '';
+    frame.removeAttribute('srcdoc');
+    frame.style.height = '80vh';
+    frame.src = url;
+  }
+
+  // PDF면 새 창 열기 버튼도 노출 (다운로드·인쇄용)
+  var btnPdf = document.getElementById('btnPdf');
   btnPdf.style.display = isPdf ? '' : 'none';
-  btnPdf.href = isPdf ? encodeURIComponent(file) : '#';
+  btnPdf.href = isPdf ? url : '#';
 
   // URL 업데이트
   history.replaceState(null,'', setParam('file', file));
@@ -278,8 +305,154 @@ function goNext(){
   }
 }
 
+// ── PDF.js 렌더링 ───────────────────────────────────────────
+// 화면 근처에 온 페이지만 그리고, 멀어진 페이지는 canvas를 비워
+// 70쪽 넘는 PDF도 iPad 메모리 한도 안에서 볼 수 있게 한다.
+var PDFJS_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+var pdfjsPromise = null;
+var pdfState = null;   // {gen, doc, observer, task}
+var pdfGen = 0;
+
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(pdfjsPromise) return pdfjsPromise;
+  pdfjsPromise = new Promise(function(resolve, reject){
+    var s = document.createElement('script');
+    s.src = PDFJS_BASE + 'pdf.min.js';
+    s.onload = function(){
+      if(!window.pdfjsLib){ reject(new Error('pdfjsLib 없음')); return; }
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_BASE + 'pdf.worker.min.js';
+      resolve(window.pdfjsLib);
+    };
+    s.onerror = function(){ pdfjsPromise = null; reject(new Error('PDF.js 로드 실패')); };
+    document.head.appendChild(s);
+  });
+  return pdfjsPromise;
+}
+
+function closePdf(){
+  pdfGen++;
+  if(pdfState){
+    if(pdfState.observer) pdfState.observer.disconnect();
+    if(pdfState.task) try{ pdfState.task.destroy(); }catch(e){}
+    if(pdfState.doc) try{ pdfState.doc.destroy(); }catch(e){}
+    pdfState = null;
+  }
+  document.getElementById('pdfWrap').innerHTML = '';
+}
+
+function pdfDone(){
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('bottomNav').style.display = '';
+}
+
+function pdfFail(url, err){
+  var wrap = document.getElementById('pdfWrap');
+  wrap.innerHTML = '<div class="pdf-msg"><div style="font-size:40px;margin-bottom:12px">📄</div>'
+    + '<p>PDF를 화면에 그리지 못했습니다.</p>'
+    + '<p><a href="'+url+'" target="_blank" rel="noopener">PDF 새 창으로 열기</a></p></div>';
+  if(window.console) console.error('[my_viewer] PDF 렌더링 실패:', err);
+  pdfDone();
+}
+
+function renderPdf(url){
+  var gen = pdfGen;
+  var wrap = document.getElementById('pdfWrap');
+  pdfState = {gen:gen, doc:null, observer:null, task:null};
+
+  loadPdfJs().then(function(lib){
+    if(gen !== pdfGen) return;
+    var task = lib.getDocument({url:url});
+    pdfState.task = task;
+    return task.promise.then(function(doc){
+      if(gen !== pdfGen){ doc.destroy(); return; }
+      pdfState.doc = doc;
+      // 1쪽 비율로 자리(placeholder)를 먼저 만들어 스크롤 길이를 잡는다
+      return doc.getPage(1).then(function(p1){
+        if(gen !== pdfGen) return;
+        var vp1 = p1.getViewport({scale:1});
+        var pages = [];
+        for(var i=1;i<=doc.numPages;i++){
+          var div = document.createElement('div');
+          div.className = 'pdf-page';
+          div.style.aspectRatio = vp1.width + ' / ' + vp1.height;
+          div.dataset.page = i;
+          div.innerHTML = '<span class="pg-no">'+i+' / '+doc.numPages+'</span>';
+          wrap.appendChild(div);
+          pages.push(div);
+        }
+        setupPdfObserver(doc, pages, gen);
+        pdfDone();
+      });
+    });
+  }).catch(function(err){
+    if(gen !== pdfGen) return;
+    pdfFail(url, err);
+  });
+}
+
+function setupPdfObserver(doc, pages, gen){
+  function draw(div){
+    if(div.dataset.state) return;           // 'rendering' | 'done'
+    div.dataset.state = 'rendering';
+    var n = +div.dataset.page;
+    doc.getPage(n).then(function(page){
+      if(gen !== pdfGen || div.dataset.state !== 'rendering') return;
+      var vp1 = page.getViewport({scale:1});
+      // 실제 쪽 비율로 보정 (가로 페이지 섞인 PDF 대비)
+      div.style.aspectRatio = vp1.width + ' / ' + vp1.height;
+      var cssW = div.clientWidth || 800;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var scale = cssW / vp1.width * dpr;
+      // iOS canvas 면적 한도(약 16.7M px) 아래로 제한
+      var maxArea = 12000000;
+      if(vp1.width*vp1.height*scale*scale > maxArea){
+        scale = Math.sqrt(maxArea / (vp1.width*vp1.height));
+      }
+      var vp = page.getViewport({scale:scale});
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.floor(vp.width);
+      canvas.height = Math.floor(vp.height);
+      var rt = page.render({canvasContext:canvas.getContext('2d'), viewport:vp});
+      div._rt = rt;
+      return rt.promise.then(function(){
+        div._rt = null;
+        if(gen !== pdfGen || div.dataset.state !== 'rendering'){ canvas.width = canvas.height = 0; return; }
+        div.insertBefore(canvas, div.firstChild);
+        div.dataset.state = 'done';
+      });
+    }).catch(function(err){
+      if(err && err.name === 'RenderingCancelledException') return;
+      delete div.dataset.state;
+    });
+  }
+  function release(div){
+    if(!div.dataset.state) return;
+    if(div._rt){ try{ div._rt.cancel(); }catch(e){} div._rt = null; }
+    var c = div.querySelector('canvas');
+    if(c){ c.width = c.height = 0; c.remove(); }   // iOS는 0 크기로 줘야 메모리를 바로 돌려준다
+    delete div.dataset.state;
+  }
+
+  if(!('IntersectionObserver' in window)){
+    pages.forEach(draw);   // 구형 브라우저: 전부 그림
+    return;
+  }
+  // 가까운 페이지(위아래 1.5화면)는 그리고, 멀어지면(4화면 밖) 해제
+  var near = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) draw(e.target); });
+  }, {rootMargin:'150% 0px'});
+  var far = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(!e.isIntersecting) release(e.target); });
+  }, {rootMargin:'400% 0px'});
+  pages.forEach(function(d){ near.observe(d); far.observe(d); });
+  pdfState.observer = {disconnect:function(){ near.disconnect(); far.disconnect(); }};
+}
+
 function showError(){
   document.getElementById('loading').style.display = 'none';
+  document.getElementById('pdfWrap').style.display = 'none';
+  document.getElementById('reportFrame').style.display = '';
   document.getElementById('reportFrame').srcdoc =
     '<div style="padding:60px;text-align:center;font-family:sans-serif;color:#64748b">'
     +'<div style="font-size:48px;margin-bottom:16px">📭</div>'
